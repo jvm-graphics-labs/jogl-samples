@@ -98,9 +98,9 @@ public class gl_300_fbo_multisample extends Test {
 //            ShaderCode fragShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
 //                    getDataDirectory() + "gl_300", getDataDirectory() + "gl_300/bin", FRAG_SHADER, true);
             ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
-                    "..", "../bin", VERT_SHADER, true);
+                    "../", "../bin", VERT_SHADER, true);
             ShaderCode fragShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
-                    "..", "../bin", FRAG_SHADER, true);
+                    "../", "../bin", FRAG_SHADER, true);
 
             vertShader.defaultShaderCustomization(gl3, true, true);
             fragShader.defaultShaderCustomization(gl3, true, true);
