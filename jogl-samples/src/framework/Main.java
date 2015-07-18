@@ -5,6 +5,8 @@
  */
 package framework;
 
+import tests.gl_300_fbo_multisample;
+
 /**
  *
  * @author gbarbieri
@@ -15,7 +17,7 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        new gl_300_fbo_multisample("gl_300_fbo_multisample", 3, 0);
     }
     
 }

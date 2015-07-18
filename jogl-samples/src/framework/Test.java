@@ -42,6 +42,10 @@ public class Test implements GLEventListener {
         this.majorVersionRequire = majorVersionRequire;
         this.minorVersionRequire = minorVersionRequire;
 
+        initGL(title);
+    }
+
+    private void initGL(String title) {
         Display display = NewtFactory.createDisplay(null);
         Screen screen = NewtFactory.createScreen(display, screenIdx);
         GLProfile glProfile = GLProfile.getDefault();
@@ -55,6 +59,9 @@ public class Test implements GLEventListener {
         glWindow.setPointerVisible(true);
         glWindow.confinePointer(false);
         glWindow.setTitle(title);
+        glWindow.setSize(windowSize.x, windowSize.y);
+        glWindow.setVisible(true);
+        glWindow.addGLEventListener(this);
 
         animator = new Animator();
         animator.add(glWindow);
@@ -68,20 +75,24 @@ public class Test implements GLEventListener {
     public final void init(GLAutoDrawable drawable) {
 
         GL3 gl3 = drawable.getGL().getGL3();
-
+        
         assert checkGLVersion(gl3);
 
         assert begin(gl3);
     }
 
     protected boolean begin(GL3 gl3) {
+
         return true;
     }
 
     @Override
     public final void dispose(GLAutoDrawable drawable) {
+
         GL3 gl3 = drawable.getGL().getGL3();
         assert end(gl3);
+        animator.stop();
+        glWindow.destroy();
     }
 
     protected boolean end(GL3 gl3) {
@@ -108,7 +119,7 @@ public class Test implements GLEventListener {
     }
 
     private boolean checkGLVersion(GL3 gl3) {
-
+        System.out.println("in");
         int[] majorVersionContext = new int[]{0};
         int[] minorVersionContext = new int[]{0};
         gl3.glGetIntegerv(GL_MAJOR_VERSION, majorVersionContext, 0);
@@ -152,5 +163,9 @@ public class Test implements GLEventListener {
             throw new Error();
         }
         return error == GL_NO_ERROR;
+    }
+
+    protected final String getDataDirectory() {
+        return "../data/";
     }
 }

@@ -5,12 +5,32 @@
  */
 package tests;
 
+import com.jogamp.common.util.IOUtil;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_LINEAR;
+import static com.jogamp.opengl.GL.GL_LINEAR_MIPMAP_LINEAR;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TEXTURE0;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
 import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import com.jogamp.opengl.util.texture.spi.DDSImage;
+import com.jogamp.opengl.util.texture.spi.DDSImage.ImageInfo;
 import framework.Semantic;
 import framework.Test;
+import java.io.IOException;
+import java.net.URLConnection;
+import java.nio.FloatBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import jglm.Vec2i;
 
 /**
  *
@@ -18,19 +38,51 @@ import framework.Test;
  */
 public class gl_300_fbo_multisample extends Test {
 
-    private final String VERT_SHADER = "image-2d.vp";
-    private final String FRAG_SHADER = "image-2d.fp";
-    private final String SHADER_ROOT = "../shaders";
-    private int programName;
+    private final String VERT_SHADER = "image-2d";
+    private final String FRAG_SHADER = "image-2d";
+    private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
+    private Vec2i FRAMEBUFFER_SIZE = new Vec2i(160, 120);
+    // With DDS textures, v texture coordinate are reversed, from top to bottom
+    private int vertexCount = 6;
+    private int vertexSize = vertexCount * 4 * GLBuffers.SIZEOF_FLOAT;
+    private float[] vertexData = new float[]{
+        -2.0f, -1.5f, 0.0f, 0.0f,
+        2.0f, -1.5f, 1.0f, 0.0f,
+        2.0f, 1.5f, 1.0f, 1.0f,
+        2.0f, 1.5f, 1.0f, 1.0f,
+        -2.0f, 1.5f, 0.0f, 1.0f,
+        -2.0f, -1.5f, 0.0f, 0.0f
+    };
+    private int programName, uniformMvp, uniformDiffuse;
+    private int[] vertexArrayName, bufferName, textureName, colorRenderbufferName, colorTextureName,
+            framebufferRenderName, framebufferResolveName;
 
     public gl_300_fbo_multisample(String title, int majorVersionRequire, int minorVersionRequire) {
-        super("gl_300_fbo_multisample", 3, 0);
+        
+        super(title, majorVersionRequire, minorVersionRequire);
+        programName = 0;
+        vertexArrayName = new int[]{0};
+        bufferName = new int[]{0};
+        textureName = new int[]{0};
+        colorRenderbufferName = new int[]{0};
+        colorTextureName = new int[]{0};
+        framebufferRenderName = new int[]{0};
+        framebufferResolveName = new int[]{0};
+        uniformMvp = -1;
+        uniformDiffuse = -1;
     }
 
     @Override
     protected boolean begin(GL3 gl3) {
-
+        System.out.println("2");
         boolean validated = true;
+
+        if (validated) {
+            initProgram(gl3);
+        }
+        if (validated) {
+            initTexture(gl3);
+        }
 
         return validated & checkError(gl3, "begin");
     }
@@ -39,24 +91,79 @@ public class gl_300_fbo_multisample extends Test {
 
         boolean validated = true;
 
-        ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
-                SHADER_ROOT, SHADER_ROOT + "/bin", VERT_SHADER, true);
-        ShaderCode fragShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
-                SHADER_ROOT, SHADER_ROOT + "/bin", FRAG_SHADER, true);
+        if (validated) {
 
-        vertShader.defaultShaderCustomization(gl3, true, true);
-        fragShader.defaultShaderCustomization(gl3, true, true);
+//            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
+//                    getDataDirectory() + "gl_300", getDataDirectory() + "gl_300/bin", VERT_SHADER, true);
+//            ShaderCode fragShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
+//                    getDataDirectory() + "gl_300", getDataDirectory() + "gl_300/bin", FRAG_SHADER, true);
+            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
+                    "..", "../bin", VERT_SHADER, true);
+            ShaderCode fragShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
+                    "..", "../bin", FRAG_SHADER, true);
 
-        ShaderProgram program = new ShaderProgram();        
-        program.add(vertShader);
-        program.add(fragShader);        
-        program.link(gl3, System.out);
-        
-        programName = program.program();
+            vertShader.defaultShaderCustomization(gl3, true, true);
+            fragShader.defaultShaderCustomization(gl3, true, true);
 
-        gl3.glBindAttribLocation(programName, Semantic.Attr.position, "position");
-        gl3.glBindAttribLocation(programName, Semantic.Attr.texCoord, "texCoord");
-        
-        
+            ShaderProgram program = new ShaderProgram();
+            program.add(vertShader);
+            program.add(fragShader);
+            program.link(gl3, System.out);
+
+            programName = program.program();
+
+            gl3.glBindAttribLocation(programName, Semantic.Attr.position, "position");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.texCoord, "texCoord");
+        }
+        if (validated) {
+
+            uniformMvp = gl3.glGetUniformLocation(programName, "mvp");
+            uniformDiffuse = gl3.glGetUniformLocation(programName, "diffuse");
+        }
+        return validated & checkError(gl3, "initProgram");
     }
+
+    private boolean initBuffer(GL3 gl3) {
+
+        bufferName = new int[1];
+        gl3.glGenBuffers(1, bufferName, 0);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+        FloatBuffer floatBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, floatBuffer, GL_STATIC_DRAW);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        return checkError(gl3, "initBuffer");
+    }
+
+    private boolean initTexture(GL3 gl3) {
+
+        try {
+            URLConnection conn = IOUtil.getResource(this.getClass(), getDataDirectory() + TEXTURE_DIFFUSE);
+
+            DDSImage ddsImage = DDSImage.read(conn.getURL().toExternalForm());
+
+            gl3.glGenTextures(1, textureName, 0);
+            gl3.glActiveTexture(GL_TEXTURE0);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
+            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, ddsImage.getNumMipMaps() - 1);
+            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+            for (int level = 0; level < ddsImage.getNumMipMaps(); level++) {
+
+                ImageInfo imageInfo = ddsImage.getMipMap(level);
+
+                System.out.println("" + level + " " + ddsImage.getCompressionFormat() + " "
+                        + imageInfo.getWidth() + " " + imageInfo.getHeight() + " " + ddsImage.getPixelFormat());
+
+                gl3.glTexImage2D(GL_TEXTURE_2D, level, ddsImage.getCompressionFormat(),
+                        imageInfo.getWidth(), imageInfo.getHeight(), 0, level, level, null);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(gl_300_fbo_multisample.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
+    }
+
 }
