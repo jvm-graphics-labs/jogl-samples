@@ -6,6 +6,7 @@
 package tests;
 
 import com.jogamp.common.util.IOUtil;
+import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_LINEAR;
 import static com.jogamp.opengl.GL.GL_LINEAR_MIPMAP_LINEAR;
@@ -14,10 +15,12 @@ import static com.jogamp.opengl.GL.GL_TEXTURE0;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
 import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLES2;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
@@ -58,7 +61,7 @@ public class gl_300_fbo_multisample extends Test {
             framebufferRenderName, framebufferResolveName;
 
     public gl_300_fbo_multisample(String title, int majorVersionRequire, int minorVersionRequire) {
-        
+
         super(title, majorVersionRequire, minorVersionRequire);
         programName = 0;
         vertexArrayName = new int[]{0};
@@ -73,8 +76,10 @@ public class gl_300_fbo_multisample extends Test {
     }
 
     @Override
-    protected boolean begin(GL3 gl3) {
-        System.out.println("2");
+    protected boolean begin(GL gl) {
+
+        GL3 gl3 = (GL3) gl;
+
         boolean validated = true;
 
         if (validated) {
@@ -84,7 +89,7 @@ public class gl_300_fbo_multisample extends Test {
             initTexture(gl3);
         }
 
-        return validated & checkError(gl3, "begin");
+        return validated & checkError(gl, "begin");
     }
 
     private boolean initProgram(GL3 gl3) {
@@ -93,17 +98,10 @@ public class gl_300_fbo_multisample extends Test {
 
         if (validated) {
 
-//            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
-//                    getDataDirectory() + "gl_300", getDataDirectory() + "gl_300/bin", VERT_SHADER, true);
-//            ShaderCode fragShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
-//                    getDataDirectory() + "gl_300", getDataDirectory() + "gl_300/bin", FRAG_SHADER, true);
             ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
-                    "../", "../bin", VERT_SHADER, true);
-            ShaderCode fragShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
-                    "../", "../bin", FRAG_SHADER, true);
-
-            vertShader.defaultShaderCustomization(gl3, true, true);
-            fragShader.defaultShaderCustomization(gl3, true, true);
+                    getDataDirectory() + "gl_300", getDataDirectory() + "gl_300/bin", VERT_SHADER, true);
+            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(),
+                    getDataDirectory() + "gl_300", getDataDirectory() + "gl_300/bin", FRAG_SHADER, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(vertShader);
@@ -140,7 +138,8 @@ public class gl_300_fbo_multisample extends Test {
         try {
             URLConnection conn = IOUtil.getResource(this.getClass(), getDataDirectory() + TEXTURE_DIFFUSE);
 
-            DDSImage ddsImage = DDSImage.read(conn.getURL().toExternalForm());
+//            DDSImage ddsImage = DDSImage.read(conn.getURL().toExternalForm());
+            DDSImage ddsImage = DDSImage.read(conn.getURL().getFile());
 
             gl3.glGenTextures(1, textureName, 0);
             gl3.glActiveTexture(GL_TEXTURE0);
@@ -150,15 +149,23 @@ public class gl_300_fbo_multisample extends Test {
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+            System.out.println("" + ddsImage.isCompressed());
+
             for (int level = 0; level < ddsImage.getNumMipMaps(); level++) {
 
                 ImageInfo imageInfo = ddsImage.getMipMap(level);
+                System.out.println("imageInfo.toString() " + ddsImage.getCompressionFormat());
 
-                System.out.println("" + level + " " + ddsImage.getCompressionFormat() + " "
-                        + imageInfo.getWidth() + " " + imageInfo.getHeight() + " " + ddsImage.getPixelFormat());
-
-                gl3.glTexImage2D(GL_TEXTURE_2D, level, ddsImage.getCompressionFormat(),
-                        imageInfo.getWidth(), imageInfo.getHeight(), 0, level, level, null);
+//                TextureData textureData = new TextureData(gl3.getGLProfile(), GL_SRGB8_ALPHA8,
+//                        ddsImage.getWidth(), ddsImage.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+//                        false, true, false, imageInfo.getData(), null);
+//                System.out.println("data.toString() " + textureData.toString());
+//                gl3.glTexImage2D(GL_TEXTURE_2D, level, textureData.getInternalFormat(),
+//                        imageInfo.getWidth(), imageInfo.getHeight(), 0, textureData.getPixelFormat(), 
+//                        textureData.getPixelType(), textureData.getBuffer());
+                gl3.glCompressedTexImage2D(GL_TEXTURE_2D, level, GLES2.GL_COMPRESSED_RGB_S3TC_DXT1_EXT,
+                        imageInfo.getWidth(), imageInfo.getHeight(), 0, imageInfo.getData().capacity(),
+                        imageInfo.getData());
             }
         } catch (IOException ex) {
             Logger.getLogger(gl_300_fbo_multisample.class.getName()).log(Level.SEVERE, null, ex);

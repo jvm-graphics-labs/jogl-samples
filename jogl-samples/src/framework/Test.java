@@ -9,6 +9,7 @@ import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
 import com.jogamp.newt.opengl.GLWindow;
+import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_INVALID_ENUM;
 import static com.jogamp.opengl.GL.GL_INVALID_FRAMEBUFFER_OPERATION;
 import static com.jogamp.opengl.GL.GL_INVALID_OPERATION;
@@ -81,7 +82,7 @@ public class Test implements GLEventListener {
         assert begin(gl3);
     }
 
-    protected boolean begin(GL3 gl3) {
+    protected boolean begin(GL gl) {
 
         return true;
     }
@@ -95,7 +96,7 @@ public class Test implements GLEventListener {
         glWindow.destroy();
     }
 
-    protected boolean end(GL3 gl3) {
+    protected boolean end(GL gl) {
         return true;
     }
 
@@ -109,7 +110,7 @@ public class Test implements GLEventListener {
         assert checkError(gl3, "render");
     }
 
-    protected boolean render(GL3 gl3) {
+    protected boolean render(GL gl) {
         return true;
     }
 
@@ -119,7 +120,7 @@ public class Test implements GLEventListener {
     }
 
     private boolean checkGLVersion(GL3 gl3) {
-        System.out.println("in");
+        
         int[] majorVersionContext = new int[]{0};
         int[] minorVersionContext = new int[]{0};
         gl3.glGetIntegerv(GL_MAJOR_VERSION, majorVersionContext, 0);
@@ -134,9 +135,9 @@ public class Test implements GLEventListener {
         return major * 100 + minor * 10;
     }
 
-    protected boolean checkError(GL3 gl3, String title) {
+    protected boolean checkError(GL gl, String title) {
 
-        int error = gl3.glGetError();
+        int error = gl.glGetError();
         if (error != GL_NO_ERROR) {
             String errorString;
             switch (error) {
@@ -166,6 +167,6 @@ public class Test implements GLEventListener {
     }
 
     protected final String getDataDirectory() {
-        return "../data/";
+        return "/data/";
     }
 }
