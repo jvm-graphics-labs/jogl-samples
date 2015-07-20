@@ -23,7 +23,9 @@ import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.Animator;
+import jglm.Vec2;
 import jglm.Vec2i;
 
 /**
@@ -33,15 +35,28 @@ import jglm.Vec2i;
 public class Test implements GLEventListener {
 
     private final int screenIdx = 0;
-    protected Vec2i windowSize = new Vec2i(640, 480);
+    protected Vec2i windowSize;
     protected GLWindow glWindow;
     protected Animator animator;
     private final int majorVersionRequire, minorVersionRequire;
+    private final Vec2 translationOrigin, translationCurrent, rotationOrigin, rotationCurrent;
 
     public Test(String title, int majorVersionRequire, int minorVersionRequire) {
 
+        this(title, majorVersionRequire, minorVersionRequire, new Vec2i(640, 480),
+                new Vec2(), new Vec2(0, 4));
+    }
+
+    public Test(String title, int majorVersionRequire, int minorVersionRequire, Vec2i windowSize,
+            Vec2 orientation, Vec2 position) {
+
         this.majorVersionRequire = majorVersionRequire;
         this.minorVersionRequire = minorVersionRequire;
+        this.windowSize = windowSize;
+        this.translationOrigin = position;
+        this.translationCurrent = position;
+        this.rotationOrigin = orientation;
+        this.rotationCurrent = orientation;
 
         initGL(title);
     }
@@ -76,7 +91,7 @@ public class Test implements GLEventListener {
     public final void init(GLAutoDrawable drawable) {
 
         GL3 gl3 = drawable.getGL().getGL3();
-        
+
         assert checkGLVersion(gl3);
 
         assert begin(gl3);
@@ -119,8 +134,18 @@ public class Test implements GLEventListener {
 
     }
 
+    protected final float[] view() {
+
+        float[] viewTranslate = FloatUtil.makeTranslation(new float[16], true, 0, 0, -translationCurrent.y);
+        float[] viewRotateX = FloatUtil.makeRotationAxis(viewTranslate, 0,
+                rotationCurrent.y, 1f, 0f, 0f, new float[3]);
+        float[] view = FloatUtil.makeRotationAxis(viewRotateX, 0,
+                rotationCurrent.x, 0f, 1f, 0f, new float[3]);
+        return view;
+    }
+
     private boolean checkGLVersion(GL3 gl3) {
-        
+
         int[] majorVersionContext = new int[]{0};
         int[] minorVersionContext = new int[]{0};
         gl3.glGetIntegerv(GL_MAJOR_VERSION, majorVersionContext, 0);
