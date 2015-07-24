@@ -39,7 +39,7 @@ import jglm.Vec2i;
  *
  * @author gbarbieri
  */
-public class gl_300_fbo_multisample extends Test {
+public class Gl_300_fbo_multisample extends Test {
 
     private final String VERT_SHADER = "image-2d";
     private final String FRAG_SHADER = "image-2d";
@@ -60,7 +60,7 @@ public class gl_300_fbo_multisample extends Test {
     private int[] vertexArrayName, bufferName, textureName, colorRenderbufferName, colorTextureName,
             framebufferRenderName, framebufferResolveName;
 
-    public gl_300_fbo_multisample(String title, int majorVersionRequire, int minorVersionRequire) {
+    public Gl_300_fbo_multisample(String title, int majorVersionRequire, int minorVersionRequire) {
 
         super(title, majorVersionRequire, minorVersionRequire);
         programName = 0;
@@ -168,7 +168,7 @@ public class gl_300_fbo_multisample extends Test {
                         imageInfo.getData());
             }
         } catch (IOException ex) {
-            Logger.getLogger(gl_300_fbo_multisample.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Gl_300_fbo_multisample.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
     }

@@ -8,6 +8,8 @@ package framework;
 import com.jogamp.newt.Display;
 import com.jogamp.newt.NewtFactory;
 import com.jogamp.newt.Screen;
+import com.jogamp.newt.event.KeyEvent;
+import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_INVALID_ENUM;
@@ -32,7 +34,7 @@ import jglm.Vec2i;
  *
  * @author gbarbieri
  */
-public class Test implements GLEventListener {
+public class Test implements GLEventListener, KeyListener {
 
     private final int screenIdx = 0;
     protected Vec2i windowSize;
@@ -40,6 +42,7 @@ public class Test implements GLEventListener {
     protected Animator animator;
     private final int majorVersionRequire, minorVersionRequire;
     private final Vec2 translationOrigin, translationCurrent, rotationOrigin, rotationCurrent;
+    private boolean escape = false;
 
     public Test(String title, int majorVersionRequire, int minorVersionRequire) {
 
@@ -78,6 +81,7 @@ public class Test implements GLEventListener {
         glWindow.setSize(windowSize.x, windowSize.y);
         glWindow.setVisible(true);
         glWindow.addGLEventListener(this);
+        glWindow.addKeyListener(this);
 
         animator = new Animator();
         animator.add(glWindow);
@@ -123,6 +127,10 @@ public class Test implements GLEventListener {
         assert render(gl3);
 
         assert checkError(gl3, "render");
+        
+        if(escape) {
+            dispose(drawable);
+        }
     }
 
     protected boolean render(GL gl) {
@@ -137,11 +145,12 @@ public class Test implements GLEventListener {
     protected final float[] view() {
 
         float[] viewTranslate = FloatUtil.makeTranslation(new float[16], true, 0, 0, -translationCurrent.y);
-        float[] viewRotateX = FloatUtil.makeRotationAxis(viewTranslate, 0,
+        float[] viewRotateX = FloatUtil.makeRotationAxis(new float[16], 0,
                 rotationCurrent.y, 1f, 0f, 0f, new float[3]);
-        float[] view = FloatUtil.makeRotationAxis(viewRotateX, 0,
+        viewRotateX = FloatUtil.multMatrix(viewRotateX, viewTranslate);
+        float[] view = FloatUtil.makeRotationAxis(new float[16], 0,
                 rotationCurrent.x, 0f, 1f, 0f, new float[3]);
-        return view;
+        return FloatUtil.multMatrix(view, viewRotateX);
     }
 
     private boolean checkGLVersion(GL3 gl3) {
@@ -193,5 +202,20 @@ public class Test implements GLEventListener {
 
     protected final String getDataDirectory() {
         return "/data/";
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+    
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+    
+        switch(e.getKeyCode()) {
+            case KeyEvent.VK_ESCAPE:
+                escape = true;
+                break;
+        }
     }
 }

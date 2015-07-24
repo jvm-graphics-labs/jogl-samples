@@ -19,4 +19,13 @@ public class Semantic {
         public static final int texCoord = 4;
         public static final int drawId = 5;
     }
+
+    public static class Frag {
+
+        public static final int color = 0;
+        public static final int red = 0;
+        public static final int green = 1;
+        public static final int blue = 2;
+        public static final int alpha = 0;
+    }
 }

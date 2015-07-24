@@ -34,19 +34,24 @@ import java.nio.ShortBuffer;
  *
  * @author elect
  */
-public class es_200_draw_elements extends Test {
+public class Es_200_draw_elements extends Test {
 
-    private final String VERT_SHADER = "flat-color";
-    private final String FRAG_SHADER = "flat-color";
-    private int elementCount = 6;
-    private int elementSize = elementCount * GLBuffers.SIZEOF_SHORT;
-    private short[] elementData = new short[]{
+    public static void main(String[] args) {
+        Es_200_draw_elements es_200_draw_elements = new Es_200_draw_elements();
+    }
+
+    private final String SHADERS_SOURCE = "flat-color";
+    private final String SHADERS_ROOT = "src/data/es_200";
+
+    private final int elementCount = 6;
+    private final int elementSize = elementCount * GLBuffers.SIZEOF_SHORT;
+    private final short[] elementData = new short[]{
         0, 1, 2,
         0, 2, 3
     };
-    private int vertexCount = 4;
-    private int positionSize = vertexCount * 2 * GLBuffers.SIZEOF_FLOAT;
-    private float[] positionData = new float[]{
+    private final int vertexCount = 4;
+    private final int positionSize = vertexCount * 2 * GLBuffers.SIZEOF_FLOAT;
+    private final float[] positionData = new float[]{
         -1f, -1f,
         +1f, -1f,
         +1f, +1f,
@@ -60,10 +65,10 @@ public class es_200_draw_elements extends Test {
         max
     }
 
-    private int[] bufferName = new int[Buffer.max.ordinal()];
+    private final int[] bufferName = new int[Buffer.max.ordinal()];
     private int programName, uniformMvp, uniformDiffuse;
 
-    public es_200_draw_elements() {
+    public Es_200_draw_elements() {
         super("es_200_draw_elements", 2, 0);
     }
 
@@ -92,16 +97,12 @@ public class es_200_draw_elements extends Test {
     private boolean initProgram(GL2ES2 gl2es2) {
 
         boolean validated = true;
-
+        // Create program
         if (validated) {
-//            ShaderCode vertShader = ShaderCode.create(gl2es2, GL_VERTEX_SHADER, this.getClass(),
-//                    getDataDirectory() + "es_200", getDataDirectory() + "es_200/bin", VERT_SHADER, true);
-//            ShaderCode fragShader = ShaderCode.create(gl2es2, GL_FRAGMENT_SHADER, this.getClass(),
-//                    getDataDirectory() + "es_200", getDataDirectory() + "es_200/bin", FRAG_SHADER, true);
             ShaderCode vertShader = ShaderCode.create(gl2es2, GL_VERTEX_SHADER, this.getClass(),
-                    null, null, VERT_SHADER, true);
+                    SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
             ShaderCode fragShader = ShaderCode.create(gl2es2, GL_FRAGMENT_SHADER, this.getClass(),
-                    null, null, FRAG_SHADER, true);
+                    SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
             vertShader.defaultShaderCustomization(gl2es2, true, false);
             fragShader.defaultShaderCustomization(gl2es2, true, false);
@@ -111,18 +112,21 @@ public class es_200_draw_elements extends Test {
             program.add(fragShader);
 
             program.link(gl2es2, System.out);
-
             programName = program.program();
-
             gl2es2.glBindAttribLocation(programName, Semantic.Attr.position, "position");
         }
+        // Get variables locations
         if (validated) {
             uniformMvp = gl2es2.glGetUniformLocation(programName, "mvp");
             uniformDiffuse = gl2es2.glGetUniformLocation(programName, "diffuse");
         }
+        // Set some variables 
         if (validated) {
+            // Bind the program for use
             gl2es2.glUseProgram(programName);
+            // Set uniform value
             gl2es2.glUniform4fv(uniformDiffuse, 1, new float[]{1f, .5f, 0f, 1f}, 0);
+            // Unbind the program
             gl2es2.glUseProgram(0);
         }
         return validated & checkError(gl2es2, "initProgram");
@@ -145,32 +149,24 @@ public class es_200_draw_elements extends Test {
     }
 
     @Override
-    protected boolean end(GL gl) {
-        GL2ES2 gl2es2 = (GL2ES2) gl;
-
-        gl2es2.glDeleteBuffers(bufferName.length, bufferName, 0);
-        gl2es2.glDeleteProgram(programName);
-
-        return true;
-    }
-
-    @Override
     protected boolean render(GL gl) {
 
         GL2ES2 gl2es2 = (GL2ES2) gl;
 
+        // Compute the MVP (Model View Projection matrix)
         float[] projection = FloatUtil.makePerspective(new float[16], 0,
                 true, FloatUtil.QUARTER_PI, 4f / 3f, .1f, 100f);
         float[] model = FloatUtil.makeIdentity(new float[16]);
         float[] mvp = FloatUtil.multMatrix(projection, FloatUtil.multMatrix(view(), model));
-//        float[] mvp = new float[]{1.810660f, 0f, 0f, 0f, 0f, 2.414213f, 0f, 0f, 0f, 0f,
-//            -1.002002f, -1f, 0f, 0f, 3.807808f, 4f};
 
+        // Set the display viewport
         gl2es2.glViewport(0, 0, windowSize.x, windowSize.y);
 
+        // Clear color buffer with black
         gl2es2.glClearColor(0f, 0f, 0f, 1f);
         gl2es2.glClearDepthf(1f);
         gl2es2.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         // Bind program
         gl2es2.glUseProgram(programName);
 
@@ -196,7 +192,13 @@ public class es_200_draw_elements extends Test {
         return true;
     }
 
-    public static void main(String[] args) {
-        es_200_draw_elements es_200_draw_elements = new es_200_draw_elements();
+    @Override
+    protected boolean end(GL gl) {
+        GL2ES2 gl2es2 = (GL2ES2) gl;
+
+        gl2es2.glDeleteBuffers(bufferName.length, bufferName, 0);
+        gl2es2.glDeleteProgram(programName);
+
+        return true;
     }
 }

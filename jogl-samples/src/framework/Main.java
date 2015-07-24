@@ -5,7 +5,7 @@
  */
 package framework;
 
-import tests.gl_300_fbo_multisample;
+import tests.Gl_300_fbo_multisample;
 
 /**
  *
@@ -17,7 +17,7 @@ public class Main {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        new gl_300_fbo_multisample("gl_300_fbo_multisample", 3, 0);
+        new Gl_300_fbo_multisample("gl_300_fbo_multisample", 3, 0);
     }
     
 }
