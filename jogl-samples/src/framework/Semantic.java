@@ -28,4 +28,16 @@ public class Semantic {
         public static final int blue = 2;
         public static final int alpha = 0;
     }
+
+    public static class Uniform {
+
+        public static final int material = 0;
+        public static final int transform0 = 1;
+        public static final int transform1 = 2;
+        public static final int indirection = 3;
+        public static final int constant = 0;
+        public static final int perFrame = 1;
+        public static final int perPass = 2;
+        public static final int light = 3;
+    }
 }

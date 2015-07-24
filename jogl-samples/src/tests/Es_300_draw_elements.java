@@ -40,6 +40,7 @@ public class Es_300_draw_elements extends Test {
     public static void main(String[] args) {
         Es_300_draw_elements es_300_draw_elements = new Es_300_draw_elements();
     }
+    
     private final String SHADERS_SOURCE = "flat-color";
     private final String SHADERS_ROOT = "src/data/es_300";
 

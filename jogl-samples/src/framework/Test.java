@@ -113,6 +113,7 @@ public class Test implements GLEventListener, KeyListener {
         assert end(gl3);
         animator.stop();
         glWindow.destroy();
+        System.exit(0);
     }
 
     protected boolean end(GL gl) {
