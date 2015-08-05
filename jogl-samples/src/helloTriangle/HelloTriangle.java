@@ -12,15 +12,28 @@ import com.jogamp.newt.Screen;
 import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.opengl.GLWindow;
+import com.jogamp.opengl.GL;
+import static com.jogamp.opengl.GL.GL_INVALID_ENUM;
+import static com.jogamp.opengl.GL.GL_INVALID_FRAMEBUFFER_OPERATION;
+import static com.jogamp.opengl.GL.GL_INVALID_OPERATION;
+import static com.jogamp.opengl.GL.GL_INVALID_VALUE;
+import static com.jogamp.opengl.GL.GL_NO_ERROR;
+import static com.jogamp.opengl.GL.GL_OUT_OF_MEMORY;
+import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
+import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
+import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
+import com.jogamp.opengl.util.glsl.ShaderCode;
+import com.jogamp.opengl.util.glsl.ShaderProgram;
 import framework.Semantic;
-import java.nio.FloatBuffer;
+import java.nio.ByteBuffer;
+import java.nio.ShortBuffer;
 
 /**
  *
@@ -64,15 +77,20 @@ public class HelloTriangle implements GLEventListener, KeyListener {
     }
 
     private int[] objects = new int[Semantic.Object.size];
-    private float[] vertexData = new float[]{
-        -0.5f, -0.5f, 0f, 1f, 0f, 0f,
-        +0.5f, -0.5f, 0f, 0f, 0f, 1f,
-        +0.0f, +0.5f, 0f, 0f, 1f, 0f
+    private byte[] vertexData = new byte[]{
+        (byte) -1, (byte) -1, (byte) Byte.MAX_VALUE, (byte) 0, (byte) 0,
+        (byte) +0, (byte) +2, (byte) 0, (byte) 0, (byte) Byte.MAX_VALUE,
+        (byte) +1, (byte) -1, (byte) 0, (byte) Byte.MAX_VALUE, (byte) 0
     };
-
     private short[] indexData = new short[]{
         0, 2, 1
     };
+    private int program, modelToClipMatrixUL;
+    private final String SHADERS_ROOT = "src/helloTriangle/shaders";
+    private float[] scale = new float[16];
+    private float[] zRotazion = new float[16];
+    private float[] modelToClip = new float[16];
+    private long start, now;
 
     public HelloTriangle() {
 
@@ -86,7 +104,15 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
         initVbo(gl4);
 
+        initIbo(gl4);
+
         initVao(gl4);
+
+        initProgram(gl4);
+
+        gl4.glEnable(GL4.GL_DEPTH_TEST);
+
+        start = System.currentTimeMillis();
     }
 
     private void initVbo(GL4 gl4) {
@@ -94,23 +120,27 @@ public class HelloTriangle implements GLEventListener, KeyListener {
         gl4.glGenBuffers(1, objects, Semantic.Object.vbo);
         gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.vbo]);
         {
-            FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
-            int size = vertexData.length * GLBuffers.SIZEOF_FLOAT;
+            ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexData);
+            int size = vertexData.length * GLBuffers.SIZEOF_BYTE;
             gl4.glBufferData(GL4.GL_ARRAY_BUFFER, size, vertexBuffer, GL4.GL_STATIC_DRAW);
         }
         gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
+
+        checkError(gl4, "initVbo");
     }
 
     private void initIbo(GL4 gl4) {
 
         gl4.glGenBuffers(1, objects, Semantic.Object.ibo);
-        gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.ibo]);
+        gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, objects[Semantic.Object.ibo]);
         {
-            FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
-            int size = vertexData.length * GLBuffers.SIZEOF_FLOAT;
-            gl4.glBufferData(GL4.GL_ARRAY_BUFFER, size, vertexBuffer, GL4.GL_STATIC_DRAW);
+            ShortBuffer indexBuffer = GLBuffers.newDirectShortBuffer(indexData);
+            int size = indexData.length * GLBuffers.SIZEOF_SHORT;
+            gl4.glBufferData(GL4.GL_ELEMENT_ARRAY_BUFFER, size, indexBuffer, GL4.GL_STATIC_DRAW);
         }
-        gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
+        gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        checkError(gl4, "initIbo");
     }
 
     private void initVao(GL4 gl4) {
@@ -120,19 +150,49 @@ public class HelloTriangle implements GLEventListener, KeyListener {
             gl4.glGenVertexArrays(1, objects, Semantic.Object.vao);
             gl4.glBindVertexArray(objects[Semantic.Object.vao]);
             {
-                int stride = (3 + 3) * GLBuffers.SIZEOF_FLOAT;
+                gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, objects[Semantic.Object.ibo]);
+                {
+                    int stride = (2 + 3) * GLBuffers.SIZEOF_BYTE;
 
-                gl4.glEnableVertexAttribArray(0);
-                gl4.glVertexAttribPointer(Semantic.Attr.position, 3, GL4.GL_FLOAT,
-                        false, stride, 0 * GLBuffers.SIZEOF_FLOAT);
+                    gl4.glEnableVertexAttribArray(Semantic.Attr.position);
+                    gl4.glVertexAttribPointer(Semantic.Attr.position, 2, GL4.GL_BYTE,
+                            false, stride, 0 * GLBuffers.SIZEOF_BYTE);
 
-                gl4.glEnableVertexAttribArray(1);
-                gl4.glVertexAttribPointer(Semantic.Attr.color, 3, GL4.GL_FLOAT,
-                        false, stride, 3 * GLBuffers.SIZEOF_FLOAT);
+                    gl4.glEnableVertexAttribArray(Semantic.Attr.color);
+                    gl4.glVertexAttribPointer(Semantic.Attr.color, 3, GL4.GL_BYTE,
+                            true, stride, 2 * GLBuffers.SIZEOF_BYTE);
+                }
             }
             gl4.glBindVertexArray(0);
         }
         gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
+
+        checkError(gl4, "initVao");
+    }
+
+    private void initProgram(GL4 gl4) {
+        ShaderCode vertShader = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(),
+                SHADERS_ROOT, null, "vs", "glsl", null, true);
+        ShaderCode fragShader = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(),
+                SHADERS_ROOT, null, "fs", "glsl", null, true);
+
+        ShaderProgram shaderProgram = new ShaderProgram();
+        shaderProgram.add(vertShader);
+        shaderProgram.add(fragShader);
+
+        shaderProgram.init(gl4);
+
+        program = shaderProgram.program();
+
+        gl4.glBindAttribLocation(program, Semantic.Attr.position, "position");
+        gl4.glBindAttribLocation(program, Semantic.Attr.color, "color");
+        gl4.glBindFragDataLocation(program, Semantic.Frag.color, "outputColor");
+
+        shaderProgram.link(gl4, System.out);
+
+        modelToClipMatrixUL = gl4.glGetUniformLocation(program, "modelToClipMatrix");
+
+        checkError(gl4, "initProgram");
     }
 
     @Override
@@ -144,11 +204,75 @@ public class HelloTriangle implements GLEventListener, KeyListener {
     @Override
     public void display(GLAutoDrawable drawable) {
 //        System.out.println("display");
+
+        GL4 gl4 = drawable.getGL().getGL4();
+
+        gl4.glClearColor(0f, .33f, 0.66f, 1f);
+        gl4.glClearDepthf(1f);
+        gl4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
+
+        gl4.glUseProgram(program);
+        {
+            gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.vbo]);
+            {
+                gl4.glBindVertexArray(objects[Semantic.Object.vao]);
+                {
+                    now = System.currentTimeMillis();
+                    float diff = (float) (now - start)/ 1000;
+
+                    scale = FloatUtil.makeScale(scale, true, 0.5f, 0.5f, 0.5f);
+                    zRotazion = FloatUtil.makeRotationEuler(zRotazion, 0, 0, 0, diff);
+                    modelToClip = FloatUtil.multMatrix(scale, zRotazion);
+                    gl4.glUniformMatrix4fv(modelToClipMatrixUL, 1, false, modelToClip, 0);
+
+                    gl4.glDrawElements(GL4.GL_TRIANGLES, indexData.length, GL4.GL_UNSIGNED_SHORT, 0);
+                }
+                gl4.glBindVertexArray(0);
+            }
+            gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
+        }
+        gl4.glUseProgram(0);
+
+        checkError(gl4, "display");
+    }
+
+    protected boolean checkError(GL gl, String title) {
+
+        int error = gl.glGetError();
+        if (error != GL_NO_ERROR) {
+            String errorString;
+            switch (error) {
+                case GL_INVALID_ENUM:
+                    errorString = "GL_INVALID_ENUM";
+                    break;
+                case GL_INVALID_VALUE:
+                    errorString = "GL_INVALID_VALUE";
+                    break;
+                case GL_INVALID_OPERATION:
+                    errorString = "GL_INVALID_OPERATION";
+                    break;
+                case GL_INVALID_FRAMEBUFFER_OPERATION:
+                    errorString = "GL_INVALID_FRAMEBUFFER_OPERATION";
+                    break;
+                case GL_OUT_OF_MEMORY:
+                    errorString = "GL_OUT_OF_MEMORY";
+                    break;
+                default:
+                    errorString = "UNKNOWN";
+                    break;
+            }
+            System.out.println("OpenGL Error(" + errorString + "): " + title);
+            throw new Error();
+        }
+        return error == GL_NO_ERROR;
     }
 
     @Override
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
+        System.out.println("reshape");
+        GL4 gl4 = drawable.getGL().getGL4();
 
+        gl4.glViewport(x, y, width, height);
     }
 
     @Override

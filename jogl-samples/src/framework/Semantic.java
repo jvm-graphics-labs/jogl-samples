@@ -46,6 +46,6 @@ public class Semantic {
         public static final int vao = 0;
         public static final int vbo = 1;
         public static final int ibo = 2;
-        public static final int size = 2;
+        public static final int size = 3;
     }
 }
