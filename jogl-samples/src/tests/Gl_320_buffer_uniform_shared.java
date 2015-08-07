@@ -22,7 +22,6 @@ import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BLOCK_DATA_SIZE;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.GL3ES3;
 import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
@@ -31,9 +30,7 @@ import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
-import jglm.Vec4;
 
 /**
  *
@@ -114,14 +111,15 @@ public class Gl_320_buffer_uniform_shared extends Test {
             program.add(shaderName[Shader.vert.ordinal()]);
             program.add(shaderName[Shader.frag.ordinal()]);
 
-            program.link(gl3, System.out);
+            program.init(gl3);
 
             programName = program.program();
 
             gl3.glBindAttribLocation(programName, Semantic.Attr.position, "position");
             gl3.glBindFragDataLocation(programName, Semantic.Frag.color, "color");
-        }
 
+            program.link(gl3, System.out);
+        }
         if (validated) {
             uniformMaterial = gl3.glGetUniformBlockIndex(programName, "material");
             uniformTransform = gl3.glGetUniformBlockIndex(programName, "transform");
@@ -138,12 +136,14 @@ public class Gl_320_buffer_uniform_shared extends Test {
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
 
         uniformBlockSizeTransform = new int[1];
+        
         gl3.glGetActiveUniformBlockiv(programName, uniformTransform,
                 GL_UNIFORM_BLOCK_DATA_SIZE, uniformBlockSizeTransform, 0);
         uniformBlockSizeTransform[0] = ((uniformBlockSizeTransform[0] / uniformBufferOffset[0] + 1)
                 * uniformBufferOffset[0]);
 
         uniformBlockSizeMaterial = new int[1];
+        
         gl3.glGetActiveUniformBlockiv(programName, uniformMaterial,
                 GL_UNIFORM_BLOCK_DATA_SIZE, uniformBlockSizeMaterial, 0);
         uniformBlockSizeMaterial[0] = ((uniformBlockSizeMaterial[0] / uniformBufferOffset[0] + 1)
@@ -171,12 +171,14 @@ public class Gl_320_buffer_uniform_shared extends Test {
         vertexArrayName = new int[1];
         gl3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3.glBindVertexArray(vertexArrayName[0]);
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
-        gl3.glVertexAttribPointer(Semantic.Attr.position, 2, GL_FLOAT, false, 0, 0);
+        {
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
+            gl3.glVertexAttribPointer(Semantic.Attr.position, 2, GL_FLOAT, false, 0, 0);
 
-        gl3.glEnableVertexAttribArray(Semantic.Attr.position);
+            gl3.glEnableVertexAttribArray(Semantic.Attr.position);
 
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
+        }
         gl3.glBindVertexArray(0);
 
         return checkError(gl3, "initVertexArray");
@@ -193,18 +195,20 @@ public class Gl_320_buffer_uniform_shared extends Test {
             float[] model = FloatUtil.makeIdentity(new float[16]);
             float[] mvp = FloatUtil.multMatrix(projection, FloatUtil.multMatrix(view(), model));
 
-            Vec4 diffuse = new Vec4(1f, .5f, 0f, 1f);
+            float[] diffuse = new float[]{1f, .5f, 0f, 1f};
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.uniform.ordinal()]);
-            ByteBuffer byteBuffer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, uniformBlockSizeTransform[0]
-                    + diffuse.toFloatArray().length * GLBuffers.SIZEOF_FLOAT,
+            ByteBuffer byteBuffer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
+                    uniformBlockSizeTransform[0] + diffuse.length * GLBuffers.SIZEOF_FLOAT,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-            FloatBuffer floatBuffer = GLBuffers.newDirectFloatBuffer(mvp.length + diffuse.toFloatArray().length);
-            floatBuffer.put(mvp);
-            floatBuffer.put(diffuse.toFloatArray());
-            floatBuffer.flip();
-            byteBuffer = GLBuffers.copyFloatBufferAsByteBuffer(floatBuffer);
-
+            
+            for (int i = 0; i < mvp.length; i++) {
+                byteBuffer.putFloat(i * GLBuffers.SIZEOF_FLOAT, mvp[i]);
+            }
+            for (int i = 0; i < diffuse.length; i++) {
+                byteBuffer.putFloat(uniformBlockSizeTransform[0] + i * GLBuffers.SIZEOF_FLOAT, diffuse[i]);
+            }
+        
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -216,6 +220,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
         gl3.glUseProgram(programName);
         gl3.glUniformBlockBinding(programName, uniformTransform, Semantic.Uniform.transform0);
         gl3.glUniformBlockBinding(programName, uniformMaterial, Semantic.Uniform.material);
+        
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
         gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.transform0,
                 bufferName[Buffer.uniform.ordinal()], 0, uniformBlockSizeTransform[0]);
