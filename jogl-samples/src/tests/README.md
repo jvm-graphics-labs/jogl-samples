@@ -5,8 +5,8 @@ Features:
 ### es_200_draw_elements
 
 - draw elements
-- glBindAttribLocation
-- glBindFragDataLocation
+- `glBindAttribLocation`
+- `glBindFragDataLocation`
 
 ### es_300_draw_elements
 
@@ -19,5 +19,5 @@ Features:
 ### gl_320_buffer_uniform_shared
 
 - uniform buffer shared
-- glMapBufferRange
+- `glMapBufferRange`
 - `GL_UNIFORM_BLOCK_DATA_SIZE`
