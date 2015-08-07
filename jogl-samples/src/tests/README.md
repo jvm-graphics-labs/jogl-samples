@@ -1,6 +1,6 @@
 # tests
 
-Features
+Features:
 
 ### es_200_draw_elements
 
@@ -20,3 +20,4 @@ Features
 
 - uniform buffer shared
 - glMapBufferRange
+- `GL_UNIFORM_BLOCK_DATA_SIZE`
