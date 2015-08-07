@@ -10,22 +10,22 @@ import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_LINEAR;
 import static com.jogamp.opengl.GL.GL_LINEAR_MIPMAP_LINEAR;
+import static com.jogamp.opengl.GL.GL_RGBA;
+import static com.jogamp.opengl.GL.GL_SRGB8_ALPHA8;
 import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
 import static com.jogamp.opengl.GL.GL_TEXTURE0;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.GLES2;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import com.jogamp.opengl.util.texture.spi.DDSImage;
-import com.jogamp.opengl.util.texture.spi.DDSImage.ImageInfo;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
@@ -34,12 +34,20 @@ import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jglm.Vec2i;
+import texture.TextureData;
+import texture.TextureIO;
+import texture.spi.DDSImage;
+import texture.spi.DDSImage.ImageInfo;
 
 /**
  *
  * @author gbarbieri
  */
 public class Gl_300_fbo_multisample extends Test {
+
+    public static void main(String[] args) {
+        Gl_300_fbo_multisample gl_300_fbo_multisample = new Gl_300_fbo_multisample();
+    }
 
     private final String VERT_SHADER = "image-2d";
     private final String FRAG_SHADER = "image-2d";
@@ -60,9 +68,9 @@ public class Gl_300_fbo_multisample extends Test {
     private int[] vertexArrayName, bufferName, textureName, colorRenderbufferName, colorTextureName,
             framebufferRenderName, framebufferResolveName;
 
-    public Gl_300_fbo_multisample(String title, int majorVersionRequire, int minorVersionRequire) {
+    public Gl_300_fbo_multisample() {
 
-        super(title, majorVersionRequire, minorVersionRequire);
+        super("Gl_300_fbo_multisample", 3, 0);
         programName = 0;
         vertexArrayName = new int[]{0};
         bufferName = new int[]{0};
@@ -138,7 +146,6 @@ public class Gl_300_fbo_multisample extends Test {
         try {
             URLConnection conn = IOUtil.getResource(this.getClass(), getDataDirectory() + TEXTURE_DIFFUSE);
 
-//            DDSImage ddsImage = DDSImage.read(conn.getURL().toExternalForm());
             DDSImage ddsImage = DDSImage.read(conn.getURL().getFile());
 
             gl3.glGenTextures(1, textureName, 0);
@@ -149,23 +156,24 @@ public class Gl_300_fbo_multisample extends Test {
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-            System.out.println("" + ddsImage.isCompressed());
+            System.out.println("" + ddsImage.isCompressed() + " " + ddsImage.getNumMipMaps());
+
+            TextureData textureData = TextureIO.newTextureData(gl3.getGLProfile(),
+                    conn.getURL(), ddsImage.getNumMipMaps() > 1, TextureIO.DDS);
 
             for (int level = 0; level < ddsImage.getNumMipMaps(); level++) {
 
                 ImageInfo imageInfo = ddsImage.getMipMap(level);
-                System.out.println("imageInfo.toString() " + ddsImage.getCompressionFormat());
+//                System.out.println("imageInfo.toString() " + ddsImage.getCompressionFormat());
 
-//                TextureData textureData = new TextureData(gl3.getGLProfile(), GL_SRGB8_ALPHA8,
-//                        ddsImage.getWidth(), ddsImage.getHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
-//                        false, true, false, imageInfo.getData(), null);
+//                TextureData textureData = new TextureData(gl3.getGLProfile(),
+//                        ddsImage.getCompressionFormat(), ddsImage.getWidth(), ddsImage.getHeight(),
+//                        0, ddsImage.getPixelFormat(), GL_UNSIGNED_BYTE, false, true, false,
+//                        imageInfo.getData(), null);
 //                System.out.println("data.toString() " + textureData.toString());
-//                gl3.glTexImage2D(GL_TEXTURE_2D, level, textureData.getInternalFormat(),
-//                        imageInfo.getWidth(), imageInfo.getHeight(), 0, textureData.getPixelFormat(), 
-//                        textureData.getPixelType(), textureData.getBuffer());
-                gl3.glCompressedTexImage2D(GL_TEXTURE_2D, level, GLES2.GL_COMPRESSED_RGB_S3TC_DXT1_EXT,
-                        imageInfo.getWidth(), imageInfo.getHeight(), 0, imageInfo.getData().capacity(),
-                        imageInfo.getData());
+                gl3.glTexImage2D(GL_TEXTURE_2D, level, textureData.getInternalFormat(),
+                        imageInfo.getWidth(), imageInfo.getHeight(), 0, textureData.getPixelFormat(), 
+                        textureData.getPixelType(), textureData.getBuffer());
             }
         } catch (IOException ex) {
             Logger.getLogger(Gl_300_fbo_multisample.class.getName()).log(Level.SEVERE, null, ex);

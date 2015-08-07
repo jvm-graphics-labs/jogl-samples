@@ -22,7 +22,6 @@ import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BLOCK_DATA_SIZE;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.GL3ES3;
 import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
@@ -31,7 +30,6 @@ import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import jglm.Vec4;
 
@@ -196,15 +194,30 @@ public class Gl_320_buffer_uniform_shared extends Test {
             Vec4 diffuse = new Vec4(1f, .5f, 0f, 1f);
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.uniform.ordinal()]);
-            ByteBuffer byteBuffer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, uniformBlockSizeTransform[0]
-                    + diffuse.toFloatArray().length * GLBuffers.SIZEOF_FLOAT,
-                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-            FloatBuffer floatBuffer = GLBuffers.newDirectFloatBuffer(mvp.length + diffuse.toFloatArray().length);
-            floatBuffer.put(mvp);
-            floatBuffer.put(diffuse.toFloatArray());
-            floatBuffer.flip();
-            byteBuffer = GLBuffers.copyFloatBufferAsByteBuffer(floatBuffer);
 
+            gl3.glBufferSubData(GL_UNIFORM_BUFFER, 0, mvp.length * GLBuffers.SIZEOF_FLOAT,
+                    GLBuffers.newDirectFloatBuffer(mvp));
+//            gl3.glBufferSubData(GL_UNIFORM_BUFFER, uniformBlockSizeTransform[0],
+//                    diffuse.toFloatArray().length * GLBuffers.SIZEOF_FLOAT, 
+//                    GLBuffers.newDirectFloatBuffer(diffuse.toFloatArray()));
+
+            ByteBuffer byteBuffer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, uniformBlockSizeTransform[0],
+                    diffuse.toFloatArray().length * GLBuffers.SIZEOF_FLOAT,
+                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+//            FloatBuffer floatBuffer = GLBuffers.newDirectFloatBuffer(mvp.length + diffuse.toFloatArray().length);
+//            floatBuffer.put(mvp);
+//            floatBuffer.put(diffuse.toFloatArray());
+//            floatBuffer.flip();
+//            byteBuffer = GLBuffers.copyFloatBufferAsByteBuffer(floatBuffer);
+//            for (int i = 0; i < mvp.length; i++) {
+//                byteBuffer.putFloat(mvp[i]);
+//            }
+//            byteBuffer.putFloat(diffuse.x);
+//            byteBuffer.putFloat(diffuse.y);
+//            byteBuffer.putFloat(diffuse.z);
+//            byteBuffer.putFloat(diffuse.w);
+            byteBuffer.put(new byte[]{0, 1, 2, 3, (byte) 255, 8, 100});
+//            byteBuffer.flip();
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
