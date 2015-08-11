@@ -145,6 +145,9 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
     private void initVao(GL4 gl4) {
 
+        /**
+        Let's create the VAO and save in it all the attributes properties.
+        */
         gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.vbo]);
         {
             gl4.glGenVertexArrays(1, objects, Semantic.Object.vao);
@@ -153,11 +156,18 @@ public class HelloTriangle implements GLEventListener, KeyListener {
                 gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, objects[Semantic.Object.ibo]);
                 {
                     int stride = (2 + 3) * GLBuffers.SIZEOF_BYTE;
-
+                    /**
+                    We draw 2D, so we need just two coordinates for the position.
+                    */
                     gl4.glEnableVertexAttribArray(Semantic.Attr.position);
                     gl4.glVertexAttribPointer(Semantic.Attr.position, 2, GL4.GL_BYTE,
                             false, stride, 0 * GLBuffers.SIZEOF_BYTE);
-
+                    /**
+                    Color needs three coordinates. We show the usage of normalization,
+                    where signed value get normalized [-1, 1] like in this case.
+                    unsigned will get normalized in the [0, 1] instead, but take
+                    in account java use always signed, althought you can trick it.
+                    */
                     gl4.glEnableVertexAttribArray(Semantic.Attr.color);
                     gl4.glVertexAttribPointer(Semantic.Attr.color, 3, GL4.GL_BYTE,
                             true, stride, 2 * GLBuffers.SIZEOF_BYTE);
@@ -184,6 +194,10 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
         program = shaderProgram.program();
 
+        /**
+        These links don't go into effect until you link the program. If you want 
+        to change index, you need to link the program again.
+        */
         gl4.glBindAttribLocation(program, Semantic.Attr.position, "position");
         gl4.glBindAttribLocation(program, Semantic.Attr.color, "color");
         gl4.glBindFragDataLocation(program, Semantic.Frag.color, "outputColor");
@@ -207,12 +221,19 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
         GL4 gl4 = drawable.getGL().getGL4();
 
+        /**
+        We set the clear color and depth (althought depth is not necessary since
+        it is 1 by default. 
+        */
         gl4.glClearColor(0f, .33f, 0.66f, 1f);
         gl4.glClearDepthf(1f);
         gl4.glClear(GL4.GL_COLOR_BUFFER_BIT | GL4.GL_DEPTH_BUFFER_BIT);
 
         gl4.glUseProgram(program);
         {
+            /**
+            VBO still needs to be bound because it is not part of VAO.
+            */
             gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.vbo]);
             {
                 gl4.glBindVertexArray(objects[Semantic.Object.vao]);
@@ -271,7 +292,10 @@ public class HelloTriangle implements GLEventListener, KeyListener {
     public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
         System.out.println("reshape");
         GL4 gl4 = drawable.getGL().getGL4();
-
+        /**
+        Just the glViewport for this sample, normally here you update your
+        projection matrix.
+        */
         gl4.glViewport(x, y, width, height);
     }
 
