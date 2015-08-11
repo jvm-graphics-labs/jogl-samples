@@ -4,3 +4,6 @@ Please use one of the [latest builds](http://jogamp.org/deployment/archive/maste
 
 
 [Tests](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/tests)
+
+[Hello Triangle](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/helloTriangle/HelloTriangle.java)
+Simple sample that features GL4, pure newt, glWindow options, animator, indexed drawing, dinamic attribute and frag data binding, interleaved data, vao, vbo (with normalization on one attribute), ibo (with shorts), uniform, glsl program (with specific suffix) and matrix jogl util, gl error check, key listener and right way to dispose. 
