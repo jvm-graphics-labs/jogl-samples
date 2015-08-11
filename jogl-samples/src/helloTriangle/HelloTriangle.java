@@ -255,7 +255,7 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
         /**
          We set the clear color and depth (althought depth is not necessary since
-         it is 1 by default. 
+         it is 1 by default). 
          */
         gl4.glClearColor(0f, .33f, 0.66f, 1f);
         gl4.glClearDepthf(1f);
