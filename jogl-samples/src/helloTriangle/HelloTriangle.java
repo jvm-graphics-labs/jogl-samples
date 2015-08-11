@@ -285,7 +285,11 @@ public class HelloTriangle implements GLEventListener, KeyListener {
             gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
         }
         gl4.glUseProgram(0);
-
+        /**
+         Check always any GL error, but keep in mind this is an implicit 
+         synchronization between CPU and GPU, so you should use it only for
+         debug purposes.
+         */
         checkError(gl4, "display");
     }
 
