@@ -178,16 +178,6 @@ public class HelloTriangle implements GLEventListener, KeyListener {
                             true, stride, 2 * GLBuffers.SIZEOF_BYTE);
                 }
             }
-            /**
-             In this sample we bind VBO and VAO to the default values, this is 
-             not a cheapier binding, it costs always as a binding, so here we 
-             have for example 2 vbo and 2 vao bindings. Every binding means 
-             additional validation and overhead, this may affect your 
-             performances. 
-             So if you are looking for high performances skip these calls, but 
-             remember that OpenGL is a state machine, so what you left bound 
-             remains bound!
-             */
             gl4.glBindVertexArray(0);
         }
         gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
@@ -235,9 +225,9 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
         gl4.glDeleteProgram(program);
         /**
-        Clean VAO first in order to minimize problems. If you delete IBO first,
-        VAO will still have the IBO id, this may lead to crashes.
-        */
+         Clean VAO first in order to minimize problems. If you delete IBO first,
+         VAO will still have the IBO id, this may lead to crashes.
+         */
         gl4.glDeleteVertexArrays(1, objects, objects[Semantic.Object.vao]);
 
         gl4.glDeleteBuffers(1, objects, Semantic.Object.vbo);
@@ -280,6 +270,16 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
                     gl4.glDrawElements(GL4.GL_TRIANGLES, indexData.length, GL4.GL_UNSIGNED_SHORT, 0);
                 }
+                /**
+                 In this sample we bind VBO and VAO to the default values, this is 
+                 not a cheapier binding, it costs always as a binding, so here we 
+                 have for example 2 vbo and 2 vao bindings. Every binding means 
+                 additional validation and overhead, this may affect your 
+                 performances. 
+                 So if you are looking for high performances skip these calls, but 
+                 remember that OpenGL is a state machine, so what you left bound 
+                 remains bound!
+                 */
                 gl4.glBindVertexArray(0);
             }
             gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
