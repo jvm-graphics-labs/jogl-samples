@@ -8,11 +8,11 @@ Features:
 - `glBindAttribLocation`
 - `glBindFragDataLocation`
 
-### es_300_draw_elements
+### [es-300-draw-elements](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/Es_300_draw_elements.java)
 
 - draw elements
 
-### gl_300_fbo_multisample, _incomplete_
+### [gl-300-fbo-multisample](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/Gl_300_fbo_multisample.java), _incomplete_
 
 - dx11 texture
 
