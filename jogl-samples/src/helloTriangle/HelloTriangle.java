@@ -262,7 +262,10 @@ public class HelloTriangle implements GLEventListener, KeyListener {
                 {
                     now = System.currentTimeMillis();
                     float diff = (float) (now - start) / 1000;
-
+                    /**
+                    Here we build the matrix that will multiply our original 
+                    vertex positions. We scale, halving it, and rotate it.
+                    */
                     scale = FloatUtil.makeScale(scale, true, 0.5f, 0.5f, 0.5f);
                     zRotazion = FloatUtil.makeRotationEuler(zRotazion, 0, 0, 0, diff);
                     modelToClip = FloatUtil.multMatrix(scale, zRotazion);
