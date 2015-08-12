@@ -2,7 +2,7 @@
 
 Features:
 
-### [es_200_draw_elements](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/Es_200_draw_elements.java)
+### [es-200-draw-elements](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/Es_200_draw_elements.java)
 
 - draw elements
 - `glBindAttribLocation`
