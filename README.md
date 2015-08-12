@@ -5,4 +5,4 @@ Please use one of the [latest builds](http://jogamp.org/deployment/archive/maste
 
 [Tests](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/tests)
 
-[Hello Triangle](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/helloTriangle/HelloTriangle.java)
+[Hello Triangle](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/helloTriangle)
