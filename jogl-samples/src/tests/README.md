@@ -16,7 +16,7 @@ Features:
 
 - dx11 texture
 
-### gl_320_buffer_uniform_shared
+### [gl-320-buffer-uniform-shared](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/Gl_320_buffer_uniform_shared.java)
 
 - uniform buffer shared
 - `glMapBufferRange`
