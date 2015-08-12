@@ -1,0 +1,1 @@
+Simple sample that features GL4, pure newt, glWindow options, animator, indexed drawing, dinamic attribute and frag data binding, interleaved data, vao, vbo (with normalization on one attribute), ibo (with shorts), uniform, glsl program (with specific suffix) and matrix jogl util, gl error check, key listener and right way to dispose. 
