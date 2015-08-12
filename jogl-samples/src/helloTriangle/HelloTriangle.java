@@ -149,16 +149,23 @@ public class HelloTriangle implements GLEventListener, KeyListener {
     }
 
     private void initVao(GL4 gl4) {
-
         /**
          Let's create the VAO and save in it all the attributes properties.
          */
-        gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.vbo]);
+        gl4.glGenVertexArrays(1, objects, Semantic.Object.vao);
+        gl4.glBindVertexArray(objects[Semantic.Object.vao]);
         {
-            gl4.glGenVertexArrays(1, objects, Semantic.Object.vao);
-            gl4.glBindVertexArray(objects[Semantic.Object.vao]);
+            /**
+             Ibo is part of the VAO, so we need to bind it and leave it bound.
+             */
+            gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, objects[Semantic.Object.ibo]);
             {
-                gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, objects[Semantic.Object.ibo]);
+                /**
+                 VBO is not part of VAO, we need it to bind it only when we call
+                 glEnableVertexAttribArray and glVertexAttribPointer, so that VAO
+                 knows which VBO the attributes refer to, then we can unbind it.
+                 */
+                gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.vbo]);
                 {
                     int stride = (2 + 3) * GLBuffers.SIZEOF_BYTE;
                     /**
@@ -177,10 +184,10 @@ public class HelloTriangle implements GLEventListener, KeyListener {
                     gl4.glVertexAttribPointer(Semantic.Attr.color, 3, GL4.GL_BYTE,
                             true, stride, 2 * GLBuffers.SIZEOF_BYTE);
                 }
+                gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
             }
-            gl4.glBindVertexArray(0);
         }
-        gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
+        gl4.glBindVertexArray(0);
 
         checkError(gl4, "initVao");
     }
@@ -253,39 +260,31 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
         gl4.glUseProgram(program);
         {
-            /**
-             VBO still needs to be bound because it is not part of VAO.
-             */
-            gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.vbo]);
+            gl4.glBindVertexArray(objects[Semantic.Object.vao]);
             {
-                gl4.glBindVertexArray(objects[Semantic.Object.vao]);
-                {
-                    now = System.currentTimeMillis();
-                    float diff = (float) (now - start) / 1000;
-                    /**
-                    Here we build the matrix that will multiply our original 
-                    vertex positions. We scale, halving it, and rotate it.
-                    */
-                    scale = FloatUtil.makeScale(scale, true, 0.5f, 0.5f, 0.5f);
-                    zRotazion = FloatUtil.makeRotationEuler(zRotazion, 0, 0, 0, diff);
-                    modelToClip = FloatUtil.multMatrix(scale, zRotazion);
-                    gl4.glUniformMatrix4fv(modelToClipMatrixUL, 1, false, modelToClip, 0);
-
-                    gl4.glDrawElements(GL4.GL_TRIANGLES, indexData.length, GL4.GL_UNSIGNED_SHORT, 0);
-                }
+                now = System.currentTimeMillis();
+                float diff = (float) (now - start) / 1000;
                 /**
-                 In this sample we bind VBO and VAO to the default values, this is 
-                 not a cheapier binding, it costs always as a binding, so here we 
-                 have for example 2 vbo and 2 vao bindings. Every binding means 
-                 additional validation and overhead, this may affect your 
-                 performances. 
-                 So if you are looking for high performances skip these calls, but 
-                 remember that OpenGL is a state machine, so what you left bound 
-                 remains bound!
+                 Here we build the matrix that will multiply our original 
+                 vertex positions. We scale, halving it, and rotate it.
                  */
-                gl4.glBindVertexArray(0);
+                scale = FloatUtil.makeScale(scale, true, 0.5f, 0.5f, 0.5f);
+                zRotazion = FloatUtil.makeRotationEuler(zRotazion, 0, 0, 0, diff);
+                modelToClip = FloatUtil.multMatrix(scale, zRotazion);
+                gl4.glUniformMatrix4fv(modelToClipMatrixUL, 1, false, modelToClip, 0);
+
+                gl4.glDrawElements(GL4.GL_TRIANGLES, indexData.length, GL4.GL_UNSIGNED_SHORT, 0);
             }
-            gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
+            /**
+             In this sample we bind VAO to the default values, this is not a 
+             cheapier binding, it costs always as a binding, so here we have for 
+             example 2 vao bindings. Every binding means additional validation 
+             and overhead, this may affect your performances. 
+             So if you are looking for high performances skip these calls, but 
+             remember that OpenGL is a state machine, so what you left bound 
+             remains bound!
+             */
+            gl4.glBindVertexArray(0);
         }
         gl4.glUseProgram(0);
         /**
