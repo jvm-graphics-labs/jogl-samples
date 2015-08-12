@@ -160,17 +160,17 @@ public class Gl_300_fbo_multisample extends Test {
 
             for (int level = 0; level < ddsImage.getNumMipMaps(); level++) {
 
-                ImageInfo imageInfo = ddsImage.getMipMap(level);
-//                System.out.println("imageInfo.toString() " + ddsImage.getCompressionFormat());
-
-//                TextureData textureData = new TextureData(gl3.getGLProfile(),
-//                        ddsImage.getCompressionFormat(), ddsImage.getWidth(), ddsImage.getHeight(),
-//                        0, ddsImage.getPixelFormat(), GL_UNSIGNED_BYTE, false, true, false,
-//                        imageInfo.getData(), null);
-//                System.out.println("data.toString() " + textureData.toString());
-                gl3.glTexImage2D(GL_TEXTURE_2D, level, textureData.getInternalFormat(),
-                        imageInfo.getWidth(), imageInfo.getHeight(), 0, textureData.getPixelFormat(), 
-                        textureData.getPixelType(), textureData.getBuffer());
+//                ImageInfo imageInfo = ddsImage.getMipMap(level);
+////                System.out.println("imageInfo.toString() " + ddsImage.getCompressionFormat());
+//
+////                TextureData textureData = new TextureData(gl3.getGLProfile(),
+////                        ddsImage.getCompressionFormat(), ddsImage.getWidth(), ddsImage.getHeight(),
+////                        0, ddsImage.getPixelFormat(), GL_UNSIGNED_BYTE, false, true, false,
+////                        imageInfo.getData(), null);
+////                System.out.println("data.toString() " + textureData.toString());
+//                gl3.glTexImage2D(GL_TEXTURE_2D, level, textureData.getInternalFormat(),
+//                        imageInfo.getWidth(), imageInfo.getHeight(), 0, textureData.getPixelFormat(), 
+//                        textureData.getPixelType(), textureData.getBuffer());
             }
         } catch (IOException ex) {
             Logger.getLogger(Gl_300_fbo_multisample.class.getName()).log(Level.SEVERE, null, ex);
