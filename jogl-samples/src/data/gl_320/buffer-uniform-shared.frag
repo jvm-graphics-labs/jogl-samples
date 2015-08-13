@@ -2,14 +2,14 @@
 
 layout(std140) uniform;
 
-uniform material
+uniform Material
 {
     vec4 diffuse;
-} Material;
+} material;
 
 out vec4 color;
 
 void main()
 {
-    color = Material.diffuse;
+    color = material.diffuse;
 }

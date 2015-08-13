@@ -42,7 +42,6 @@ public class Test implements GLEventListener, KeyListener {
     protected Animator animator;
     private final int majorVersionRequire, minorVersionRequire;
     private final Vec2 translationOrigin, translationCurrent, rotationOrigin, rotationCurrent;
-    private boolean escape = false;
 
     public Test(String title, int majorVersionRequire, int minorVersionRequire) {
 
@@ -111,8 +110,6 @@ public class Test implements GLEventListener, KeyListener {
 
         GL3 gl3 = drawable.getGL().getGL3();
         assert end(gl3);
-        animator.stop();
-        glWindow.destroy();
         System.exit(0);
     }
 
@@ -128,10 +125,6 @@ public class Test implements GLEventListener, KeyListener {
         assert render(gl3);
 
         assert checkError(gl3, "render");
-        
-        if(escape) {
-            dispose(drawable);
-        }
     }
 
     protected boolean render(GL gl) {
@@ -143,14 +136,15 @@ public class Test implements GLEventListener, KeyListener {
 
     }
 
+    protected float[] viewTranslate = new float[16], viewRotateX = new float[16],
+            tmpVec = new float[3], view = new float[16];
+
     protected final float[] view() {
 
-        float[] viewTranslate = FloatUtil.makeTranslation(new float[16], true, 0, 0, -translationCurrent.y);
-        float[] viewRotateX = FloatUtil.makeRotationAxis(new float[16], 0,
-                rotationCurrent.y, 1f, 0f, 0f, new float[3]);
+        viewTranslate = FloatUtil.makeTranslation(viewTranslate, true, 0, 0, -translationCurrent.y);
+        viewRotateX = FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec);
         viewRotateX = FloatUtil.multMatrix(viewRotateX, viewTranslate);
-        float[] view = FloatUtil.makeRotationAxis(new float[16], 0,
-                rotationCurrent.x, 0f, 1f, 0f, new float[3]);
+        view = FloatUtil.makeRotationAxis(view, 0, rotationCurrent.x, 0f, 1f, 0f, tmpVec);
         return FloatUtil.multMatrix(view, viewRotateX);
     }
 
@@ -207,15 +201,16 @@ public class Test implements GLEventListener, KeyListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
-    
+
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-    
-        switch(e.getKeyCode()) {
+
+        switch (e.getKeyCode()) {
             case KeyEvent.VK_ESCAPE:
-                escape = true;
+                animator.stop();
+                glWindow.destroy();
                 break;
         }
     }

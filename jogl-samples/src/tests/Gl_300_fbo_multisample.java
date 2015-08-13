@@ -32,9 +32,9 @@ import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jglm.Vec2i;
-import texture.TextureData;
-import texture.TextureIO;
-import texture.spi.DDSImage;
+//import texture.TextureData;
+//import texture.TextureIO;
+//import texture.spi.DDSImage;
 
 /**
  *
@@ -140,41 +140,41 @@ public class Gl_300_fbo_multisample extends Test {
 
     private boolean initTexture(GL3 gl3) {
 
-        try {
-            URLConnection conn = IOUtil.getResource(this.getClass(), getDataDirectory() + TEXTURE_DIFFUSE);
-
-            DDSImage ddsImage = DDSImage.read(conn.getURL().getFile());
-
-            gl3.glGenTextures(1, textureName, 0);
-            gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, ddsImage.getNumMipMaps() - 1);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-            System.out.println("" + ddsImage.isCompressed() + " " + ddsImage.getNumMipMaps());
-
-            TextureData textureData = TextureIO.newTextureData(gl3.getGLProfile(),
-                    conn.getURL(), ddsImage.getNumMipMaps() > 1, TextureIO.DDS);
-
-            for (int level = 0; level < ddsImage.getNumMipMaps(); level++) {
-
-//                ImageInfo imageInfo = ddsImage.getMipMap(level);
-////                System.out.println("imageInfo.toString() " + ddsImage.getCompressionFormat());
+//        try {
+//            URLConnection conn = IOUtil.getResource(this.getClass(), getDataDirectory() + TEXTURE_DIFFUSE);
 //
-////                TextureData textureData = new TextureData(gl3.getGLProfile(),
-////                        ddsImage.getCompressionFormat(), ddsImage.getWidth(), ddsImage.getHeight(),
-////                        0, ddsImage.getPixelFormat(), GL_UNSIGNED_BYTE, false, true, false,
-////                        imageInfo.getData(), null);
-////                System.out.println("data.toString() " + textureData.toString());
-//                gl3.glTexImage2D(GL_TEXTURE_2D, level, textureData.getInternalFormat(),
-//                        imageInfo.getWidth(), imageInfo.getHeight(), 0, textureData.getPixelFormat(), 
-//                        textureData.getPixelType(), textureData.getBuffer());
-            }
-        } catch (IOException ex) {
-            Logger.getLogger(Gl_300_fbo_multisample.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//            DDSImage ddsImage = DDSImage.read(conn.getURL().getFile());
+//
+//            gl3.glGenTextures(1, textureName, 0);
+//            gl3.glActiveTexture(GL_TEXTURE0);
+//            gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
+//            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+//            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, ddsImage.getNumMipMaps() - 1);
+//            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//
+//            System.out.println("" + ddsImage.isCompressed() + " " + ddsImage.getNumMipMaps());
+//
+//            TextureData textureData = TextureIO.newTextureData(gl3.getGLProfile(),
+//                    conn.getURL(), ddsImage.getNumMipMaps() > 1, TextureIO.DDS);
+//
+//            for (int level = 0; level < ddsImage.getNumMipMaps(); level++) {
+//
+////                ImageInfo imageInfo = ddsImage.getMipMap(level);
+//////                System.out.println("imageInfo.toString() " + ddsImage.getCompressionFormat());
+////
+//////                TextureData textureData = new TextureData(gl3.getGLProfile(),
+//////                        ddsImage.getCompressionFormat(), ddsImage.getWidth(), ddsImage.getHeight(),
+//////                        0, ddsImage.getPixelFormat(), GL_UNSIGNED_BYTE, false, true, false,
+//////                        imageInfo.getData(), null);
+//////                System.out.println("data.toString() " + textureData.toString());
+////                gl3.glTexImage2D(GL_TEXTURE_2D, level, textureData.getInternalFormat(),
+////                        imageInfo.getWidth(), imageInfo.getHeight(), 0, textureData.getPixelFormat(), 
+////                        textureData.getPixelType(), textureData.getBuffer());
+//            }
+//        } catch (IOException ex) {
+//            Logger.getLogger(Gl_300_fbo_multisample.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         return false;
     }
 

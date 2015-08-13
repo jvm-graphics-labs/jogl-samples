@@ -2,14 +2,14 @@
 
 layout(std140, column_major) uniform;
 
-uniform transform
+uniform Transform
 {
     mat4 mvp;
-} Transform;
+} transform;
 
 in vec2 position;
 
 void main()
 {	
-    gl_Position = Transform.mvp * vec4(position, 0.0, 1.0);
+    gl_Position = transform.mvp * vec4(position, 0.0, 1.0);
 }
