@@ -217,8 +217,8 @@ public class Gl_320_buffer_uniform extends Test {
     }
 
     private boolean initBuffer(GL3 gl3) {
-        bufferName = new int[Buffer.max.ordinal()];
 
+        bufferName = new int[Buffer.max.ordinal()];
         gl3.glGenBuffers(Buffer.max.ordinal(), bufferName, 0);
 
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
@@ -231,6 +231,7 @@ public class Gl_320_buffer_uniform extends Test {
         for (int v = 0; v < vertexCount; v++) {
             vertexBuffer.put(vertexData[v].toFloatArray());
         }
+        vertexBuffer.rewind();
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -268,12 +269,12 @@ public class Gl_320_buffer_uniform extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
-            gl3.glVertexAttribPointer(Semantic.Attr.position, 3, GL_FLOAT,
-                    false, Vertex_v3fn3fc4f.sizeOf, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.normal, 3, GL_FLOAT,
-                    false, Vertex_v3fn3fc4f.sizeOf, 3 * GLBuffers.SIZEOF_FLOAT);
-            gl3.glVertexAttribPointer(Semantic.Attr.color, 4, GL_FLOAT,
-                    false, Vertex_v3fn3fc4f.sizeOf, (3 + 3) * GLBuffers.SIZEOF_FLOAT);
+            gl3.glVertexAttribPointer(Semantic.Attr.position, 3, GL_FLOAT, false, 
+                    Vertex_v3fn3fc4f.sizeOf, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.normal, 3, GL_FLOAT, false, 
+                    Vertex_v3fn3fc4f.sizeOf, 3 * GLBuffers.SIZEOF_FLOAT);
+            gl3.glVertexAttribPointer(Semantic.Attr.color, 4, GL_FLOAT, false, 
+                    Vertex_v3fn3fc4f.sizeOf, (3 + 3) * GLBuffers.SIZEOF_FLOAT);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.position);
@@ -299,7 +300,7 @@ public class Gl_320_buffer_uniform extends Test {
             projection = FloatUtil.makePerspective(projection, 0, true,
                     (float) (Math.PI * 0.25f), 4.0f / 3.0f, 0.1f, 100.0f);
             view();
-            model = FloatUtil.makeRotationAxis(model, 0, (float) (-Math.PI + 0.5f), 0.0f, 0.0f, 1.0f, tmpVec);
+            model = FloatUtil.makeRotationAxis(model, 0, (float) (-Math.PI * 0.5f), 0.0f, 0.0f, 1.0f, tmpVec);
             //  view contains now vm (mv)
             FloatUtil.multMatrix(view, model);
             for (int c = 0; c < 3; c++) {
