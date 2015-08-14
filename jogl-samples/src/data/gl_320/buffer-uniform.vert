@@ -2,36 +2,36 @@
 
 layout(std140) uniform;
 
-struct transform
+struct Transform
 {
-    mat4 P;
-    mat4 MV;
-    mat3 Normal;
+    mat4 p;
+    mat4 mV;
+    mat3 normal;
 };
 
-uniform per_draw
+uniform PerDraw
 {
-    transform Transform;
-} PerDraw;
+    Transform transform;
+} perDraw;
 
-in vec3 Position;
-in vec3 Normal;
-in vec4 Color;
+in vec3 position;
+in vec3 normal;
+in vec4 color;
 
-out block
+out Block
 {
-    vec3 Normal;
-    vec3 View;
-    vec3 Color;
-} Out;
+    vec3 normal;
+    vec3 view;
+    vec3 color;
+} blockOut;
 
 void main()
 {
-    vec4 P = PerDraw.Transform.MV * vec4(Position, 1.0);
+    vec4 p = perDraw.transform.mV * vec4(position, 1.0);
 
-    Out.Normal = mat3(PerDraw.Transform.MV) * Normal;
-    Out.View = -P.xyz;
-    Out.Color = Color.rgb;
+    blockOut.normal = mat3(perDraw.transform.mV) * normal;
+    blockOut.view = -p.xyz;
+    blockOut.color = color.rgb;
 
-    gl_Position = PerDraw.Transform.P * P;
+    gl_Position = perDraw.transform.p * p;
 }

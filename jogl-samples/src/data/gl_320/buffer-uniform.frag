@@ -2,47 +2,47 @@
 
 layout(std140) uniform;
 
-struct material
+struct Material
 {
-    vec3 Ambient;
-    vec3 Diffuse;
-    vec3 Specular;
-    float Shininess;
-} Material;
+    vec3 ambient;
+    vec3 diffuse;
+    vec3 specular;
+    float shininess;
+} material;
 
-struct light
+struct Light
 {
-    vec3 Position; // Camera space
+    vec3 position; // Camera space
 };
 
-uniform per_scene
+uniform PerScene
 {
-    material Material;
-} PerScene;
+    Material material;
+} perScene;
 
-uniform per_pass
+uniform PerPass
 {
-    light Light;
-} PerPass;
+    Light light;
+} perPass;
 
-in block
+in Block
 {
-    vec3 Normal;
-    vec3 View;
-    vec3 Color;
-} In;
+    vec3 normal;
+    vec3 view;
+    vec3 color;
+} blockIn;
 
-out vec4 Color;
+out vec4 color;
 
 void main()
 {
-    vec3 N = normalize(In.Normal);
-    vec3 L = normalize(PerPass.Light.Position + In.View);
-    vec3 V = normalize(In.View);
+    vec3 n = normalize(blockIn.normal);
+    vec3 l = normalize(perPass.light.position + blockIn.view);
+    vec3 v = normalize(blockIn.view);
 
-    vec3 Diffuse = max(dot(N, L), 0.0) * PerScene.Material.Diffuse;
-    vec3 R = reflect(-L, N);
-    vec3 Specular = pow(max(dot(R, V), 0.0), PerScene.Material.Shininess) * PerScene.Material.Specular;
+    vec3 diffuse = max(dot(n, l), 0.0) * perScene.material.diffuse;
+    vec3 r = reflect(-l, n);
+    vec3 specular = pow(max(dot(r, v), 0.0), perScene.material.shininess) * perScene.material.specular;
 
-    Color = vec4(PerScene.Material.Ambient + Diffuse + Specular, 1.0);
+    color = vec4(perScene.material.ambient + diffuse + specular, 1.0);
 }

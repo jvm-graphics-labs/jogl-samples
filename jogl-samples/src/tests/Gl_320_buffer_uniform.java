@@ -45,12 +45,12 @@ public class Gl_320_buffer_uniform extends Test {
         Gl_320_buffer_uniform gl_320_buffer_uniform = new Gl_320_buffer_uniform();
     }
 
-    private final String SHADERS_SOURCE = "buffer-uniform";
-    private final String SHADERS_ROOT = "src/data/gl_320";
-
     public Gl_320_buffer_uniform() {
         super("gl-320-buffer-uniform", 3, 2);
     }
+    
+    private final String SHADERS_SOURCE = "buffer-uniform";
+    private final String SHADERS_ROOT = "src/data/gl_320";
 
     public class Vertex_v3fn3fc4f {
 
@@ -196,17 +196,17 @@ public class Gl_320_buffer_uniform extends Test {
 
             programName = program.program();
 
-            gl3.glBindAttribLocation(programName, Semantic.Attr.position, "Position");
-            gl3.glBindAttribLocation(programName, Semantic.Attr.normal, "Normal");
-            gl3.glBindAttribLocation(programName, Semantic.Attr.color, "Color");
-            gl3.glBindFragDataLocation(programName, Semantic.Frag.color, "Color");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.position, "position");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.normal, "normal");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.color, "color");
+            gl3.glBindFragDataLocation(programName, Semantic.Frag.color, "color");
 
             program.link(gl3, System.out);
         }
         if (validated) {
-            uniformPerDraw = gl3.glGetUniformBlockIndex(programName, "per_draw");
-            uniformPerPass = gl3.glGetUniformBlockIndex(programName, "per_pass");
-            uniformPerScene = gl3.glGetUniformBlockIndex(programName, "per_scene");
+            uniformPerDraw = gl3.glGetUniformBlockIndex(programName, "PerDraw");
+            uniformPerPass = gl3.glGetUniformBlockIndex(programName, "PerPass");
+            uniformPerScene = gl3.glGetUniformBlockIndex(programName, "PerScene");
 
             gl3.glUniformBlockBinding(programName, uniformPerDraw, Uniform.perDraw.ordinal());
             gl3.glUniformBlockBinding(programName, uniformPerPass, Uniform.perPass.ordinal());
