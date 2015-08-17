@@ -8,9 +8,9 @@ Simple sample that features:
 - dynamic attribute binding
 - dynamic frag data binding
 - interleaved data
-- vao
-- vbo (with normalization on one attribute)
-- ibo (with shorts)
+- vertex array object (VAO)
+- vertex buffer object (VBO) with normalization on one attribute
+- index buffer object (IBO) with shorts
 - uniform
 - glsl program (with specific suffix) jogl util 
 - matrix jogl util 
