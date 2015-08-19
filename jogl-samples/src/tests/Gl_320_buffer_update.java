@@ -7,24 +7,30 @@ package tests;
 
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_BACK;
-import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
-import static com.jogamp.opengl.GL.GL_FRAMEBUFFER;
-import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_COMPLETE;
+import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
+import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_MAP_FLUSH_EXPLICIT_BIT;
 import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_MAP_UNSYNCHRONIZED_BIT;
 import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
 import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
+import static com.jogamp.opengl.GL2ES3.GL_COLOR;
+import static com.jogamp.opengl.GL2ES3.GL_COPY_READ_BUFFER;
+import static com.jogamp.opengl.GL2ES3.GL_COPY_WRITE_BUFFER;
+import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BLOCK_DATA_SIZE;
+import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 /**
  *
@@ -60,6 +66,7 @@ public class Gl_320_buffer_update extends Test {
 
     private int[] bufferName = new int[Buffer.max.ordinal()], vertexArrayName = new int[1];
     private int programName, uniformTransform, uniformMaterial;
+    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -72,18 +79,12 @@ public class Gl_320_buffer_update extends Test {
             validated = initProgram(gl3);
         }
         if (validated) {
-//            validated = initBuffer(gl3);
+            validated = initBuffer(gl3);
         }
         if (validated) {
-//            validated = initVertexArray(gl3);
+            validated = initVertexArray(gl3);
         }
-        gl3.glEnable(GL_DEPTH_TEST);
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        gl3.glDrawBuffer(GL_BACK);
-        if (gl3.glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-            return false;
-        }
-        return validated;
+        return validated && checkError(gl, "begin");
     }
 
     private boolean initProgram(GL3 gl3) {
@@ -136,68 +137,145 @@ public class Gl_320_buffer_update extends Test {
                 null,
                 GL_STATIC_DRAW);
 
-		// Copy the vertex data in the buffer, in this sample for the whole range of data.
+        // Copy the vertex data in the buffer, in this sample for the whole range of data.
         // It doesn't required to be the buffer size but pointers require no memory overlapping.
         ByteBuffer data = gl3.glMapBufferRange(
                 GL_ARRAY_BUFFER,
                 0, // Offset
                 positionSize, // Size,
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_FLUSH_EXPLICIT_BIT);
-		
-//        for(int f)
-//
-//		// Explicitly send the data to the graphic card.
-//		glFlushMappedBufferRange(GL_ARRAY_BUFFER, 0, PositionSize);
-//
-//		glUnmapBuffer(GL_ARRAY_BUFFER);
-//
-//		// Unbind the buffer
-//		glBindBuffer(GL_ARRAY_BUFFER, 0);
-//
-//		// Copy buffer
-//		glBindBuffer(GL_ARRAY_BUFFER, BufferName[buffer::COPY]);
-//		glBufferData(GL_ARRAY_BUFFER, PositionSize, 0, GL_STATIC_DRAW);
-//		glBindBuffer(GL_ARRAY_BUFFER, 0);
-//
-//		glBindBuffer(GL_COPY_READ_BUFFER, BufferName[buffer::ARRAY]);
-//		glBindBuffer(GL_COPY_WRITE_BUFFER, BufferName[buffer::COPY]);
-//
-//		glCopyBufferSubData(
-//			GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
-//			0, 0,
-//			PositionSize);
-//
-//		glBindBuffer(GL_COPY_READ_BUFFER, 0);
-//		glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
-//
-//		GLint UniformBlockSize = 0;
-//
-//		{
-//			glGetActiveUniformBlockiv(
-//				ProgramName, 
-//				UniformTransform,
-//				GL_UNIFORM_BLOCK_DATA_SIZE,
-//				&UniformBlockSize);
-//
-//			glBindBuffer(GL_UNIFORM_BUFFER, BufferName[buffer::TRANSFORM]);
-//			glBufferData(GL_UNIFORM_BUFFER, UniformBlockSize, 0, GL_DYNAMIC_DRAW);
-//			glBindBuffer(GL_UNIFORM_BUFFER, 0);
-//		}
-//
-//		{
-//			glm::vec4 Diffuse(1.0f, 0.5f, 0.0f, 1.0f);
-//
-//			glGetActiveUniformBlockiv(
-//				ProgramName, 
-//				UniformMaterial,
-//				GL_UNIFORM_BLOCK_DATA_SIZE,
-//				&UniformBlockSize);
-//
-//			glBindBuffer(GL_UNIFORM_BUFFER, BufferName[buffer::MATERIAL]);
-//			glBufferData(GL_UNIFORM_BUFFER, UniformBlockSize, &Diffuse[0], GL_DYNAMIC_DRAW);
-//			glBindBuffer(GL_UNIFORM_BUFFER, 0);
-//		}
-//
-//		return this->checkError("initBuffer");
+
+        for (int f = 0; f < positionData.length; f++) {
+            data.putFloat(f * GLBuffers.SIZEOF_FLOAT, positionData[f]);
+        }
+
+        // Explicitly send the data to the graphic card.
+        gl3.glFlushMappedBufferRange(GL_ARRAY_BUFFER, 0, positionSize);
+
+        gl3.glUnmapBuffer(GL_ARRAY_BUFFER);
+
+        // Unbind the buffer
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        // Copy buffer
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.copy.ordinal()]);
+        gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, null, GL_STATIC_DRAW);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        gl3.glBindBuffer(GL_COPY_READ_BUFFER, bufferName[Buffer.array.ordinal()]);
+        gl3.glBindBuffer(GL_COPY_WRITE_BUFFER, bufferName[Buffer.copy.ordinal()]);
+
+        gl3.glCopyBufferSubData(
+                GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
+                0, 0,
+                positionSize);
+
+        gl3.glBindBuffer(GL_COPY_READ_BUFFER, 0);
+        gl3.glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
+
+        int[] uniformBlockSize = new int[1];
+
+        {
+            gl3.glGetActiveUniformBlockiv(
+                    programName,
+                    uniformTransform,
+                    GL_UNIFORM_BLOCK_DATA_SIZE,
+                    uniformBlockSize, 0);
+
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.transform.ordinal()]);
+            gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize[0], null, GL_DYNAMIC_DRAW);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        {
+            float[] diffuse = new float[]{1.0f, 0.5f, 0.0f, 1.0f};
+
+            gl3.glGetActiveUniformBlockiv(
+                    programName,
+                    uniformMaterial,
+                    GL_UNIFORM_BLOCK_DATA_SIZE,
+                    uniformBlockSize, 0);
+
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.material.ordinal()]);
+            FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(diffuse);
+            gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize[0], diffuseBuffer, GL_DYNAMIC_DRAW);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        return checkError(gl3, "initBuffer");
+    }
+
+    private boolean initVertexArray(GL3 gl3) {
+
+        gl3.glGenVertexArrays(1, vertexArrayName, 0);
+        gl3.glBindVertexArray(vertexArrayName[0]);
+        {
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.copy.ordinal()]);
+            int stride = 2 * GLBuffers.SIZEOF_FLOAT, offset = 0;
+            gl3.glVertexAttribPointer(Semantic.Attr.position, 2, GL_FLOAT, false, stride, offset);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+            gl3.glEnableVertexAttribArray(Semantic.Attr.position);
+        }
+        gl3.glBindVertexArray(0);
+
+        return checkError(gl3, "initVertexArray");
+    }
+
+    @Override
+    protected boolean render(GL gl) {
+
+        GL3 gl3 = (GL3) gl;
+
+        {
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.transform.ordinal()]);
+            ByteBuffer transformBuffer = gl3.glMapBufferRange(
+                    GL_UNIFORM_BUFFER, 0, 16 * GLBuffers.SIZEOF_FLOAT,
+                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+            projection = FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
+                    glWindow.getWidth() / glWindow.getHeight(), 0.1f, 100.0f);
+            FloatUtil.makeIdentity(model);
+            // update view matrix
+            view();
+            // view *= model
+            FloatUtil.multMatrix(view, model);
+            mvp = FloatUtil.multMatrix(projection, view);
+
+            for (int f = 0; f < mvp.length; f++) {
+                transformBuffer.putFloat(f * GLBuffers.SIZEOF_FLOAT, mvp[f]);
+            }
+            transformBuffer.rewind();
+
+            // Make sure the uniform buffer is uploaded
+            gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        gl3.glViewport(0, 0, glWindow.getWidth(), glWindow.getHeight());
+        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+
+        gl3.glUseProgram(programName);
+
+        // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.transform0, bufferName[Buffer.transform.ordinal()]);
+        // Attach the buffer to UBO binding point semantic::uniform::MATERIAL
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.material, bufferName[Buffer.material.ordinal()]);
+
+        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
+
+        return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL3 gl3 = (GL3) gl;
+
+        gl3.glDeleteBuffers(Buffer.max.ordinal(),  bufferName, 0);
+        gl3.glDeleteProgram(programName);
+        gl3.glDeleteVertexArrays(1,  vertexArrayName, 0);
+
+        return true;
     }
 }
