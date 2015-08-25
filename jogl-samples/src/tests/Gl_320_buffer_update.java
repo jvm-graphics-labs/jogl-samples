@@ -105,15 +105,15 @@ public class Gl_320_buffer_update extends Test {
 
             programName = program.program();
 
-            gl3.glBindAttribLocation(programName, Semantic.Attr.position, "Position");
-            gl3.glBindAttribLocation(programName, Semantic.Attr.color, "Color");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.position, "position");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.color, "color");
 
             program.link(gl3, System.out);
         }
         // Get variables locations
         if (validated) {
-            uniformTransform = gl3.glGetUniformBlockIndex(programName, "transform");
-            uniformMaterial = gl3.glGetUniformBlockIndex(programName, "material");
+            uniformTransform = gl3.glGetUniformBlockIndex(programName, "Transform");
+            uniformMaterial = gl3.glGetUniformBlockIndex(programName, "Material");
 
             gl3.glUniformBlockBinding(programName, uniformTransform, Semantic.Uniform.transform0);
             gl3.glUniformBlockBinding(programName, uniformMaterial, Semantic.Uniform.material);
