@@ -1454,9 +1454,8 @@ public class Caps {
 			formatsData.COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT = true;
 			break;
 //		case GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI:
-		case GL_COMPRESSED_LUMINANCE_ALPHA:
-			formatsData.COMPRESSED_LUMINANCE_ALPHA_3DC_ATI = true;
-			break;
+//			formatsData.COMPRESSED_LUMINANCE_ALPHA_3DC_ATI = true;
+//			break;
 //		case GL_COMPRESSED_RGB_FXT1:
 //			formatsData.COMPRESSED_RGB_FXT1_3DFX = true;
 //			break;
