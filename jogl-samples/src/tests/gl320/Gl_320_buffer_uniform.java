@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tests;
+package tests.gl320;
 
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
@@ -196,10 +196,10 @@ public class Gl_320_buffer_uniform extends Test {
 
             programName = program.program();
 
-            gl3.glBindAttribLocation(programName, Semantic.Attr.position, "position");
-            gl3.glBindAttribLocation(programName, Semantic.Attr.normal, "normal");
-            gl3.glBindAttribLocation(programName, Semantic.Attr.color, "color");
-            gl3.glBindFragDataLocation(programName, Semantic.Frag.color, "color");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.NORMAL, "normal");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.COLOR, "color");
+            gl3.glBindFragDataLocation(programName, Semantic.Frag.COLOR, "color");
 
             program.link(gl3, System.out);
         }
@@ -269,17 +269,17 @@ public class Gl_320_buffer_uniform extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
-            gl3.glVertexAttribPointer(Semantic.Attr.position, 3, GL_FLOAT, false, 
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, 
                     Vertex_v3fn3fc4f.sizeOf, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.normal, 3, GL_FLOAT, false, 
+            gl3.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false, 
                     Vertex_v3fn3fc4f.sizeOf, 3 * GLBuffers.SIZEOF_FLOAT);
-            gl3.glVertexAttribPointer(Semantic.Attr.color, 4, GL_FLOAT, false, 
+            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, 
                     Vertex_v3fn3fc4f.sizeOf, (3 + 3) * GLBuffers.SIZEOF_FLOAT);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            gl3.glEnableVertexAttribArray(Semantic.Attr.position);
-            gl3.glEnableVertexAttribArray(Semantic.Attr.normal);
-            gl3.glEnableVertexAttribArray(Semantic.Attr.color);
+            gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
+            gl3.glEnableVertexAttribArray(Semantic.Attr.NORMAL);
+            gl3.glEnableVertexAttribArray(Semantic.Attr.COLOR);
 
             gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
         }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tests;
+package tests.gl300;
 
 import com.jogamp.common.util.IOUtil;
 import com.jogamp.opengl.GL;
@@ -115,8 +115,8 @@ public class Gl_300_fbo_multisample extends Test {
 
             programName = program.program();
 
-            gl3.glBindAttribLocation(programName, Semantic.Attr.position, "position");
-            gl3.glBindAttribLocation(programName, Semantic.Attr.texCoord, "texCoord");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.TEXCOORD, "texCoord");
         }
         if (validated) {
 

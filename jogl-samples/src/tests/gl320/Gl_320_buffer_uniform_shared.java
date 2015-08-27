@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tests;
+package tests.gl320;
 
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
@@ -116,8 +116,8 @@ public class Gl_320_buffer_uniform_shared extends Test {
 
             programName = program.program();
 
-            gl3.glBindAttribLocation(programName, Semantic.Attr.position, "position");
-            gl3.glBindFragDataLocation(programName, Semantic.Frag.color, "color");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
+            gl3.glBindFragDataLocation(programName, Semantic.Frag.COLOR, "color");
 
             program.link(gl3, System.out);
         }
@@ -174,9 +174,9 @@ public class Gl_320_buffer_uniform_shared extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
-            gl3.glVertexAttribPointer(Semantic.Attr.position, 2, GL_FLOAT, false, 0, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
 
-            gl3.glEnableVertexAttribArray(Semantic.Attr.position);
+            gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
             gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
         }
@@ -221,14 +221,14 @@ public class Gl_320_buffer_uniform_shared extends Test {
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
 
         gl3.glUseProgram(programName);
-        gl3.glUniformBlockBinding(programName, uniformTransform, Semantic.Uniform.transform0);
-        gl3.glUniformBlockBinding(programName, uniformMaterial, Semantic.Uniform.material);
+        gl3.glUniformBlockBinding(programName, uniformTransform, Semantic.Uniform.TRANSFORM0);
+        gl3.glUniformBlockBinding(programName, uniformMaterial, Semantic.Uniform.MATERIAL);
 
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
-        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.transform0,
+        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0,
                 bufferName[Buffer.uniform.ordinal()], 0, uniformBlockSizeTransform[0]);
         // Attach the buffer to UBO binding point semantic::uniform::MATERIAL 
-        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.material, bufferName[Buffer.uniform.ordinal()],
+        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.uniform.ordinal()],
                 uniformBlockSizeTransform[0], uniformBlockSizeMaterial[0]);
 
         // Bind vertex array & draw 

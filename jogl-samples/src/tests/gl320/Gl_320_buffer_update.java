@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tests;
+package tests.gl320;
 
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
@@ -105,8 +105,8 @@ public class Gl_320_buffer_update extends Test {
 
             programName = program.program();
 
-            gl3.glBindAttribLocation(programName, Semantic.Attr.position, "position");
-            gl3.glBindAttribLocation(programName, Semantic.Attr.color, "color");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.COLOR, "color");
 
             program.link(gl3, System.out);
         }
@@ -115,8 +115,8 @@ public class Gl_320_buffer_update extends Test {
             uniformTransform = gl3.glGetUniformBlockIndex(programName, "Transform");
             uniformMaterial = gl3.glGetUniformBlockIndex(programName, "Material");
 
-            gl3.glUniformBlockBinding(programName, uniformTransform, Semantic.Uniform.transform0);
-            gl3.glUniformBlockBinding(programName, uniformMaterial, Semantic.Uniform.material);
+            gl3.glUniformBlockBinding(programName, uniformTransform, Semantic.Uniform.TRANSFORM0);
+            gl3.glUniformBlockBinding(programName, uniformMaterial, Semantic.Uniform.MATERIAL);
         }
 
         return validated & checkError(gl3, "initProgram");
@@ -212,10 +212,10 @@ public class Gl_320_buffer_update extends Test {
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.copy.ordinal()]);
             int stride = 2 * GLBuffers.SIZEOF_FLOAT, offset = 0;
-            gl3.glVertexAttribPointer(Semantic.Attr.position, 2, GL_FLOAT, false, stride, offset);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, stride, offset);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            gl3.glEnableVertexAttribArray(Semantic.Attr.position);
+            gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
         }
         gl3.glBindVertexArray(0);
 
@@ -257,9 +257,9 @@ public class Gl_320_buffer_update extends Test {
         gl3.glUseProgram(programName);
 
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.transform0, bufferName[Buffer.transform.ordinal()]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.transform.ordinal()]);
         // Attach the buffer to UBO binding point semantic::uniform::MATERIAL
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.material, bufferName[Buffer.material.ordinal()]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.material.ordinal()]);
 
         gl3.glBindVertexArray(vertexArrayName[0]);
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
