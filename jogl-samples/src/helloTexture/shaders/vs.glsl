@@ -5,14 +5,14 @@
 
 // Incoming vertex position, Model Space.
 in vec2 position;
-// Incoming vertex color.
-in vec3 color;
+// Incoming texture coordinates.
+in vec2 texCoord;
 
 // Uniform matrix from Model Space to Clip Space.
 uniform mat4 modelToClipMatrix;
 
-// Outgoing color.
-out vec3 interpolatedColor;
+// Outgoing texture coordinates.
+out vec2 interpolatedTexCoord;
 
 void main() {
 
@@ -20,6 +20,6 @@ void main() {
     // it with the modelToClipMatrix.
     gl_Position = modelToClipMatrix * vec4(position, 0, 1);
 
-    // We assign the color to the outgoing variable.
-    interpolatedColor = color;
+    // We assign the texture coordinate to the outgoing variable.
+    interpolatedTexCoord = texCoord;
 }

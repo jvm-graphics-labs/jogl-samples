@@ -39,6 +39,7 @@ public class Semantic {
         public static final int PERFRAME = 1;
         public static final int PERPASS = 2;
         public static final int LIGHT = 3;
+        public static final int TEXTURE0 = 0;
     }
 
     public static class Object {
@@ -46,6 +47,8 @@ public class Semantic {
         public static final int VAO = 0;
         public static final int VBO = 1;
         public static final int IBO = 2;
+        public static final int TEXTURE = 2;
+        public static final int SAMPLER = 2;
         public static final int SIZE = 3;
     }
 }
