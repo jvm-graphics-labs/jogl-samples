@@ -46,8 +46,8 @@ public class Gl_300_fbo_multisample extends Test {
         Gl_300_fbo_multisample gl_300_fbo_multisample = new Gl_300_fbo_multisample();
     }
 
-    private final String VERT_SHADER = "image-2d";
-    private final String FRAG_SHADER = "image-2d";
+    private final String SHADERS_SOURCE = "image-2d";
+    private final String SHADERS_ROOT = "src/data/gl_320";
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
     private Vec2i FRAMEBUFFER_SIZE = new Vec2i(160, 120);
     // With DDS textures, v texture coordinate are reversed, from top to bottom
@@ -103,10 +103,10 @@ public class Gl_300_fbo_multisample extends Test {
 
         if (validated) {
 
-            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
-                    getDataDirectory() + "gl_300", getDataDirectory() + "gl_300/bin", VERT_SHADER, true);
-            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(),
-                    getDataDirectory() + "gl_300", getDataDirectory() + "gl_300/bin", FRAG_SHADER, true);
+            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(vertShader);
@@ -141,9 +141,7 @@ public class Gl_300_fbo_multisample extends Test {
     private boolean initTexture(GL3 gl3) {
 
 //        try {
-//            URLConnection conn = IOUtil.getResource(this.getClass(), getDataDirectory() + TEXTURE_DIFFUSE);
-//
-//            DDSImage ddsImage = DDSImage.read(conn.getURL().getFile());
+////            jgli.Texture
 //
 //            gl3.glGenTextures(1, textureName, 0);
 //            gl3.glActiveTexture(GL_TEXTURE0);
