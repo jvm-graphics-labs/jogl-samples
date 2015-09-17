@@ -56,7 +56,7 @@ public class Gl_320_draw_instanced extends Test {
         +1.0f, +1.0f,
         +1.0f, +1.0f,
         -1.0f, +1.0f,
-        +1.0f, -1.0f
+        -1.0f, -1.0f
     };
 
     private enum Buffer {
@@ -115,19 +115,19 @@ public class Gl_320_draw_instanced extends Test {
             program.add(fragShader);
 
             program.init(gl3);
-
+            
             programName = program.program();
 
-            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "Position");
-            gl3.glBindFragDataLocation(programName, Semantic.Frag.COLOR, "Color");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
+            gl3.glBindFragDataLocation(programName, Semantic.Frag.COLOR, "color");
 
             program.link(gl3, System.out);
         }
         // Get variables locations
         if (validated) {
 
-            uniformTransform = gl3.glGetUniformBlockIndex(programName, "transform");
-            uniformMaterial = gl3.glGetUniformBlockIndex(programName, "material");
+            uniformTransform = gl3.glGetUniformBlockIndex(programName, "Transform");
+            uniformMaterial = gl3.glGetUniformBlockIndex(programName, "Material");
         }
 
         return validated & checkError(gl3, "initProgram");
@@ -223,7 +223,7 @@ public class Gl_320_draw_instanced extends Test {
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL.ordinal()]);
         gl4.glBindVertexArray(vertexArrayName[0]);
 
-        gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 5);
+        gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 2);
 
         return true;
     }

@@ -4,20 +4,20 @@ precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-uniform transform
+uniform Transform
 {
-	mat4 MVP[2];
-} Transform;
+    mat4 mvp[2];
+} transform;
 
-in vec2 Position;
+in vec2 position;
 
-out block
+out Block
 {
-	flat int Instance;
-} Out;
+    flat int instance;
+} outBlock;
 
 void main()
 {
-	gl_Position = Transform.MVP[gl_InstanceID] * vec4(Position, 0.0, 1.0);
-	Out.Instance = gl_InstanceID;
+    gl_Position = transform.mvp[gl_InstanceID] * vec4(position, 0.0, 1.0);
+    outBlock.instance = gl_InstanceID;
 }

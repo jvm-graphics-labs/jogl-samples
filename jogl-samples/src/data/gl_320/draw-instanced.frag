@@ -4,19 +4,19 @@ precision highp float;
 precision highp int;
 layout(std140) uniform;
 
-uniform material
+uniform Material
 {
-	vec4 Diffuse[2];
-} Material;
+    vec4 diffuse[2];
+} material;
 
-in block
+in Block
 {
-	flat int Instance;
-} In;
+    flat int instance;
+} inBlock;
 
-out vec4 Color;
+out vec4 color;
 
 void main()
 {
-	Color = Material.Diffuse[In.Instance];
+    color = material.diffuse[inBlock.instance];
 }
