@@ -107,7 +107,7 @@ public class Es_300_draw_elements extends Test {
             program.link(gl3es3, System.out);
 
             programName = program.program();
-            gl3es3.glBindAttribLocation(programName, Semantic.Attr.position, "position");            
+            gl3es3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");            
         }
         // Get variables locations
         if (validated) {
@@ -147,11 +147,11 @@ public class Es_300_draw_elements extends Test {
         gl3es3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3es3.glBindVertexArray(vertexArrayName[0]);
         gl3es3.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
-        gl3es3.glVertexAttribPointer(Semantic.Attr.position, 2, GL_FLOAT, false, 0, 0);
+        gl3es3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
         gl3es3.glBindBuffer(GL_ARRAY_BUFFER, 0);
         gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferName[0]);
 
-        gl3es3.glEnableVertexAttribArray(Semantic.Attr.position);
+        gl3es3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
         gl3es3.glBindVertexArray(0);
 
         return checkError(gl3es3, "initVertexArray");

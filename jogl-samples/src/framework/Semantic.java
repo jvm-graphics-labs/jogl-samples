@@ -13,39 +13,39 @@ public class Semantic {
 
     public static class Attr {
 
-        public static final int position = 0;
-        public static final int normal = 1;
-        public static final int color = 3;
-        public static final int texCoord = 4;
-        public static final int drawId = 5;
+        public static final int POSITION = 0;
+        public static final int NORMAL = 1;
+        public static final int COLOR = 3;
+        public static final int TEXCOORD = 4;
+        public static final int DRAW_ID = 5;
     }
 
     public static class Frag {
 
-        public static final int color = 0;
-        public static final int red = 0;
-        public static final int green = 1;
-        public static final int blue = 2;
-        public static final int alpha = 0;
+        public static final int COLOR = 0;
+        public static final int RED = 0;
+        public static final int GREEN = 1;
+        public static final int BLUE = 2;
+        public static final int ALPHA = 0;
     }
 
     public static class Uniform {
 
-        public static final int material = 0;
-        public static final int transform0 = 1;
-        public static final int transform1 = 2;
-        public static final int indirection = 3;
-        public static final int constant = 0;
-        public static final int perFrame = 1;
-        public static final int perPass = 2;
-        public static final int light = 3;
+        public static final int MATERIAL = 0;
+        public static final int TRANSFORM0 = 1;
+        public static final int TRANSFORM1 = 2;
+        public static final int INDIRECTION = 3;
+        public static final int CONSTANT = 0;
+        public static final int PER_FRAME = 1;
+        public static final int PER_PASS = 2;
+        public static final int LIGHT = 3;
     }
 
     public static class Object {
 
-        public static final int vao = 0;
-        public static final int vbo = 1;
-        public static final int ibo = 2;
-        public static final int size = 3;
+        public static final int VAO = 0;
+        public static final int VBO = 1;
+        public static final int IBO = 2;
+        public static final int SIZE = 3;
     }
 }

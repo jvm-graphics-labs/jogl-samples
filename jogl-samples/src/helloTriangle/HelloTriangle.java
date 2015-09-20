@@ -76,7 +76,7 @@ public class HelloTriangle implements GLEventListener, KeyListener {
         animator.start();
     }
 
-    private int[] objects = new int[Semantic.Object.size];
+    private int[] objects = new int[Semantic.Object.SIZE];
     // Position interleaved with colors (to be normalized).
     private byte[] vertexData = new byte[]{
         (byte) -1, (byte) -1, (byte) Byte.MAX_VALUE, (byte) 0, (byte) 0,
@@ -122,8 +122,8 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
     private void initVbo(GL4 gl4) {
 
-        gl4.glGenBuffers(1, objects, Semantic.Object.vbo);
-        gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.vbo]);
+        gl4.glGenBuffers(1, objects, Semantic.Object.VBO);
+        gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.VBO]);
         {
             ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexData);
             int size = vertexData.length * GLBuffers.SIZEOF_BYTE;
@@ -136,8 +136,8 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
     private void initIbo(GL4 gl4) {
 
-        gl4.glGenBuffers(1, objects, Semantic.Object.ibo);
-        gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, objects[Semantic.Object.ibo]);
+        gl4.glGenBuffers(1, objects, Semantic.Object.IBO);
+        gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, objects[Semantic.Object.IBO]);
         {
             ShortBuffer indexBuffer = GLBuffers.newDirectShortBuffer(indexData);
             int size = indexData.length * GLBuffers.SIZEOF_SHORT;
@@ -152,27 +152,27 @@ public class HelloTriangle implements GLEventListener, KeyListener {
         /**
          Let's create the VAO and save in it all the attributes properties.
          */
-        gl4.glGenVertexArrays(1, objects, Semantic.Object.vao);
-        gl4.glBindVertexArray(objects[Semantic.Object.vao]);
+        gl4.glGenVertexArrays(1, objects, Semantic.Object.VAO);
+        gl4.glBindVertexArray(objects[Semantic.Object.VAO]);
         {
             /**
              Ibo is part of the VAO, so we need to bind it and leave it bound.
              */
-            gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, objects[Semantic.Object.ibo]);
+            gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, objects[Semantic.Object.IBO]);
             {
                 /**
                  VBO is not part of VAO, we need it to bind it only when we call
                  glEnableVertexAttribArray and glVertexAttribPointer, so that VAO
                  knows which VBO the attributes refer to, then we can unbind it.
                  */
-                gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.vbo]);
+                gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.VBO]);
                 {
                     int stride = (2 + 3) * GLBuffers.SIZEOF_BYTE;
                     /**
                      We draw 2D, so we need just two coordinates for the position.
                      */
-                    gl4.glEnableVertexAttribArray(Semantic.Attr.position);
-                    gl4.glVertexAttribPointer(Semantic.Attr.position, 2, GL4.GL_BYTE,
+                    gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
+                    gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL4.GL_BYTE,
                             false, stride, 0 * GLBuffers.SIZEOF_BYTE);
                     /**
                      Color needs three coordinates. We show the usage of normalization,
@@ -180,8 +180,8 @@ public class HelloTriangle implements GLEventListener, KeyListener {
                      unsigned will get normalized in the [0, 1] instead, but take
                      in account java use always signed, althought you can trick it.
                      */
-                    gl4.glEnableVertexAttribArray(Semantic.Attr.color);
-                    gl4.glVertexAttribPointer(Semantic.Attr.color, 3, GL4.GL_BYTE,
+                    gl4.glEnableVertexAttribArray(Semantic.Attr.COLOR);
+                    gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 3, GL4.GL_BYTE,
                             true, stride, 2 * GLBuffers.SIZEOF_BYTE);
                 }
                 gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
@@ -210,9 +210,9 @@ public class HelloTriangle implements GLEventListener, KeyListener {
          These links don't go into effect until you link the program. If you want 
          to change index, you need to link the program again.
          */
-        gl4.glBindAttribLocation(program, Semantic.Attr.position, "position");
-        gl4.glBindAttribLocation(program, Semantic.Attr.color, "color");
-        gl4.glBindFragDataLocation(program, Semantic.Frag.color, "outputColor");
+        gl4.glBindAttribLocation(program, Semantic.Attr.POSITION, "position");
+        gl4.glBindAttribLocation(program, Semantic.Attr.COLOR, "color");
+        gl4.glBindFragDataLocation(program, Semantic.Frag.COLOR, "outputColor");
 
         shaderProgram.link(gl4, System.out);
         /**
@@ -235,11 +235,11 @@ public class HelloTriangle implements GLEventListener, KeyListener {
          Clean VAO first in order to minimize problems. If you delete IBO first,
          VAO will still have the IBO id, this may lead to crashes.
          */
-        gl4.glDeleteVertexArrays(1, objects, objects[Semantic.Object.vao]);
+        gl4.glDeleteVertexArrays(1, objects, objects[Semantic.Object.VAO]);
 
-        gl4.glDeleteBuffers(1, objects, Semantic.Object.vbo);
+        gl4.glDeleteBuffers(1, objects, Semantic.Object.VBO);
 
-        gl4.glDeleteBuffers(1, objects, Semantic.Object.ibo);
+        gl4.glDeleteBuffers(1, objects, Semantic.Object.IBO);
 
         System.exit(0);
     }
@@ -260,7 +260,7 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
         gl4.glUseProgram(program);
         {
-            gl4.glBindVertexArray(objects[Semantic.Object.vao]);
+            gl4.glBindVertexArray(objects[Semantic.Object.VAO]);
             {
                 now = System.currentTimeMillis();
                 float diff = (float) (now - start) / 1000;

@@ -43,6 +43,7 @@ public class Test implements GLEventListener, KeyListener {
     private final int majorVersionRequire, minorVersionRequire;
     private final Vec2 translationOrigin, translationCurrent, rotationOrigin, rotationCurrent;
     private boolean escape = false;
+    protected final String TEXTURE_ROOT = "src/data";
 
     public Test(String title, int majorVersionRequire, int minorVersionRequire) {
 

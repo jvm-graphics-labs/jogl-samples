@@ -113,7 +113,7 @@ public class Es_200_draw_elements extends Test {
 
             program.link(gl2es2, System.out);
             programName = program.program();
-            gl2es2.glBindAttribLocation(programName, Semantic.Attr.position, "position");
+            gl2es2.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
         }
         // Get variables locations
         if (validated) {
@@ -175,16 +175,16 @@ public class Es_200_draw_elements extends Test {
 
         gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
         {
-            gl2es2.glVertexAttribPointer(Semantic.Attr.position, 2, GL_FLOAT, false, 0, 0);
+            gl2es2.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
         }
         gl2es2.glBindBuffer(GL_ARRAY_BUFFER, 0);
         gl2es2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
 
-        gl2es2.glEnableVertexAttribArray(Semantic.Attr.position);
+        gl2es2.glEnableVertexAttribArray(Semantic.Attr.POSITION);
         {
             gl2es2.glDrawElements(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0);
         }
-        gl2es2.glDisableVertexAttribArray(Semantic.Attr.position);
+        gl2es2.glDisableVertexAttribArray(Semantic.Attr.POSITION);
 
         // Unbind program
         gl2es2.glUseProgram(0);
