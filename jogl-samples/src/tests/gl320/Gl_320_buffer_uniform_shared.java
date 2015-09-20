@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tests;
+package tests.gl320;
 
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
@@ -77,6 +77,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
     private final int[] bufferName = new int[Buffer.max.ordinal()];
     private int programName, uniformMaterial, uniformTransform;
     private int[] uniformBlockSizeTransform, uniformBlockSizeMaterial, vertexArrayName;
+    private float[] projection = new float[16], model = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -121,8 +122,8 @@ public class Gl_320_buffer_uniform_shared extends Test {
             program.link(gl3, System.out);
         }
         if (validated) {
-            uniformMaterial = gl3.glGetUniformBlockIndex(programName, "material");
-            uniformTransform = gl3.glGetUniformBlockIndex(programName, "transform");
+            uniformMaterial = gl3.glGetUniformBlockIndex(programName, "Material");
+            uniformTransform = gl3.glGetUniformBlockIndex(programName, "Transform");
         }
 
         return validated & checkError(gl3, "initProgram");
@@ -190,23 +191,25 @@ public class Gl_320_buffer_uniform_shared extends Test {
         GL3 gl3 = (GL3) gl;
         {
             // Compute the MVP (Model View Projection matrix)
-            float[] projection = FloatUtil.makePerspective(new float[16], 0, true, FloatUtil.QUARTER_PI,
+            FloatUtil.makePerspective(projection, 0, true, FloatUtil.QUARTER_PI,
                     (float) windowSize.x / (float) windowSize.y, .1f, 100f);
-            float[] model = FloatUtil.makeIdentity(new float[16]);
-            float[] mvp = FloatUtil.multMatrix(projection, FloatUtil.multMatrix(view(), model));
+            view();
+            FloatUtil.makeIdentity(model);
+            // projection contains now mpv
+            FloatUtil.multMatrix(projection, FloatUtil.multMatrix(view, model));
 
             float[] diffuse = new float[]{1f, .5f, 0f, 1f};
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.uniform.ordinal()]);
-            ByteBuffer byteBuffer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
+            ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
                     uniformBlockSizeTransform[0] + diffuse.length * GLBuffers.SIZEOF_FLOAT,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            for (int i = 0; i < mvp.length; i++) {
-                byteBuffer.putFloat(i * GLBuffers.SIZEOF_FLOAT, mvp[i]);
+            for (int i = 0; i < projection.length; i++) {
+                pointer.putFloat(i * GLBuffers.SIZEOF_FLOAT, projection[i]);
             }
             for (int i = 0; i < diffuse.length; i++) {
-                byteBuffer.putFloat(uniformBlockSizeTransform[0] + i * GLBuffers.SIZEOF_FLOAT, diffuse[i]);
+                pointer.putFloat(uniformBlockSizeTransform[0] + i * GLBuffers.SIZEOF_FLOAT, diffuse[i]);
             }
 
             // Make sure the uniform buffer is uploaded
@@ -231,6 +234,18 @@ public class Gl_320_buffer_uniform_shared extends Test {
         // Bind vertex array & draw 
         gl3.glBindVertexArray(vertexArrayName[0]);
         gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
+        return true;
+    }
+    
+    @Override
+    protected boolean end(GL gl) {
+        
+        GL3 gl3 = (GL3) gl;
+        
+        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteBuffers(Buffer.max.ordinal(), bufferName, 0);
+        gl3.glDeleteProgram(programName);
+        
         return true;
     }
 }

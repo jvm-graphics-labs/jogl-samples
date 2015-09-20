@@ -5,4 +5,6 @@ Please use one of the [latest builds](http://jogamp.org/deployment/archive/maste
 
 - [Tests](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/tests), jogl porting of g-truc [ogl-samples](https://github.com/g-truc/ogl-samples)
 
-- [Hello Triangle](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/helloTriangle), sample
+- [Hello Triangle](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/helloTriangle), triangle sample
+
+- [Hello Texture](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/helloTexture), texture sample

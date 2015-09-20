@@ -169,7 +169,9 @@ public class HelloTriangle implements GLEventListener, KeyListener {
                 {
                     int stride = (2 + 3) * GLBuffers.SIZEOF_BYTE;
                     /**
-                     We draw 2D, so we need just two coordinates for the position.
+                     We draw in 2D on the xy plane, so we need just two 
+                     coordinates for the position, it will be padded to vec4 as
+                     (x, y, 0, 1) in the vertex shader.
                      */
                     gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
                     gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL4.GL_BYTE,
@@ -179,6 +181,8 @@ public class HelloTriangle implements GLEventListener, KeyListener {
                      where signed value get normalized [-1, 1] like in this case.
                      unsigned will get normalized in the [0, 1] instead, but take
                      in account java use always signed, althought you can trick it.
+                     Vec3 color will be padded to (x, y, z, 1) in the fragment
+                     shader.
                      */
                     gl4.glEnableVertexAttribArray(Semantic.Attr.COLOR);
                     gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 3, GL4.GL_BYTE,

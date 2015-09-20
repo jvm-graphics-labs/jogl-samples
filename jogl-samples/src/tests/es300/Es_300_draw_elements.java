@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tests;
+package tests.es300;
 
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
