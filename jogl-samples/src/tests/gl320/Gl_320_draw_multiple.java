@@ -47,16 +47,16 @@ public class Gl_320_draw_multiple extends Test {
     private int[] Count = new int[]{ElementCount, ElementCount};
     private int[] BaseVertex = new int[]{0, 4};
     
-    private int Count[2] = {ElementCount, ElementCount};
-	GLint const BaseVertex[2] = {0, 4};
-	
-	namespace buffer
-	{
-		enum type
-		{
-			VERTEX,
-			ELEMENT,
-			TRANSFORM,
-			MAX
-		};
+//    private int Count[2] = {ElementCount, ElementCount};
+//	GLint const BaseVertex[2] = {0, 4};
+//	
+//	namespace buffer
+//	{
+//		enum type
+//		{
+//			VERTEX,
+//			ELEMENT,
+//			TRANSFORM,
+//			MAX
+//		};
 }
