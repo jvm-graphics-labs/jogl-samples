@@ -111,15 +111,15 @@ public class Gl_300_fbo_multisample extends Test {
 
             programName = program.program();
 
-            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "Position");
-            gl3.glBindAttribLocation(programName, Semantic.Attr.TEXCOORD, "TexCoord");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.TEXCOORD, "texCoord");
             
             program.link(gl3, System.out);
         }
         if (validated) {
 
-            uniformMvp = gl3.glGetUniformLocation(programName, "MVP");
-            uniformDiffuse = gl3.glGetUniformLocation(programName, "Diffuse");
+            uniformMvp = gl3.glGetUniformLocation(programName, "mvp");
+            uniformDiffuse = gl3.glGetUniformLocation(programName, "diffuse");
         }
         return validated & checkError(gl3, "initProgram");
     }

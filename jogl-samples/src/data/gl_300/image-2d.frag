@@ -1,15 +1,15 @@
 #version 130
 
-uniform sampler2D Diffuse;
+uniform sampler2D diffuse;
 
-in vec2 VertTexcoord;
+in vec2 vertTexCoord;
 
-out vec4 Color;
+out vec4 color;
 
 void main()
 {
-	Color = texture(Diffuse, VertTexcoord);
+    color = texture(diffuse, vertTexCoord);
 
-	if(length(VertTexcoord - 0.5) > 0.5)
-		Color.a = 0.0;
+    if(length(vertTexCoord - 0.5) > 0.5)
+        color.a = 0.0;
 }
