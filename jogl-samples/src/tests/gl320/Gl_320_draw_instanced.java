@@ -202,7 +202,7 @@ public class Gl_320_draw_instanced extends Test {
             FloatUtil.multMatrix(mvp, 16, modelB, 0);
 
             for (int f = 0; f < mvp.length; f++) {
-                pointer.putFloat(f * GLBuffers.SIZEOF_FLOAT, mvp[f]);
+                pointer.putFloat(mvp[f]);
             }
 
             // Make sure the uniform buffer is uploaded
