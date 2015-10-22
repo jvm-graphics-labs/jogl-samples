@@ -232,17 +232,15 @@ public class Gl_320_buffer_update extends Test {
             ByteBuffer transformBuffer = gl3.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, 16 * GLBuffers.SIZEOF_FLOAT,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-            projection = FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    glWindow.getWidth() / glWindow.getHeight(), 0.1f, 100.0f);
+
+            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
+                    (float) glWindow.getWidth() / glWindow.getHeight(), 0.1f, 100.0f);
             FloatUtil.makeIdentity(model);
-            // update view matrix
-            view();
-            // view *= model
-            FloatUtil.multMatrix(view, model);
-            mvp = FloatUtil.multMatrix(projection, view);
+            FloatUtil.multMatrix(projection, view());
+            FloatUtil.multMatrix(projection, model, mvp);
 
             for (int f = 0; f < mvp.length; f++) {
-                transformBuffer.putFloat(f * GLBuffers.SIZEOF_FLOAT, mvp[f]);
+                transformBuffer.putFloat(mvp[f]);
             }
             transformBuffer.rewind();
 
@@ -272,9 +270,9 @@ public class Gl_320_buffer_update extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(Buffer.max.ordinal(),  bufferName, 0);
+        gl3.glDeleteBuffers(Buffer.max.ordinal(), bufferName, 0);
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteVertexArrays(1,  vertexArrayName, 0);
+        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
 
         return true;
     }

@@ -191,12 +191,11 @@ public class Gl_320_buffer_uniform_shared extends Test {
         GL3 gl3 = (GL3) gl;
         {
             // Compute the MVP (Model View Projection matrix)
-            FloatUtil.makePerspective(projection, 0, true, FloatUtil.QUARTER_PI,
-                    (float) windowSize.x / (float) windowSize.y, .1f, 100f);
-            view();
+            FloatUtil.makePerspective(projection, 0, true, FloatUtil.QUARTER_PI, 
+                    (float) windowSize.x / windowSize.y, .1f, 100f);
             FloatUtil.makeIdentity(model);
-            // projection contains now mpv
-            FloatUtil.multMatrix(projection, FloatUtil.multMatrix(view, model));
+            FloatUtil.multMatrix(projection, view());
+            FloatUtil.multMatrix(projection, model);
 
             float[] diffuse = new float[]{1f, .5f, 0f, 1f};
 
@@ -236,16 +235,16 @@ public class Gl_320_buffer_uniform_shared extends Test {
         gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
         return true;
     }
-    
+
     @Override
     protected boolean end(GL gl) {
-        
+
         GL3 gl3 = (GL3) gl;
-        
+
         gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
         gl3.glDeleteBuffers(Buffer.max.ordinal(), bufferName, 0);
         gl3.glDeleteProgram(programName);
-        
+
         return true;
     }
 }

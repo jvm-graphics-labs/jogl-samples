@@ -44,6 +44,10 @@ public class Test implements GLEventListener, KeyListener {
     private final Vec2 translationOrigin, translationCurrent, rotationOrigin, rotationCurrent;
     protected final String TEXTURE_ROOT = "src/data";
 
+    public Test(String title, int majorVersionRequire, int minorVersionRequire, Vec2 orientation) {
+        this(title, majorVersionRequire, minorVersionRequire, new Vec2i(640, 480), orientation, new Vec2(0, 4));
+    }
+
     public Test(String title, int majorVersionRequire, int minorVersionRequire) {
 
         this(title, majorVersionRequire, minorVersionRequire, new Vec2i(640, 480),
@@ -137,16 +141,18 @@ public class Test implements GLEventListener, KeyListener {
 
     }
 
-    protected float[] viewTranslate = new float[16], viewRotateX = new float[16],
-            tmpVec = new float[3], view = new float[16];
+    private float[] viewTranslate = new float[16], viewRotateX = new float[16],
+            viewRotateY = new float[16], view = new float[16];
+    protected float[] tmpVec = new float[3];
 
     protected final float[] view() {
 
-        viewTranslate = FloatUtil.makeTranslation(viewTranslate, true, 0, 0, -translationCurrent.y);
-        viewRotateX = FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec);
-        viewRotateX = FloatUtil.multMatrix(viewRotateX, viewTranslate);
-        view = FloatUtil.makeRotationAxis(view, 0, rotationCurrent.x, 0f, 1f, 0f, tmpVec);
-        return FloatUtil.multMatrix(view, viewRotateX);
+        FloatUtil.makeTranslation(viewTranslate, true, 0, 0, -translationCurrent.y);
+        FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec);
+        FloatUtil.multMatrix(viewTranslate, viewRotateX, viewRotateX);
+        FloatUtil.makeRotationAxis(viewRotateY, 0, rotationCurrent.x, 0f, 1f, 0f, tmpVec);
+        FloatUtil.multMatrix(viewRotateX, viewRotateY, view);
+        return view;
     }
 
     private boolean checkGLVersion(GL3 gl3) {

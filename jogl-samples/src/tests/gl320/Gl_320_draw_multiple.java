@@ -31,7 +31,8 @@ import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
-import java.nio.ShortBuffer;
+import java.nio.IntBuffer;
+import jglm.Vec2;
 
 /**
  *
@@ -44,7 +45,7 @@ public class Gl_320_draw_multiple extends Test {
     }
 
     public Gl_320_draw_multiple() {
-        super("gl-320-draw-multiple", 3, 2);
+        super("gl-320-draw-multiple", 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "draw-multiple";
@@ -52,7 +53,7 @@ public class Gl_320_draw_multiple extends Test {
 
     private int ElementCount = 6;
     private int ElementSize = ElementCount * Integer.BYTES;
-    private short[] ElementData = new short[]{
+    private int[] ElementData = new int[]{
         0, 1, 2,
         0, 2, 3
     };
@@ -81,7 +82,7 @@ public class Gl_320_draw_multiple extends Test {
     };
 
     private int programName, uniformTransform;
-    private int[] bufferName = new int[1], vertexArrayName = new int[1];
+    private int[] bufferName = new int[Buffer.MAX.ordinal()], vertexArrayName = new int[1];
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
@@ -121,14 +122,14 @@ public class Gl_320_draw_multiple extends Test {
 
             programName = program.program();
 
-            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "Position");
-            gl3.glBindFragDataLocation(programName, Semantic.Frag.COLOR, "Color");
-            
+            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
+            gl3.glBindFragDataLocation(programName, Semantic.Frag.COLOR, "color");
+
             program.link(gl3, System.out);
         }
         if (validated) {
 
-            uniformTransform = gl3.glGetUniformLocation(programName, "Transform");
+            uniformTransform = gl3.glGetUniformBlockIndex(programName, "Transform");
             gl3.glUniformBlockBinding(programName, uniformTransform, Semantic.Uniform.TRANSFORM0);
         }
         return validated & checkError(gl3, "initProgram");
@@ -144,7 +145,7 @@ public class Gl_320_draw_multiple extends Test {
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
-        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(ElementData);
+        IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(ElementData);
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, ElementSize, elementBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -161,12 +162,14 @@ public class Gl_320_draw_multiple extends Test {
 
         gl3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3.glBindVertexArray(vertexArrayName[0]);
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
-        gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, 0, 0);
+        {
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, 0, 0);
 
-        gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
+            gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        }
         gl3.glBindVertexArray(0);
 
         return checkError(gl3, "initVertexArray");
@@ -182,7 +185,7 @@ public class Gl_320_draw_multiple extends Test {
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) (Math.PI * 0.25f), 4.0f / 3.0f, 0.1f, 100.0f);
+            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
             FloatUtil.makeIdentity(model);
             FloatUtil.multMatrix(projection, view(), mvp);
             FloatUtil.multMatrix(mvp, model);
@@ -190,7 +193,7 @@ public class Gl_320_draw_multiple extends Test {
             for (int f = 0; f < mvp.length; f++) {
                 pointer.putFloat(mvp[f]);
             }
-
+            pointer.rewind();
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -207,7 +210,10 @@ public class Gl_320_draw_multiple extends Test {
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
         gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
         gl3.glBindVertexArray(vertexArrayName[0]);
-        PointerBuffer indices = PointerBuffer.wrap(ByteBuffer.wrap(new byte[]{(byte) 0, (byte) 0}));
+        PointerBuffer indices = PointerBuffer.allocateDirect(2);
+        indices.put(0);
+        indices.put(0);
+        indices.rewind();
         /**
          * public void glMultiDrawElementsBaseVertex(int mode, IntBuffer count,
          * int type, PointerBuffer indices, int drawcount, IntBuffer basevertex)
@@ -219,6 +225,18 @@ public class Gl_320_draw_multiple extends Test {
                 indices,
                 2,
                 GLBuffers.newDirectIntBuffer(BaseVertex));
+
+        return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL3 gl3 = (GL3) gl;
+
+        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glDeleteProgram(programName);
+        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
 
         return true;
     }

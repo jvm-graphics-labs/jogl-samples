@@ -2,15 +2,15 @@
 
 layout(std140) uniform;
 
-uniform transform
+uniform Transform
 {
-	mat4 MVP;
-} Transform;
+    mat4 mvp;
+} transform;
 
-in vec4 Position;
+in vec4 position;
 
 void main()
 {
-	gl_Position = Transform.MVP * Position;
+    gl_Position = transform.mvp * position;
 }
 
