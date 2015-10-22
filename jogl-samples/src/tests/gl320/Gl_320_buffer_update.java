@@ -146,7 +146,7 @@ public class Gl_320_buffer_update extends Test {
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_FLUSH_EXPLICIT_BIT);
 
         for (int f = 0; f < positionData.length; f++) {
-            data.putFloat(f * GLBuffers.SIZEOF_FLOAT, positionData[f]);
+            data.putFloat(positionData[f]);
         }
 
         // Explicitly send the data to the graphic card.
