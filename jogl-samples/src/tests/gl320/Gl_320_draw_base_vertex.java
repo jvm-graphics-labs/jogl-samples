@@ -31,7 +31,6 @@ public class Gl_320_draw_base_vertex extends Test {
 
     public Gl_320_draw_base_vertex() {
         super("gl-320-draw-base-vertex", 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
-//        super("gl-320-draw-base-vertex", 3, 2);
     }
 
     private final String SHADERS_SOURCE = "draw-base-vertex";

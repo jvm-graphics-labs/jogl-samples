@@ -40,7 +40,7 @@ public class Gl_320_draw_range_arrays extends Test {
     }
 
     public Gl_320_draw_range_arrays() {
-        super("gl-320-draw-instanced", 3, 2);
+        super("gl-320-draw-range-arrays", 3, 2);
     }
 
     private final String SHADERS_SOURCE = "draw-range-arrays";

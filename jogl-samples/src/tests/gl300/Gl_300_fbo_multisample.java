@@ -48,7 +48,6 @@ public class Gl_300_fbo_multisample extends Test {
 
     private final String SHADERS_SOURCE = "image-2d";
     private final String SHADERS_ROOT = "src/data/gl_300";
-    private final String TEXTURE_ROOT = "/data";
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
     private Vec2i FRAMEBUFFER_SIZE = new Vec2i(160, 120);
     // With DDS textures, v texture coordinate are reversed, from top to bottom
