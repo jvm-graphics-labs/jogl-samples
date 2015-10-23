@@ -33,7 +33,7 @@ Features:
 ### [gl-320-buffer-update](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl320/Gl_320_buffer_update.java)
 
 - `glCopyBufferSubData`
-- 
+ 
 ### [gl-320-draw-base-vertex](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl320/Gl_320_draw_base_vertex.java)
 
 - `glDrawElementsInstancedBaseVertex`
