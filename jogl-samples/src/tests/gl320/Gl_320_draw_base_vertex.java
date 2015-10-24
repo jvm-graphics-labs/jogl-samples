@@ -189,15 +189,12 @@ public class Gl_320_draw_base_vertex extends Test {
                     0, 16 * GLBuffers.SIZEOF_FLOAT, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
             
             FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) glWindow.getWidth() / (float) glWindow.getHeight(), 0.1f, 100.0f);
-//            FloatUtil.makeIdentity(model);
-            FloatUtil.makeRotationEuler(model, 0, (float)Math.PI/8, (float)Math.PI/4, 0);
+                    (float) glWindow.getWidth() / glWindow.getHeight(), 0.1f, 100.0f);
+            FloatUtil.makeIdentity(model);
 
-            view();
-            FloatUtil.multMatrix(view, model, mvp);
-            FloatUtil.multMatrix(projection, mvp, mvp);
-
-//            FloatUtil.makeScale(model, true, .5f, .5f, .5f);
+            FloatUtil.multMatrix(projection, view(), mvp);
+            FloatUtil.multMatrix(mvp, model);
+            
             for (int i = 0; i < mvp.length; i++) {
                 transformBuffer.putFloat(i * GLBuffers.SIZEOF_FLOAT, mvp[i]);
             }
