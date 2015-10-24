@@ -17,6 +17,7 @@ import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import jglm.Vec2;
 
 /**
  *
@@ -29,7 +30,7 @@ public class Gl_320_draw_base_vertex extends Test {
     }
 
     public Gl_320_draw_base_vertex() {
-        super("gl-320-draw-base-vertex", 3, 2);
+        super("gl-320-draw-base-vertex", 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "draw-base-vertex";
@@ -187,7 +188,7 @@ public class Gl_320_draw_base_vertex extends Test {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
             ByteBuffer transformBuffer = gl.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, 16 * GLBuffers.SIZEOF_FLOAT, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-            
+
             FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
                     (float) glWindow.getWidth() / glWindow.getHeight(), 0.1f, 100.0f);
             FloatUtil.makeIdentity(model);
@@ -195,8 +196,8 @@ public class Gl_320_draw_base_vertex extends Test {
             FloatUtil.multMatrix(projection, view(), mvp);
             FloatUtil.multMatrix(mvp, model);
             
-            for (int i = 0; i < mvp.length; i++) {
-                transformBuffer.putFloat(i * GLBuffers.SIZEOF_FLOAT, mvp[i]);
+            for (int f = 0; f < mvp.length; f++) {
+                transformBuffer.putFloat(mvp[f]);
             }
             transformBuffer.rewind();
 

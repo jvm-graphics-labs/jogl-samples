@@ -48,7 +48,7 @@ public class Gl_320_buffer_uniform extends Test {
     public Gl_320_buffer_uniform() {
         super("gl-320-buffer-uniform", 3, 2);
     }
-    
+
     private final String SHADERS_SOURCE = "buffer-uniform";
     private final String SHADERS_ROOT = "src/data/gl_320";
 
@@ -151,7 +151,7 @@ public class Gl_320_buffer_uniform extends Test {
         vertex, element, perScene, perPass, perDraw, max
     }
 
-    private float[] projection = new float[16], model = new float[16], normal = new float[9];
+    private float[] projection = new float[16], model = new float[16], normal = new float[9], mv = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -269,11 +269,11 @@ public class Gl_320_buffer_uniform extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, 
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false,
                     Vertex_v3fn3fc4f.sizeOf, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false, 
+            gl3.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false,
                     Vertex_v3fn3fc4f.sizeOf, 3 * GLBuffers.SIZEOF_FLOAT);
-            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, 
+            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false,
                     Vertex_v3fn3fc4f.sizeOf, (3 + 3) * GLBuffers.SIZEOF_FLOAT);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -297,23 +297,22 @@ public class Gl_320_buffer_uniform extends Test {
             ByteBuffer transform = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Transform.sizeOf,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            projection = FloatUtil.makePerspective(projection, 0, true,
-                    (float) (Math.PI * 0.25f), 4.0f / 3.0f, 0.1f, 100.0f);
-            view();
-            model = FloatUtil.makeRotationAxis(model, 0, (float) (-Math.PI * 0.5f), 0.0f, 0.0f, 1.0f, tmpVec);
-            //  view contains now vm (mv)
-            FloatUtil.multMatrix(view, model);
+            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+            float[] view = view();
+            FloatUtil.makeRotationAxis(model, 0, (float) -Math.PI * 0.5f, 0.0f, 0.0f, 1.0f, tmpVec);
+
+            FloatUtil.multMatrix(view, model, mv);
             for (int c = 0; c < 3; c++) {
                 for (int r = 0; r < 3; r++) {
                     normal[c * 3 + r] = view[c * 4 + r];
                 }
             }
-            for (int i = 0; i < view.length; i++) {
-                transform.putFloat((16 + i) * GLBuffers.SIZEOF_FLOAT, view[i]);
-                transform.putFloat((0 + i) * GLBuffers.SIZEOF_FLOAT, projection[i]);
+            for (int i = 0; i < view.length; i++) {                
+                transform.putFloat((0 + i) * Float.BYTES, projection[i]);
+                transform.putFloat((projection.length + i) * Float.BYTES, mv[i]);
             }
             for (int i = 0; i < normal.length; i++) {
-                transform.putFloat((16 * 2 + i) * GLBuffers.SIZEOF_FLOAT, normal[i]);
+                transform.putFloat((projection.length + mv.length + i) * Float.BYTES, normal[i]);
             }
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

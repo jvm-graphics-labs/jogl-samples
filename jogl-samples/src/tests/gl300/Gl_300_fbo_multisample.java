@@ -48,7 +48,6 @@ public class Gl_300_fbo_multisample extends Test {
 
     private final String SHADERS_SOURCE = "image-2d";
     private final String SHADERS_ROOT = "src/data/gl_300";
-    private final String TEXTURE_ROOT = "/data";
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
     private Vec2i FRAMEBUFFER_SIZE = new Vec2i(160, 120);
     // With DDS textures, v texture coordinate are reversed, from top to bottom
@@ -113,7 +112,7 @@ public class Gl_300_fbo_multisample extends Test {
 
             gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
             gl3.glBindAttribLocation(programName, Semantic.Attr.TEXCOORD, "texCoord");
-            
+
             program.link(gl3, System.out);
         }
         if (validated) {
@@ -164,32 +163,18 @@ public class Gl_300_fbo_multisample extends Test {
         return checkError(gl3, "initTexture");
     }
 
-    private final boolean useRenderbuffer = true;
-
     private boolean initFramebuffer(GL3 gl3) {
 
         colorRenderbufferName = new int[1];
-        if (useRenderbuffer) {
-            gl3.glGenRenderbuffers(1, colorRenderbufferName, 0);
-            gl3.glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbufferName[0]);
-            gl3.glRenderbufferStorageMultisample(GL_RENDERBUFFER, 8, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
-        } else {
-            gl3.glGenTextures(1, colorRenderbufferName, 0);
-            gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, colorRenderbufferName[0]);
-            gl3.glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA8,
-                    FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, false);
-        }
+        gl3.glGenRenderbuffers(1, colorRenderbufferName, 0);
+        gl3.glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbufferName[0]);
+        gl3.glRenderbufferStorageMultisample(GL_RENDERBUFFER, 8, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
         // The second parameter is the number of samples.
 
         framebufferRenderName = new int[1];
         gl3.glGenFramebuffers(1, framebufferRenderName, 0);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferRenderName[0]);
-        if (useRenderbuffer) {
-            gl3.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbufferName[0]);
-        } else {
-            gl3.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                    GL_TEXTURE_2D_MULTISAMPLE, colorRenderbufferName[0], 0);
-        }
+        gl3.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbufferName[0]);
         if (gl3.glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
             return false;
         }
@@ -252,7 +237,6 @@ public class Gl_300_fbo_multisample extends Test {
         renderFBO(gl3, framebufferRenderName[0]);
         gl3.glDisable(GL_MULTISAMPLE);
 
-//        saveImage(gl3);
         // Resolved multisampling
         gl3.glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferRenderName[0]);
         gl3.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferResolveName[0]);
@@ -263,7 +247,6 @@ public class Gl_300_fbo_multisample extends Test {
                 GL_COLOR_BUFFER_BIT, GL_LINEAR);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-//        saveImage(gl3);
         // Pass 2
         // Render the colorbuffer from the multisampled framebuffer
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
@@ -297,7 +280,7 @@ public class Gl_300_fbo_multisample extends Test {
 
     private void renderFB(GL3 gl3, int texture2dName) {
 
-        FloatUtil.makePerspective(perspective, 0, true, (float) (Math.PI * 0.25f),
+        FloatUtil.makePerspective(perspective, 0, true, (float) Math.PI * 0.25f,
                 (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
         FloatUtil.makeIdentity(model);
         FloatUtil.multMatrix(perspective, view(), mvp);
@@ -313,46 +296,20 @@ public class Gl_300_fbo_multisample extends Test {
         checkError(gl3, "renderFB");
     }
 
-    private void saveImage(GL3 gl3) {
-        try {
-            BufferedImage screenshot = new BufferedImage(FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
-                    BufferedImage.TYPE_INT_ARGB);
-            Graphics graphics = screenshot.getGraphics();
+    @Override
+    protected boolean end(GL gl) {
 
-            ByteBuffer buffer;
-            if (useRenderbuffer) {
-                buffer = GLBuffers.newDirectByteBuffer(FRAMEBUFFER_SIZE.x * FRAMEBUFFER_SIZE.y * 4);
-            } else {
-                buffer = GLBuffers.newDirectByteBuffer(256 * 256 * 4);
-            }
+        GL3 gl3 = (GL3) gl;
 
-            gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferResolveName[0]);
-            gl3.glReadBuffer(GL3.GL_COLOR_ATTACHMENT0);
+        gl3.glDeleteBuffers(1, bufferName, 0);
+        gl3.glDeleteProgram(programName);
+        gl3.glDeleteTextures(1, textureName, 0);
+        gl3.glDeleteTextures(1, colorTextureName, 0);
+        gl3.glDeleteRenderbuffers(1, colorRenderbufferName, 0);
+        gl3.glDeleteFramebuffers(1, framebufferRenderName, 0);
+        gl3.glDeleteFramebuffers(1, framebufferResolveName, 0);
+        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
 
-            gl3.glPixelStorei(GL4.GL_UNPACK_ALIGNMENT, 1);
-            checkError(gl3, "pre");
-            if (useRenderbuffer) {
-                gl3.glReadPixels(0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, GL3.GL_RGBA, GL3.GL_BYTE, buffer);
-            } else {
-                gl3.glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_BYTE, buffer);
-            }
-            checkError(gl3, "post");
-
-            for (int h = 0; h < FRAMEBUFFER_SIZE.x; h++) {
-                for (int w = 0; w < FRAMEBUFFER_SIZE.y; w++) {
-                    // The color are the three consecutive bytes, it's like referencing
-                    // to the next consecutive array elements, so we got red, green, blue..
-                    // red, green, blue, and so on..
-                    graphics.setColor(new Color(buffer.get() * 2, buffer.get() * 2, buffer.get() * 2));
-                    buffer.get();
-                    graphics.drawRect(w, FRAMEBUFFER_SIZE.y - h, 1, 1); // height - h is for flipping the image
-                }
-            }
-
-            File outputfile = new File("D:\\Downloads\\texture.png");
-            ImageIO.write(screenshot, "jpg", outputfile);
-        } catch (IOException ex) {
-            //Logger.getLogger(EC_DepthPeeling.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        return true;
     }
 }

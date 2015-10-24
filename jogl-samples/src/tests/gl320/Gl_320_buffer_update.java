@@ -146,7 +146,7 @@ public class Gl_320_buffer_update extends Test {
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_FLUSH_EXPLICIT_BIT);
 
         for (int f = 0; f < positionData.length; f++) {
-            data.putFloat(f * GLBuffers.SIZEOF_FLOAT, positionData[f]);
+            data.putFloat(positionData[f]);
         }
 
         // Explicitly send the data to the graphic card.
@@ -232,17 +232,15 @@ public class Gl_320_buffer_update extends Test {
             ByteBuffer transformBuffer = gl3.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, 16 * GLBuffers.SIZEOF_FLOAT,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-            projection = FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
+            
+            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
                     (float) glWindow.getWidth() / glWindow.getHeight(), 0.1f, 100.0f);
             FloatUtil.makeIdentity(model);
-            // update view matrix
-            view();
-            // view *= model
-            FloatUtil.multMatrix(view, model);
-            mvp = FloatUtil.multMatrix(projection, view);
+            FloatUtil.multMatrix(projection, view());
+            FloatUtil.multMatrix(projection, model, mvp);
 
             for (int f = 0; f < mvp.length; f++) {
-                transformBuffer.putFloat(f * GLBuffers.SIZEOF_FLOAT, mvp[f]);
+                transformBuffer.putFloat(mvp[f]);
             }
             transformBuffer.rewind();
 

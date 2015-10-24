@@ -12,15 +12,25 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
+import static com.jogamp.opengl.GL.GL_FRAMEBUFFER;
+import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_COMPLETE;
+import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
+import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT;
+import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE;
+import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_UNSUPPORTED;
 import static com.jogamp.opengl.GL.GL_INVALID_ENUM;
 import static com.jogamp.opengl.GL.GL_INVALID_FRAMEBUFFER_OPERATION;
 import static com.jogamp.opengl.GL.GL_INVALID_OPERATION;
 import static com.jogamp.opengl.GL.GL_INVALID_VALUE;
 import static com.jogamp.opengl.GL.GL_NO_ERROR;
 import static com.jogamp.opengl.GL.GL_OUT_OF_MEMORY;
+import static com.jogamp.opengl.GL2ES3.GL_FRAMEBUFFER_UNDEFINED;
 import static com.jogamp.opengl.GL2ES3.GL_MAJOR_VERSION;
 import static com.jogamp.opengl.GL2ES3.GL_MINOR_VERSION;
+import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER;
+import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER;
 import com.jogamp.opengl.GL3;
+import static com.jogamp.opengl.GL3ES3.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
@@ -42,7 +52,11 @@ public class Test implements GLEventListener, KeyListener {
     protected Animator animator;
     private final int majorVersionRequire, minorVersionRequire;
     private final Vec2 translationOrigin, translationCurrent, rotationOrigin, rotationCurrent;
-    protected final String TEXTURE_ROOT = "src/data";
+    protected final String TEXTURE_ROOT = "/data";
+
+    public Test(String title, int majorVersionRequire, int minorVersionRequire, Vec2 orientation) {
+        this(title, majorVersionRequire, minorVersionRequire, new Vec2i(640, 480), orientation, new Vec2(0, 4));
+    }
 
     public Test(String title, int majorVersionRequire, int minorVersionRequire) {
 
@@ -137,16 +151,18 @@ public class Test implements GLEventListener, KeyListener {
 
     }
 
-    protected float[] viewTranslate = new float[16], viewRotateX = new float[16],
-            tmpVec = new float[3], view = new float[16];
+    private float[] viewTranslate = new float[16], viewRotateX = new float[16],
+            viewRotateY = new float[16], view = new float[16];
+    protected float[] tmpVec = new float[3];
 
     protected final float[] view() {
 
-        viewTranslate = FloatUtil.makeTranslation(viewTranslate, true, 0, 0, -translationCurrent.y);
-        viewRotateX = FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec);
-        viewRotateX = FloatUtil.multMatrix(viewRotateX, viewTranslate);
-        view = FloatUtil.makeRotationAxis(view, 0, rotationCurrent.x, 0f, 1f, 0f, tmpVec);
-        return FloatUtil.multMatrix(view, viewRotateX);
+        FloatUtil.makeTranslation(viewTranslate, true, 0, 0, -translationCurrent.y);
+        FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec);
+        FloatUtil.multMatrix(viewTranslate, viewRotateX, viewRotateX);
+        FloatUtil.makeRotationAxis(viewRotateY, 0, rotationCurrent.x, 0f, 1f, 0f, tmpVec);
+        FloatUtil.multMatrix(viewRotateX, viewRotateY, view);
+        return view;
     }
 
     private boolean checkGLVersion(GL3 gl3) {
@@ -194,6 +210,42 @@ public class Test implements GLEventListener, KeyListener {
             throw new Error();
         }
         return error == GL_NO_ERROR;
+    }
+
+    protected boolean checkFramebuffer(GL gl, int framebufferName) {
+
+        int status = gl.glCheckFramebufferStatus(GL_FRAMEBUFFER);
+
+        switch (status) {
+
+            case GL_FRAMEBUFFER_UNDEFINED:
+
+                System.err.println("OpenGL Error(GL_FRAMEBUFFER_UNDEFINED)");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT:
+                System.err.println("OpenGL Error(GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT)");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT:
+                System.err.println("OpenGL Error(GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT)");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER:
+                System.err.println("OpenGL Error(GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER)");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER:
+                System.err.println("OpenGL Error(GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER)");
+                break;
+            case GL_FRAMEBUFFER_UNSUPPORTED:
+                System.err.println("OpenGL Error(GL_FRAMEBUFFER_UNSUPPORTED)");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE:
+                System.err.println("OpenGL Error(GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE)");
+                break;
+            case GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS:
+                System.err.println("OpenGL Error(GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS)");
+                break;
+        }
+
+        return status == GL_FRAMEBUFFER_COMPLETE;
     }
 
     protected final String getDataDirectory() {

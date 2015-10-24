@@ -115,7 +115,7 @@ public class Gl_320_draw_instanced extends Test {
             program.add(fragShader);
 
             program.init(gl3);
-            
+
             programName = program.program();
 
             gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
@@ -189,16 +189,14 @@ public class Gl_320_draw_instanced extends Test {
                     GL_UNIFORM_BUFFER, 0, 16 * 2 * GLBuffers.SIZEOF_FLOAT,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) (Math.PI * 0.25f),
-                    (float) glWindow.getWidth() / (float) glWindow.getHeight(), 0.1f, 100.0f);
+            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
+                    (float) glWindow.getWidth() / glWindow.getHeight(), 0.1f, 100.0f);
             FloatUtil.makeTranslation(modelA, true, -1.1f, 0.0f, 0.0f);
             FloatUtil.makeTranslation(modelB, true, +1.1f, 0.0f, 0.0f);
 
-            view();
-
-            FloatUtil.multMatrix(projection, 0, view, 0, mvp, 0);
+            FloatUtil.multMatrix(projection, 0, view(), 0, mvp, 0);
             FloatUtil.multMatrix(mvp, 0, modelA, 0);
-            FloatUtil.multMatrix(projection, 0, view, 0, mvp, 16);
+            FloatUtil.multMatrix(projection, 0, view(), 0, mvp, 16);
             FloatUtil.multMatrix(mvp, 16, modelB, 0);
 
             for (int f = 0; f < mvp.length; f++) {
@@ -225,6 +223,17 @@ public class Gl_320_draw_instanced extends Test {
 
         gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 2);
 
+        return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL3 gl3 = (GL3) gl;
+        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glDeleteProgram(programName);
+        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        
         return true;
     }
 }
