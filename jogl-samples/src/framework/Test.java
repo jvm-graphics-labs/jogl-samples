@@ -37,6 +37,14 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.Animator;
+import com.jogamp.opengl.util.GLBuffers;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import javax.imageio.ImageIO;
 import jglm.Vec2;
 import jglm.Vec2i;
 
@@ -265,6 +273,35 @@ public class Test implements GLEventListener, KeyListener {
                 animator.stop();
                 glWindow.destroy();
                 break;
+        }
+    }
+
+    private void saveImage(GL3 gl3, int width, int height) {
+
+        try {
+            BufferedImage screenshot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics graphics = screenshot.getGraphics();
+
+            ByteBuffer buffer = GLBuffers.newDirectByteBuffer(width * height * 4);
+
+            gl3.glReadBuffer(GL3.GL_COLOR_ATTACHMENT0);
+            gl3.glReadPixels(0, 0, width, height, GL3.GL_RGBA, GL3.GL_BYTE, buffer);
+
+            for (int h = 0; h < height; h++) {
+                for (int w = 0; w < width; w++) {
+                    // The color are the three consecutive bytes, it's like referencing
+                    // to the next consecutive array elements, so we got red, green, blue..
+                    // red, green, blue, and so on..
+                    graphics.setColor(new Color(buffer.get() * 2, buffer.get() * 2, buffer.get() * 2));
+                    buffer.get();   // alpha
+                    graphics.drawRect(w, height - h, 1, 1); // height - h is for flipping the image
+                }
+            }
+
+            File outputfile = new File("D:\\Downloads\\texture.png");
+            ImageIO.write(screenshot, "jpg", outputfile);
+        } catch (IOException ex) {
+            //  Logger.getLogger(EC_DepthPeeling.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }

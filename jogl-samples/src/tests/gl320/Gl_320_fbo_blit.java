@@ -38,16 +38,10 @@ import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import framework.Semantic;
 import framework.Test;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import jglm.Vec2i;
 
 /**
@@ -141,7 +135,7 @@ public class Gl_320_fbo_blit extends Test {
             ShaderProgram program = new ShaderProgram();
             program.add(vertShader);
             program.add(fragShader);
-            program.link(gl3, System.out);
+            program.init(gl3);
 
             programName = program.program();
 
@@ -342,5 +336,20 @@ public class Gl_320_fbo_blit extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
 
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL3 gl3 = (GL3) gl;
+
+        gl3.glDeleteProgram(programName);
+        gl3.glDeleteBuffers(1, bufferName, 0);
+        gl3.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl3.glDeleteRenderbuffers(1, colorRenderbufferName, 0);
+        gl3.glDeleteFramebuffers(Framebuffer.MAX.ordinal(), framebufferName, 0);
+        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+
+        return true;
     }
 }

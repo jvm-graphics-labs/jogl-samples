@@ -118,7 +118,7 @@ public class Gl_320_draw_multiple extends Test {
             ShaderProgram program = new ShaderProgram();
             program.add(vertShader);
             program.add(fragShader);
-            program.link(gl3, System.out);
+            program.init(gl3);
 
             programName = program.program();
 

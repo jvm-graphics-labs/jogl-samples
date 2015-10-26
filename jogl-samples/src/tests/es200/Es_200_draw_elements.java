@@ -111,9 +111,11 @@ public class Es_200_draw_elements extends Test {
             program.add(vertShader);
             program.add(fragShader);
 
-            program.link(gl2es2, System.out);
+            program.init(gl2es2);
             programName = program.program();
             gl2es2.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
+
+            program.link(gl2es2, System.out);
         }
         // Get variables locations
         if (validated) {

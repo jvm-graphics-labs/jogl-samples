@@ -104,10 +104,12 @@ public class Es_300_draw_elements extends Test {
             program.add(vertShader);
             program.add(fragShader);
             
-            program.link(gl3es3, System.out);
+            program.init(gl3es3);
 
             programName = program.program();
             gl3es3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");            
+            
+            program.link(gl3es3, System.out);
         }
         // Get variables locations
         if (validated) {

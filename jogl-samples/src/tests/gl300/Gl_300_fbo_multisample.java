@@ -96,7 +96,7 @@ public class Gl_300_fbo_multisample extends Test {
             ShaderProgram program = new ShaderProgram();
             program.add(vertShader);
             program.add(fragShader);
-            program.link(gl3, System.out);
+            program.init(gl3);
 
             programName = program.program();
 
