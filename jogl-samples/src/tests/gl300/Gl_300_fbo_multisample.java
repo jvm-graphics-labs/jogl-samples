@@ -8,29 +8,19 @@ package tests.gl300;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import framework.Semantic;
 import framework.Test;
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 import jgli.Gl;
 import jgli.Load;
 import jglm.Vec2i;
-//import texture.TextureData;
-//import texture.TextureIO;
-//import texture.spi.DDSImage;
 
 /**
  *
