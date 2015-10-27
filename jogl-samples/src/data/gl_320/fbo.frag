@@ -4,14 +4,14 @@ precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-uniform sampler2D Diffuse;
+uniform sampler2D diffuse;
 
 in vec4 gl_FragCoord;
-out vec4 Color;
+out vec4 color;
 
 void main()
 {
-	vec2 TextureSize = vec2(textureSize(Diffuse, 0));
+    vec2 texSize = vec2(textureSize(diffuse, 0));
 
-	Color = texture(Diffuse, gl_FragCoord.xy * 2.0 / TextureSize);
+    color = texture(diffuse, gl_FragCoord.xy * 2.0 / texSize);
 }

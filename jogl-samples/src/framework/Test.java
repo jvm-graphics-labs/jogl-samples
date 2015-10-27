@@ -276,7 +276,7 @@ public class Test implements GLEventListener, KeyListener {
         }
     }
 
-    private void saveImage(GL3 gl3, int width, int height) {
+    protected void saveImage(GL3 gl3, int width, int height) {
 
         try {
             BufferedImage screenshot = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
@@ -298,7 +298,7 @@ public class Test implements GLEventListener, KeyListener {
                 }
             }
 
-            File outputfile = new File("D:\\Downloads\\texture.png");
+            File outputfile = new File("/home/elect/Downloads/texture.jpg");
             ImageIO.write(screenshot, "jpg", outputfile);
         } catch (IOException ex) {
             //  Logger.getLogger(EC_DepthPeeling.class.getName()).log(Level.SEVERE, null, ex);

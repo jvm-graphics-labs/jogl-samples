@@ -4,16 +4,16 @@ precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-uniform sampler2D Diffuse;
+uniform sampler2D diffuse;
 
-in block
+in Block
 {
-	vec2 Texcoord;
-} In;
+    vec2 texCoord;
+} inBlock;
 
-out vec4 Color;
+out vec4 color;
 
 void main()
 {
-	Color = textureLod(Diffuse, In.Texcoord, 0);
+    color = textureLod(diffuse, inBlock.texCoord, 0);
 }

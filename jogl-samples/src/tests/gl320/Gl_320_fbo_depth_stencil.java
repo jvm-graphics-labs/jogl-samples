@@ -213,7 +213,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
             uniformDiffuse[Program.TEXTURE.ordinal()]
                     = gl3.glGetUniformLocation(programName[Program.TEXTURE.ordinal()], "diffuse");
             uniformDiffuse[Program.SPLASH.ordinal()]
-                    = gl3.glGetUniformLocation(programName[Program.SPLASH.ordinal()], "Diffuse");
+                    = gl3.glGetUniformLocation(programName[Program.SPLASH.ordinal()], "diffuse");
 
             gl3.glUseProgram(programName[Program.TEXTURE.ordinal()]);
             gl3.glUniform1i(uniformDiffuse[Program.TEXTURE.ordinal()], 0);
@@ -382,6 +382,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
             for (int i = 0; i < mvp.length; i++) {
                 pointer.putFloat(uniformBufferOffsetAlignment[0] * 1 + i * Float.BYTES, mvp[i]);
             }
+            pointer.rewind();
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
@@ -405,8 +406,9 @@ public class Gl_320_fbo_depth_stencil extends Test {
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
             gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE.ordinal()]);
 
-            gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()],
-                    uniformBufferOffsetAlignment[0] * 0, uniformBufferOffsetAlignment[0]);
+            gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0,
+                    bufferName[Buffer.TRANSFORM.ordinal()], uniformBufferOffsetAlignment[0] * 0,
+                    uniformBufferOffsetAlignment[0]);
 
             gl3.glDisable(GL_DEPTH_TEST);
             gl3.glStencilMask(0xFF);
@@ -440,6 +442,22 @@ public class Gl_320_fbo_depth_stencil extends Test {
 
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 1);
         }
+
+        return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL3 gl3 = (GL3) gl;
+
+        gl3.glDeleteFramebuffers(1, framebufferName, 0);
+        gl3.glDeleteProgram(programName[Program.SPLASH.ordinal()]);
+        gl3.glDeleteProgram(programName[Program.TEXTURE.ordinal()]);
+
+        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl3.glDeleteVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
 
         return true;
     }
