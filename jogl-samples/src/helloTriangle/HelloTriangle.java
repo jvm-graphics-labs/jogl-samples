@@ -87,7 +87,7 @@ public class HelloTriangle implements GLEventListener, KeyListener {
         0, 2, 1
     };
     private int program, modelToClipMatrixUL;
-    private final String SHADERS_ROOT = "src/helloTriangle/shaders";
+    private final String SHADERS_ROOT = "/shaders";
     /**
      Use pools, you don't want to create and let them cleaned by the garbage
      collector continuosly in the display() method.
