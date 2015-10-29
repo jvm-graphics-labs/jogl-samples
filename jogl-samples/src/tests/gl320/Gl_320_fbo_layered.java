@@ -18,14 +18,18 @@ import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
 import static com.jogamp.opengl.GL.GL_TEXTURE0;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_SHORT;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
+import static com.jogamp.opengl.GL2ES3.GL_COLOR;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_2D_ARRAY;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
 import com.jogamp.opengl.GL3;
 import static com.jogamp.opengl.GL3ES3.GL_GEOMETRY_SHADER;
+import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
@@ -99,6 +103,7 @@ public class Gl_320_fbo_layered extends Test {
             bufferName = new int[Buffer.MAX.ordinal()], textureColorbufferName = new int[1];
     private int uniformDiffuse, uniformLayer;
     private Vec4i[] viewport = new Vec4i[4];
+    private float[] projection = new float[16], view = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -283,5 +288,53 @@ public class Gl_320_fbo_layered extends Test {
         gl3.glBindVertexArray(0);
 
         return checkError(gl3, "initVertexArray");
+    }
+
+    @Override
+    protected boolean render(GL gl) {
+
+        GL3 gl3 = (GL3) gl;
+
+        FloatUtil.makeOrtho(projection, 0, true, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f);
+        FloatUtil.makeIdentity(view);
+        FloatUtil.makeIdentity(model);
+
+        FloatUtil.multMatrix(projection, view, mvp);
+        FloatUtil.multMatrix(mvp, model);
+
+        // Pass 1
+        {
+            gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
+            gl3.glViewport(0, 0, framebufferSize.x, framebufferSize.y);
+
+            gl3.glUseProgram(programName[Program.LAYERING.ordinal()]);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.LAYERING.ordinal()], 1, false, mvp, 0);
+
+            gl3.glBindVertexArray(vertexArrayName[Program.LAYERING.ordinal()]);
+            gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, null, 1, 0);
+        }
+
+        // Pass 2
+        {
+            gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+
+            gl3.glUseProgram(programName[Program.SPLASH.ordinal()]);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.SPLASH.ordinal()], 1, false, mvp, 0);
+            gl3.glUniform1i(uniformDiffuse, 0);
+
+            gl3.glActiveTexture(GL_TEXTURE0);
+            gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureColorbufferName[0]);
+
+            gl3.glBindVertexArray(vertexArrayName[Program.SPLASH.ordinal()]);
+
+            for (int i = 0; i < 4; ++i) {
+                gl3.glUniform1i(uniformLayer, i);
+                gl3.glViewport(viewport[i].x, viewport[i].y, viewport[i].z, viewport[i].w);
+                gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, null, 1, 0);
+            }
+        }
+
+        return true;
     }
 }
