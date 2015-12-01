@@ -172,7 +172,7 @@ public class Gl_320_buffer_uniform extends Test {
         gl3.glEnable(GL_DEPTH_TEST);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
         gl3.glDrawBuffer(GL_BACK);
-        if (!checkFramebuffer(gl, 0)) {
+        if (!isFramebufferComplete(gl, 0)) {
             return false;
         }
         return validated;

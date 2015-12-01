@@ -326,7 +326,7 @@ public class Gl_320_fbo_blend extends Test {
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
         gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER.ordinal()], 0);
 
-        if (!checkFramebuffer(gl3, framebufferName[0])) {
+        if (!isFramebufferComplete(gl3, framebufferName[0])) {
             return false;
         }
 

@@ -296,7 +296,7 @@ public class Gl_320_fbo_depth extends Test {
         gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.RENDERBUFFER.ordinal()], 0);
         gl3.glDrawBuffer(GL_NONE);
 
-        if (!checkFramebuffer(gl3, framebufferName[0])) {
+        if (!isFramebufferComplete(gl3, framebufferName[0])) {
             return false;
         }
 

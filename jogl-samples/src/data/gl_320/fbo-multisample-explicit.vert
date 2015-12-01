@@ -17,5 +17,5 @@ out Block
 void main()
 {	
     outBlock.texCoord = texCoord;
-    gl_Position = mvp * vec4(position, 0.0, 1.0);
+    gl_Position = mvp * vec4(position, float(gl_InstanceID) * 1.0 - 2.0, 1.0);
 }

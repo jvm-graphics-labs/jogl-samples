@@ -14,4 +14,12 @@ public class Glm {
     public static int ceilMultiple(int source, int multiple) {
         return source + (multiple - (source % multiple));
     }
+    
+    public static float [] convertLinearToSRGB(float[] colorLinear) {
+        
+    }
+    
+    private static float [] compute_rgbToSrgb (float [] colorLinear, float gammaCorrection) {
+        Math.
+    }
 }

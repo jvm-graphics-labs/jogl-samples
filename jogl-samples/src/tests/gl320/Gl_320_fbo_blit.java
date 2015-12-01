@@ -12,7 +12,6 @@ import static com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_DRAW_FRAMEBUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_FRAMEBUFFER;
-import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_COMPLETE;
 import static com.jogamp.opengl.GL.GL_LINEAR;
 import static com.jogamp.opengl.GL.GL_LINEAR_MIPMAP_LINEAR;
 import static com.jogamp.opengl.GL.GL_READ_FRAMEBUFFER;
@@ -218,14 +217,14 @@ public class Gl_320_fbo_blit extends Test {
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RENDER.ordinal()]);
         gl3.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
                 GL_RENDERBUFFER, colorRenderbufferName[0]);
-        if (!checkFramebuffer(gl3, framebufferName[Framebuffer.RENDER.ordinal()])) {
+        if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.RENDER.ordinal()])) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RESOLVE.ordinal()]);
         gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER.ordinal()], 0);
-        if (!checkFramebuffer(gl3, framebufferName[Framebuffer.RESOLVE.ordinal()])) {
+        if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.RESOLVE.ordinal()])) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);

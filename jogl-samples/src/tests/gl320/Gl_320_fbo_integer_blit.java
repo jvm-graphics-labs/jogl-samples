@@ -266,14 +266,14 @@ public class Gl_320_fbo_integer_blit extends Test {
 
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RENDER.ordinal()]);
         gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.RENDERBUFFER.ordinal()], 0);
-        if (!checkFramebuffer(gl3, framebufferName[Framebuffer.RENDER.ordinal()])) {
+        if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.RENDER.ordinal()])) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RESOLVE.ordinal()]);
         gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.SPLASHBUFFER.ordinal()], 0);
-        if (!checkFramebuffer(gl3, framebufferName[Framebuffer.RESOLVE.ordinal()])) {
+        if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.RESOLVE.ordinal()])) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);

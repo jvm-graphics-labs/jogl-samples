@@ -221,7 +221,7 @@ public class Test implements GLEventListener, KeyListener {
         return error == GL_NO_ERROR;
     }
 
-    protected boolean checkFramebuffer(GL gl, int framebufferName) {
+    protected boolean isFramebufferComplete(GL gl, int framebufferName) {
 
         gl.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
 
@@ -257,6 +257,10 @@ public class Test implements GLEventListener, KeyListener {
         }
 
         return status == GL_FRAMEBUFFER_COMPLETE;
+    }
+    
+    protected float cameraDistance() {
+        return translationCurrent.y;
     }
 
     protected final String getDataDirectory() {

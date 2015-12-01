@@ -6,27 +6,26 @@ layout(std140, column_major) uniform;
 layout(triangles) in;
 layout(triangle_strip, max_vertices = 12) out;
 
-uniform mat4 MVP;
+uniform mat4 mvp;
 
-out block
+out Block
 {
-	flat int Instance;
-} Out;
+    flat int instance;
+} outBlock;
 
 void main()
 {	
-	for(int Layer = 0; Layer < 4; ++Layer)
-	{
-		gl_Layer = Layer;
+    for(int layer = 0; layer < 4; ++layer)
+    {
+        gl_Layer = layer;
 
-		for(int i = 0; i < gl_in.length(); ++i)
-		{
-			gl_Position = MVP * gl_in[i].gl_Position;
-			Out.Instance = Layer;
-			EmitVertex();
-		}
-
-		EndPrimitive();
-	}
+        for(int i = 0; i < gl_in.length(); ++i)
+        {
+            gl_Position = mvp * gl_in[i].gl_Position;
+            outBlock.instance = layer;
+            EmitVertex();
+        }
+        EndPrimitive();
+    }
 }
 

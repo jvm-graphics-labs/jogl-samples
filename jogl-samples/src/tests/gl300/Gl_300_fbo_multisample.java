@@ -165,7 +165,7 @@ public class Gl_300_fbo_multisample extends Test {
         gl3.glGenFramebuffers(1, framebufferRenderName, 0);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferRenderName[0]);
         gl3.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbufferName[0]);
-        if (!checkFramebuffer(gl3, framebufferRenderName[0])) {
+        if (!isFramebufferComplete(gl3, framebufferRenderName[0])) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -182,7 +182,7 @@ public class Gl_300_fbo_multisample extends Test {
         gl3.glGenFramebuffers(1, framebufferResolveName, 0);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferResolveName[0]);
         gl3.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTextureName[0], 0);
-        if (!checkFramebuffer(gl3, framebufferResolveName[0])) {
+        if (!isFramebufferComplete(gl3, framebufferResolveName[0])) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);

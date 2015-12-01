@@ -4,7 +4,10 @@ precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-uniform mat4 mvp;
+uniform Transform
+{
+    mat4 mvp;
+} transform;
 
 in vec2 position;
 in vec2 texCoord;
@@ -17,5 +20,5 @@ out Block
 void main()
 {	
     outBlock.texCoord = texCoord;
-    gl_Position = mvp * vec4(position, 0.0, 1.0);
+    gl_Position = transform.mvp * vec4(position, 0.0, 1.0);
 }

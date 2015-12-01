@@ -4,8 +4,7 @@ precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-uniform sampler2DArray diffuse;
-uniform int layer;
+uniform usampler2D diffuse;
 
 in Block
 {
@@ -16,5 +15,7 @@ out vec4 color;
 
 void main()
 {
-    color = texture(diffuse, vec3(inBlock.texCoord, float(layer)));
+    uvec4 intColor = texture(diffuse, inBlock.texCoord);
+
+    color = vec4(intColor) / 255.0;
 }

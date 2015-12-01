@@ -322,7 +322,7 @@ public class Gl_320_fbo_depth_multisample extends Test {
         gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.MULTISAMPLE.ordinal()], 0);
         gl3.glDrawBuffer(GL_NONE);
 
-        if (!checkFramebuffer(gl3, framebufferName[Framebuffer.DEPTH_MULTISAMPLE.ordinal()])) {
+        if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.DEPTH_MULTISAMPLE.ordinal()])) {
             return false;
         }
 
