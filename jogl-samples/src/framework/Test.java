@@ -27,7 +27,6 @@ import static com.jogamp.opengl.GL.GL_OUT_OF_MEMORY;
 import static com.jogamp.opengl.GL2ES3.GL_FRAMEBUFFER_UNDEFINED;
 import static com.jogamp.opengl.GL2ES3.GL_MAJOR_VERSION;
 import static com.jogamp.opengl.GL2ES3.GL_MINOR_VERSION;
-import static com.jogamp.opengl.GL2ES3.GL_RGBA_INTEGER;
 import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER;
 import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER;
 import com.jogamp.opengl.GL3;
@@ -258,7 +257,7 @@ public class Test implements GLEventListener, KeyListener {
 
         return status == GL_FRAMEBUFFER_COMPLETE;
     }
-    
+
     protected float cameraDistance() {
         return translationCurrent.y;
     }
@@ -292,15 +291,18 @@ public class Test implements GLEventListener, KeyListener {
             ByteBuffer buffer = GLBuffers.newDirectByteBuffer(width * height * 4);
 
             gl3.glReadBuffer(GL3.GL_COLOR_ATTACHMENT0);
-            gl3.glReadPixels(0, 0, width, height, GL3.GL_RGBA_INTEGER, GL3.GL_UNSIGNED_BYTE, buffer);
+            gl3.glReadPixels(0, 0, width, height, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buffer);
 
             for (int h = 0; h < height; h++) {
                 for (int w = 0; w < width; w++) {
                     // The color are the three consecutive bytes, it's like referencing
                     // to the next consecutive array elements, so we got red, green, blue..
                     // red, green, blue, and so on..
-                    graphics.setColor(new Color((buffer.get() & 0xff) / 255f, (buffer.get() & 0xff) / 255f,
-                            (buffer.get() & 0xff) / 255f));
+//                    System.out.println("(" + ((buffer.get() & 0xff) / 255) + ", "
+//                            + ((buffer.get() & 0xff) / 255) + ", " + ((buffer.get() & 0xff) / 255)
+//                            + ", " + ((buffer.get() & 0xff) / 255) + ")");
+                    graphics.setColor(new Color((buffer.get() & 0xff), (buffer.get() & 0xff), 
+                            (buffer.get() & 0xff)));
                     buffer.get();   // alpha
 //                    graphics.drawRect(w, height - h, 1, 1); // height - h is for flipping the image
                     graphics.drawRect(w, h, 1, 1); // height - h is for flipping the image
