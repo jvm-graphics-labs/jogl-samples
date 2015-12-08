@@ -68,8 +68,8 @@ public class Gl_320_fbo_rtt extends Test {
     private float[] vertexData = {
         -4.0f, -3.0f, 0.0f, 0.0f,
         +4.0f, -3.0f, 1.0f, 0.0f,
-        +4.0f, 3.0f, 1.0f, 1.0f,
-        -4.0f, 3.0f, 0.0f, 1.0f};
+        +4.0f, +3.0f, 1.0f, 1.0f,
+        -4.0f, +3.0f, 0.0f, 1.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;

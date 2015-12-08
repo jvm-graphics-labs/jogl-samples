@@ -83,8 +83,8 @@ public class Gl_320_fbo_srgb_blend extends Test {
     private float[] VertexData = {
         -10.0f, -10.0f, 0.0f, 1.0f,
         +10.0f, -10.0f, 1.0f, 1.0f,
-        +10.0f, 10.0f, 1.0f, 0.0f,
-        -10.0f, 10.0f, 0.0f, 0.0f};
+        +10.0f, +10.0f, 1.0f, 0.0f,
+        -10.0f, +10.0f, 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;

@@ -27,6 +27,7 @@ import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
 import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
+import static com.jogamp.opengl.GL2ES1.GL_POINT_SPRITE;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import static com.jogamp.opengl.GL2ES3.GL_COLOR;
@@ -35,6 +36,7 @@ import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT;
+import com.jogamp.opengl.GL2GL3;
 import static com.jogamp.opengl.GL2GL3.GL_LOWER_LEFT;
 import static com.jogamp.opengl.GL2GL3.GL_POINT_SPRITE_COORD_ORIGIN;
 import com.jogamp.opengl.GL3;
@@ -133,13 +135,14 @@ public class Gl_320_fbo_blend_points extends Test {
         boolean validated = true;
 
         gl3.glEnable(GL_PROGRAM_POINT_SIZE);
+        gl3.glEnable(GL_POINT_SPRITE);
         gl3.glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
 
-//        float[] pointSizeProperties = new float[3];
-//        gl3.glGetFloatv(GL2GL3.GL_POINT_SIZE_RANGE, pointSizeProperties, 0);
-//        gl3.glGetFloatv(GL2GL3.GL_POINT_SIZE_GRANULARITY, pointSizeProperties, 2);
-//        System.out.println("pointSizeRange: (" + pointSizeProperties[0] + ", " + pointSizeProperties[1] + ") "
-//                + "granularity: " + pointSizeProperties[2]);
+        float[] pointSizeProperties = new float[3];
+        gl3.glGetFloatv(GL2GL3.GL_POINT_SIZE_RANGE, pointSizeProperties, 0);
+        gl3.glGetFloatv(GL2GL3.GL_POINT_SIZE_GRANULARITY, pointSizeProperties, 2);
+        System.out.println("pointSizeRange: (" + pointSizeProperties[0] + ", " + pointSizeProperties[1] + ") "
+                + "granularity: " + pointSizeProperties[2]);
 
         if (validated) {
             validated = initProgram(gl3);
@@ -336,7 +339,7 @@ public class Gl_320_fbo_blend_points extends Test {
             gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
             gl3.glEnable(GL_FRAMEBUFFER_SRGB);
 
-//            gl3.glEnable(GL_BLEND);
+            gl3.glEnable(GL_BLEND);
             gl3.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
             gl3.glUseProgram(programName[Program.RENDER.ordinal()]);
@@ -348,8 +351,7 @@ public class Gl_320_fbo_blend_points extends Test {
 
             gl3.glDisable(GL_BLEND);
         }
-
-//        saveImage(gl3, windowSize.x * framebufferScale, windowSize.y * framebufferScale);
+        
         {
             gl3.glViewport(0, 0, windowSize.x, windowSize.y);
 

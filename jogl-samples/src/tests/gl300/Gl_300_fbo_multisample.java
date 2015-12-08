@@ -6,6 +6,8 @@
 package tests.gl300;
 
 import com.jogamp.opengl.GL;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.math.FloatUtil;
@@ -125,6 +127,25 @@ public class Gl_300_fbo_multisample extends Test {
         return checkError(gl3, "initBuffer");
     }
 
+    private boolean initVertexArray(GL3 gl3) {
+
+        vertexArrayName = new int[1];
+        gl3.glGenVertexArrays(1, vertexArrayName, 0);
+        gl3.glBindVertexArray(vertexArrayName[0]);
+        {
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+            gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
+            gl3.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
+        }
+        gl3.glBindVertexArray(0);
+
+        return checkError(gl3, "initVertexArray");
+    }
+
     private boolean initTexture(GL3 gl3) {
 
         try {
@@ -188,25 +209,6 @@ public class Gl_300_fbo_multisample extends Test {
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         return checkError(gl3, "initFramebuffer");
-    }
-
-    private boolean initVertexArray(GL3 gl3) {
-
-        vertexArrayName = new int[1];
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
-        {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-            gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
-            gl3.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
-        }
-        gl3.glBindVertexArray(0);
-
-        return checkError(gl3, "initVertexArray");
     }
 
     @Override

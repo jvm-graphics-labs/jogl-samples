@@ -30,8 +30,7 @@ vec4 convertRgbToSrgb(in vec4 ColorRGB)
 
 void main()
 {
-	//vec4 ColorRGB = vec4(In.Color.rgb, (1.0 - smoothstep(0.0, 1.0, length((gl_PointCoord - 0.5) * 2.0))) * 1.0);
-        vec4 ColorRGB = length(gl_PointCoord) > 1 ? vec4(0, 1, 0, 1) : vec4(1, 0, 0, 1);
+	vec4 ColorRGB = vec4(In.Color.rgb, (1.0 - smoothstep(0.0, 1.0, length((gl_PointCoord - 0.5) * 2.0))) * 1.0);
 
 	Color = ColorRGB;//convertRgbToSrgb(ColorRGB);
 }

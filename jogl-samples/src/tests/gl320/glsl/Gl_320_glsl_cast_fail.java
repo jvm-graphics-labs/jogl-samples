@@ -37,8 +37,8 @@ public class Gl_320_glsl_cast_fail extends Test {
     private float[] vertexData = {
         -1.0f, -1.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, 1.0f, 1.0f, 0.0f,
-        -1.0f, 1.0f, 0.0f, 0.0f};
+        +1.0f, +1.0f, 1.0f, 0.0f,
+        -1.0f, +1.0f, 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;

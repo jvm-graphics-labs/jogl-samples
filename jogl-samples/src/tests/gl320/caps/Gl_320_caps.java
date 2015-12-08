@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tests.gl320;
+package tests.gl320.caps;
 
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.GL_COLOR;

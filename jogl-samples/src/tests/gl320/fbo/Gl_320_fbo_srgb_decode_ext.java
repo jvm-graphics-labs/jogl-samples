@@ -84,8 +84,8 @@ public class Gl_320_fbo_srgb_decode_ext extends Test {
     private float[] vertexData = {
         -1.0f, -1.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, 1.0f, 1.0f, 0.0f,
-        -1.0f, 1.0f, 0.0f, 0.0f};
+        +1.0f, +1.0f, 1.0f, 0.0f,
+        -1.0f, +1.0f, 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;

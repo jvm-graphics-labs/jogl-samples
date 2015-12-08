@@ -20,6 +20,6 @@ out block
 void main()
 {
 	Out.Color = Color;
-	gl_PointSize = 180.0;
+	gl_PointSize = 256.0;
 	gl_Position = Transform.MVP * Position;
 }

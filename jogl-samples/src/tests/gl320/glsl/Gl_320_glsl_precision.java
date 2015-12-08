@@ -11,10 +11,10 @@ import static com.jogamp.opengl.GL.GL_CLAMP_TO_EDGE;
 import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
 import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL.GL_LINEAR;
-import static com.jogamp.opengl.GL.GL_LINEAR_MIPMAP_LINEAR;
 import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
+import static com.jogamp.opengl.GL.GL_NEAREST;
+import static com.jogamp.opengl.GL.GL_NEAREST_MIPMAP_NEAREST;
 import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
 import static com.jogamp.opengl.GL.GL_TEXTURE0;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
@@ -50,23 +50,23 @@ import java.util.logging.Logger;
  *
  * @author GBarbieri
  */
-public class Gl_320_glsl_builtin_blocks extends Test {
+public class Gl_320_glsl_precision extends Test {
 
     public static void main(String[] args) {
-        Gl_320_glsl_builtin_blocks gl_320_glsl_builtin_blocks = new Gl_320_glsl_builtin_blocks();
+        Gl_320_glsl_precision gl_320_glsl_precision = new Gl_320_glsl_precision();
     }
 
-    public Gl_320_glsl_builtin_blocks() {
-        super("gl-320-fbo-glsl-builtin-blocks", 3, 2);
+    public Gl_320_glsl_precision() {
+        super("gl-320-glsl-precision", 3, 2);
     }
 
-    private final String SHADERS_SOURCE = "glsl-builtin-blocks";
+    private final String SHADERS_SOURCE = "glsl-precision";
     private final String SHADERS_ROOT = "src/data/gl_320/glsl";
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
     private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
-    float[] vertexData = {
+    private float[] vertexData = {
         -1.0f, -1.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 1.0f, 1.0f,
         +1.0f, +1.0f, 1.0f, 0.0f,
@@ -85,7 +85,7 @@ public class Gl_320_glsl_builtin_blocks extends Test {
         MAX
     }
 
-    private int[] bufferName = new int[Buffer.MAX.ordinal()], vertexArrayName = new int[1], textureName = new int[1];
+    private int[] vertexArrayName = new int[1], textureName = new int[1], bufferName = new int[Buffer.MAX.ordinal()];
     private int programName, uniformTransform, uniformDiffuse;
     private float[] projection = new float[16], model = new float[16];
 
@@ -93,7 +93,6 @@ public class Gl_320_glsl_builtin_blocks extends Test {
     protected boolean begin(GL gl) {
 
         GL3 gl3 = (GL3) gl;
-
         boolean validated = true;
 
         if (validated) {
@@ -161,9 +160,7 @@ public class Gl_320_glsl_builtin_blocks extends Test {
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = {0};
-
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-
         int uniformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
@@ -173,7 +170,7 @@ public class Gl_320_glsl_builtin_blocks extends Test {
         return checkError(gl3, "initBuffer");
     }
 
-    private boolean initTexture(GL3 gl3) {
+    protected boolean initTexture(GL3 gl3) {
 
         try {
             jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE);
@@ -187,26 +184,29 @@ public class Gl_320_glsl_builtin_blocks extends Test {
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
             jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
-            for (int level = 0; level < texture.levels(); ++level) {
-                gl3.glTexImage2D(GL_TEXTURE_2D, level,
+            for (int Level = 0; Level < texture.levels(); ++Level) {
+                gl3.glTexImage2D(GL_TEXTURE_2D, Level,
                         format.internal.value,
-                        texture.dimensions(level)[0], texture.dimensions(level)[1],
+                        texture.dimensions(Level)[0], texture.dimensions(Level)[1],
                         0,
                         format.external.value, format.type.value,
-                        texture.data(0, 0, level));
+                        texture.data(0, 0, Level));
             }
 
-            gl3.glGenerateMipmap(GL_TEXTURE_2D);
+            if (texture.levels() == 1) {
+                gl3.glGenerateMipmap(GL_TEXTURE_2D);
+            }
 
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
         } catch (IOException ex) {
-            Logger.getLogger(Gl_320_glsl_builtin_blocks.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Gl_320_glsl_precision.class.getName()).log(Level.SEVERE, null, ex);
         }
         return checkError(gl3, "initTexture");
     }
