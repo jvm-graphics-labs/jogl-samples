@@ -9,7 +9,7 @@ uniform Transform
     mat4 mvp;
 } transform;
 
-in vec4 position;
+in vec2 position;
 in vec4 color;
 
 out Block
@@ -18,8 +18,8 @@ out Block
 } outBlock;
 
 void main()
-{
+{	
+    gl_Position = transform.mvp * vec4(position, 0.0, 1.0);
     outBlock.color = color;
-    gl_PointSize = 256.0;
-    gl_Position = transform.mvp * position;
 }
+

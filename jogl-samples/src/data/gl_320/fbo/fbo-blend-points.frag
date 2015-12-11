@@ -6,12 +6,12 @@ layout(std140, column_major) uniform;
 
 in vec2 gl_PointCoord;
 
-in block
+in Block
 {
-	vec4 Color;
-} In;
+    vec4 color;
+} inBlock;
 
-out vec4 Color;
+out vec4 color;
 /*
 vec3 detail_rgbToSrgb(in vec3 ColorRGB, in float GammaCorrection)
 {
@@ -30,7 +30,7 @@ vec4 convertRgbToSrgb(in vec4 ColorRGB)
 
 void main()
 {
-	vec4 ColorRGB = vec4(In.Color.rgb, (1.0 - smoothstep(0.0, 1.0, length((gl_PointCoord - 0.5) * 2.0))) * 1.0);
+    vec4 colorRgb = vec4(inBlock.color.rgb, (1.0 - smoothstep(0.0, 1.0, length((gl_PointCoord - 0.5) * 2.0))) * 1.0);
 
-	Color = ColorRGB;//convertRgbToSrgb(ColorRGB);
+    color = colorRgb;//convertRgbToSrgb(ColorRGB);
 }

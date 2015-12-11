@@ -184,9 +184,9 @@ public class Gl_320_fbo_blend_points extends Test {
 
             programName[Program.RENDER.ordinal()] = shaderProgram.program();
 
-            gl3.glBindAttribLocation(programName[Program.RENDER.ordinal()], Semantic.Attr.POSITION, "Position");
-            gl3.glBindAttribLocation(programName[Program.RENDER.ordinal()], Semantic.Attr.COLOR, "Color");
-            gl3.glBindFragDataLocation(programName[Program.RENDER.ordinal()], Semantic.Frag.COLOR, "Color");
+            gl3.glBindAttribLocation(programName[Program.RENDER.ordinal()], Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName[Program.RENDER.ordinal()], Semantic.Attr.COLOR, "color");
+            gl3.glBindFragDataLocation(programName[Program.RENDER.ordinal()], Semantic.Frag.COLOR, "color");
 
             shaderProgram.link(gl3, System.out);
         }
@@ -205,14 +205,14 @@ public class Gl_320_fbo_blend_points extends Test {
 
             programName[Program.SPLASH.ordinal()] = shaderProgram.program();
 
-            gl3.glBindFragDataLocation(programName[Program.SPLASH.ordinal()], Semantic.Frag.COLOR, "Color");
+            gl3.glBindFragDataLocation(programName[Program.SPLASH.ordinal()], Semantic.Frag.COLOR, "color");
 
             shaderProgram.link(gl3, System.out);
         }
         if (validated) {
 
-            uniformTransform = gl3.glGetUniformBlockIndex(programName[Program.RENDER.ordinal()], "transform");
-            uniformDiffuse = gl3.glGetUniformLocation(programName[Program.SPLASH.ordinal()], "Diffuse");
+            uniformTransform = gl3.glGetUniformBlockIndex(programName[Program.RENDER.ordinal()], "Transform");
+            uniformDiffuse = gl3.glGetUniformLocation(programName[Program.SPLASH.ordinal()], "diffuse");
 
             gl3.glUseProgram(programName[Program.RENDER.ordinal()]);
             gl3.glUniformBlockBinding(programName[Program.RENDER.ordinal()], uniformTransform,
@@ -351,7 +351,7 @@ public class Gl_320_fbo_blend_points extends Test {
 
             gl3.glDisable(GL_BLEND);
         }
-        
+
         {
             gl3.glViewport(0, 0, windowSize.x, windowSize.y);
 
@@ -366,6 +366,22 @@ public class Gl_320_fbo_blend_points extends Test {
 
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 1);
         }
+
+        return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL3 gl3 = (GL3) gl;
+
+        gl3.glDeleteFramebuffers(1, framebufferName, 0);
+        gl3.glDeleteProgram(programName[Program.SPLASH.ordinal()]);
+        gl3.glDeleteProgram(programName[Program.RENDER.ordinal()]);
+
+        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl3.glDeleteVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
 
         return true;
     }

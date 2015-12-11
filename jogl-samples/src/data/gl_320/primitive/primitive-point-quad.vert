@@ -4,10 +4,7 @@ precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-uniform Transform
-{
-    mat4 mvp;
-} transform;
+uniform mat4 mv;
 
 in vec4 position;
 in vec4 color;
@@ -20,6 +17,6 @@ out Block
 void main()
 {
     outBlock.color = color;
-    gl_PointSize = 256.0;
-    gl_Position = transform.mvp * position;
+    gl_Position = position;
+    gl_PointSize = 512 / -(mv * position).z;
 }

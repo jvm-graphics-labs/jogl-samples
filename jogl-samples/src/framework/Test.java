@@ -12,6 +12,7 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
+import static com.jogamp.opengl.GL.GL_EXTENSIONS;
 import static com.jogamp.opengl.GL.GL_FRAMEBUFFER;
 import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_COMPLETE;
 import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
@@ -27,6 +28,7 @@ import static com.jogamp.opengl.GL.GL_OUT_OF_MEMORY;
 import static com.jogamp.opengl.GL2ES3.GL_FRAMEBUFFER_UNDEFINED;
 import static com.jogamp.opengl.GL2ES3.GL_MAJOR_VERSION;
 import static com.jogamp.opengl.GL2ES3.GL_MINOR_VERSION;
+import static com.jogamp.opengl.GL2ES3.GL_NUM_EXTENSIONS;
 import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER;
 import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER;
 import com.jogamp.opengl.GL3;
@@ -47,6 +49,7 @@ import java.nio.ByteBuffer;
 import javax.imageio.ImageIO;
 import jglm.Vec2;
 import jglm.Vec2i;
+import jglm.Vec3;
 
 /**
  *
@@ -220,6 +223,20 @@ public class Test implements GLEventListener, KeyListener {
         return error == GL_NO_ERROR;
     }
 
+    protected boolean checkExtension(GL gl, String extensionName) {
+
+        GL3 gl3 = (GL3) gl;
+        int[] extensionCount = {0};
+        gl.glGetIntegerv(GL_NUM_EXTENSIONS, extensionCount, 0);
+        for (int i = 0; i < extensionCount[0]; i++) {
+            if (gl3.glGetStringi(GL_EXTENSIONS, i).equals(extensionName)) {
+                return true;
+            }
+        }
+        System.out.println("Failed to find Extension: " + extensionName);
+        return false;
+    }
+
     protected boolean isFramebufferComplete(GL gl, int framebufferName) {
 
         gl.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName);
@@ -262,6 +279,10 @@ public class Test implements GLEventListener, KeyListener {
         return translationCurrent.y;
     }
 
+    protected Vec3 cameraPosition() {
+        return new Vec3(0.0f, 0.0f, -translationCurrent.y);
+    }
+
     protected final String getDataDirectory() {
         return "/data/";
     }
@@ -301,7 +322,7 @@ public class Test implements GLEventListener, KeyListener {
 //                    System.out.println("(" + ((buffer.get() & 0xff) / 255) + ", "
 //                            + ((buffer.get() & 0xff) / 255) + ", " + ((buffer.get() & 0xff) / 255)
 //                            + ", " + ((buffer.get() & 0xff) / 255) + ")");
-                    graphics.setColor(new Color((buffer.get() & 0xff), (buffer.get() & 0xff), 
+                    graphics.setColor(new Color((buffer.get() & 0xff), (buffer.get() & 0xff),
                             (buffer.get() & 0xff)));
                     buffer.get();   // alpha
 //                    graphics.drawRect(w, height - h, 1, 1); // height - h is for flipping the image
