@@ -26,6 +26,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
@@ -42,7 +43,7 @@ public class Gl_320_query_occlusion extends Test {
     }
 
     public Gl_320_query_occlusion() {
-        super("gl-320-query-occlusion", 3, 2);
+        super("gl-320-query-occlusion", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "query-occlusion";

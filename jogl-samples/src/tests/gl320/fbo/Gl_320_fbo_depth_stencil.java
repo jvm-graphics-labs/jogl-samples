@@ -55,6 +55,7 @@ import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import framework.Glm;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
@@ -63,6 +64,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jgli.Texture2D;
 
 /**
  *
@@ -75,7 +77,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
     }
 
     public Gl_320_fbo_depth_stencil() {
-        super("Gl-320-fbo-depth-stencil", 3, 2);
+        super("Gl-320-fbo-depth-stencil", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE_TEXTURE = "texture-2d";
@@ -257,7 +259,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
 
         try {
 
-            jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE);
+            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
             if (texture.empty()) {
                 throw new Error("texture empty");

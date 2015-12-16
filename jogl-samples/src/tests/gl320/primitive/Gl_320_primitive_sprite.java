@@ -32,12 +32,14 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jgli.Texture2D;
 import jglm.Vec2;
 
 /**
@@ -51,7 +53,7 @@ public class Gl_320_primitive_sprite extends Test {
     }
 
     public Gl_320_primitive_sprite() {
-        super("gl-320-primitive-sprite", 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-320-primitive-sprite", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "primitive-sprite";
@@ -187,7 +189,7 @@ public class Gl_320_primitive_sprite extends Test {
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-            jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE);
+            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
 
             jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());

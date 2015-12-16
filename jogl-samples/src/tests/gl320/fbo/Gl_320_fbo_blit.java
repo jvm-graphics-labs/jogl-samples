@@ -35,12 +35,14 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jgli.Texture2D;
 import jglm.Vec2i;
 
 /**
@@ -54,7 +56,7 @@ public class Gl_320_fbo_blit extends Test {
     }
 
     public Gl_320_fbo_blit() {
-        super("gl-320-fbo-blit", 3, 2);
+        super("gl-320-fbo-blit", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "fbo-blit";
@@ -167,7 +169,7 @@ public class Gl_320_fbo_blit extends Test {
     private boolean initTexture(GL3 gl3) {
 
         try {
-            jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE);
+            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
             gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
             gl3.glActiveTexture(GL_TEXTURE0);

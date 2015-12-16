@@ -25,6 +25,7 @@ import static com.jogamp.opengl.GL.GL_INVALID_OPERATION;
 import static com.jogamp.opengl.GL.GL_INVALID_VALUE;
 import static com.jogamp.opengl.GL.GL_NO_ERROR;
 import static com.jogamp.opengl.GL.GL_OUT_OF_MEMORY;
+import com.jogamp.opengl.GL2ES2;
 import static com.jogamp.opengl.GL2ES3.GL_FRAMEBUFFER_UNDEFINED;
 import static com.jogamp.opengl.GL2ES3.GL_MAJOR_VERSION;
 import static com.jogamp.opengl.GL2ES3.GL_MINOR_VERSION;
@@ -35,6 +36,7 @@ import com.jogamp.opengl.GL3;
 import static com.jogamp.opengl.GL3.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLES2;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.FloatUtil;
@@ -61,23 +63,29 @@ public class Test implements GLEventListener, KeyListener {
     protected Vec2i windowSize;
     protected GLWindow glWindow;
     protected Animator animator;
+    private Profile profile;
     private final int majorVersionRequire, minorVersionRequire;
     private final Vec2 translationOrigin, translationCurrent, rotationOrigin, rotationCurrent;
     protected final String TEXTURE_ROOT = "/data";
 
-    public Test(String title, int majorVersionRequire, int minorVersionRequire, Vec2 orientation) {
-        this(title, majorVersionRequire, minorVersionRequire, new Vec2i(640, 480), orientation, new Vec2(0, 4));
+    public Test(String title, Profile profile, int majorVersionRequire, int minorVersionRequire, Vec2 orientation) {
+        this(title, profile, majorVersionRequire, minorVersionRequire, new Vec2i(640, 480), orientation, new Vec2(0, 4));
     }
 
-    public Test(String title, int majorVersionRequire, int minorVersionRequire) {
+    public Test(String title, Profile profile, int majorVersionRequire, int minorVersionRequire, Vec2i windowSize) {
+        this(title, profile, majorVersionRequire, minorVersionRequire, windowSize, new Vec2(), new Vec2(0, 4));
+    }
 
-        this(title, majorVersionRequire, minorVersionRequire, new Vec2i(640, 480),
+    public Test(String title, Profile profile, int majorVersionRequire, int minorVersionRequire) {
+
+        this(title, profile, majorVersionRequire, minorVersionRequire, new Vec2i(640, 480),
                 new Vec2(), new Vec2(0, 4));
     }
 
-    public Test(String title, int majorVersionRequire, int minorVersionRequire, Vec2i windowSize,
+    public Test(String title, Profile profile, int majorVersionRequire, int minorVersionRequire, Vec2i windowSize,
             Vec2 orientation, Vec2 position) {
 
+        this.profile = profile;
         this.majorVersionRequire = majorVersionRequire;
         this.minorVersionRequire = minorVersionRequire;
         this.windowSize = windowSize;
@@ -119,11 +127,42 @@ public class Test implements GLEventListener, KeyListener {
     @Override
     public final void init(GLAutoDrawable drawable) {
 
-        GL3 gl3 = drawable.getGL().getGL3();
+        GL gl = getCorrespondingGl(drawable);
 
-        assert checkGLVersion(gl3);
+        assert checkGLVersion(gl);
 
-        assert begin(gl3);
+        assert begin(gl);
+    }
+
+    private GL getCorrespondingGl(GLAutoDrawable drawable) {
+        switch (profile) {
+            case ES:
+                switch (majorVersionRequire) {
+                    case 1:
+                        return drawable.getGL().getGL2ES1();
+                    case 2:
+                        return drawable.getGL().getGL2ES2();
+                    case 3:
+                        return drawable.getGL().getGL2ES3();
+                    default:
+                        return drawable.getGL();
+                }
+            case CORE:
+                switch(majorVersionRequire) {
+                    case 1:
+                        return drawable.getGL().getGL();
+                    case 2:
+                        return drawable.getGL().getGL2();
+                    case 3:
+                        return drawable.getGL().getGL3();
+                    case 4:
+                        return drawable.getGL().getGL4();
+                    default:
+                        return drawable.getGL();
+                }
+            default:
+                return drawable.getGL();
+        }
     }
 
     protected boolean begin(GL gl) {
@@ -134,8 +173,8 @@ public class Test implements GLEventListener, KeyListener {
     @Override
     public final void dispose(GLAutoDrawable drawable) {
 
-        GL3 gl3 = drawable.getGL().getGL3();
-        assert end(gl3);
+        GL gl = getCorrespondingGl(drawable);
+        assert end(gl);
         System.exit(0);
     }
 
@@ -146,11 +185,11 @@ public class Test implements GLEventListener, KeyListener {
     @Override
     public final void display(GLAutoDrawable drawable) {
 
-        GL3 gl3 = drawable.getGL().getGL3();
+        GL gl = getCorrespondingGl(drawable);
 
-        assert render(gl3);
+        assert render(gl);
 
-        assert checkError(gl3, "render");
+        assert checkError(gl, "render");
     }
 
     protected boolean render(GL gl) {
@@ -176,12 +215,12 @@ public class Test implements GLEventListener, KeyListener {
         return view;
     }
 
-    private boolean checkGLVersion(GL3 gl3) {
+    private boolean checkGLVersion(GL gl) {
 
         int[] majorVersionContext = new int[]{0};
         int[] minorVersionContext = new int[]{0};
-        gl3.glGetIntegerv(GL_MAJOR_VERSION, majorVersionContext, 0);
-        gl3.glGetIntegerv(GL_MINOR_VERSION, minorVersionContext, 0);
+        gl.glGetIntegerv(GL_MAJOR_VERSION, majorVersionContext, 0);
+        gl.glGetIntegerv(GL_MINOR_VERSION, minorVersionContext, 0);
         System.out.println("OpenGL Version Needed " + majorVersionRequire + "." + minorVersionRequire
                 + " ( " + majorVersionContext[0] + "," + minorVersionContext[0] + " found)");
         return version(majorVersionContext[0], minorVersionContext[0])
@@ -223,11 +262,10 @@ public class Test implements GLEventListener, KeyListener {
         return error == GL_NO_ERROR;
     }
 
-    protected boolean checkExtension(GL gl, String extensionName) {
+    protected boolean checkExtension(GL3 gl3, String extensionName) {
 
-        GL3 gl3 = (GL3) gl;
         int[] extensionCount = {0};
-        gl.glGetIntegerv(GL_NUM_EXTENSIONS, extensionCount, 0);
+        gl3.glGetIntegerv(GL_NUM_EXTENSIONS, extensionCount, 0);
         for (int i = 0; i < extensionCount[0]; i++) {
             if (gl3.glGetStringi(GL_EXTENSIONS, i).equals(extensionName)) {
                 return true;

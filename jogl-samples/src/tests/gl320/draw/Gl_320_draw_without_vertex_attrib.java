@@ -20,6 +20,7 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
@@ -35,7 +36,7 @@ public class Gl_320_draw_without_vertex_attrib extends Test {
     }
 
     public Gl_320_draw_without_vertex_attrib() {
-        super("gl-320-draw-without-vertex-attrib", 3, 2);
+        super("gl-320-draw-without-vertex-attrib", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "draw-without-vertex-attrib";

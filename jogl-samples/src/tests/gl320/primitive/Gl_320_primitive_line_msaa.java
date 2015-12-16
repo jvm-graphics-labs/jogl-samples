@@ -41,6 +41,7 @@ import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import framework.Glm;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
@@ -57,7 +58,7 @@ public class Gl_320_primitive_line_msaa extends Test {
     }
 
     public Gl_320_primitive_line_msaa() {
-        super("gl-320-primitive-line-msaa", 3, 2);
+        super("gl-320-primitive-line-msaa", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE_TEXTURE = "primitive-line-msaa-render";

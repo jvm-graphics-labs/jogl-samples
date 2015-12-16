@@ -32,6 +32,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.FloatBuffer;
@@ -48,7 +49,7 @@ public class Gl_320_fbo_rtt_texture_array extends Test {
     }
 
     public Gl_320_fbo_rtt_texture_array() {
-        super("Gl-320-fbo-rtt-texture-array", 3, 2);
+        super("Gl-320-fbo-rtt-texture-array", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE1 = "fbo-rtt-multiple-output";

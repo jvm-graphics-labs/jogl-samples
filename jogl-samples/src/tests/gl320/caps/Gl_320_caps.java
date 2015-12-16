@@ -23,7 +23,7 @@ public class Gl_320_caps extends Test {
     }
 
     public Gl_320_caps() {
-        super("gl-320-caps", 3, 2);
+        super("gl-320-caps", Profile.CORE, 3, 2);
     }
 
     @Override
@@ -60,15 +60,15 @@ public class Gl_320_caps extends Test {
 
         return validated;
     }
-    
+
     @Override
     protected boolean render(GL gl) {
-        
-        GL3 gl3 = (GL3)gl;
-        
+
+        GL3 gl3 = (GL3) gl;
+
         gl3.glViewport(0, 0, glWindow.getWidth(), glWindow.getHeight());
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
-        
+
         return true;
     }
 }

@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jgli.Texture2D;
 
 /**
  *
@@ -61,7 +62,7 @@ public class Gl_320_fbo_multisample_integer extends Test {
     }
 
     public Gl_320_fbo_multisample_integer() {
-        super("Gl-320-fbo-multisample-integer", 3, 2);
+        super("Gl-320-fbo-multisample-integer", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE1 = "fbo-multisample-integer";
@@ -238,7 +239,7 @@ public class Gl_320_fbo_multisample_integer extends Test {
             gl3.glGetIntegerv(GL_MAX_DEPTH_TEXTURE_SAMPLES, maxDepthTextureSamples, 0);
             gl3.glGetIntegerv(GL_MAX_INTEGER_SAMPLES, maxIntegerSamples, 0);
 
-            jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE);
+            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
             gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
             gl3.glActiveTexture(GL_TEXTURE0);

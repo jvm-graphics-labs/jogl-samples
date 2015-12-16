@@ -22,12 +22,14 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jgli.Texture2D;
 import jglm.Vec4i;
 
 /**
@@ -41,7 +43,7 @@ public class Gl_320_texture_compressed_ext extends Test {
     }
 
     public Gl_320_texture_compressed_ext() {
-        super("gl-320-texture-compressed-ext", 3, 2);
+        super("gl-320-texture-compressed-ext", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "texture-compressed";
@@ -184,7 +186,7 @@ public class Gl_320_texture_compressed_ext extends Test {
             gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
 
             {
-                jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC1);
+                jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC1));
                 assert (!texture.empty());
 
                 gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BC1.ordinal()]);
@@ -203,7 +205,7 @@ public class Gl_320_texture_compressed_ext extends Test {
             }
 
             {
-                jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC3);
+                jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC3));
                 assert (!texture.empty());
 
                 gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BC3.ordinal()]);
@@ -222,7 +224,7 @@ public class Gl_320_texture_compressed_ext extends Test {
             }
 
             {
-                jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC4);
+                jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC4));
                 assert (!texture.empty());
 
                 gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BC4.ordinal()]);
@@ -241,7 +243,7 @@ public class Gl_320_texture_compressed_ext extends Test {
             }
 
             {
-                jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC5);
+                jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC5));
                 assert (!texture.empty());
 
                 gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BC5.ordinal()]);

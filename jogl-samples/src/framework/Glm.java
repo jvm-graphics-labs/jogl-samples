@@ -113,6 +113,38 @@ public class Glm {
         return new float[]{pXYZ[0], pXYZ[1], pXYZ[2], pW};
     }
 
+    public static float[] hsvColor(float[] rgbColor) {
+
+        float[] hsv = {rgbColor[0], rgbColor[1], rgbColor[2]};
+        float min = Math.min(Math.min(rgbColor[0], rgbColor[1]), rgbColor[2]);
+        float max = Math.max(Math.max(rgbColor[0], rgbColor[1]), rgbColor[2]);
+        float delta = max - min;
+
+        hsv[2] = max;
+
+        if (max != 0) {
+
+            hsv[1] = delta / hsv[2];
+            float h = 0;
+
+            if (rgbColor[0] == max) {
+                // between yellow & magenta
+                h = 0 + 60 * (rgbColor[1] - rgbColor[2]) / delta;
+            } else if (rgbColor[1] == max) {
+                // between cyan & yellow
+                h = 120 + 60 * (rgbColor[2] - rgbColor[0]) / delta;
+            } else {
+                // between magenta & cyan
+                h = 240 + 60 * (rgbColor[0] - rgbColor[1]) / delta;
+            }
+        } else {
+            // If r = g = b = 0 then s = 0, h is undefined
+            hsv[1] = 0;
+            hsv[0] = 0;
+        }
+        return hsv;
+    }
+
     private static float[] lessThan(float[] a, float b) {
         float[] result = new float[a.length];
         for (int i = 0; i < a.length; i++) {
@@ -173,7 +205,7 @@ public class Glm {
         return result;
     }
 
-    private static float[] mult(float[] a, float b) {
+    public static float[] mult(float[] a, float b) {
         float[] result = new float[a.length];
         for (int i = 0; i < a.length; i++) {
             result[i] = a[i] * b;
@@ -181,7 +213,7 @@ public class Glm {
         return result;
     }
 
-    private static float[] mult(float[] a, float[] b) {
+    public static float[] mult(float[] a, float[] b) {
         float[] result = new float[a.length];
         for (int i = 0; i < a.length; i++) {
             result[i] = a[i] * b[i];
@@ -227,6 +259,89 @@ public class Glm {
         tmp[1] = tmp[1] * (viewport[3]) + viewport[1];
 
         return new float[]{tmp[0], tmp[1], tmp[2]};
+    }
+
+    public static float[] rgbColor(float[] hsvColor) {
+
+        float[] hsv = hsvColor;
+        float[] rgbColor = new float[3];
+
+        if (hsv[1] == 0) {
+            // achromatic (grey)
+            rgbColor[0] = rgbColor[1] = rgbColor[2] = hsv[2];
+        } else {
+            float sector = floor(hsv[0] / 60);
+            float frac = (hsv[0] / 60) - sector;
+            // factorial part of h
+            float o = hsv[2] * (1 - hsv[1]);
+            float p = hsv[2] * (1 - hsv[1] * frac);
+            float q = hsv[2] * (1 - hsv[1] * (1 - frac));
+
+            switch ((int) sector) {
+
+                default:
+                case 0:
+                    rgbColor[0] = hsv[2];
+                    rgbColor[1] = q;
+                    rgbColor[2] = o;
+                    break;
+                case 1:
+                    rgbColor[0] = p;
+                    rgbColor[1] = hsv[2];
+                    rgbColor[2] = o;
+                    break;
+                case 2:
+                    rgbColor[0] = o;
+                    rgbColor[1] = hsv[2];
+                    rgbColor[2] = q;
+                    break;
+                case 3:
+                    rgbColor[0] = o;
+                    rgbColor[1] = p;
+                    rgbColor[2] = hsv[2];
+                    break;
+                case 4:
+                    rgbColor[0] = q;
+                    rgbColor[1] = o;
+                    rgbColor[2] = hsv[2];
+                    break;
+                case 5:
+                    rgbColor[0] = hsv[2];
+                    rgbColor[1] = o;
+                    rgbColor[2] = p;
+                    break;
+            }
+        }
+
+        return rgbColor;
+    }
+
+    public static float[] saturation(float s, float[] color) {
+
+        float[] result = FloatUtil.multMatrixVec(saturation(s), new float[]{color[0], color[1], color[2], 0}, new float[4]);
+
+        return new float[]{result[0], result[1], result[2]};
+    }
+
+    private static float[] saturation(float s) {
+
+        float[] rgbw = {0.2126f, 0.7152f, 0.0722f};
+
+        float col0 = (1 - s) * rgbw[0];
+        float col1 = (1 - s) * rgbw[1];
+        float col2 = (1 - s) * rgbw[2];
+
+        float[] result = FloatUtil.makeIdentity(new float[16]);
+        result[0 * 4 + 0] = col0 + s;
+        result[0 * 4 + 1] = col0;
+        result[0 * 4 + 2] = col0;
+        result[1 * 4 + 0] = col1;
+        result[1 * 4 + 1] = col1 + s;
+        result[1 * 4 + 2] = col1;
+        result[2 * 4 + 0] = col2;
+        result[2 * 4 + 1] = col2;
+        result[2 * 4 + 2] = col2 + s;
+        return result;
     }
 
     public static float simplex(float[] v) {

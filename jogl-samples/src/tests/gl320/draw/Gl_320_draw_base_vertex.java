@@ -12,6 +12,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
@@ -30,7 +31,7 @@ public class Gl_320_draw_base_vertex extends Test {
     }
 
     public Gl_320_draw_base_vertex() {
-        super("gl-320-draw-base-vertex", 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-320-draw-base-vertex", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "draw-base-vertex";
@@ -195,7 +196,7 @@ public class Gl_320_draw_base_vertex extends Test {
 
             FloatUtil.multMatrix(projection, view(), mvp);
             FloatUtil.multMatrix(mvp, model);
-            
+
             for (int f = 0; f < mvp.length; f++) {
                 transformBuffer.putFloat(mvp[f]);
             }

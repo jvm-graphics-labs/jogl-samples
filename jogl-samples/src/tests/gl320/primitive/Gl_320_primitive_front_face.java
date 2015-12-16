@@ -21,6 +21,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.FloatBuffer;
@@ -37,7 +38,7 @@ public class Gl_320_primitive_front_face extends Test {
     }
 
     public Gl_320_primitive_front_face() {
-        super("gl-320-primitive-front-face", 3, 2);
+        super("gl-320-primitive-front-face", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "primitive-front-face";

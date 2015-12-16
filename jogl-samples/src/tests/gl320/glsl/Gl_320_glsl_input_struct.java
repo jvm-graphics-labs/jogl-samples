@@ -36,6 +36,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
@@ -44,6 +45,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jgli.Texture2D;
 
 /**
  *
@@ -56,7 +58,7 @@ public class Gl_320_glsl_input_struct extends Test {
     }
 
     public Gl_320_glsl_input_struct() {
-        super("gl-320-glsl-input-struct", 3, 2);
+        super("gl-320-glsl-input-struct", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "glsl-input-struct";
@@ -176,7 +178,7 @@ public class Gl_320_glsl_input_struct extends Test {
     private boolean initTexture(GL3 gl3) {
 
         try {
-            jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE);
+            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
 
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

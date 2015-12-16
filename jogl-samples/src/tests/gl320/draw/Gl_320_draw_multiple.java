@@ -27,6 +27,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
@@ -45,7 +46,7 @@ public class Gl_320_draw_multiple extends Test {
     }
 
     public Gl_320_draw_multiple() {
-        super("gl-320-draw-multiple", 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-320-draw-multiple", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "draw-multiple";

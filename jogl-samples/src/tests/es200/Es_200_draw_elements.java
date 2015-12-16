@@ -25,6 +25,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.FloatBuffer;
@@ -69,7 +70,7 @@ public class Es_200_draw_elements extends Test {
     private int programName, uniformMvp, uniformDiffuse;
 
     public Es_200_draw_elements() {
-        super("es_200_draw_elements", 2, 0);
+        super("es_200_draw_elements", Profile.ES, 2, 0);
     }
 
     @Override

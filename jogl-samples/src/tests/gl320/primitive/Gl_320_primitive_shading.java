@@ -30,6 +30,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
@@ -47,7 +48,7 @@ public class Gl_320_primitive_shading extends Test {
     }
 
     public Gl_320_primitive_shading() {
-        super("gl-320-primitive-shading", 3, 2);
+        super("gl-320-primitive-shading", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "primitive-shading";

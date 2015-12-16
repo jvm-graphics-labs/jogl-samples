@@ -46,6 +46,7 @@ import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import framework.Glm;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
@@ -62,7 +63,7 @@ public class Gl_320_fbo_blend_points extends Test {
     }
 
     public Gl_320_fbo_blend_points() {
-        super("gl-320-fbo-blend-points", 3, 2);
+        super("gl-320-fbo-blend-points", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE_RENDER = "fbo-blend-points";

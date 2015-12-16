@@ -31,12 +31,14 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jgli.Texture2D;
 
 /**
  *
@@ -49,7 +51,7 @@ public class Gl_320_fbo_integer extends Test {
     }
 
     public Gl_320_fbo_integer() {
-        super("Gl-320-fbo-integer", 3, 2);
+        super("Gl-320-fbo-integer", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE1 = "fbo-integer-render";
@@ -200,7 +202,7 @@ public class Gl_320_fbo_integer extends Test {
 
         try {
 
-            jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE);
+            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
             gl3.glActiveTexture(GL_TEXTURE0);
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);

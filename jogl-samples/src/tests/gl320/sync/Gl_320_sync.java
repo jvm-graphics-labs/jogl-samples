@@ -35,6 +35,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
@@ -42,6 +43,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jgli.Texture2D;
 
 /**
  *
@@ -54,7 +56,7 @@ public class Gl_320_sync extends Test {
     }
 
     public Gl_320_sync() {
-        super("gl-320-sync", 3, 2);
+        super("gl-320-sync", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "sync";
@@ -178,7 +180,7 @@ public class Gl_320_sync extends Test {
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-            jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE);
+            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
 
             jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());

@@ -27,6 +27,7 @@ import static com.jogamp.opengl.GL3ES3.GL_GEOMETRY_SHADER;
 import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
@@ -43,7 +44,7 @@ public class Gl_320_primitive_point_quad extends Test {
     }
 
     public Gl_320_primitive_point_quad() {
-        super("gl-320-primitive-point-quad", 3, 2);
+        super("gl-320-primitive-point-quad", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "primitive-point-quad";

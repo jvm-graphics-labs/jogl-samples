@@ -26,6 +26,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
@@ -43,7 +44,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
     }
 
     public Gl_320_buffer_uniform_shared() {
-        super("gl-320-buffer-uniform-shared", 3, 2);
+        super("gl-320-buffer-uniform-shared", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "buffer-uniform-shared";
@@ -191,7 +192,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
         GL3 gl3 = (GL3) gl;
         {
             // Compute the MVP (Model View Projection matrix)
-            FloatUtil.makePerspective(projection, 0, true, FloatUtil.QUARTER_PI, 
+            FloatUtil.makePerspective(projection, 0, true, FloatUtil.QUARTER_PI,
                     (float) windowSize.x / windowSize.y, .1f, 100f);
             FloatUtil.makeIdentity(model);
             FloatUtil.multMatrix(projection, view());

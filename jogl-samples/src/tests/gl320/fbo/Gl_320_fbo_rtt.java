@@ -35,12 +35,12 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import jglm.Vec2i;
-import jglm.Vec4;
 import jglm.Vec4i;
 
 /**
@@ -54,7 +54,7 @@ public class Gl_320_fbo_rtt extends Test {
     }
 
     public Gl_320_fbo_rtt() {
-        super("gl-320-fbo-rtt", 3, 2);
+        super("gl-320-fbo-rtt", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE1 = "fbo-rtt-multiple-output";

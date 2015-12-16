@@ -26,6 +26,7 @@ import static com.jogamp.opengl.GL3.GL_PROGRAM_POINT_SIZE;
 import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
@@ -41,7 +42,7 @@ public class Gl_320_primitive_point_clip extends Test {
     }
 
     public Gl_320_primitive_point_clip() {
-        super("gl-320-primitive-point-clip", 3, 2);
+        super("gl-320-primitive-point-clip", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "primitive-point-clip";

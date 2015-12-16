@@ -11,6 +11,7 @@ import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 
@@ -25,7 +26,7 @@ public class Gl_320_glsl_cast_fail extends Test {
     }
 
     public Gl_320_glsl_cast_fail() {
-        super("gl-320-glsl-cast-fail", 3, 2);
+        super("gl-320-glsl-cast-fail", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "glsl-cast-fail";

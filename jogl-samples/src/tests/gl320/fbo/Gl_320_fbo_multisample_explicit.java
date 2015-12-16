@@ -36,12 +36,14 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jgli.Texture2D;
 import jglm.Vec2;
 import jglm.Vec2i;
 
@@ -56,7 +58,8 @@ public class Gl_320_fbo_multisample_explicit extends Test {
     }
 
     public Gl_320_fbo_multisample_explicit() {
-        super("Gl-320-fbo-multisample-explicit", 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("Gl-320-fbo-multisample-explicit", Profile.CORE, 3, 2, 
+                new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
     }
 
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
@@ -190,7 +193,7 @@ public class Gl_320_fbo_multisample_explicit extends Test {
     private boolean initTexture(GL3 gl3) {
 
         try {
-            jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE);
+            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
             gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
 

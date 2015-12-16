@@ -27,6 +27,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
@@ -43,7 +44,7 @@ public class Gl_320_buffer_update extends Test {
     }
 
     public Gl_320_buffer_update() {
-        super("gl-320-buffer-update", 3, 2);
+        super("gl-320-buffer-update", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "buffer-update";
@@ -232,7 +233,7 @@ public class Gl_320_buffer_update extends Test {
             ByteBuffer transformBuffer = gl3.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, 16 * GLBuffers.SIZEOF_FLOAT,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-            
+
             FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
                     (float) glWindow.getWidth() / glWindow.getHeight(), 0.1f, 100.0f);
             FloatUtil.makeIdentity(model);

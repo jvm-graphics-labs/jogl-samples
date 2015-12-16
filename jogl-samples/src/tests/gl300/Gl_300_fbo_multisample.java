@@ -14,6 +14,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class Gl_300_fbo_multisample extends Test {
     }
 
     public Gl_300_fbo_multisample() {
-        super("gl-300-fbo-multisample", 3, 0);
+        super("gl-300-fbo-multisample", Profile.COMPATIBILITY, 3, 0);
     }
 
     private final String SHADERS_SOURCE = "image-2d";
@@ -160,7 +161,7 @@ public class Gl_300_fbo_multisample extends Test {
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-            jgli.Gl.Format glFormat = Gl.instance.translate(texture.format);
+            jgli.Gl.Format glFormat = Gl.instance.translate(texture.format());
 
             for (int level = 0; level < texture.levels(); level++) {
 

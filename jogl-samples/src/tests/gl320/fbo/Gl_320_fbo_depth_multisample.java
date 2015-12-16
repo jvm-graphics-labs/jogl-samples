@@ -45,6 +45,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
@@ -53,6 +54,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jgli.Texture2D;
 import jglm.Vec2;
 
 /**
@@ -66,7 +68,7 @@ public class Gl_320_fbo_depth_multisample extends Test {
     }
 
     public Gl_320_fbo_depth_multisample() {
-        super("Gl-320-fbo-depth-multisample", 3, 2, new Vec2(0.0f, -(float) Math.PI * 0.48f));
+        super("Gl-320-fbo-depth-multisample", Profile.CORE, 3, 2, new Vec2(0.0f, -(float) Math.PI * 0.48f));
     }
 
     private final String SHADERS_SOURCE_TEXTURE = "texture-2d";
@@ -240,7 +242,7 @@ public class Gl_320_fbo_depth_multisample extends Test {
         boolean validated = true;
 
         try {
-            jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE);
+            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
             if (texture.empty()) {
                 throw new Error("texture empty");

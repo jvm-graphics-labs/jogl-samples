@@ -33,6 +33,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.FloatBuffer;
@@ -51,7 +52,7 @@ public class Gl_320_fbo_layered extends Test {
     }
 
     public Gl_320_fbo_layered() {
-        super("Gl-320-fbo-layered", 3, 2);
+        super("Gl-320-fbo-layered", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE1 = "fbo-layered";

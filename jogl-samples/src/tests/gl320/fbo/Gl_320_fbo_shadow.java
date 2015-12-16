@@ -56,6 +56,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
@@ -63,6 +64,7 @@ import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jgli.Texture2D;
 import jglm.Vec2;
 import jglm.Vec2i;
 
@@ -77,7 +79,7 @@ public class Gl_320_fbo_shadow extends Test {
     }
 
     public Gl_320_fbo_shadow() {
-        super("Gl-320-fbo-shadow", 3, 2, new Vec2(0.0f, -(float) Math.PI * 0.3f));
+        super("Gl-320-fbo-shadow", Profile.CORE, 3, 2, new Vec2(0.0f, -(float) Math.PI * 0.3f));
     }
 
     private final String SHADER_SOURCE_DEPTH = "fbo-shadow-depth";
@@ -284,7 +286,7 @@ public class Gl_320_fbo_shadow extends Test {
 
         try {
 
-            jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE);
+            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
 
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

@@ -33,6 +33,7 @@ import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import framework.Glm;
+import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.FloatBuffer;
@@ -49,7 +50,7 @@ public class Gl_320_texture_3d extends Test {
     }
 
     public Gl_320_texture_3d() {
-        super("gl-320-texture-3d", 3, 2);
+        super("gl-320-texture-3d", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE = "texture-3d";
