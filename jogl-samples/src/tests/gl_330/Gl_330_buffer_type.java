@@ -41,7 +41,7 @@ public class Gl_330_buffer_type extends Test {
     }
 
     public Gl_330_buffer_type() {
-        super("gl-330-buffer-type", Profile.CORE, 3, 2);
+        super("gl-330-buffer-type", Profile.CORE, 3, 3);
     }
 
     private final String SHADERS_SOURCE = "flat-color";
@@ -157,8 +157,8 @@ public class Gl_330_buffer_type extends Test {
         // Get variables locations
         if (validated) {
 
-            uniformMvp = gl3.glGetUniformLocation(programName, "MVP");
-            uniformDiffuse = gl3.glGetUniformLocation(programName, "Diffuse");
+            uniformMvp = gl3.glGetUniformLocation(programName, "mvp");
+            uniformDiffuse = gl3.glGetUniformLocation(programName, "diffuse");
         }
 
         return validated & checkError(gl3, "initProgram");
@@ -247,7 +247,7 @@ public class Gl_330_buffer_type extends Test {
         FloatUtil.multMatrix(projection, view(), mvp);
         FloatUtil.multMatrix(mvp, model);
 
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f,1.0f,1.0f,1.0f}, 0);
+        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
         gl3.glUseProgram(programName);
         gl3.glUniform4fv(uniformDiffuse, 1, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
@@ -262,5 +262,17 @@ public class Gl_330_buffer_type extends Test {
         }
 
         return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL3 gl3 = (GL3) gl;
+
+        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glDeleteVertexArrays(Buffer.MAX.ordinal(), vertexArrayName, 0);
+        gl3.glDeleteProgram(programName);
+
+        return checkError(gl3, "end");
     }
 }

@@ -228,28 +228,16 @@ public class Glm {
     }
 
     public static int packSnorm3x10_1x2(float[] v) {
-        int[] tmp = new int[4];
-        tmp[0] = (int) (Math.max(-1, Math.min(1, v[0])) * 511.f);
-        tmp[1] = (int) (Math.max(-1, Math.min(1, v[1])) * 511.f);
-        tmp[2] = (int) (Math.max(-1, Math.min(1, v[2])) * 511.f);
-        tmp[3] = (int) (Math.max(-1, Math.min(1, v[3])) * 1.f);
-        int[] left = new int[4];
-        left[0] = ((tmp[0] & 0xffff) << 22);
-        left[1] = ((tmp[1] & 0xffff) << 22);
-        left[2] = ((tmp[2] & 0xffff) << 22);
-        left[3] = ((tmp[3] & 0xffff) << 30);
-        int[] right = new int[4];
-        right[0] = (left[0] >> 22);
-        right[1] = ((left[1]&0xffff) >> 12);
-        right[2] = (left[2] >> 2);
-        right[3] = (left[3] >> 0);
-//        return (tmp[0] << 22) | (tmp[1] << 12) | (tmp[2] << 2) | tmp[3];
-        return right[0] | (right[1] << 0) | (right[2] << 0) | (right[3] << 0);
-    }
-
-    public static void main(String[] args) {
-        int i = packSnorm3x10_1x2(new float[]{-1.0f, -1.0f, 0.0f, 1.0f});
-        System.out.println("" + i);
+        int[] resutl = new int[4];
+        resutl[0] = (int) (Math.max(-1, Math.min(1, v[0])) * 511.f);
+        resutl[1] = (int) (Math.max(-1, Math.min(1, v[1])) * 511.f);
+        resutl[2] = (int) (Math.max(-1, Math.min(1, v[2])) * 511.f);
+        resutl[3] = (int) (Math.max(-1, Math.min(1, v[3])) * 1.f);
+        resutl[0] = (resutl[0] << 22) >>> 22;
+        resutl[1] = (resutl[1] << 22) >>> 12;
+        resutl[2] = (resutl[2] << 22) >>> 2;
+        resutl[3] = (resutl[3] << 30);
+        return resutl[0] | resutl[1] | resutl[2] | resutl[3];
     }
 
     private static float[] pow(float[] base, float exponent) {

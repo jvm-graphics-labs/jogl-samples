@@ -72,7 +72,7 @@ public class Gl_330_blend_rtt extends Test {
     }
 
     public Gl_330_blend_rtt() {
-        super("gl-330-blend-rtt", Profile.CORE, 3, 2);
+        super("gl-330-blend-rtt", Profile.CORE, 3, 3);
     }
 
     private final String SHADERS_SOURCE = "image-2d";

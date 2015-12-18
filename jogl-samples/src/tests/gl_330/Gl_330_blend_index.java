@@ -48,7 +48,7 @@ public class Gl_330_blend_index extends Test {
     }
 
     public Gl_330_blend_index() {
-        super("gl-330-blend-index", Profile.CORE, 3, 2);
+        super("gl-330-blend-index", Profile.CORE, 3, 3);
     }
 
     private final String SHADERS_SOURCE = "blend-index";
