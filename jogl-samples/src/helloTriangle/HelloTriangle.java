@@ -89,8 +89,8 @@ public class HelloTriangle implements GLEventListener, KeyListener {
     private int program, modelToClipMatrixUL;
     private final String SHADERS_ROOT = "/shaders";
     /**
-     Use pools, you don't want to create and let them cleaned by the garbage
-     collector continuosly in the display() method.
+     * Use pools, you don't want to create and let them cleaned by the garbage
+     * collector continuosly in the display() method.
      */
     private float[] scale = new float[16];
     private float[] zRotazion = new float[16];
@@ -150,39 +150,44 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
     private void initVao(GL4 gl4) {
         /**
-         Let's create the VAO and save in it all the attributes properties.
+         * Let's create the VAO and save in it all the attributes properties.
          */
         gl4.glGenVertexArrays(1, objects, Semantic.Object.VAO);
         gl4.glBindVertexArray(objects[Semantic.Object.VAO]);
         {
             /**
-             Ibo is part of the VAO, so we need to bind it and leave it bound.
+             * Ibo is part of the VAO, so we need to bind it and leave it bound.
              */
             gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, objects[Semantic.Object.IBO]);
             {
                 /**
-                 VBO is not part of VAO, we need it to bind it only when we call
-                 glEnableVertexAttribArray and glVertexAttribPointer, so that VAO
-                 knows which VBO the attributes refer to, then we can unbind it.
+                 * VBO is not part of VAO, we need it to bind it only when we call
+                 * glEnableVertexAttribArray and glVertexAttribPointer, so that VAO
+                 * knows which VBO the attributes refer to, then we can unbind it.
                  */
                 gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.VBO]);
                 {
+                    /**
+                     * This is the vertex attribute layout:
+                     *
+                     * | position x | position y | color R | color G | color B |
+                     */
                     int stride = (2 + 3) * GLBuffers.SIZEOF_BYTE;
                     /**
-                     We draw in 2D on the xy plane, so we need just two 
-                     coordinates for the position, it will be padded to vec4 as
-                     (x, y, 0, 1) in the vertex shader.
+                     * We draw in 2D on the xy plane, so we need just two
+                     * coordinates for the position, it will be padded to vec4 as
+                     * (x, y, 0, 1) in the vertex shader.
                      */
                     gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
                     gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL4.GL_BYTE,
                             false, stride, 0 * GLBuffers.SIZEOF_BYTE);
                     /**
-                     Color needs three coordinates. We show the usage of normalization,
-                     where signed value get normalized [-1, 1] like in this case.
-                     unsigned will get normalized in the [0, 1] instead, but take
-                     in account java use always signed, althought you can trick it.
-                     Vec3 color will be padded to (x, y, z, 1) in the fragment
-                     shader.
+                     * Color needs three coordinates. We show the usage of normalization,
+                     * where signed value get normalized [-1, 1] like in this case.
+                     * unsigned will get normalized in the [0, 1] instead, but take
+                     * in account java use always signed, althought you can trick it.
+                     * Vec3 color will be padded to (x, y, z, 1) in the fragment
+                     * shader.
                      */
                     gl4.glEnableVertexAttribArray(Semantic.Attr.COLOR);
                     gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 3, GL4.GL_BYTE,
@@ -211,8 +216,8 @@ public class HelloTriangle implements GLEventListener, KeyListener {
         program = shaderProgram.program();
 
         /**
-         These links don't go into effect until you link the program. If you want 
-         to change index, you need to link the program again.
+         * These links don't go into effect until you link the program. If you want
+         * to change index, you need to link the program again.
          */
         gl4.glBindAttribLocation(program, Semantic.Attr.POSITION, "position");
         gl4.glBindAttribLocation(program, Semantic.Attr.COLOR, "color");
@@ -220,8 +225,8 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
         shaderProgram.link(gl4, System.out);
         /**
-         Take in account that JOGL offers a GLUniformData class, here we don't 
-         use it, but take a look to it since it may be interesting for you.
+         * Take in account that JOGL offers a GLUniformData class, here we don't
+         * use it, but take a look to it since it may be interesting for you.
          */
         modelToClipMatrixUL = gl4.glGetUniformLocation(program, "modelToClipMatrix");
 
@@ -236,8 +241,8 @@ public class HelloTriangle implements GLEventListener, KeyListener {
 
         gl4.glDeleteProgram(program);
         /**
-         Clean VAO first in order to minimize problems. If you delete IBO first,
-         VAO will still have the IBO id, this may lead to crashes.
+         * Clean VAO first in order to minimize problems. If you delete IBO first,
+         * VAO will still have the IBO id, this may lead to crashes.
          */
         gl4.glDeleteVertexArrays(1, objects, objects[Semantic.Object.VAO]);
 
@@ -255,8 +260,8 @@ public class HelloTriangle implements GLEventListener, KeyListener {
         GL4 gl4 = drawable.getGL().getGL4();
 
         /**
-         We set the clear color and depth (althought depth is not necessary since
-         it is 1 by default). 
+         * We set the clear color and depth (althought depth is not necessary since
+         * it is 1 by default).
          */
         gl4.glClearColor(0f, .33f, 0.66f, 1f);
         gl4.glClearDepthf(1f);
@@ -269,8 +274,8 @@ public class HelloTriangle implements GLEventListener, KeyListener {
                 now = System.currentTimeMillis();
                 float diff = (float) (now - start) / 1000;
                 /**
-                 Here we build the matrix that will multiply our original 
-                 vertex positions. We scale, halving it, and rotate it.
+                 * Here we build the matrix that will multiply our original
+                 * vertex positions. We scale, halving it, and rotate it.
                  */
                 scale = FloatUtil.makeScale(scale, true, 0.5f, 0.5f, 0.5f);
                 zRotazion = FloatUtil.makeRotationEuler(zRotazion, 0, 0, 0, diff);
@@ -280,21 +285,21 @@ public class HelloTriangle implements GLEventListener, KeyListener {
                 gl4.glDrawElements(GL4.GL_TRIANGLES, indexData.length, GL4.GL_UNSIGNED_SHORT, 0);
             }
             /**
-             In this sample we bind VAO to the default values, this is not a 
-             cheapier binding, it costs always as a binding, so here we have for 
-             example 2 vao bindings. Every binding means additional validation 
-             and overhead, this may affect your performances. 
-             So if you are looking for high performances skip these calls, but 
-             remember that OpenGL is a state machine, so what you left bound 
-             remains bound!
+             * In this sample we bind VAO to the default values, this is not a
+             * cheapier binding, it costs always as a binding, so here we have for
+             * example 2 vao bindings. Every binding means additional validation
+             * and overhead, this may affect your performances.
+             * So if you are looking for high performances skip these calls, but
+             * remember that OpenGL is a state machine, so what you left bound
+             * remains bound!
              */
             gl4.glBindVertexArray(0);
         }
         gl4.glUseProgram(0);
         /**
-         Check always any GL error, but keep in mind this is an implicit 
-         synchronization between CPU and GPU, so you should use it only for
-         debug purposes.
+         * Check always any GL error, but keep in mind this is an implicit
+         * synchronization between CPU and GPU, so you should use it only for
+         * debug purposes.
          */
         checkError(gl4, "display");
     }
@@ -335,8 +340,8 @@ public class HelloTriangle implements GLEventListener, KeyListener {
         System.out.println("reshape");
         GL4 gl4 = drawable.getGL().getGL4();
         /**
-         Just the glViewport for this sample, normally here you update your
-         projection matrix.
+         * Just the glViewport for this sample, normally here you update your
+         * projection matrix.
          */
         gl4.glViewport(x, y, width, height);
     }

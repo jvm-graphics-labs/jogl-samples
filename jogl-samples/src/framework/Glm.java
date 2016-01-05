@@ -137,6 +137,11 @@ public class Glm {
                 // between magenta & cyan
                 h = 240 + 60 * (rgbColor[0] - rgbColor[1]) / delta;
             }
+            if (h < 0) {
+                hsv[0] = h + 360;
+            } else {
+                hsv[0] = h;
+            }
         } else {
             // If r = g = b = 0 then s = 0, h is undefined
             hsv[1] = 0;
