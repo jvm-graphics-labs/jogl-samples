@@ -38,7 +38,7 @@ public class Caps {
     private ExtensionData extensi;
     private DebugData debug;
     public LimitsData limits;
-    private ValuesData values;
+    public ValuesData values;
     private FormatsData formats;
     
     private int[] tmp = new int[1];

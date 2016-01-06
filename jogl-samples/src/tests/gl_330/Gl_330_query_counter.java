@@ -23,7 +23,6 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import com.sun.org.glassfish.external.probe.provider.annotations.Probe;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
