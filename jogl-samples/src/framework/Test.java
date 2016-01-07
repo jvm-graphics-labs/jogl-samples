@@ -25,6 +25,9 @@ import static com.jogamp.opengl.GL.GL_INVALID_OPERATION;
 import static com.jogamp.opengl.GL.GL_INVALID_VALUE;
 import static com.jogamp.opengl.GL.GL_NO_ERROR;
 import static com.jogamp.opengl.GL.GL_OUT_OF_MEMORY;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SEVERITY_LOW;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SOURCE_APPLICATION;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_TYPE_OTHER;
 import static com.jogamp.opengl.GL2ES3.GL_FRAMEBUFFER_UNDEFINED;
 import static com.jogamp.opengl.GL2ES3.GL_MAJOR_VERSION;
 import static com.jogamp.opengl.GL2ES3.GL_MINOR_VERSION;
@@ -33,6 +36,7 @@ import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER;
 import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER;
 import com.jogamp.opengl.GL3;
 import static com.jogamp.opengl.GL3.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS;
+import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLEventListener;
@@ -146,7 +150,7 @@ public class Test implements GLEventListener, KeyListener {
                         return drawable.getGL();
                 }
             case CORE:
-                switch(majorVersionRequire) {
+                switch (majorVersionRequire) {
                     case 1:
                         return drawable.getGL().getGL();
                     case 2:
@@ -309,6 +313,17 @@ public class Test implements GLEventListener, KeyListener {
         }
 
         return status == GL_FRAMEBUFFER_COMPLETE;
+    }
+
+    protected void logImplementationDependentLimit(GL4 gl4, int value, String string) {
+
+        int[] result = {0};
+        gl4.glGetIntegerv(value, result, 0);
+        System.out.println(value + ": " + result[0]);
+        if (checkExtension(gl4, "GL_ARB_debug_output")) {
+            gl4.glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 1, 
+                    GL_DEBUG_SEVERITY_LOW, string.length(), string);
+        }
     }
 
     protected float cameraDistance() {

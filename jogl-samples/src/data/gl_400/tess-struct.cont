@@ -1,0 +1,27 @@
+#version 400 core
+
+precision highp float;
+precision highp int;
+layout(std140, column_major) uniform;
+layout(vertices = 4) out;
+
+struct Vertex
+{
+    vec4 color;
+};
+
+in Vertex vert[];
+out Vertex cont[];
+
+void main()
+{	
+    gl_TessLevelInner[0] = 16.0;
+    gl_TessLevelInner[1] = 16.0;
+    gl_TessLevelOuter[0] = 8.0;
+    gl_TessLevelOuter[1] = 8.0;
+    gl_TessLevelOuter[2] = 8.0;
+    gl_TessLevelOuter[3] = 8.0;
+    gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+    cont[gl_InvocationID].color = vert[gl_InvocationID].color;
+}
+
