@@ -1,0 +1,47 @@
+#version 410 core
+
+#define POSITION		0
+#define COLOR			3
+#define FRAG_COLOR		0
+
+precision highp float;
+precision highp int;
+layout(std140, column_major) uniform;
+layout(quads, equal_spacing, ccw) in;
+
+struct Vertex
+{
+    vec4 color;
+};
+
+in gl_PerVertex
+{
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
+} gl_in[];
+
+layout(location = 0) in Vertex inVertex[];
+
+out gl_PerVertex
+{
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
+};
+
+layout(location = 0) out Vertex outVertex;
+
+vec4 interpolate(in vec4 v0, in vec4 v1, in vec4 v2, in vec4 v3)
+{
+    vec4 a = mix(v0, v1, gl_TessCoord.x);
+    vec4 b = mix(v3, v2, gl_TessCoord.x);
+    return mix(a, b, gl_TessCoord.y);
+}
+
+void main()
+{	
+    gl_Position = interpolate(gl_in[0].gl_Position, gl_in[1].gl_Position, gl_in[2].gl_Position, gl_in[3].gl_Position);
+    outVertex.color = interpolate(inVertex[0].color, inVertex[1].color, inVertex[2].color, inVertex[3].color);
+}
+

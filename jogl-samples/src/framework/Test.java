@@ -13,6 +13,7 @@ import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_EXTENSIONS;
+import static com.jogamp.opengl.GL.GL_FALSE;
 import static com.jogamp.opengl.GL.GL_FRAMEBUFFER;
 import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_COMPLETE;
 import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
@@ -25,9 +26,13 @@ import static com.jogamp.opengl.GL.GL_INVALID_OPERATION;
 import static com.jogamp.opengl.GL.GL_INVALID_VALUE;
 import static com.jogamp.opengl.GL.GL_NO_ERROR;
 import static com.jogamp.opengl.GL.GL_OUT_OF_MEMORY;
+import static com.jogamp.opengl.GL.GL_TRUE;
+import com.jogamp.opengl.GL2ES2;
 import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SEVERITY_LOW;
 import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SOURCE_APPLICATION;
 import static com.jogamp.opengl.GL2ES2.GL_DEBUG_TYPE_OTHER;
+import static com.jogamp.opengl.GL2ES2.GL_INFO_LOG_LENGTH;
+import static com.jogamp.opengl.GL2ES2.GL_LINK_STATUS;
 import static com.jogamp.opengl.GL2ES3.GL_FRAMEBUFFER_UNDEFINED;
 import static com.jogamp.opengl.GL2ES3.GL_MAJOR_VERSION;
 import static com.jogamp.opengl.GL2ES3.GL_MINOR_VERSION;
@@ -321,9 +326,33 @@ public class Test implements GLEventListener, KeyListener {
         gl4.glGetIntegerv(value, result, 0);
         System.out.println(value + ": " + result[0]);
         if (checkExtension(gl4, "GL_ARB_debug_output")) {
-            gl4.glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 1, 
+            gl4.glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 1,
                     GL_DEBUG_SEVERITY_LOW, string.length(), string);
         }
+    }
+
+    protected boolean checkProgram(GL2ES2 gl2, int programName) {
+
+        if (programName == 0) {
+            return false;
+        }
+
+        int[] result = {GL_FALSE};
+        gl2.glGetProgramiv(programName, GL_LINK_STATUS, result, 0);
+
+        if (result[0] == GL_TRUE) {
+            return true;
+        }
+
+        int[] infoLogLength = {0};
+        gl2.glGetProgramiv(programName, GL_INFO_LOG_LENGTH, infoLogLength, 0);
+        if (infoLogLength[0] > 0) {
+            byte[] buffer = new byte[infoLogLength[0]];
+            gl2.glGetProgramInfoLog(programName, infoLogLength[0], null, 0, buffer, 0);
+            System.out.println(new String(buffer));
+        }
+
+        return result[0] == GL_TRUE;
     }
 
     protected float cameraDistance() {
