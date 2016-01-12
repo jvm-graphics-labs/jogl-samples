@@ -2,16 +2,13 @@
 
 #define FRAG_COLOR		0
 #define DIFFUSE			0
-
-#define MATERIAL	0
-#define TRANSFORM0	1
-#define TRANSFORM1	2	
+#define MATERIAL		0
 
 precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-layout(binding = DIFFUSE, rgba16f) coherent uniform image2D diffuse;
+layout(binding = DIFFUSE, r32ui) coherent uniform uimage2D imageData;
 
 layout(binding = MATERIAL) uniform Material
 {
@@ -27,5 +24,6 @@ layout(location = FRAG_COLOR, index = 0) out vec4 color;
 
 void main()
 {
-    color = imageLoad(diffuse, ivec2(inBlock.texCoord * material.imgSize));
+    uint fetch = imageLoad(imageData, ivec2(inBlock.texCoord * material.imgSize)).x;
+    color = unpackUnorm4x8(fetch);
 }

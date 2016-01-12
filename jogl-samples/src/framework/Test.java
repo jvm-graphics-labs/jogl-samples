@@ -33,23 +33,39 @@ import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SOURCE_APPLICATION;
 import static com.jogamp.opengl.GL2ES2.GL_DEBUG_TYPE_OTHER;
 import static com.jogamp.opengl.GL2ES2.GL_INFO_LOG_LENGTH;
 import static com.jogamp.opengl.GL2ES2.GL_LINK_STATUS;
+import static com.jogamp.opengl.GL2ES2.GL_MAX_VERTEX_ATTRIBS;
+import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING;
+import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_ENABLED;
+import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_NORMALIZED;
+import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_POINTER;
+import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_SIZE;
+import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_STRIDE;
+import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_TYPE;
+import com.jogamp.opengl.GL2ES3;
 import static com.jogamp.opengl.GL2ES3.GL_FRAMEBUFFER_UNDEFINED;
 import static com.jogamp.opengl.GL2ES3.GL_MAJOR_VERSION;
 import static com.jogamp.opengl.GL2ES3.GL_MINOR_VERSION;
 import static com.jogamp.opengl.GL2ES3.GL_NUM_EXTENSIONS;
+import static com.jogamp.opengl.GL2ES3.GL_VERTEX_ATTRIB_ARRAY_DIVISOR;
+import static com.jogamp.opengl.GL2ES3.GL_VERTEX_ATTRIB_ARRAY_INTEGER;
 import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER;
 import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER;
 import com.jogamp.opengl.GL3;
 import static com.jogamp.opengl.GL3.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS;
+import com.jogamp.opengl.GL3ES3;
 import com.jogamp.opengl.GL4;
+import static com.jogamp.opengl.GL4.GL_VERTEX_ATTRIB_ARRAY_LONG;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLES2;
+import com.jogamp.opengl.GLES3;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
+import static framework.Profile.ES;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
@@ -81,35 +97,32 @@ public class Test implements GLEventListener, KeyListener {
     protected GLWindow glWindow;
     protected Animator animator;
     private Profile profile;
-    private final int majorVersionRequire, minorVersionRequire;
+    private final int major, minor;
     private final Vec2 translationOrigin, translationCurrent, rotationOrigin, rotationCurrent;
     protected final String TEXTURE_ROOT = "/data";
 
-    public Test(String title, Profile profile, int majorVersionRequire, int minorVersionRequire, Vec2 orientation) {
-        this(title, profile, majorVersionRequire, minorVersionRequire, new Vec2i(640, 480), orientation, new Vec2(0, 4));
+    public Test(String title, Profile profile, int major, int minor, Vec2 orientation) {
+        this(title, profile, major, minor, new Vec2i(640, 480), orientation, new Vec2(0, 4));
     }
 
-    public Test(String title, Profile profile, int majorVersionRequire, int minorVersionRequire, Vec2i windowSize) {
-        this(title, profile, majorVersionRequire, minorVersionRequire, windowSize, new Vec2(), new Vec2(0, 4));
+    public Test(String title, Profile profile, int major, int minor, Vec2i windowSize) {
+        this(title, profile, major, minor, windowSize, new Vec2(), new Vec2(0, 4));
     }
 
-    public Test(String title, Profile profile, int majorVersionRequire, int minorVersionRequire, Vec2i windowSize,
-            Vec2 orientation) {
-        this(title, profile, majorVersionRequire, minorVersionRequire, windowSize, orientation, new Vec2(0, 4));
+    public Test(String title, Profile profile, int major, int minor, Vec2i windowSize, Vec2 orientation) {
+        this(title, profile, major, minor, windowSize, orientation, new Vec2(0, 4));
     }
 
-    public Test(String title, Profile profile, int majorVersionRequire, int minorVersionRequire) {
+    public Test(String title, Profile profile, int major, int minor) {
 
-        this(title, profile, majorVersionRequire, minorVersionRequire, new Vec2i(640, 480),
-                new Vec2(), new Vec2(0, 4));
+        this(title, profile, major, minor, new Vec2i(640, 480), new Vec2(), new Vec2(0, 4));
     }
 
-    public Test(String title, Profile profile, int majorVersionRequire, int minorVersionRequire, Vec2i windowSize,
-            Vec2 orientation, Vec2 position) {
+    public Test(String title, Profile profile, int major, int minor, Vec2i windowSize, Vec2 orientation, Vec2 position) {
 
         this.profile = profile;
-        this.majorVersionRequire = majorVersionRequire;
-        this.minorVersionRequire = minorVersionRequire;
+        this.major = major;
+        this.minor = minor;
         this.windowSize = windowSize;
         this.translationOrigin = position;
         this.translationCurrent = position;
@@ -162,7 +175,7 @@ public class Test implements GLEventListener, KeyListener {
     private GL getCorrespondingGl(GLAutoDrawable drawable) {
         switch (profile) {
             case ES:
-                switch (majorVersionRequire) {
+                switch (major) {
                     case 1:
                         return drawable.getGL().getGL2ES1();
                     case 2:
@@ -173,7 +186,7 @@ public class Test implements GLEventListener, KeyListener {
                         return drawable.getGL();
                 }
             case CORE:
-                switch (majorVersionRequire) {
+                switch (major) {
                     case 1:
                         return drawable.getGL().getGL();
                     case 2:
@@ -246,10 +259,10 @@ public class Test implements GLEventListener, KeyListener {
         int[] minorVersionContext = new int[]{0};
         gl.glGetIntegerv(GL_MAJOR_VERSION, majorVersionContext, 0);
         gl.glGetIntegerv(GL_MINOR_VERSION, minorVersionContext, 0);
-        System.out.println("OpenGL Version Needed " + majorVersionRequire + "." + minorVersionRequire
+        System.out.println("OpenGL Version Needed " + major + "." + minor
                 + " ( " + majorVersionContext[0] + "," + minorVersionContext[0] + " found)");
         return version(majorVersionContext[0], minorVersionContext[0])
-                >= version(majorVersionRequire, minorVersionRequire);
+                >= version(major, minor);
     }
 
     private int version(int major, int minor) {
@@ -373,22 +386,65 @@ public class Test implements GLEventListener, KeyListener {
         return result[0] == GL_TRUE;
     }
 
+    protected boolean validate(GL2ES3 gl4, int vertexArrayName, VertexAttrib[] expected) {
+
+        boolean success = true;
+
+        int[] maxVertexAttrib = {0};
+        gl4.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, maxVertexAttrib, 0);
+
+        gl4.glBindVertexArray(vertexArrayName);
+        for (int attribLocation = 0; attribLocation < Math.min(maxVertexAttrib[0], expected.length); ++attribLocation) {
+            VertexAttrib vertexAttrib = new VertexAttrib();
+            int[] value = {0};
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_ENABLED, value, 0);
+            vertexAttrib.enabled = value[0];
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, value, 0);
+            vertexAttrib.binding = value[0];
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_SIZE, value, 0);
+            vertexAttrib.size = value[0];
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_STRIDE, value, 0);
+            vertexAttrib.stride = value[0];
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_TYPE, value, 0);
+            vertexAttrib.type = value[0];
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, value, 0);
+            vertexAttrib.normalized = value[0] == GL_TRUE;
+            if (profile != ES || (profile == ES && (major * 10 + minor >= 30))) {
+                gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_INTEGER, value, 0);
+                vertexAttrib.integer = value[0];
+            }
+            if (profile != ES && (major * 10 + minor >= 44)) {
+                gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_LONG, value, 0);
+                vertexAttrib.long_ = value[0];
+            }
+            if (profile != ES && (major * 10 + minor >= 31)) {
+                gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_DIVISOR, value, 0);
+                vertexAttrib.divisor = value[0];
+            }
+//            gl4.glGetVertexAttribPointerv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_POINTER,  value,0);
+            success = success && (vertexAttrib.isEqual(expected[attribLocation]));
+            assert (success);
+        }
+        gl4.glBindVertexArray(0);
+
+        return success;
+    }
+
     protected void deallocateDirectBuffer(Buffer directBuffer) {
         try {
             //        ((DirectBuffer) directBuffer).cleaner().clean();
-            if(!directBuffer.isDirect()) {
+            if (!directBuffer.isDirect()) {
                 return;
             }
-            
+
             Method cleanerMethod = directBuffer.getClass().getMethod("cleaner");
             cleanerMethod.setAccessible(true);
             Object cleaner = cleanerMethod.invoke(directBuffer);
             Method cleanMethod = cleaner.getClass().getMethod("clean");
             cleanMethod.setAccessible(true);
             cleanMethod.invoke(cleaner);
-            
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException 
-                | IllegalArgumentException | InvocationTargetException ex) {
+
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -396,19 +452,18 @@ public class Test implements GLEventListener, KeyListener {
     protected void deallocateDirectFloatBuffer(FloatBuffer directBuffer) {
         try {
             //        ((DirectBuffer) directBuffer).cleaner().clean();
-            if(!directBuffer.isDirect()) {
+            if (!directBuffer.isDirect()) {
                 return;
             }
-            
+
             Method cleanerMethod = directBuffer.getClass().getMethod("cleaner");
             cleanerMethod.setAccessible(true);
             Object cleaner = cleanerMethod.invoke(directBuffer);
             Method cleanMethod = cleaner.getClass().getMethod("clean");
             cleanMethod.setAccessible(true);
             cleanMethod.invoke(cleaner);
-            
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException 
-                | IllegalArgumentException | InvocationTargetException ex) {
+
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
             Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -425,7 +480,6 @@ public class Test implements GLEventListener, KeyListener {
 //
 //        ((DirectBuffer) directBuffer).cleaner().clean();
 //    }
-
     protected float cameraDistance() {
         return translationCurrent.y;
     }

@@ -30,7 +30,7 @@ out Block
 } outBlock;
 
 void main()
-{
+{	
     outBlock.texCoord = texCoord;
     gl_Position = transform.mvp * vec4(position, 0.0, 1.0);
 }
