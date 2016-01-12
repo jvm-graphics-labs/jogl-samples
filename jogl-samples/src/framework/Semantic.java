@@ -51,4 +51,10 @@ public class Semantic {
         public static final int SAMPLER = 4;
         public static final int SIZE = 5;
     }
+
+    public static class Image {
+
+        public static final int DIFFUSE = 0;
+        public static final int PICKING = 1;
+    }
 }
