@@ -311,8 +311,6 @@ public class Gl_420_image_load extends Test {
 
 //            pointer.putFloat(imageSize.x);
 //            pointer.putFloat(imageSize.y);
-//            pointer.putFloat((float)((long)imageSize.x));
-//            pointer.putFloat((float)((long)imageSize.y));
             pointer.put((byte) (0 & 0xff));
             pointer.put((byte) (1 & 0xff));
             pointer.put((byte) (0 & 0xff));
