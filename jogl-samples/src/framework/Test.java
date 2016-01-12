@@ -44,6 +44,7 @@ import static com.jogamp.opengl.GL3.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.FloatUtil;
@@ -54,11 +55,20 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import jglm.Vec2;
 import jglm.Vec2i;
 import jglm.Vec3;
+import sun.nio.ch.DirectBuffer;
 
 /**
  *
@@ -81,6 +91,11 @@ public class Test implements GLEventListener, KeyListener {
 
     public Test(String title, Profile profile, int majorVersionRequire, int minorVersionRequire, Vec2i windowSize) {
         this(title, profile, majorVersionRequire, minorVersionRequire, windowSize, new Vec2(), new Vec2(0, 4));
+    }
+
+    public Test(String title, Profile profile, int majorVersionRequire, int minorVersionRequire, Vec2i windowSize,
+            Vec2 orientation) {
+        this(title, profile, majorVersionRequire, minorVersionRequire, windowSize, orientation, new Vec2(0, 4));
     }
 
     public Test(String title, Profile profile, int majorVersionRequire, int minorVersionRequire) {
@@ -110,6 +125,8 @@ public class Test implements GLEventListener, KeyListener {
         GLProfile glProfile = GLProfile.getDefault();
         GLCapabilities glCapabilities = new GLCapabilities(glProfile);
         glWindow = GLWindow.create(screen, glCapabilities);
+        glWindow.setContextCreationFlags(GLContext.CTX_OPTION_DEBUG);
+
         assert glWindow != null;
 
         glWindow.setUndecorated(false);
@@ -121,6 +138,7 @@ public class Test implements GLEventListener, KeyListener {
         glWindow.setSize(windowSize.x, windowSize.y);
         glWindow.setVisible(true);
         glWindow.addGLEventListener(this);
+//                glWindow.getContext().enableGLDebugMessage(true);
         glWindow.addKeyListener(this);
 
         animator = new Animator();
@@ -324,7 +342,7 @@ public class Test implements GLEventListener, KeyListener {
 
         int[] result = {0};
         gl4.glGetIntegerv(value, result, 0);
-        System.out.println(value + ": " + result[0]);
+        System.out.println(value + "(" + string + "): " + result[0]);
         if (checkExtension(gl4, "GL_ARB_debug_output")) {
             gl4.glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 1,
                     GL_DEBUG_SEVERITY_LOW, string.length(), string);
@@ -354,6 +372,59 @@ public class Test implements GLEventListener, KeyListener {
 
         return result[0] == GL_TRUE;
     }
+
+    protected void deallocateDirectBuffer(Buffer directBuffer) {
+        try {
+            //        ((DirectBuffer) directBuffer).cleaner().clean();
+            if(!directBuffer.isDirect()) {
+                return;
+            }
+            
+            Method cleanerMethod = directBuffer.getClass().getMethod("cleaner");
+            cleanerMethod.setAccessible(true);
+            Object cleaner = cleanerMethod.invoke(directBuffer);
+            Method cleanMethod = cleaner.getClass().getMethod("clean");
+            cleanMethod.setAccessible(true);
+            cleanMethod.invoke(cleaner);
+            
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException 
+                | IllegalArgumentException | InvocationTargetException ex) {
+            Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    protected void deallocateDirectFloatBuffer(FloatBuffer directBuffer) {
+        try {
+            //        ((DirectBuffer) directBuffer).cleaner().clean();
+            if(!directBuffer.isDirect()) {
+                return;
+            }
+            
+            Method cleanerMethod = directBuffer.getClass().getMethod("cleaner");
+            cleanerMethod.setAccessible(true);
+            Object cleaner = cleanerMethod.invoke(directBuffer);
+            Method cleanMethod = cleaner.getClass().getMethod("clean");
+            cleanMethod.setAccessible(true);
+            cleanMethod.invoke(cleaner);
+            
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException 
+                | IllegalArgumentException | InvocationTargetException ex) {
+            Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    protected void deallocateDirectShortBuffer(ShortBuffer directBuffer) {
+        ((DirectBuffer) directBuffer).cleaner().clean();
+    }
+
+    protected void deallocateDirectIntBuffer(IntBuffer directBuffer) {
+        ((DirectBuffer) directBuffer).cleaner().clean();
+    }
+
+//    protected void deallocateDirectFloatBuffer(FloatBuffer directBuffer) {
+//
+//        ((DirectBuffer) directBuffer).cleaner().clean();
+//    }
 
     protected float cameraDistance() {
         return translationCurrent.y;

@@ -110,16 +110,16 @@ public class Gl_410_program_64 extends Test {
 
                 String[] vertexSourceContent = new String[]{
                     new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE + ".vert")).useDelimiter("\\A").next()};
-                programName[Program.VERT.ordinal()] = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1,
-                        vertexSourceContent);
+                programName[Program.VERT.ordinal()]
+                        = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
             }
 
             if (validated) {
 
                 String[] fragmentSourceContent = new String[]{
                     new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE + ".frag")).useDelimiter("\\A").next()};
-                programName[Program.FRAG.ordinal()] = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1,
-                        fragmentSourceContent);
+                programName[Program.FRAG.ordinal()]
+                        = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
             }
 
             if (validated) {
