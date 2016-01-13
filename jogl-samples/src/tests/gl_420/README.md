@@ -14,4 +14,4 @@
 
 ## gl-420-depth-conservative
 
-- early depth test, optimization. https://www.opengl.org/registry/specs/ARB/conservative_depth.txt
+- [early depth test](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/data/gl_420/test-depth-conservative.frag#L16), optimization. https://www.opengl.org/registry/specs/ARB/conservative_depth.txt
