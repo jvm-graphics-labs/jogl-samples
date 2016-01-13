@@ -322,7 +322,7 @@ public class Gl_420_picking extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
 
-        gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 5, 0, 0);
+        gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.PICKING.ordinal()]);
         ByteBuffer pointer = gl4.glMapBufferRange(GL_ARRAY_BUFFER, 0, Float.BYTES, GL_MAP_READ_BIT);

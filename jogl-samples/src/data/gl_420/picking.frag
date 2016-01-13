@@ -11,13 +11,6 @@ in vec4 gl_FragCoord;
 layout(binding = 0) uniform sampler2D diffuse;
 layout(binding = 1, r32f) writeonly uniform imageBuffer depth;
 
-/*
-layout(binding = PICKING) uniform picking
-{
-	uvec2 Coord;
-} Picking;
-*/
-
 uvec2 pickingCoord = uvec2(320, 240);
 
 in Block
