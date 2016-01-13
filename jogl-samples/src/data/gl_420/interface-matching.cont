@@ -9,57 +9,57 @@ precision highp int;
 layout(std140, column_major) uniform;
 layout(vertices = 4) out;
 
-struct vertex
+struct Vertex
 {
-	vec4 Color;
+    vec4 color;
 };
 
 in gl_PerVertex
 {
-	vec4 gl_Position;
-	float gl_PointSize;
-	float gl_ClipDistance[];
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
 } gl_in[];
 
-layout(location = 0) in vertex st_In[];
+layout(location = 0) in Vertex stIn[];
 
 #define COUNT 2
 
-in block
+in Block
 {
-	vec4 Color;
-	float Lumimance[COUNT];
-} bl_In[]; 
+    vec4 color;
+    float lumimance[COUNT];
+} blIn[]; 
 
 out gl_PerVertex
 {
-	vec4 gl_Position;
-	float gl_PointSize;
-	float gl_ClipDistance[];
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
 } gl_out[];
 
-layout(location = 0) out vertex st_Out[];
+layout(location = 0) out Vertex stOut[];
 
-out block
+out Block
 {
-	vec4 Color;
-} bl_Out[]; 
+    vec4 color;
+} blOut[]; 
 
 void main()
 {
-	float Luminance = 0.0;
-	for(int i = 0; i < COUNT; ++i)
-		Luminance += bl_In[gl_InvocationID].Lumimance[i];
+    float luminance = 0.0;
+    for(int i = 0; i < COUNT; ++i)
+        luminance += blIn[gl_InvocationID].lumimance[i];
 
-	gl_TessLevelInner[0] = 16.0;
-	gl_TessLevelInner[1] = 16.0;
-	gl_TessLevelOuter[0] = 8.0;
-	gl_TessLevelOuter[1] = 8.0;
-	gl_TessLevelOuter[2] = 8.0;
-	gl_TessLevelOuter[3] = 8.0;
-	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
-	st_Out[gl_InvocationID].Color = st_In[gl_InvocationID].Color;
-	bl_Out[gl_InvocationID].Color = bl_In[gl_InvocationID].Color;
-	bl_Out[gl_InvocationID].Color = bl_In[gl_InvocationID].Color * Luminance;
+    gl_TessLevelInner[0] = 16.0;
+    gl_TessLevelInner[1] = 16.0;
+    gl_TessLevelOuter[0] = 8.0;
+    gl_TessLevelOuter[1] = 8.0;
+    gl_TessLevelOuter[2] = 8.0;
+    gl_TessLevelOuter[3] = 8.0;
+    gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+    stOut[gl_InvocationID].color = stIn[gl_InvocationID].color;
+    blOut[gl_InvocationID].color = blIn[gl_InvocationID].color;
+    blOut[gl_InvocationID].color = blIn[gl_InvocationID].color * luminance;
 }
 
