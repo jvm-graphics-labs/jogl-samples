@@ -33,7 +33,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jgli.Texture2D;
+import jgli.Texture2d;
 import jglm.Vec4i;
 
 /**
@@ -169,7 +169,7 @@ public class Gl_320_texture_fetch extends Test {
             gl3.glActiveTexture(GL_TEXTURE0);
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
 
-            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
+            jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
             jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
 

@@ -28,7 +28,7 @@ import framework.Test;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jgli.Texture2D;
+import jgli.Texture2d;
 import jglm.Vec2;
 
 /**
@@ -102,7 +102,7 @@ public class Gl_320_image_space extends Test {
     private boolean initTexture(GL3 gl3) {
 
         try {
-            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
+            jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
 
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);

@@ -450,13 +450,12 @@ public class Test implements GLEventListener, KeyListener {
     }
 
     protected void deallocateDirectFloatBuffer(FloatBuffer directBuffer) {
+        //        ((DirectBuffer) directBuffer).cleaner().clean();
         try {
-            //        ((DirectBuffer) directBuffer).cleaner().clean();
             if (!directBuffer.isDirect()) {
                 return;
             }
-
-            Method cleanerMethod = directBuffer.getClass().getMethod("cleaner");
+            Method cleanerMethod = directBuffer.getClass().getDeclaredMethod("cleaner");
             cleanerMethod.setAccessible(true);
             Object cleaner = cleanerMethod.invoke(directBuffer);
             Method cleanMethod = cleaner.getClass().getMethod("clean");
@@ -469,7 +468,21 @@ public class Test implements GLEventListener, KeyListener {
     }
 
     protected void deallocateDirectShortBuffer(ShortBuffer directBuffer) {
-        ((DirectBuffer) directBuffer).cleaner().clean();
+//        ((DirectBuffer) directBuffer).cleaner().clean();
+        try {
+            if (!directBuffer.isDirect()) {
+                return;
+            }
+            Method cleanerMethod = directBuffer.getClass().getDeclaredMethod("cleaner");
+            cleanerMethod.setAccessible(true);
+            Object cleaner = cleanerMethod.invoke(directBuffer);
+            Method cleanMethod = cleaner.getClass().getDeclaredMethod("clean");
+            cleanMethod.setAccessible(true);
+            cleanMethod.invoke(cleaner);
+
+        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     protected void deallocateDirectIntBuffer(IntBuffer directBuffer) {

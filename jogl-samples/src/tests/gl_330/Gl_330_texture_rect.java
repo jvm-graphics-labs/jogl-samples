@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jgli.Texture2D;
+import jgli.Texture2d;
 
 /**
  *
@@ -174,7 +174,7 @@ public class Gl_330_texture_rect extends Test {
             gl3.glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             gl3.glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
+            jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
 
             assert (texture.dimensions()[0] <= textureSize[0]

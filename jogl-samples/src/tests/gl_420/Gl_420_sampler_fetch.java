@@ -54,7 +54,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jgli.Texture2D;
+import jgli.Texture2d;
 import jglm.Vec2i;
 
 /**
@@ -202,6 +202,7 @@ public class Gl_420_sampler_fetch extends Test {
 
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        deallocateDirectShortBuffer(elementBuffer);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -220,7 +221,7 @@ public class Gl_420_sampler_fetch extends Test {
     private boolean initTexture(GL4 gl4) {
 
         try {
-            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
+            jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
             jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
 
@@ -232,7 +233,7 @@ public class Gl_420_sampler_fetch extends Test {
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             gl4.glTexStorage2D(GL_TEXTURE_2D, texture.levels(), format.internal.value,
-                    texture.dimensions(0)[1], texture.dimensions(0)[1]);
+                    texture.dimensions(0)[0], texture.dimensions(0)[1]);
 
             for (int level = 0; level < texture.levels(); ++level) {
                 gl4.glTexSubImage2D(GL_TEXTURE_2D, level,

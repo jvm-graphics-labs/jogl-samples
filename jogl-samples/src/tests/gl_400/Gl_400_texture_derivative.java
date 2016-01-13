@@ -67,7 +67,7 @@ import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import jgli.Texture2D;
+import jgli.Texture2d;
 import jglm.Vec2;
 import jglm.Vec2i;
 
@@ -275,7 +275,7 @@ public class Gl_400_texture_derivative extends Test {
         boolean validated = true;
 
         int[] textureSize = {128, 128};
-        jgli.Texture2D texture = new Texture2D(jgli.Format.FORMAT_RGBA8_UNORM, textureSize);
+        jgli.Texture2d texture = new Texture2d(jgli.Format.FORMAT_RGBA8_UNORM, textureSize);
         texture.clear(0, 0, 0, new byte[]{(byte) 255, (byte) 0, (byte) 0, (byte) 255});
         texture.clear(0, 0, 1, new byte[]{(byte) 255, (byte) 128, (byte) 0, (byte) 255});
         texture.clear(0, 0, 2, new byte[]{(byte) 0, (byte) 255, (byte) 0, (byte) 255});

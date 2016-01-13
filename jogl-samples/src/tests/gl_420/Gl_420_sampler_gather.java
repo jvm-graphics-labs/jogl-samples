@@ -51,7 +51,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jgli.Texture2D;
+import jgli.Texture2d;
 
 /**
  *
@@ -180,7 +180,7 @@ public class Gl_420_sampler_gather extends Test {
     private boolean initTexture(GL4 gl4) {
 
         try {
-            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
+            jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
             jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
             jgli.Gl.Swizzles swizzles = jgli.Gl.instance.translate(texture.swizzles());

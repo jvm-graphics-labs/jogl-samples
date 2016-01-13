@@ -46,7 +46,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jgli.Texture2D;
+import jgli.Texture2d;
 import jglm.Vec2;
 
 /**
@@ -223,7 +223,7 @@ public class Gl_400_program_subroutine extends Test {
             gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
 
             {
-                jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_RGB8));
+                jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_RGB8));
                 jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
 
                 gl4.glActiveTexture(GL_TEXTURE0);
@@ -248,7 +248,7 @@ public class Gl_400_program_subroutine extends Test {
             }
 
             {
-                jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_DXT1));
+                jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_DXT1));
                 jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
                 jgli.Gl.Swizzles swizzles = jgli.Gl.instance.translate(texture.swizzles());
 

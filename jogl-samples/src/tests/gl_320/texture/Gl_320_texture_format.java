@@ -40,7 +40,7 @@ import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jgli.Texture2D;
+import jgli.Texture2d;
 import jglm.Vec4i;
 
 /**
@@ -199,7 +199,7 @@ public class Gl_320_texture_format extends Test {
     protected boolean initTexture(GL3 gl3) {
 
         try {
-            jgli.Texture2D texture = new Texture2D(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
+            jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
