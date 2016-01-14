@@ -33,6 +33,7 @@ import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import com.jogamp.opengl.util.texture.TextureData;
 import com.jogamp.opengl.util.texture.TextureIO;
+import framework.BufferUtils;
 import framework.Semantic;
 import java.io.File;
 import java.io.IOException;
@@ -138,8 +139,13 @@ public class HelloTexture implements GLEventListener, KeyListener {
         gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.VBO]);
         {
             FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
-            int size = vertexData.length * GLBuffers.SIZEOF_FLOAT;
+            int size = vertexData.length * Float.BYTES;
             gl4.glBufferData(GL4.GL_ARRAY_BUFFER, size, vertexBuffer, GL4.GL_STATIC_DRAW);
+            /**
+             * Since vertexBuffer is a direct buffer, this means it is outside
+             * the Garbage Collector job and it is up to us to remove it.
+             */
+            BufferUtils.destroyDirectBuffer(vertexBuffer);
         }
         gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
 
@@ -152,8 +158,9 @@ public class HelloTexture implements GLEventListener, KeyListener {
         gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, objects[Semantic.Object.IBO]);
         {
             ShortBuffer indexBuffer = GLBuffers.newDirectShortBuffer(indexData);
-            int size = indexData.length * GLBuffers.SIZEOF_SHORT;
+            int size = indexData.length * Short.BYTES;
             gl4.glBufferData(GL4.GL_ELEMENT_ARRAY_BUFFER, size, indexBuffer, GL4.GL_STATIC_DRAW);
+            BufferUtils.destroyDirectBuffer(indexBuffer);
         }
         gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -180,7 +187,7 @@ public class HelloTexture implements GLEventListener, KeyListener {
                  */
                 gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.VBO]);
                 {
-                    int stride = (2 + 2) * GLBuffers.SIZEOF_FLOAT;
+                    int stride = (2 + 2) * Float.BYTES;
                     /**
                      * We draw in 2D on the xy plane, so we need just two
                      * coordinates for the position, it will be padded to vec4
@@ -188,13 +195,13 @@ public class HelloTexture implements GLEventListener, KeyListener {
                      */
                     gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
                     gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL4.GL_FLOAT,
-                            false, stride, 0 * GLBuffers.SIZEOF_FLOAT);
+                            false, stride, 0 * Float.BYTES);
                     /**
                      * 2D Texture coordinates.
                      */
                     gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
                     gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL4.GL_FLOAT,
-                            false, stride, 2 * GLBuffers.SIZEOF_FLOAT);
+                            false, stride, 2 * Float.BYTES);
                 }
                 gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
             }

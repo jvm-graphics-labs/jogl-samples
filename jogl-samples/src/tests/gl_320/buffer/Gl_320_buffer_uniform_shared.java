@@ -26,6 +26,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -51,7 +52,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/buffer";
 
     private final int vertexCount = 4;
-    private final int positionSize = vertexCount * 2 * GLBuffers.SIZEOF_FLOAT;
+    private final int positionSize = vertexCount * 2 * Float.BYTES;
     private final float[] positionData = new float[]{
         -1f, -1f,
         +1f, -1f,
@@ -59,7 +60,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
         -1f, +1f};
 
     private final int elementCount = 6;
-    private final int elementSize = elementCount * GLBuffers.SIZEOF_SHORT;
+    private final int elementSize = elementCount * Short.BYTES;
     private final short[] elementData = new short[]{
         0, 1, 2,
         2, 3, 0};
@@ -157,13 +158,15 @@ public class Gl_320_buffer_uniform_shared extends Test {
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
-        ShortBuffer shortBuffer = GLBuffers.newDirectShortBuffer(elementData);
-        gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, shortBuffer, GL_STATIC_DRAW);
+        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
-        FloatBuffer floatBuffer = GLBuffers.newDirectFloatBuffer(positionData);
-        gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, floatBuffer, GL_STATIC_DRAW);
+        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return checkError(gl3, "initBuffer");
@@ -202,14 +205,14 @@ public class Gl_320_buffer_uniform_shared extends Test {
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.uniform.ordinal()]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
-                    uniformBlockSizeTransform[0] + diffuse.length * GLBuffers.SIZEOF_FLOAT,
+                    uniformBlockSizeTransform[0] + diffuse.length * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             for (int i = 0; i < projection.length; i++) {
-                pointer.putFloat(i * GLBuffers.SIZEOF_FLOAT, projection[i]);
+                pointer.putFloat(i * Float.BYTES, projection[i]);
             }
             for (int i = 0; i < diffuse.length; i++) {
-                pointer.putFloat(uniformBlockSizeTransform[0] + i * GLBuffers.SIZEOF_FLOAT, diffuse[i]);
+                pointer.putFloat(uniformBlockSizeTransform[0] + i * Float.BYTES, diffuse[i]);
             }
 
             // Make sure the uniform buffer is uploaded

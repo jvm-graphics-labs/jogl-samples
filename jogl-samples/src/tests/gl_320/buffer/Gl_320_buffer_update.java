@@ -27,6 +27,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -51,7 +52,7 @@ public class Gl_320_buffer_update extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/buffer";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 2 * GLBuffers.SIZEOF_FLOAT;
+    private int positionSize = vertexCount * 2 * Float.BYTES;
     private float[] positionData = new float[]{
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -200,6 +201,7 @@ public class Gl_320_buffer_update extends Test {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.material.ordinal()]);
             FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(diffuse);
             gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize[0], diffuseBuffer, GL_DYNAMIC_DRAW);
+            BufferUtils.destroyDirectBuffer(diffuseBuffer);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
@@ -212,7 +214,7 @@ public class Gl_320_buffer_update extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.copy.ordinal()]);
-            int stride = 2 * GLBuffers.SIZEOF_FLOAT, offset = 0;
+            int stride = 2 * Float.BYTES, offset = 0;
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, stride, offset);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -231,7 +233,7 @@ public class Gl_320_buffer_update extends Test {
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.transform.ordinal()]);
             ByteBuffer transformBuffer = gl3.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, 16 * GLBuffers.SIZEOF_FLOAT,
+                    GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,

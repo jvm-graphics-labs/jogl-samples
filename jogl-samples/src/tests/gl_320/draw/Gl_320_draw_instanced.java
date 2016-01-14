@@ -26,6 +26,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -50,7 +51,7 @@ public class Gl_320_draw_instanced extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/draw";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 2 * GLBuffers.SIZEOF_FLOAT;
+    private int positionSize = vertexCount * 2 * Float.BYTES;
     private float[] positionData = new float[]{
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -141,25 +142,26 @@ public class Gl_320_draw_instanced extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = new int[]{0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
 
-        int uniformTransformBlockSize = Math.max(16 * 2 * GLBuffers.SIZEOF_FLOAT, uniformBufferOffset[0]);
+        int uniformTransformBlockSize = Math.max(16 * 2 * Float.BYTES, uniformBufferOffset[0]);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformTransformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        int uniformMaterialBlockSize = Math.max(4 * 2 * GLBuffers.SIZEOF_FLOAT, uniformBufferOffset[0]);
+        int uniformMaterialBlockSize = Math.max(4 * 2 * Float.BYTES, uniformBufferOffset[0]);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL.ordinal()]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformMaterialBlockSize, null, GL_STATIC_DRAW);
 
-        ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, 4 * 2 * GLBuffers.SIZEOF_FLOAT,
+        ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, 4 * 2 * Float.BYTES,
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
         float[] vecs = new float[]{1.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 1.0f};
         for (int f = 0; f < vecs.length; f++) {
-            pointer.putFloat(f * GLBuffers.SIZEOF_FLOAT, vecs[f]);
+            pointer.putFloat(f * Float.BYTES, vecs[f]);
         }
         pointer.rewind();
         gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
@@ -187,7 +189,7 @@ public class Gl_320_draw_instanced extends Test {
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
             ByteBuffer pointer = gl4.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, 16 * 2 * GLBuffers.SIZEOF_FLOAT,
+                    GL_UNIFORM_BUFFER, 0, 16 * 2 * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,

@@ -25,6 +25,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -45,13 +46,13 @@ public class Es_200_draw_elements extends Test {
     private final String SHADERS_ROOT = "src/data/es_200";
 
     private final int elementCount = 6;
-    private final int elementSize = elementCount * GLBuffers.SIZEOF_SHORT;
+    private final int elementSize = elementCount * Short.BYTES;
     private final short[] elementData = new short[]{
         0, 1, 2,
         0, 2, 3
     };
     private final int vertexCount = 4;
-    private final int positionSize = vertexCount * 2 * GLBuffers.SIZEOF_FLOAT;
+    private final int positionSize = vertexCount * 2 * Float.BYTES;
     private final float[] positionData = new float[]{
         -1f, -1f,
         +1f, -1f,
@@ -139,13 +140,15 @@ public class Es_200_draw_elements extends Test {
         gl2es2.glGenBuffers(bufferName.length, bufferName, 0);
 
         gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
-        FloatBuffer floatBuffer = GLBuffers.newDirectFloatBuffer(positionData);
-        gl2es2.glBufferData(GL_ARRAY_BUFFER, positionSize, floatBuffer, GL_STATIC_DRAW);
+        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        gl2es2.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl2es2.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl2es2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
         ShortBuffer shortBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl2es2.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, shortBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(shortBuffer);
         gl2es2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         return checkError(gl2es2, "initBuffer");

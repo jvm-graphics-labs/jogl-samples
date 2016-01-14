@@ -14,6 +14,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -45,7 +46,7 @@ public class Gl_300_fbo_multisample extends Test {
     private Vec2i FRAMEBUFFER_SIZE = new Vec2i(160, 120);
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * 4 * GLBuffers.SIZEOF_FLOAT;
+    private int vertexSize = vertexCount * 4 * Float.BYTES;
     private float[] vertexData = new float[]{
         -2.0f, -1.5f, 0.0f, 0.0f,
         +2.0f, -1.5f, 1.0f, 0.0f,
@@ -121,8 +122,9 @@ public class Gl_300_fbo_multisample extends Test {
         bufferName = new int[1];
         gl3.glGenBuffers(1, bufferName, 0);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-        FloatBuffer floatBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
-        gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, floatBuffer, GL_STATIC_DRAW);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return checkError(gl3, "initBuffer");

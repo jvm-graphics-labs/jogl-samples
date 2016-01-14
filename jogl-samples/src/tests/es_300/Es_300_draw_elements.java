@@ -26,6 +26,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -46,13 +47,13 @@ public class Es_300_draw_elements extends Test {
     private final String SHADERS_ROOT = "src/data/es_300";
 
     private final int elementCount = 6;
-    private final int elementSize = elementCount * GLBuffers.SIZEOF_INT;
+    private final int elementSize = elementCount * Integer.BYTES;
     private final int[] elementData = new int[]{
         0, 1, 2,
         0, 2, 3};
 
     private final int vertexCount = 4;
-    private final int positionSize = vertexCount * 2 * GLBuffers.SIZEOF_FLOAT;
+    private final int positionSize = vertexCount * 2 * Float.BYTES;
     private final float[] positionData = new float[]{
         -1f, -1f,
         +1f, -1f,
@@ -131,15 +132,17 @@ public class Es_300_draw_elements extends Test {
         arrayBufferName = new int[1];
         gl3es3.glGenBuffers(1, arrayBufferName, 0);
         gl3es3.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
-        FloatBuffer floatBuffer = GLBuffers.newDirectFloatBuffer(positionData);
-        gl3es3.glBufferData(GL_ARRAY_BUFFER, positionSize, floatBuffer, GL_STATIC_DRAW);
+        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        gl3es3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl3es3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         elementBufferName = new int[1];
         gl3es3.glGenBuffers(1, elementBufferName, 0);
         gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferName[0]);
-        IntBuffer intBuffer = GLBuffers.newDirectIntBuffer(elementData);
-        gl3es3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, intBuffer, GL_STATIC_DRAW);
+        IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
+        gl3es3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         return checkError(gl3es3, "initBuffer");

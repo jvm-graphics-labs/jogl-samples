@@ -547,6 +547,7 @@ public class Test implements GLEventListener, KeyListener {
                     graphics.drawRect(w, h, 1, 1); // height - h is for flipping the image
                 }
             }
+            BufferUtils.destroyDirectBuffer(buffer);
 
 //            File outputfile = new File("/home/elect/Downloads/texture.jpg");
             File outputfile = new File("D:\\Downloads\\texture.png");

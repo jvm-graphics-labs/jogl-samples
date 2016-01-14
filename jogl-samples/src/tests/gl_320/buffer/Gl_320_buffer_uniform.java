@@ -28,6 +28,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -57,7 +58,7 @@ public class Gl_320_buffer_uniform extends Test {
         public float[] position;
         public float[] normal;
         public float[] color;
-        public static final int sizeOf = (3 + 3 + 4) * GLBuffers.SIZEOF_FLOAT;
+        public static final int sizeOf = (3 + 3 + 4) * Float.BYTES;
 
         public Vertex_v3fn3fc4f(float[] position, float[] normal, float[] color) {
             this.position = position;
@@ -80,13 +81,13 @@ public class Gl_320_buffer_uniform extends Test {
         public float[] mv;
         public float[] normal;
 
-        public static final int sizeOf = (16 + 16 + 9) * GLBuffers.SIZEOF_FLOAT;
+        public static final int sizeOf = (16 + 16 + 9) * Float.BYTES;
     }
 
     public class Light {
 
         public float[] position;
-        public static final int sizeOf = 3 * GLBuffers.SIZEOF_FLOAT;
+        public static final int sizeOf = 3 * Float.BYTES;
 
         public Light(float[] position) {
             this.position = position;
@@ -105,7 +106,7 @@ public class Gl_320_buffer_uniform extends Test {
         public float padding2;
         public float[] specular;
         public float shininess;
-        public static final int sizeOf = (3 + 1 + 3 + 1 + 3 + 1) * GLBuffers.SIZEOF_FLOAT;
+        public static final int sizeOf = (3 + 1 + 3 + 1 + 3 + 1) * Float.BYTES;
 
         public Material(float[] ambient, float[] diffuse, float[] specular, float shininess) {
             this.ambient = ambient;
@@ -133,7 +134,7 @@ public class Gl_320_buffer_uniform extends Test {
         new Vertex_v3fn3fc4f(new float[]{-1.0f, +1.0f, 0.0f}, new float[]{0.0f, 0.0f, 1.0f}, new float[]{1.0f, 1.0f, 1.0f, 1.0f})
     };
     private int elementCount = 6;
-    private int elementSize = elementCount * GLBuffers.SIZEOF_SHORT;
+    private int elementSize = elementCount * Short.BYTES;
     private short[] elementData = new short[]{
         0, 1, 2,
         2, 3, 0
@@ -224,6 +225,7 @@ public class Gl_320_buffer_uniform extends Test {
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
@@ -233,6 +235,7 @@ public class Gl_320_buffer_uniform extends Test {
         }
         vertexBuffer.rewind();
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         {
@@ -247,6 +250,7 @@ public class Gl_320_buffer_uniform extends Test {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.perPass.ordinal()]);
             FloatBuffer lightBuffer = GLBuffers.newDirectFloatBuffer(light.toFloatArray());
             gl3.glBufferData(GL_UNIFORM_BUFFER, Light.sizeOf, lightBuffer, GL_STATIC_DRAW);
+            BufferUtils.destroyDirectBuffer(lightBuffer);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
@@ -257,6 +261,7 @@ public class Gl_320_buffer_uniform extends Test {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.perScene.ordinal()]);
             FloatBuffer materialBuffer = GLBuffers.newDirectFloatBuffer(material.toFloatArray());
             gl3.glBufferData(GL_UNIFORM_BUFFER, Material.sizeOf, materialBuffer, GL_STATIC_DRAW);
+            BufferUtils.destroyDirectBuffer(materialBuffer);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
         return true;
@@ -272,9 +277,9 @@ public class Gl_320_buffer_uniform extends Test {
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false,
                     Vertex_v3fn3fc4f.sizeOf, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false,
-                    Vertex_v3fn3fc4f.sizeOf, 3 * GLBuffers.SIZEOF_FLOAT);
+                    Vertex_v3fn3fc4f.sizeOf, 3 * Float.BYTES);
             gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false,
-                    Vertex_v3fn3fc4f.sizeOf, (3 + 3) * GLBuffers.SIZEOF_FLOAT);
+                    Vertex_v3fn3fc4f.sizeOf, (3 + 3) * Float.BYTES);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);

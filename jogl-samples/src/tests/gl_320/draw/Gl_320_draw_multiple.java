@@ -27,6 +27,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -71,8 +72,8 @@ public class Gl_320_draw_multiple extends Test {
         +1.5f, +1.0f, -0.5f,
         -1.5f, +1.0f, -0.5f};
 
-    private int[] Count = new int[]{ElementCount, ElementCount};
-    private int[] BaseVertex = new int[]{0, 4};
+    private IntBuffer count = GLBuffers.newDirectIntBuffer(new int[]{ElementCount, ElementCount});
+    private IntBuffer baseVertex = GLBuffers.newDirectIntBuffer(new int[]{0, 4});
 
     private enum Buffer {
 
@@ -143,11 +144,13 @@ public class Gl_320_draw_multiple extends Test {
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(PositionData);
         gl3.glBufferData(GL_ARRAY_BUFFER, PositionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
         IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(ElementData);
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, ElementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         int[] uniformBlockSize = new int[1];
@@ -221,11 +224,11 @@ public class Gl_320_draw_multiple extends Test {
          */
         gl3.glMultiDrawElementsBaseVertex(
                 GL_TRIANGLES,
-                GLBuffers.newDirectIntBuffer(Count),
+                count,
                 GL_UNSIGNED_INT,
                 indices,
                 2,
-                GLBuffers.newDirectIntBuffer(BaseVertex));
+                baseVertex);
 
         return true;
     }
@@ -238,6 +241,8 @@ public class Gl_320_draw_multiple extends Test {
         gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
         gl3.glDeleteProgram(programName);
         gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        BufferUtils.destroyDirectBuffer(count);
+        BufferUtils.destroyDirectBuffer(baseVertex);
 
         return true;
     }

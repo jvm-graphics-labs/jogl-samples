@@ -31,6 +31,7 @@ import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Semantic;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
@@ -126,8 +127,9 @@ public class HelloTriangle implements GLEventListener, KeyListener {
         gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, objects[Semantic.Object.VBO]);
         {
             ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexData);
-            int size = vertexData.length * GLBuffers.SIZEOF_BYTE;
+            int size = vertexData.length * Byte.BYTES;
             gl4.glBufferData(GL4.GL_ARRAY_BUFFER, size, vertexBuffer, GL4.GL_STATIC_DRAW);
+            BufferUtils.destroyDirectBuffer(vertexBuffer);
         }
         gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
 
@@ -140,8 +142,9 @@ public class HelloTriangle implements GLEventListener, KeyListener {
         gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, objects[Semantic.Object.IBO]);
         {
             ShortBuffer indexBuffer = GLBuffers.newDirectShortBuffer(indexData);
-            int size = indexData.length * GLBuffers.SIZEOF_SHORT;
+            int size = indexData.length * Short.BYTES;
             gl4.glBufferData(GL4.GL_ELEMENT_ARRAY_BUFFER, size, indexBuffer, GL4.GL_STATIC_DRAW);
+            BufferUtils.destroyDirectBuffer(indexBuffer);
         }
         gl4.glBindBuffer(GL4.GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -172,7 +175,7 @@ public class HelloTriangle implements GLEventListener, KeyListener {
                      *
                      * | position x | position y | color R | color G | color B |
                      */
-                    int stride = (2 + 3) * GLBuffers.SIZEOF_BYTE;
+                    int stride = (2 + 3) * Byte.BYTES;
                     /**
                      * We draw in 2D on the xy plane, so we need just two
                      * coordinates for the position, it will be padded to vec4 as
@@ -180,7 +183,7 @@ public class HelloTriangle implements GLEventListener, KeyListener {
                      */
                     gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
                     gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL4.GL_BYTE,
-                            false, stride, 0 * GLBuffers.SIZEOF_BYTE);
+                            false, stride, 0 * Byte.BYTES);
                     /**
                      * Color needs three coordinates. We show the usage of normalization,
                      * where signed value get normalized [-1, 1] like in this case.
@@ -191,7 +194,7 @@ public class HelloTriangle implements GLEventListener, KeyListener {
                      */
                     gl4.glEnableVertexAttribArray(Semantic.Attr.COLOR);
                     gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 3, GL4.GL_BYTE,
-                            true, stride, 2 * GLBuffers.SIZEOF_BYTE);
+                            true, stride, 2 * Byte.BYTES);
                 }
                 gl4.glBindBuffer(GL4.GL_ARRAY_BUFFER, 0);
             }
