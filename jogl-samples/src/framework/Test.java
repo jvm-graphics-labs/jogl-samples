@@ -37,7 +37,6 @@ import static com.jogamp.opengl.GL2ES2.GL_MAX_VERTEX_ATTRIBS;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_ENABLED;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_NORMALIZED;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_POINTER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_SIZE;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_STRIDE;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_TYPE;
@@ -52,14 +51,11 @@ import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER;
 import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER;
 import com.jogamp.opengl.GL3;
 import static com.jogamp.opengl.GL3.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS;
-import com.jogamp.opengl.GL3ES3;
 import com.jogamp.opengl.GL4;
 import static com.jogamp.opengl.GL4.GL_VERTEX_ATTRIB_ARRAY_LONG;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLContext;
-import com.jogamp.opengl.GLES2;
-import com.jogamp.opengl.GLES3;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.FloatUtil;
@@ -71,20 +67,11 @@ import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
-import java.nio.ShortBuffer;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import jglm.Vec2;
 import jglm.Vec2i;
 import jglm.Vec3;
-import sun.nio.ch.DirectBuffer;
 
 /**
  *
@@ -429,70 +416,7 @@ public class Test implements GLEventListener, KeyListener {
 
         return success;
     }
-
-    protected void deallocateDirectBuffer(Buffer directBuffer) {
-        try {
-            //        ((DirectBuffer) directBuffer).cleaner().clean();
-            if (!directBuffer.isDirect()) {
-                return;
-            }
-
-            Method cleanerMethod = directBuffer.getClass().getMethod("cleaner");
-            cleanerMethod.setAccessible(true);
-            Object cleaner = cleanerMethod.invoke(directBuffer);
-            Method cleanMethod = cleaner.getClass().getMethod("clean");
-            cleanMethod.setAccessible(true);
-            cleanMethod.invoke(cleaner);
-
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    protected void deallocateDirectFloatBuffer(FloatBuffer directBuffer) {
-        //        ((DirectBuffer) directBuffer).cleaner().clean();
-        try {
-            if (!directBuffer.isDirect()) {
-                return;
-            }
-            Method cleanerMethod = directBuffer.getClass().getDeclaredMethod("cleaner");
-            cleanerMethod.setAccessible(true);
-            Object cleaner = cleanerMethod.invoke(directBuffer);
-            Method cleanMethod = cleaner.getClass().getMethod("clean");
-            cleanMethod.setAccessible(true);
-            cleanMethod.invoke(cleaner);
-
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    protected void deallocateDirectShortBuffer(ShortBuffer directBuffer) {
-//        ((DirectBuffer) directBuffer).cleaner().clean();
-        try {
-            if (!directBuffer.isDirect()) {
-                return;
-            }
-            Method cleanerMethod = directBuffer.getClass().getDeclaredMethod("cleaner");
-            cleanerMethod.setAccessible(true);
-            Object cleaner = cleanerMethod.invoke(directBuffer);
-            Method cleanMethod = cleaner.getClass().getDeclaredMethod("clean");
-            cleanMethod.setAccessible(true);
-            cleanMethod.invoke(cleaner);
-
-        } catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-            Logger.getLogger(Test.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-
-    protected void deallocateDirectIntBuffer(IntBuffer directBuffer) {
-        ((DirectBuffer) directBuffer).cleaner().clean();
-    }
-
-//    protected void deallocateDirectFloatBuffer(FloatBuffer directBuffer) {
-//
-//        ((DirectBuffer) directBuffer).cleaner().clean();
-//    }
+    
     protected float cameraDistance() {
         return translationCurrent.y;
     }
