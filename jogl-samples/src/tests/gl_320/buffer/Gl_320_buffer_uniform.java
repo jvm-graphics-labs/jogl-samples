@@ -152,7 +152,8 @@ public class Gl_320_buffer_uniform extends Test {
         vertex, element, perScene, perPass, perDraw, max
     }
 
-    private float[] projection = new float[16], model = new float[16], normal = new float[9], mv = new float[16];
+    private float[] projection = new float[16], model = new float[16], normal = new float[9],
+            view = new float[16], mv = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -233,8 +234,7 @@ public class Gl_320_buffer_uniform extends Test {
         for (Vertex_v3fn3fc4f vertex : vertexData) {
             vertexBuffer.put(vertex.toFloatArray());
         }
-        vertexBuffer.rewind();
-        gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer.rewind(), GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -303,7 +303,7 @@ public class Gl_320_buffer_uniform extends Test {
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-            float[] view = view();
+            view = view();
             FloatUtil.makeRotationAxis(model, 0, (float) -Math.PI * 0.5f, 0.0f, 0.0f, 1.0f, tmpVec);
 
             FloatUtil.multMatrix(view, model, mv);
@@ -312,13 +312,7 @@ public class Gl_320_buffer_uniform extends Test {
                     normal[c * 3 + r] = view[c * 4 + r];
                 }
             }
-            for (int i = 0; i < view.length; i++) {
-                transform.putFloat((0 + i) * Float.BYTES, projection[i]);
-                transform.putFloat((projection.length + i) * Float.BYTES, mv[i]);
-            }
-            for (int i = 0; i < normal.length; i++) {
-                transform.putFloat((projection.length + mv.length + i) * Float.BYTES, normal[i]);
-            }
+            transform.asFloatBuffer().put(projection).put(mv).put(normal).rewind();
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);

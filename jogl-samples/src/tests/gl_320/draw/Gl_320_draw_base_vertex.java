@@ -201,10 +201,7 @@ public class Gl_320_draw_base_vertex extends Test {
             FloatUtil.multMatrix(projection, view(), mvp);
             FloatUtil.multMatrix(mvp, model);
 
-            for (int f = 0; f < mvp.length; f++) {
-                transformBuffer.putFloat(mvp[f]);
-            }
-            transformBuffer.rewind();
+            transformBuffer.asFloatBuffer().put(mvp).rewind();
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

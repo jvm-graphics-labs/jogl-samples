@@ -159,11 +159,8 @@ public class Gl_320_draw_instanced extends Test {
 
         ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, 4 * 2 * Float.BYTES,
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-        float[] vecs = new float[]{1.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 1.0f};
-        for (int f = 0; f < vecs.length; f++) {
-            pointer.putFloat(f * Float.BYTES, vecs[f]);
-        }
-        pointer.rewind();
+        pointer.asFloatBuffer().put(new float[]{1.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 1.0f}).rewind();
+        
         gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 

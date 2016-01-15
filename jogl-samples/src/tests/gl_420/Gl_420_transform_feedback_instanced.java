@@ -5,26 +5,40 @@
  */
 package tests.gl_420;
 
+import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
 import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
+import static com.jogamp.opengl.GL.GL_TRIANGLE_STRIP;
 import static com.jogamp.opengl.GL.GL_TRUE;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_INT;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER_BIT;
 import static com.jogamp.opengl.GL2ES2.GL_PROGRAM_SEPARABLE;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
+import static com.jogamp.opengl.GL2ES3.GL_COLOR;
+import static com.jogamp.opengl.GL2ES3.GL_DEPTH;
 import static com.jogamp.opengl.GL2ES3.GL_GEOMETRY_SHADER_BIT;
 import static com.jogamp.opengl.GL2ES3.GL_INTERLEAVED_ATTRIBS;
+import static com.jogamp.opengl.GL2ES3.GL_RASTERIZER_DISCARD;
 import static com.jogamp.opengl.GL2ES3.GL_TRANSFORM_FEEDBACK;
 import static com.jogamp.opengl.GL2ES3.GL_TRANSFORM_FEEDBACK_BUFFER;
 import static com.jogamp.opengl.GL3ES3.GL_GEOMETRY_SHADER;
 import com.jogamp.opengl.GL4;
+import com.jogamp.opengl.math.FloatUtil;
+import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import jglm.Vec2;
 
 /**
@@ -73,10 +87,36 @@ public class Gl_420_transform_feedback_instanced extends Test {
         MAX
     }
 
-    private int[] feedbackName = {0}, query = {0}, pipelineName = new int[Pipeline.MAX.ordinal()],
+    private int[] feedbackName = {0}, pipelineName = new int[Pipeline.MAX.ordinal()],
             programName = new int[Pipeline.MAX.ordinal()], vertexArrayName = new int[Pipeline.MAX.ordinal()],
             bufferName = new int[Buffer.MAX.ordinal()];
     private int transformUniformMvp, feedbackUniformMvp;
+    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
+
+    @Override
+    protected boolean begin(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        boolean validated = true;
+
+        gl4.glEnable(GL_DEPTH_TEST);
+
+        if (validated) {
+            validated = initProgram(gl4);
+        }
+        if (validated) {
+            validated = initBuffer(gl4);
+        }
+        if (validated) {
+            validated = initVertexArray(gl4);
+        }
+        if (validated) {
+            validated = initFeedback(gl4);
+        }
+
+        return validated;
+    }
 
     private boolean initProgram(GL4 gl4) {
 
@@ -97,16 +137,17 @@ public class Gl_420_transform_feedback_instanced extends Test {
             gl4.glProgramParameteri(programName[Pipeline.TRANSFORM.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(geomShaderCode);
-            shaderProgram.link(gl4, System.out);
 
-            String[] strings = {"gl_Position", "block.Color"};
+            String[] strings = {"gl_Position", "Block.color"};
             gl4.glTransformFeedbackVaryings(programName[Pipeline.TRANSFORM.ordinal()], 2, strings, GL_INTERLEAVED_ATTRIBS);
+
+            shaderProgram.link(gl4, System.out);
         }
 
         // Get variables locations
         if (validated) {
 
-            transformUniformMvp = gl4.glGetUniformLocation(programName[Pipeline.TRANSFORM.ordinal()], "MVP");
+            transformUniformMvp = gl4.glGetUniformLocation(programName[Pipeline.TRANSFORM.ordinal()], "mvp");
             validated = validated && (transformUniformMvp >= 0);
         }
 
@@ -131,7 +172,7 @@ public class Gl_420_transform_feedback_instanced extends Test {
         // Get variables locations
         if (validated) {
 
-            feedbackUniformMvp = gl4.glGetUniformLocation(programName[Pipeline.FEEDBACK.ordinal()], "MVP");
+            feedbackUniformMvp = gl4.glGetUniformLocation(programName[Pipeline.FEEDBACK.ordinal()], "mvp");
             validated = validated && (feedbackUniformMvp >= 0);
         }
 
@@ -191,23 +232,88 @@ public class Gl_420_transform_feedback_instanced extends Test {
 
         return true;
     }
-    
-    private boolean initBuffer(GL4 gl4)	{
-        
-		gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName,0);
 
-		gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.TRANSFORM_ELEMENT.ordinal()]);
-//		gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, ElementSize, ElementData, GL_STATIC_DRAW);
-//		gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-//
-//		gl4.glBindBuffer(GL_ARRAY_BUFFER, BufferName[buffer::TRANSFORM_VERTEX]);
-//		gl4.glBufferData(GL_ARRAY_BUFFER, VertexSize, VertexData, GL_STATIC_DRAW);
-//		gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
-//
-//		gl4.glBindBuffer(GL_ARRAY_BUFFER, BufferName[buffer::FEEDBACK_VERTEX]);
-//		gl4.glBufferData(GL_ARRAY_BUFFER, sizeof(glf::vertex_v4fc4f) * 6, NULL, GL_STATIC_DRAW);
-//		gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
+    private boolean initBuffer(GL4 gl4) {
 
-		return true;
-	}
+        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.TRANSFORM_ELEMENT.ordinal()]);
+        IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
+        gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.TRANSFORM_VERTEX.ordinal()]);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.FEEDBACK_VERTEX.ordinal()]);
+        gl4.glBufferData(GL_ARRAY_BUFFER, 2 * 4 * Float.BYTES * elementCount, null, GL_STATIC_DRAW);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        return true;
+    }
+
+    @Override
+    protected boolean render(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+        FloatUtil.makeIdentity(model);
+        FloatUtil.multMatrix(projection, view(), mvp);
+        FloatUtil.multMatrix(mvp, model);
+
+        gl4.glProgramUniformMatrix4fv(programName[Pipeline.TRANSFORM.ordinal()],
+                transformUniformMvp, 1, false, mvp, 0);
+        gl4.glProgramUniformMatrix4fv(programName[Pipeline.FEEDBACK.ordinal()],
+                feedbackUniformMvp, 1, false, mvp, 0);
+
+        gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
+
+        float[] depth = {1.0f};
+        gl4.glClearBufferfv(GL_DEPTH, 0, depth, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+
+        // First draw, capture the attributes
+        // Disable rasterisation, vertices processing only!
+        gl4.glEnable(GL_RASTERIZER_DISCARD);
+
+        gl4.glBindProgramPipeline(pipelineName[Pipeline.TRANSFORM.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[Pipeline.TRANSFORM.ordinal()]);
+
+        gl4.glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackName[0]);
+        gl4.glBeginTransformFeedback(GL_TRIANGLES);
+        {
+            gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 0, 1, 0);
+        }
+        gl4.glEndTransformFeedback();
+
+        gl4.glDisable(GL_RASTERIZER_DISCARD);
+
+        // Second draw, reuse the captured attributes
+        gl4.glBindProgramPipeline(pipelineName[Pipeline.FEEDBACK.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[Pipeline.FEEDBACK.ordinal()]);
+
+        gl4.glDrawTransformFeedbackStreamInstanced(GL_TRIANGLE_STRIP, feedbackName[0], 0, 5);
+
+        return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        gl4.glDeleteProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
+        gl4.glDeleteVertexArrays(Pipeline.MAX.ordinal(), vertexArrayName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteProgram(programName[Pipeline.TRANSFORM.ordinal()]);
+        gl4.glDeleteProgram(programName[Pipeline.FEEDBACK.ordinal()]);
+        gl4.glDeleteTransformFeedbacks(1, feedbackName, 0);
+
+        return true;
+    }
 }

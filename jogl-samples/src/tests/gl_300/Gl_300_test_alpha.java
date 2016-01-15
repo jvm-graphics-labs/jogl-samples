@@ -171,8 +171,7 @@ public class Gl_300_test_alpha extends Test {
         for (Vertex vertex : vertexData) {
             vertexBuffer.put(vertex.toFloatArray());
         }
-        vertexBuffer.rewind();
-        gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer.rewind(), GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 

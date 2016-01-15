@@ -147,9 +147,7 @@ public class Gl_320_buffer_update extends Test {
                 positionSize, // Size,
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT | GL_MAP_FLUSH_EXPLICIT_BIT);
 
-        for (int f = 0; f < positionData.length; f++) {
-            data.putFloat(positionData[f]);
-        }
+        data.asFloatBuffer().put(positionData).rewind();
 
         // Explicitly send the data to the graphic card.
         gl3.glFlushMappedBufferRange(GL_ARRAY_BUFFER, 0, positionSize);
@@ -242,10 +240,7 @@ public class Gl_320_buffer_update extends Test {
             FloatUtil.multMatrix(projection, view());
             FloatUtil.multMatrix(projection, model, mvp);
 
-            for (int f = 0; f < mvp.length; f++) {
-                transformBuffer.putFloat(mvp[f]);
-            }
-            transformBuffer.rewind();
+            transformBuffer.asFloatBuffer().put(mvp).rewind();
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

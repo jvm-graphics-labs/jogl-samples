@@ -373,11 +373,8 @@ public class Es_300_fbo_srgb extends Test {
 
             FloatUtil.multMatrix(projection, view());
 
-            for (float f : projection) {
-                pointer.putFloat(f);
-            }
-            pointer.rewind();
-
+            pointer.asFloatBuffer().put(projection).rewind();
+            
             // Make sure the uniform buffer is uploaded
             gl3es3.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }

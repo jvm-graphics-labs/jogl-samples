@@ -208,12 +208,9 @@ public class Gl_320_buffer_uniform_shared extends Test {
                     uniformBlockSizeTransform[0] + diffuse.length * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            for (int i = 0; i < projection.length; i++) {
-                pointer.putFloat(i * Float.BYTES, projection[i]);
-            }
-            for (int i = 0; i < diffuse.length; i++) {
-                pointer.putFloat(uniformBlockSizeTransform[0] + i * Float.BYTES, diffuse[i]);
-            }
+            pointer.asFloatBuffer().put(projection);
+            pointer.position(uniformBlockSizeTransform[0]);
+            pointer.asFloatBuffer().put(diffuse).rewind();
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
