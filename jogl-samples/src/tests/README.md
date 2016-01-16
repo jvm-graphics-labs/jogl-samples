@@ -4,7 +4,7 @@ The Java OpenGL Samples Pack is a port of the [OpenGL Samples Pack](http://www.g
 
 The project aims to promote the new OpenGL features making easier version transitions for OpenGL programmers with a complementary documentation for the OpenGL specification. Despite the fact that the OpenGL Samples Pack provides as simple (and dumb) as possible samples, it's not a tutorial for beginner but a project for programmers already familiar with OpenGL. The OpenGL Samples Pack is also a good OpenGL drivers feature test.
 
-These samples use [NEWT](http://jogamp.org/jogl/doc/NEWT-Overview.html) to create window and [jogl](http://jogamp.org/jogl/www/) of [Jogamp](http://jogamp.org/) as OpenGL wrapper, GLM as math library and to replace OpenGL fixed pipeline functions and GLI to load images. 
+These samples use [NEWT](http://jogamp.org/jogl/doc/NEWT-Overview.html) to create window and [jogl](http://jogamp.org/jogl/www/) of [Jogamp](http://jogamp.org/) as OpenGL wrapper, [jglm](https://github.com/elect86/Jglm) as math library and to replace OpenGL fixed pipeline functions and [jgli](https://github.com/elect86/jgli) to load images. 
 
 
 Features:
