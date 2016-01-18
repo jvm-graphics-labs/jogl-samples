@@ -57,6 +57,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Glm;
 import framework.Profile;
 import framework.Semantic;
@@ -245,11 +246,13 @@ public class Gl_320_fbo_srgb extends Test {
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = {0};
@@ -299,6 +302,7 @@ public class Gl_320_fbo_srgb extends Test {
                     1, 1, 0,
                     GL_RGBA, GL_FLOAT,
                     dataBuffer);
+            BufferUtils.destroyDirectBuffer(dataBuffer);
 
             gl3.glActiveTexture(GL_TEXTURE0);
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);

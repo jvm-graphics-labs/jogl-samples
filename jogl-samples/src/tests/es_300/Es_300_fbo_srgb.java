@@ -23,7 +23,6 @@ import static com.jogamp.opengl.GL.GL_LINEAR_MIPMAP_LINEAR;
 import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
 import static com.jogamp.opengl.GL.GL_NEAREST;
-import static com.jogamp.opengl.GL.GL_RGBA8;
 import static com.jogamp.opengl.GL.GL_SRGB;
 import static com.jogamp.opengl.GL.GL_SRGB8_ALPHA8;
 import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
