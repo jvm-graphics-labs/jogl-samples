@@ -55,6 +55,7 @@ public class HelloTexture implements GLEventListener, KeyListener {
     private static boolean fullscreen = false;
     private static boolean mouseVisible = true;
     private static boolean mouseConfined = false;
+    private static String title = "Hello Texture";
     public static GLWindow glWindow;
     public static Animator animator;
 
@@ -73,6 +74,7 @@ public class HelloTexture implements GLEventListener, KeyListener {
         glWindow.setFullscreen(fullscreen);
         glWindow.setPointerVisible(mouseVisible);
         glWindow.confinePointer(mouseConfined);
+        glWindow.setTitle(title);
         glWindow.setVisible(true);
 
         HelloTexture helloTexture = new HelloTexture();
