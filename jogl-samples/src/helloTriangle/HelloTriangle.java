@@ -49,6 +49,7 @@ public class HelloTriangle implements GLEventListener, KeyListener {
     private static boolean fullscreen = false;
     private static boolean mouseVisible = true;
     private static boolean mouseConfined = false;
+    private static String title = "Hello Triangle";
     public static GLWindow glWindow;
     public static Animator animator;
 
@@ -67,6 +68,7 @@ public class HelloTriangle implements GLEventListener, KeyListener {
         glWindow.setFullscreen(fullscreen);
         glWindow.setPointerVisible(mouseVisible);
         glWindow.confinePointer(mouseConfined);
+        glWindow.setTitle(title);
         glWindow.setVisible(true);
 
         HelloTriangle helloTriangle = new HelloTriangle();
@@ -91,7 +93,7 @@ public class HelloTriangle implements GLEventListener, KeyListener {
     private final String SHADERS_ROOT = "/shaders";
     /**
      * Use pools, you don't want to create and let them cleaned by the garbage
-     * collector continuosly in the display() method.
+     * collector continuously in the display() method.
      */
     private float[] scale = new float[16];
     private float[] zRotazion = new float[16];
