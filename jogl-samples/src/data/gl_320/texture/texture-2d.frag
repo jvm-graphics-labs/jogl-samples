@@ -15,5 +15,5 @@ out vec4 color;
 
 void main()
 {
-    color = textureLod(diffuse, inBlock.texCoord, 0);
+    color = texture(diffuse, inBlock.texCoord);
 }

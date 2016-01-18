@@ -30,8 +30,14 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -42,8 +48,9 @@ public class Es_300_draw_elements extends Test {
     public static void main(String[] args) {
         Es_300_draw_elements es_300_draw_elements = new Es_300_draw_elements();
     }
-    
+
     private final String SHADERS_SOURCE = "flat-color";
+    private final String SHADER_SOURCE_FAIL = "flat-color-fail";
     private final String SHADERS_ROOT = "src/data/es_300";
 
     private final int elementCount = 6;
@@ -95,6 +102,28 @@ public class Es_300_draw_elements extends Test {
 
         boolean validated = true;
 
+        int shaderName = gl3es3.glCreateShader(GL_FRAGMENT_SHADER);
+
+        try {
+            // Check fail positive
+            if (validated) {
+
+                Path path = Paths.get(SHADERS_ROOT + "/" + SHADER_SOURCE_FAIL + ".frag");
+                String[] fragShader = new String[]{new String(Files.readAllBytes(path))};
+                int[] length = new int[]{fragShader.length};
+                gl3es3.glShaderSource(shaderName, 1, fragShader, length, 0);
+                gl3es3.glCompileShader(shaderName);
+
+                /**
+                 * This does not fail..
+                 */
+//                validated = validated && !framework.Compiler.check(gl3es3, shaderName);
+                gl3es3.glDeleteShader(shaderName);
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Es_300_draw_elements.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
         // Create program
         if (validated) {
             ShaderCode vertShader = ShaderCode.create(gl3es3, GL_VERTEX_SHADER, this.getClass(),
@@ -105,12 +134,12 @@ public class Es_300_draw_elements extends Test {
             ShaderProgram program = new ShaderProgram();
             program.add(vertShader);
             program.add(fragShader);
-            
+
             program.init(gl3es3);
 
             programName = program.program();
-            gl3es3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");            
-            
+            gl3es3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
+
             program.link(gl3es3, System.out);
         }
         // Get variables locations
@@ -167,10 +196,10 @@ public class Es_300_draw_elements extends Test {
     protected boolean render(GL gl) {
 
         GL3ES3 gl3es3 = (GL3ES3) gl;
-        
+
         int[] buffer = new int[]{GL_BACK};
         gl3es3.glDrawBuffers(1, buffer, 0);
-        
+
         // Compute the MVP (Model View Projection matrix)
         float[] projection = FloatUtil.makePerspective(new float[16], 0,
                 true, FloatUtil.QUARTER_PI, 4f / 3f, .1f, 100f);
@@ -184,7 +213,7 @@ public class Es_300_draw_elements extends Test {
         gl3es3.glClearColor(0f, 0f, 0f, 1f);
         gl3es3.glClearDepthf(1f);
         gl3es3.glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
+
         // Bind program
         gl3es3.glUseProgram(programName);
 
@@ -192,9 +221,9 @@ public class Es_300_draw_elements extends Test {
         gl3es3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
 
         gl3es3.glBindVertexArray(vertexArrayName[0]);
-        
+
         gl3es3.glDrawElements(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 0);
-        
+
         return true;
     }
 

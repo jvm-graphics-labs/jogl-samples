@@ -43,6 +43,7 @@ import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+import jglm.Vec2;
 
 /**
  *
@@ -55,7 +56,7 @@ public class Gl_420_debug_output extends Test implements GLDebugListener {
     }
 
     public Gl_420_debug_output() {
-        super("gl-420-debug-output", Profile.CORE, 4, 2);
+        super("gl-420-debug-output", Profile.CORE, 4, 2, new Vec2(0.25f, 0.25f));
     }
 
     private final String SHADERS_SOURCE = "debug-output";
@@ -187,7 +188,7 @@ public class Gl_420_debug_output extends Test implements GLDebugListener {
     @Override
     public void messageSent(GLDebugMessage event) {
 //        if (event.getDbgMsg().equals("Message 1")) {
-            System.out.println(event.toString());
+        System.out.println(event.toString());
 //        }
     }
 
@@ -258,7 +259,7 @@ public class Gl_420_debug_output extends Test implements GLDebugListener {
 
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
         boolean fail = true;
-        gl4.glClearBufferfv(fail? GL_UNIFORM_BUFFER : GL_COLOR, 0, new float[]{0.0f, 0.5f, 1.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(fail ? GL_UNIFORM_BUFFER : GL_COLOR, 0, new float[]{0.0f, 0.5f, 1.0f, 1.0f}, 0);
 
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glBindVertexArray(vertexArrayName[0]);

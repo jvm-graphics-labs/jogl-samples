@@ -349,30 +349,6 @@ public class Test implements GLEventListener, KeyListener {
         }
     }
 
-    protected boolean checkProgram(GL2ES2 gl2, int programName) {
-
-        if (programName == 0) {
-            return false;
-        }
-
-        int[] result = {GL_FALSE};
-        gl2.glGetProgramiv(programName, GL_LINK_STATUS, result, 0);
-
-        if (result[0] == GL_TRUE) {
-            return true;
-        }
-
-        int[] infoLogLength = {0};
-        gl2.glGetProgramiv(programName, GL_INFO_LOG_LENGTH, infoLogLength, 0);
-        if (infoLogLength[0] > 0) {
-            byte[] buffer = new byte[infoLogLength[0]];
-            gl2.glGetProgramInfoLog(programName, infoLogLength[0], null, 0, buffer, 0);
-            System.out.println(new String(buffer));
-        }
-
-        return result[0] == GL_TRUE;
-    }
-
     protected boolean validate(GL2ES3 gl4, int vertexArrayName, VertexAttrib[] expected) {
 
         boolean success = true;

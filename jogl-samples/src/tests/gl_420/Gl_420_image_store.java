@@ -166,10 +166,10 @@ public class Gl_420_image_store extends Test {
 
             if (validated) {
 
-                validated = validated && checkProgram(gl4, programName[Program.VERT_READ.ordinal()]);
-                validated = validated && checkProgram(gl4, programName[Program.FRAG_READ.ordinal()]);
-                validated = validated && checkProgram(gl4, programName[Program.VERT_SAVE.ordinal()]);
-                validated = validated && checkProgram(gl4, programName[Program.FRAG_SAVE.ordinal()]);
+                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.VERT_READ.ordinal()]);
+                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.FRAG_READ.ordinal()]);
+                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.VERT_SAVE.ordinal()]);
+                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.FRAG_SAVE.ordinal()]);
             }
 
             if (validated) {

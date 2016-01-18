@@ -181,8 +181,10 @@ public class Gl_410_program_separate extends Test {
 
             if (validated) {
 
-                validated = validated && checkProgram(gl4, separateProgramName[Program.VERTEX.ordinal()]);
-                validated = validated && checkProgram(gl4, separateProgramName[Program.FRAGMENT.ordinal()]);
+                validated = validated &&
+                        framework.Compiler.checkProgram(gl4, separateProgramName[Program.VERTEX.ordinal()]);
+                validated = validated && 
+                        framework.Compiler.checkProgram(gl4, separateProgramName[Program.FRAGMENT.ordinal()]);
             }
             if (validated) {
 

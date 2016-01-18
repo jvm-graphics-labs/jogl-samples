@@ -13,6 +13,7 @@ import framework.structureData.ExtensionData;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2.*;
 import com.jogamp.opengl.GL2ES3;
+import static com.jogamp.opengl.GL2ES3.GL_CONTEXT_FLAGS;
 import com.jogamp.opengl.GL4;
 import static com.jogamp.opengl.GL4.*;
 import static framework.Profile.*;
@@ -28,6 +29,10 @@ public class Caps {
 
         initVersion(gl, profile);
         initExtensions(gl);
+        if (check(4, 3) || extensi.KHR_debug) {
+            gl.glGetIntegerv(GL_CONTEXT_FLAGS, tmp, 0);
+            version.CONTEXT_FLAGS = tmp[0];
+        }
         initDebug(gl);
         initLimits(gl);
         initValues(gl);
@@ -64,11 +69,6 @@ public class Caps {
         version.VERSION = gl.glGetString(GL_VERSION);
         version.SHADING_LANGUAGE_VERSION = gl.glGetString(GL_SHADING_LANGUAGE_VERSION);
 
-        if (check(4, 3) || extensi.KHR_debug) {
-
-            gl.glGetIntegerv(GL_CONTEXT_FLAGS, tmp, 0);
-            version.CONTEXT_FLAGS = tmp[0];
-        }
         if (check(3, 0)) {
 
             gl.glGetIntegerv(GL_NUM_EXTENSIONS, tmp, 0);

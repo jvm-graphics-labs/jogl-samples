@@ -199,7 +199,7 @@ public class Gl_410_program_binary extends Test {
         ShaderProgram shaderProgram = new ShaderProgram();
         shaderProgram.init(gl4);
         /**
-         * We need to reset the same parameters otherwise we won't
+         * We need to set always the same parameters otherwise we won't
          * get GL_LINK_STATUS == GL_TRUE.
          */
         gl4.glProgramParameteri(shaderProgram.program(), GL_PROGRAM_SEPARABLE, GL_TRUE);

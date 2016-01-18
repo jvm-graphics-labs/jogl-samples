@@ -124,8 +124,8 @@ public class Gl_410_program_64 extends Test {
 
             if (validated) {
 
-                validated = validated && checkProgram(gl4, programName[Program.VERT.ordinal()]);
-                validated = validated && checkProgram(gl4, programName[Program.FRAG.ordinal()]);
+                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.VERT.ordinal()]);
+                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.FRAG.ordinal()]);
             }
 
             if (validated) {
