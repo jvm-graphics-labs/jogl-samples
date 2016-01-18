@@ -30,6 +30,7 @@ import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.Random;
 
 /**
@@ -127,28 +128,24 @@ public class Gl_320_primitive_point extends Test {
         // Reserve buffer memory but don't copy the values
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexCount * 2 * 4 * Float.BYTES, null, GL_STATIC_DRAW);
 
-        ByteBuffer data = gl3.glMapBufferRange(
+        FloatBuffer data = gl3.glMapBufferRange(
                 GL_ARRAY_BUFFER,
                 0, // Offset
                 vertexCount * 2 * 4 * Float.BYTES, // Size,
-                GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-
+                GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT).asFloatBuffer();
+        
+        
         for (int i = 0; i < vertexCount; ++i) {
             //Data[i].Position = glm::vec4(glm::linearRand(glm::vec2(-1), glm::vec2(1)), glm::gaussRand(0.0f, 1.0f), 1);
             //Data[i].Position = glm::vec4(glm::linearRand(glm::vec2(-1), glm::vec2(1)), /*glm::gaussRand(0.0f, 1.0f)*/0, 1);
             //Data[i].Position = glm::vec4(glm::sphericalRand(1.0f), 1);
-            data.putFloat((float) random.nextGaussian());
-            data.putFloat((float) random.nextGaussian());
-            data.putFloat((float) random.nextGaussian());
-            data.putFloat(1);
+            data.put((float) random.nextGaussian()).put((float) random.nextGaussian()).put((float) random.nextGaussian());
+            data.put(new float[]{1,1,1,1,1});
             //Data[i].Position = glm::vec4(glm::circularRand(1.0f), 0, 1);
             //Data[i].Position = glm::vec4(glm::diskRand(1.0f), 0, 1);
             //Data[i].Position = glm::vec4(glm::ballRand(1.0f), 1);
-            data.putFloat(1);
-            data.putFloat(1);
-            data.putFloat(1);
-            data.putFloat(1);
         }
+        data.rewind();
 
         gl3.glUnmapBuffer(GL_ARRAY_BUFFER);
 

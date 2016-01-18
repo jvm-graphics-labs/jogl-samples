@@ -151,10 +151,7 @@ public class Gl_320_primitive_point_quad extends Test {
             0.8f, 0.0f, 3.5f, 1.0f,
             0.0f, 0.0f, 1.0f, 1.0f};
 
-        for (float f : floatArray) {
-            data.putFloat(f);
-        }
-        data.rewind();
+        data.asFloatBuffer().put(floatArray).rewind();
 
         gl3.glUnmapBuffer(GL_ARRAY_BUFFER);
 

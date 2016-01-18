@@ -195,9 +195,8 @@ public class Gl_320_draw_range_arrays extends Test {
             FloatUtil.multMatrix(projection, view());
             FloatUtil.multMatrix(projection, model);
 
-            for (int f = 0; f < projection.length; f++) {
-                pointer.putFloat(projection[f]);
-            }
+            pointer.asFloatBuffer().put(projection).rewind();
+            
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
 

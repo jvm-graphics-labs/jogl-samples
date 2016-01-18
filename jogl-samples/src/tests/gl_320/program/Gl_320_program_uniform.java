@@ -201,10 +201,7 @@ public class Gl_320_program_uniform extends Test {
             FloatUtil.multMatrix(projection, view(), mvp);
             FloatUtil.multMatrix(mvp, model);
 
-            for (float f : mvp) {
-                pointer.putFloat(f);
-            }
-            pointer.rewind();
+            pointer.asFloatBuffer().put(mvp).rewind();
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);

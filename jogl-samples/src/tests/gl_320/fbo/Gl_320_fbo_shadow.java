@@ -61,6 +61,7 @@ import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -258,14 +259,13 @@ public class Gl_320_fbo_shadow extends Test {
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
         ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
         for (int v = 0; v < vertexCount; v++) {
-            for (int i = 0; i < 3; i++) {
-                vertexBuffer.putFloat(vertexV3fData[v * 3 + i]);
-            }
-            for (int i = 0; i < 4; i++) {
-                vertexBuffer.put(vertexV4u8Data[v * 4 + i]);
-            }
+            vertexBuffer.putFloat(vertexV3fData[v * 3 + 0]).putFloat(vertexV3fData[v * 3 + 1])
+                    .putFloat(vertexV3fData[v * 3 + 2]).put(vertexV4u8Data, v * 4, 4);
         }
         vertexBuffer.rewind();
+        for (int i = 0; i < vertexBuffer.capacity(); i++) {
+            System.out.println("" + vertexBuffer.get(i));
+        }
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -408,6 +408,8 @@ public class Gl_320_fbo_shadow extends Test {
                 GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES * 3,
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
+        FloatBuffer poiBufferF = pointer.asFloatBuffer();
+
         // Update of the MVP matrix for the render pass
         {
             FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 10.0f);
@@ -415,9 +417,7 @@ public class Gl_320_fbo_shadow extends Test {
             FloatUtil.multMatrix(projection, view());
             FloatUtil.multMatrix(projection, model);
 
-            for (float f : projection) {
-                pointer.putFloat(f);
-            }
+            poiBufferF.put(projection);
         }
 
         // Update of the MVP matrix for the depth pass
@@ -429,9 +429,7 @@ public class Gl_320_fbo_shadow extends Test {
             FloatUtil.multMatrix(projection, view, depthMvp);
             FloatUtil.multMatrix(depthMvp, model);
 
-            for (float f : depthMvp) {
-                pointer.putFloat(f);
-            }
+            poiBufferF.put(depthMvp);
 
             float[] biasMatrix = {
                 0.5f, 0.0f, 0.0f, 0.0f,
@@ -441,11 +439,7 @@ public class Gl_320_fbo_shadow extends Test {
 
             FloatUtil.multMatrix(biasMatrix, depthMvp);
 
-            for (float f : biasMatrix) {
-                pointer.putFloat(f);
-            }
-
-            pointer.rewind();
+            poiBufferF.put(biasMatrix).rewind();
         }
 
         gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

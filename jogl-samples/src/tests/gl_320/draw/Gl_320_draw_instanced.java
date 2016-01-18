@@ -199,9 +199,7 @@ public class Gl_320_draw_instanced extends Test {
             FloatUtil.multMatrix(projection, 0, view(), 0, mvp, 16);
             FloatUtil.multMatrix(mvp, 16, modelB, 0);
 
-            for (int f = 0; f < mvp.length; f++) {
-                pointer.putFloat(mvp[f]);
-            }
+            pointer.asFloatBuffer().put(mvp).rewind();
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);

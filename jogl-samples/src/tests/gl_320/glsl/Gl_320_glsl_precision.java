@@ -250,9 +250,7 @@ public class Gl_320_glsl_precision extends Test {
             FloatUtil.multMatrix(projection, view());
             FloatUtil.multMatrix(projection, model);
 
-            for (float f : projection) {
-                pointer.putFloat(f);
-            }
+            pointer.asFloatBuffer().put(projection).rewind();
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

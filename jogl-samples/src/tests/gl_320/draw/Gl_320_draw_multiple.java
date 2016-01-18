@@ -194,10 +194,8 @@ public class Gl_320_draw_multiple extends Test {
             FloatUtil.multMatrix(projection, view(), mvp);
             FloatUtil.multMatrix(mvp, model);
 
-            for (int f = 0; f < mvp.length; f++) {
-                pointer.putFloat(mvp[f]);
-            }
-            pointer.rewind();
+            pointer.asFloatBuffer().put(mvp).rewind();
+
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -214,10 +212,7 @@ public class Gl_320_draw_multiple extends Test {
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
         gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
         gl3.glBindVertexArray(vertexArrayName[0]);
-        PointerBuffer indices = PointerBuffer.allocateDirect(2);
-        indices.put(0);
-        indices.put(0);
-        indices.rewind();
+        PointerBuffer indices = PointerBuffer.allocateDirect(2).put(0).put(0).rewind();
         /**
          * public void glMultiDrawElementsBaseVertex(int mode, IntBuffer count,
          * int type, PointerBuffer indices, int drawcount, IntBuffer basevertex)

@@ -274,7 +274,7 @@ public class Gl_430_draw_vertex_attrib_binding extends Test {
             FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
                     (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
             FloatUtil.makeIdentity(model);
-            
+
             FloatUtil.multMatrix(projection, view());
             FloatUtil.multMatrix(projection, model);
 
@@ -298,6 +298,21 @@ public class Gl_430_draw_vertex_attrib_binding extends Test {
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
 
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
+
+        return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        gl4.glDeleteProgramPipelines(1, pipelineName, 0);
+        gl4.glDeleteProgram(programName[Program.FRAGMENT.ordinal()]);
+        gl4.glDeleteProgram(programName[Program.VERTEX.ordinal()]);
+        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteTextures(1, textureName, 0);
+        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
 
         return true;
     }

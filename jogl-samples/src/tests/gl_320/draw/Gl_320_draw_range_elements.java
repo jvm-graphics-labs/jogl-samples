@@ -204,16 +204,14 @@ public class Gl_320_draw_range_elements extends Test {
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) windowSize.x / 3.0f / windowSize.y, 0.1f, 100.0f);
+            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 
+                    windowSize.x / 3.0f / windowSize.y, 0.1f, 100.0f);
             FloatUtil.makeIdentity(model);
 
             FloatUtil.multMatrix(projection, view());
             FloatUtil.multMatrix(projection, model);
 
-            for (int f = 0; f < projection.length; f++) {
-                pointer.putFloat(projection[f]);
-            }
+            pointer.asFloatBuffer().put(projection).rewind();
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }

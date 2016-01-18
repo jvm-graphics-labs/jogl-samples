@@ -281,10 +281,7 @@ public class Gl_320_texture_float extends Test {
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
             FloatUtil.makeOrtho(ortho, 0, true, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
 
-            for (float f : ortho) {
-                pointer.putFloat(f);
-            }
-            pointer.rewind();
+            pointer.asFloatBuffer().put(ortho).rewind();
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }

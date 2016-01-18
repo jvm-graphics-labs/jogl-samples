@@ -376,19 +376,15 @@ public class Gl_320_fbo_depth_stencil extends Test {
             FloatUtil.multMatrix(projection, view(), mvp);
             FloatUtil.multMatrix(mvp, model);
 
-            for (int i = 0; i < mvp.length; i++) {
-                pointer.putFloat(uniformBufferOffsetAlignment[0] * 0 + i * Float.BYTES, mvp[i]);
-            }
+            pointer.asFloatBuffer().put(mvp);
 
             FloatUtil.makeScale(model, true, 1.05f, 1.05f, 1.05f);
 
             FloatUtil.multMatrix(projection, view(), mvp);
             FloatUtil.multMatrix(mvp, model);
-
-            for (int i = 0; i < mvp.length; i++) {
-                pointer.putFloat(uniformBufferOffsetAlignment[0] * 1 + i * Float.BYTES, mvp[i]);
-            }
-            pointer.rewind();
+            
+            pointer.position(uniformBufferOffsetAlignment[0]);
+            pointer.asFloatBuffer().put(mvp).rewind();
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

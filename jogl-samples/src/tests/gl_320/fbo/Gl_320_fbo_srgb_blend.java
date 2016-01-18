@@ -360,9 +360,7 @@ public class Gl_320_fbo_srgb_blend extends Test {
                     (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
             FloatUtil.multMatrix(projection, view());
 
-            for (float f : projection) {
-                pointer.putFloat(f);
-            }
+            pointer.asFloatBuffer().put(projection).rewind();
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

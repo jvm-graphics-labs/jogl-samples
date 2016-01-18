@@ -188,12 +188,8 @@ public class Gl_320_primitive_shading extends Test {
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
         ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
         for (int i = 0; i < vertexCount; i++) {
-            vertexBuffer.putFloat(vertexV2fData[i * 2 + 0]);
-            vertexBuffer.putFloat(vertexV2fData[i * 2 + 1]);
-            vertexBuffer.put(vertexV4ubData[i * 4 + 0]);
-            vertexBuffer.put(vertexV4ubData[i * 4 + 1]);
-            vertexBuffer.put(vertexV4ubData[i * 4 + 2]);
-            vertexBuffer.put(vertexV4ubData[i * 4 + 3]);
+            vertexBuffer.putFloat(vertexV2fData[i * 2 + 0]).putFloat(vertexV2fData[i * 2 + 1]);
+            vertexBuffer.put(vertexV4ubData,i * 4, 4);
         }
         vertexBuffer.rewind();
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
