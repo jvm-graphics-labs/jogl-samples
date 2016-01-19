@@ -196,6 +196,9 @@ public class Gl_430_direct_state_access_ext extends Test {
         uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
 
         gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        /**
+         * TODO switch to glCreateBuffers.
+         */
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glNamedBufferData(bufferName[Buffer.ELEMENT.ordinal()], elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
