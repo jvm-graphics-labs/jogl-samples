@@ -1,5 +1,5 @@
 # GL 430
 
-## Gl_430_fbo_invalidate
+## gl-430-fbo-invalidate
 
 - `glInvalidateFramebuffer`
