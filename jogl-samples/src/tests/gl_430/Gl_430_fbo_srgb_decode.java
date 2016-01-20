@@ -5,17 +5,23 @@
  */
 package tests.gl_430;
 
+import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ALPHA;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_COLOR_ATTACHMENT0;
 import static com.jogamp.opengl.GL.GL_DEPTH_ATTACHMENT;
 import static com.jogamp.opengl.GL.GL_DEPTH_COMPONENT24;
+import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
 import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
 import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_FRAMEBUFFER;
+import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_SRGB;
+import static com.jogamp.opengl.GL.GL_LESS;
 import static com.jogamp.opengl.GL.GL_LINEAR;
 import static com.jogamp.opengl.GL.GL_LINEAR_MIPMAP_LINEAR;
+import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
+import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
 import static com.jogamp.opengl.GL.GL_RGBA8;
 import static com.jogamp.opengl.GL.GL_SRGB8_ALPHA8;
 import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
@@ -23,11 +29,15 @@ import static com.jogamp.opengl.GL.GL_TEXTURE0;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.jogamp.opengl.GL.GL_UNPACK_ALIGNMENT;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_SHORT;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_RED;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import static com.jogamp.opengl.GL2ES3.GL_BLUE;
+import static com.jogamp.opengl.GL2ES3.GL_COLOR;
+import static com.jogamp.opengl.GL2ES3.GL_DEPTH;
 import static com.jogamp.opengl.GL2ES3.GL_GREEN;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_2D_ARRAY;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
@@ -39,6 +49,7 @@ import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_R;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT;
 import com.jogamp.opengl.GL4;
+import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
@@ -47,6 +58,7 @@ import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
@@ -121,6 +133,32 @@ public class Gl_430_fbo_srgb_decode extends Test {
     private int framebufferScale = 2, uniformTransform = -1;
     private float[] projection = new float[16];
 
+    @Override
+    protected boolean begin(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        boolean validated = true;
+
+        if (validated) {
+            validated = initProgram(gl4);
+        }
+        if (validated) {
+            validated = initBuffer(gl4);
+        }
+        if (validated) {
+            validated = initVertexArray(gl4);
+        }
+        if (validated) {
+            validated = initTexture(gl4);
+        }
+        if (validated) {
+            validated = initFramebuffer(gl4);
+        }
+
+        return validated;
+    }
+
     private boolean initProgram(GL4 gl4) {
 
         boolean validated = true;
@@ -162,11 +200,11 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
         if (validated) {
 
-            uniformTransform = gl4.glGetUniformBlockIndex(programName[Program.TEXTURE.ordinal()], "transform");
+            uniformTransform = gl4.glGetUniformBlockIndex(programName[Program.TEXTURE.ordinal()], "Transform");
             uniformDiffuse[Program.TEXTURE.ordinal()]
-                    = gl4.glGetUniformLocation(programName[Program.TEXTURE.ordinal()], "Diffuse");
+                    = gl4.glGetUniformLocation(programName[Program.TEXTURE.ordinal()], "diffuse");
             uniformDiffuse[Program.SPLASH.ordinal()]
-                    = gl4.glGetUniformLocation(programName[Program.SPLASH.ordinal()], "Diffuse");
+                    = gl4.glGetUniformLocation(programName[Program.SPLASH.ordinal()], "diffuse");
 
             gl4.glUseProgram(programName[Program.TEXTURE.ordinal()]);
             gl4.glUniform1i(uniformDiffuse[Program.TEXTURE.ordinal()], 0);
@@ -293,7 +331,7 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
     private boolean initFramebuffer(GL4 gl4) {
 
-        gl4.glGenFramebuffers(1,  framebufferName,0);
+        gl4.glGenFramebuffers(1, framebufferName, 0);
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
         gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER.ordinal()], 0);
         gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.RENDERBUFFER.ordinal()], 0);
@@ -303,6 +341,91 @@ public class Gl_430_fbo_srgb_decode extends Test {
         }
 
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        return true;
+    }
+
+    @Override
+    protected boolean render(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        {
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, projection.length * Float.BYTES,
+                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+
+            //glm::mat4 Projection = glm::perspectiveFov(glm::pi<float>() * 0.25f, 640.f, 480.f, 0.1f, 100.0f);
+            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
+                    (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+
+            FloatUtil.multMatrix(projection, view());
+
+            pointer.asFloatBuffer().put(projection).rewind();
+
+            // Make sure the uniform buffer is uploaded
+            gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
+        }
+
+        {
+            gl4.glEnable(GL_DEPTH_TEST);
+            gl4.glDepthFunc(GL_LESS);
+
+            gl4.glViewport(0, 0, windowSize.x * framebufferScale, windowSize.y * framebufferScale);
+
+            gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
+
+            // Convert linear clear color to sRGB color space, FramebufferName is a sRGB FBO
+            gl4.glEnable(GL_FRAMEBUFFER_SRGB);
+            float[] depth = {1.0f};
+            gl4.glClearBufferfv(GL_DEPTH, 0, depth, 0);
+            gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+
+            // TextureName[texture::DIFFUSE] is a sRGB texture which sRGB conversion on fetch has been disabled
+            // Hence in the shader, the value is stored as sRGB so we should not convert it to sRGB.
+            gl4.glDisable(GL_FRAMEBUFFER_SRGB);
+            gl4.glUseProgram(programName[Program.TEXTURE.ordinal()]);
+
+            gl4.glActiveTexture(GL_TEXTURE0);
+            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE_RGB.ordinal()]);
+            gl4.glBindVertexArray(vertexArrayName[Program.TEXTURE.ordinal()]);
+            gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0,
+                    bufferName[Buffer.TRANSFORM.ordinal()]);
+
+            gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 2, 0);
+        }
+
+        {
+            gl4.glDisable(GL_DEPTH_TEST);
+
+            gl4.glViewport(0, 0, windowSize.x, windowSize.y);
+
+            gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+            gl4.glUseProgram(programName[Program.SPLASH.ordinal()]);
+
+            gl4.glActiveTexture(GL_TEXTURE0);
+            gl4.glBindVertexArray(vertexArrayName[Program.SPLASH.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+
+            gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 1);
+        }
+
+        return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        gl4.glDeleteFramebuffers(1, framebufferName, 0);
+        gl4.glDeleteProgram(programName[Program.SPLASH.ordinal()]);
+        gl4.glDeleteProgram(programName[Program.TEXTURE.ordinal()]);
+
+        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
+
         return true;
     }
 }
