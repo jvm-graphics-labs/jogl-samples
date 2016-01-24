@@ -275,7 +275,7 @@ public class Gl_400_texture_derivative extends Test {
         boolean validated = true;
 
         int[] textureSize = {128, 128};
-        jgli.Texture2d texture = new Texture2d(jgli.Format.FORMAT_RGBA8_UNORM, textureSize);
+        jgli.Texture2d texture = new Texture2d(jgli.Format.FORMAT_RGBA8_UNORM_PACK32, textureSize);
         texture.clear(0, 0, 0, new byte[]{(byte) 255, (byte) 0, (byte) 0, (byte) 255});
         texture.clear(0, 0, 1, new byte[]{(byte) 255, (byte) 128, (byte) 0, (byte) 255});
         texture.clear(0, 0, 2, new byte[]{(byte) 0, (byte) 255, (byte) 0, (byte) 255});

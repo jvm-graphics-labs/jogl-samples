@@ -159,7 +159,7 @@ public class Gl_320_texture_cube extends Test {
 
     private boolean initTexture(GL3 gl3) {
 
-        jgli.TextureCube texture = new TextureCube(jgli.Format.FORMAT_RGBA8_UNORM, new int[]{2, 2}, 1);
+        jgli.TextureCube texture = new TextureCube(jgli.Format.FORMAT_RGBA8_UNORM_PACK32, new int[]{2, 2}, 1);
         assert (!texture.empty());
 
         texture.clearFace(0, new byte[]{(byte) 255, (byte) 0, (byte) 0, (byte) 255});

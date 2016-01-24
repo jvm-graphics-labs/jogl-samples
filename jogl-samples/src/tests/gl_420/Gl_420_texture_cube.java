@@ -216,7 +216,7 @@ public class Gl_420_texture_cube extends Test {
         gl4.glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
         gl4.glTexParameteri(GL_TEXTURE_CUBE_MAP_ARRAY, GL_TEXTURE_MAX_LEVEL, 2);
 
-        jgli.TextureCube textureA = new TextureCube(jgli.Format.FORMAT_RGBA8_UNORM, new int[]{512, 512}, 1);
+        jgli.TextureCube textureA = new TextureCube(jgli.Format.FORMAT_RGBA8_UNORM_PACK32, new int[]{512, 512}, 1);
         assert (!textureA.empty());
         textureA.clear(0, 0, 0, new byte[]{(byte) 255, (byte) 0, (byte) 0, (byte) 255});
         textureA.clear(0, 1, 0, new byte[]{(byte) 255, (byte) 128, (byte) 0, (byte) 255});
@@ -225,7 +225,7 @@ public class Gl_420_texture_cube extends Test {
         textureA.clear(0, 4, 0, new byte[]{(byte) 0, (byte) 255, (byte) 255, (byte) 255});
         textureA.clear(0, 5, 0, new byte[]{(byte) 0, (byte) 0, (byte) 255, (byte) 255});
 
-        jgli.TextureCube textureB = new TextureCube(jgli.Format.FORMAT_RGBA8_UNORM, new int[]{256, 256}, 1);
+        jgli.TextureCube textureB = new TextureCube(jgli.Format.FORMAT_RGBA8_UNORM_PACK32, new int[]{256, 256}, 1);
         assert (!textureB.empty());
         textureB.clear(0, 0, 0, new byte[]{(byte) 255, (byte) 128, (byte) 128, (byte) 255});
         textureB.clear(0, 1, 0, new byte[]{(byte) 255, (byte) 192, (byte) 128, (byte) 255});
@@ -234,7 +234,7 @@ public class Gl_420_texture_cube extends Test {
         textureB.clear(0, 4, 0, new byte[]{(byte) 128, (byte) 255, (byte) 255, (byte) 255});
         textureB.clear(0, 5, 0, new byte[]{(byte) 128, (byte) 128, (byte) 255, (byte) 255});
 
-        jgli.TextureCube textureC = new TextureCube(jgli.Format.FORMAT_RGBA8_UNORM, new int[]{128, 128}, 1);
+        jgli.TextureCube textureC = new TextureCube(jgli.Format.FORMAT_RGBA8_UNORM_PACK32, new int[]{128, 128}, 1);
         assert (!textureC.empty());
         textureC.clear(0, 0, 0, new byte[]{(byte) 255, (byte) 192, (byte) 192, (byte) 255});
         textureC.clear(0, 1, 0, new byte[]{(byte) 255, (byte) 224, (byte) 192, (byte) 255});

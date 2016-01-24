@@ -215,7 +215,7 @@ public class Gl_320_fbo_integer extends Test {
 
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            jgli.Gl.Format format = jgli.Gl.instance.translate(jgli.Format.FORMAT_RGB8_UINT);
+            jgli.Gl.Format format = jgli.Gl.instance.translate(jgli.Format.FORMAT_RGB8_UINT_PACK8);
 
             for (int level = 0; level < texture.levels(); level++) {
 

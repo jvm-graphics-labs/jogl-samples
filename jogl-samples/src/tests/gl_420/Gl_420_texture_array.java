@@ -166,7 +166,7 @@ public class Gl_420_texture_array extends Test {
         gl4.glActiveTexture(GL_TEXTURE0);
         gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[0]);
 
-        jgli.Texture2dArray texture = new Texture2dArray(jgli.Format.FORMAT_RGBA8_UNORM, new int[]{4, 4}, 15, 1);
+        jgli.Texture2dArray texture = new Texture2dArray(jgli.Format.FORMAT_RGBA8_UNORM_PACK32, new int[]{4, 4}, 15, 1);
         for (int layerIndex = 0; layerIndex < texture.layers(); ++layerIndex) {
             /**
              * Trick to get the 1 inclusive, altought with less probability
