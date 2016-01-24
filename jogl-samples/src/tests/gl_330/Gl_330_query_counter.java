@@ -198,7 +198,7 @@ public class Gl_330_query_counter extends Test {
 
         int[] availableEnd = {GL_FALSE};
         gl3.glGetQueryObjectiv(queryName[Query.END.ordinal()], GL_QUERY_RESULT_AVAILABLE, availableEnd, 0);
-
+        
         // The OpenGL implementations will wait for the query if it's not available
         long[] timeBegin = {0}, timeEnd = {0};
         gl3.glGetQueryObjecti64v(queryName[Query.BEGIN.ordinal()], GL_QUERY_RESULT, timeBegin, 0);

@@ -82,9 +82,9 @@ public class HelloTriangle implements GLEventListener, KeyListener {
     private int[] objects = new int[Semantic.Object.SIZE];
     // Position interleaved with colors (to be normalized).
     private byte[] vertexData = new byte[]{
-        (byte) -1, (byte) -1, (byte) Byte.MAX_VALUE, (byte) 0, (byte) 0,
-        (byte) +0, (byte) +2, (byte) 0, (byte) 0, (byte) Byte.MAX_VALUE,
-        (byte) +1, (byte) -1, (byte) 0, (byte) Byte.MAX_VALUE, (byte) 0
+        (byte) -1, (byte) -1, Byte.MAX_VALUE, (byte) 0, (byte) 0,
+        (byte) +0, (byte) +2, (byte) 0, (byte) 0, Byte.MAX_VALUE,
+        (byte) +1, (byte) -1, (byte) 0, Byte.MAX_VALUE, (byte) 0
     };
     private short[] indexData = new short[]{
         0, 2, 1
