@@ -416,7 +416,7 @@ public class Test implements GLEventListener, KeyListener {
         switch (e.getKeyCode()) {
             case KeyEvent.VK_ESCAPE:
                 animator.stop();
-                glWindow.destroy();
+//                glWindow.destroy();
                 break;
         }
     }
