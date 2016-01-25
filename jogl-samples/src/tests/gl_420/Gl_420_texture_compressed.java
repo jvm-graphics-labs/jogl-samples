@@ -222,8 +222,8 @@ public class Gl_420_texture_compressed extends Test {
 
                 jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_DXT5_SRGB));
                 assert (!texture.empty());
-                jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
-                jgli.Gl.Swizzles swizzles = jgli.Gl.instance.translate(texture.swizzles());
+                jgli.Gl.Format format = jgli.Gl.translate(texture.format());
+                jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
                 gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BPTC.ordinal()]);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -248,8 +248,8 @@ public class Gl_420_texture_compressed extends Test {
             {
                 jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_DXT5_UNORM));
                 assert (!texture.empty());
-                jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
-                jgli.Gl.Swizzles swizzles = jgli.Gl.instance.translate(texture.swizzles());
+                jgli.Gl.Format format = jgli.Gl.translate(texture.format());
+                jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
                 gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DXT5.ordinal()]);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -274,8 +274,8 @@ public class Gl_420_texture_compressed extends Test {
             {
                 jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_RGB9E5_UFLOAT));
                 assert (!texture.empty());
-                jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
-                jgli.Gl.Swizzles swizzles = jgli.Gl.instance.translate(texture.swizzles());
+                jgli.Gl.Format format = jgli.Gl.translate(texture.format());
+                jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
                 gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGTC.ordinal()]);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -299,8 +299,8 @@ public class Gl_420_texture_compressed extends Test {
             {
                 jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_RGBA8_SNORM));
                 assert (!texture.empty());
-                jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
-                jgli.Gl.Swizzles swizzles = jgli.Gl.instance.translate(texture.swizzles());
+                jgli.Gl.Format format = jgli.Gl.translate(texture.format());
+                jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
                 gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGB8.ordinal()]);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);

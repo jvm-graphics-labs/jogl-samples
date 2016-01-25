@@ -218,7 +218,7 @@ public class Gl_400_fbo_multisample extends Test {
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             for (int level = 0; level < texture.levels(); ++level) {
                 gl4.glTexImage2D(GL_TEXTURE_2D, level,

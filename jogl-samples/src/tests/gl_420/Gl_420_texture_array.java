@@ -180,7 +180,7 @@ public class Gl_420_texture_array extends Test {
             texture.clear(layerIndex, 0, 0, color);
         }
 
-        jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+        jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
         gl4.glTexStorage3D(GL_TEXTURE_2D_ARRAY, texture.levels(),
                 format.internal.value,

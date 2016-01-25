@@ -206,7 +206,7 @@ public class Gl_320_fbo_multisample_explicit extends Test {
 
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
             for (int level = 0; level < texture.levels(); level++) {
                 gl3.glTexImage2D(GL_TEXTURE_2D, level,
                         format.internal.value,

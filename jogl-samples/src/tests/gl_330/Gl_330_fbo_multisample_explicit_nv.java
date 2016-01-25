@@ -221,7 +221,7 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
 
         try {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
             gl3.glActiveTexture(GL_TEXTURE0);

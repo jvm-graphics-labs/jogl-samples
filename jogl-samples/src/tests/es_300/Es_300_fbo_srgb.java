@@ -271,7 +271,7 @@ public class Es_300_fbo_srgb extends Test {
             int[] swizzle = {GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA};
             gl3es3.glTexParameteriv(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_RGBA, swizzle, 0);
 
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
             for (int level = 0; level < texture.levels(); ++level) {
 
                 gl3es3.glTexImage2D(GL_TEXTURE_2D, level,

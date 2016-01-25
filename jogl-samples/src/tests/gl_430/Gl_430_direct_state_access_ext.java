@@ -234,8 +234,8 @@ public class Gl_430_direct_state_access_ext extends Test {
 
         try {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
-            jgli.Gl.Swizzles swizzles = jgli.Gl.instance.translate(texture.swizzles());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
+            jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
             gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
 

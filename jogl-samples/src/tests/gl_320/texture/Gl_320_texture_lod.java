@@ -193,7 +193,7 @@ public class Gl_320_texture_lod extends Test {
             gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
 
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             {
                 gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.ZERO.ordinal()]);

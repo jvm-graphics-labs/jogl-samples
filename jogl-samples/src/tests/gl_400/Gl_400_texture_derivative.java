@@ -287,7 +287,7 @@ public class Gl_400_texture_derivative extends Test {
 
         assert (!texture.empty());
 
-        jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+        jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
         gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 

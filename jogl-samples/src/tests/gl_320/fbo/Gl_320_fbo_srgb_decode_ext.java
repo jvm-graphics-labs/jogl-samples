@@ -272,7 +272,7 @@ public class Gl_320_fbo_srgb_decode_ext extends Test {
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SRGB_DECODE_EXT, GL_DECODE_EXT);
 
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
             for (int level = 0; level < texture.levels(); ++level) {
                 gl3.glTexImage2D(GL_TEXTURE_2D, level,
                         format.internal.value,

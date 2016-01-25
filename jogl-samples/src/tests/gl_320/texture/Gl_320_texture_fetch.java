@@ -171,7 +171,7 @@ public class Gl_320_texture_fetch extends Test {
 
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             for (int level = 0; level < texture.levels(); ++level) {
                 gl3.glCompressedTexImage2D(GL_TEXTURE_2D, level,

@@ -273,8 +273,8 @@ public class Gl_320_fbo_srgb extends Test {
         try {
 
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
-            jgli.Gl.Swizzles swizzles = jgli.Gl.instance.translate(texture.swizzles());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
+            jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
             assert (!texture.empty());
 

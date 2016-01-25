@@ -193,7 +193,7 @@ public class Gl_320_texture_compressed_ext extends Test {
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
 
-                jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+                jgli.Gl.Format format = jgli.Gl.translate(texture.format());
                 for (int level = 0; level < texture.levels(); ++level) {
                     gl3.glCompressedTexImage2D(GL_TEXTURE_2D, level,
                             format.internal.value,
@@ -212,7 +212,7 @@ public class Gl_320_texture_compressed_ext extends Test {
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
 
-                jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+                jgli.Gl.Format format = jgli.Gl.translate(texture.format());
                 for (int level = 0; level < texture.levels(); ++level) {
                     gl3.glCompressedTexImage2D(GL_TEXTURE_2D, level,
                             format.internal.value,
@@ -231,7 +231,7 @@ public class Gl_320_texture_compressed_ext extends Test {
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
 
-                jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+                jgli.Gl.Format format = jgli.Gl.translate(texture.format());
                 for (int level = 0; level < texture.levels(); ++level) {
                     gl3.glCompressedTexImage2D(GL_TEXTURE_2D, level,
                             format.internal.value,
@@ -250,7 +250,7 @@ public class Gl_320_texture_compressed_ext extends Test {
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
 
-                jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+                jgli.Gl.Format format = jgli.Gl.translate(texture.format());
                 for (int level = 0; level < texture.levels(); ++level) {
                     gl3.glCompressedTexImage2D(GL_TEXTURE_2D, level,
                             format.internal.value,

@@ -197,7 +197,7 @@ public class Gl_320_texture_offset extends Test {
         try {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             gl3.glGenTextures(1, textureName, 0);
             gl3.glActiveTexture(GL_TEXTURE0);

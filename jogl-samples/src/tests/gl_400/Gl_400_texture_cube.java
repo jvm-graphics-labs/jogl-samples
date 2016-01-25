@@ -219,8 +219,8 @@ public class Gl_400_texture_cube extends Test {
             jgli.Texture texture = jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_DDS);
             assert (!texture.empty());
 
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
-            jgli.Gl.Target target = jgli.Gl.instance.translate(texture.target());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
+            jgli.Gl.Target target = jgli.Gl.translate(texture.target());
 
             gl4.glTexImage3D(
                     target.value, 0,

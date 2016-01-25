@@ -186,7 +186,7 @@ public class Gl_320_texture_cube extends Test {
         gl3.glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_NONE);
         gl3.glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
         
-        jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+        jgli.Gl.Format format = jgli.Gl.translate(texture.format());
         for (int face = 0; face < 6; ++face) {
             gl3.glTexImage2D(
                     GL_TEXTURE_CUBE_MAP_POSITIVE_X + face,

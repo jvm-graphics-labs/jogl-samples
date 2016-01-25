@@ -144,7 +144,7 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
                 return false;
             }
 
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             gl3.glGenTextures(1, textureName, 0);
 

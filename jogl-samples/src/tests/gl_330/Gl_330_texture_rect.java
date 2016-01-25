@@ -175,7 +175,7 @@ public class Gl_330_texture_rect extends Test {
             gl3.glTexParameteri(GL_TEXTURE_RECTANGLE, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             assert (texture.dimensions()[0] <= textureSize[0]
                     && texture.dimensions()[1] <= textureSize[0]);

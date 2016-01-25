@@ -161,8 +161,8 @@ public class Gl_330_blend_index extends Test {
 
         try {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
-            jgli.Gl.Swizzles swizzles = jgli.Gl.instance.translate(texture.swizzles());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
+            jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
             gl3.glGenTextures(1, textureName, 0);
 

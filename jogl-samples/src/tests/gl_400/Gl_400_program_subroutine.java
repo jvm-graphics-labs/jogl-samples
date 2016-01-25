@@ -224,7 +224,7 @@ public class Gl_400_program_subroutine extends Test {
 
             {
                 jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_RGB8));
-                jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+                jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
                 gl4.glActiveTexture(GL_TEXTURE0);
                 gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGB8.ordinal()]);
@@ -249,8 +249,8 @@ public class Gl_400_program_subroutine extends Test {
 
             {
                 jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_DXT1));
-                jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
-                jgli.Gl.Swizzles swizzles = jgli.Gl.instance.translate(texture.swizzles());
+                jgli.Gl.Format format = jgli.Gl.translate(texture.format());
+                jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
                 gl4.glActiveTexture(GL_TEXTURE0);
                 gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DXT1.ordinal()]);

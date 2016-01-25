@@ -173,7 +173,7 @@ public class Gl_430_image_sampling extends Test {
         try {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
-            jgli.Gl.Format format = jgli.Gl.instance.translate(texture.format());
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
