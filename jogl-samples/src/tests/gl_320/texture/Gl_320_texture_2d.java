@@ -222,7 +222,7 @@ public class Gl_320_texture_2d extends Test {
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         0,
                         jgli.Gl.ExternalFormat.EXTERNAL_RGB.value, jgli.Gl.TypeFormat.TYPE_U8.value,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             if (texture.levels() == 1) {

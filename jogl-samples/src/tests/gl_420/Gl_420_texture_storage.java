@@ -225,7 +225,7 @@ public class Gl_420_texture_storage extends Test {
                         0, 0, 0,
                         texture.dimensions(level)[0], texture.dimensions(level)[1], 1,
                         format.external.value, format.type.value,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);

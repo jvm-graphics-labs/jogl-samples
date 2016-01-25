@@ -86,26 +86,33 @@ public class Test implements GLEventListener, KeyListener {
     private Profile profile;
     private final int major, minor;
     private final Vec2 translationOrigin, translationCurrent, rotationOrigin, rotationCurrent;
+    private boolean glDebug;
     protected final String TEXTURE_ROOT = "/data";
 
+    public Test(String title, Profile profile, int major, int minor, Vec2 orientation, boolean glDebug) {
+        this(title, profile, major, minor, new Vec2i(640, 480), orientation, new Vec2(0, 4), glDebug);
+    }
+
     public Test(String title, Profile profile, int major, int minor, Vec2 orientation) {
-        this(title, profile, major, minor, new Vec2i(640, 480), orientation, new Vec2(0, 4));
+        this(title, profile, major, minor, new Vec2i(640, 480), orientation, new Vec2(0, 4), true);
     }
 
     public Test(String title, Profile profile, int major, int minor, Vec2i windowSize) {
-        this(title, profile, major, minor, windowSize, new Vec2(), new Vec2(0, 4));
+        this(title, profile, major, minor, windowSize, new Vec2(), new Vec2(0, 4), true);
     }
 
     public Test(String title, Profile profile, int major, int minor, Vec2i windowSize, Vec2 orientation) {
-        this(title, profile, major, minor, windowSize, orientation, new Vec2(0, 4));
+        this(title, profile, major, minor, windowSize, orientation, new Vec2(0, 4), true);
     }
 
     public Test(String title, Profile profile, int major, int minor) {
-
-        this(title, profile, major, minor, new Vec2i(640, 480), new Vec2(), new Vec2(0, 4));
+        this(title, profile, major, minor, new Vec2i(640, 480), new Vec2(), new Vec2(0, 4), true);
     }
 
-    public Test(String title, Profile profile, int major, int minor, Vec2i windowSize, Vec2 orientation, Vec2 position) {
+    public Test(String title, Profile profile,
+            int major, int minor,
+            Vec2i windowSize, Vec2 orientation, Vec2 position,
+            boolean glDebug) {
 
         this.profile = profile;
         this.major = major;
@@ -115,17 +122,21 @@ public class Test implements GLEventListener, KeyListener {
         this.translationCurrent = position;
         this.rotationOrigin = orientation;
         this.rotationCurrent = orientation;
+        this.glDebug = glDebug;
 
         initGL(title);
     }
 
     private void initGL(String title) {
+
         Display display = NewtFactory.createDisplay(null);
         Screen screen = NewtFactory.createScreen(display, screenIdx);
         GLProfile glProfile = GLProfile.getDefault();
         GLCapabilities glCapabilities = new GLCapabilities(glProfile);
         glWindow = GLWindow.create(screen, glCapabilities);
-        glWindow.setContextCreationFlags(GLContext.CTX_OPTION_DEBUG);
+        if (glDebug) {
+            glWindow.setContextCreationFlags(GLContext.CTX_OPTION_DEBUG);
+        }
 
         assert glWindow != null;
 
@@ -138,7 +149,6 @@ public class Test implements GLEventListener, KeyListener {
         glWindow.setSize(windowSize.x, windowSize.y);
         glWindow.setVisible(true);
         glWindow.addGLEventListener(this);
-//                glWindow.getContext().enableGLDebugMessage(true);
         glWindow.addKeyListener(this);
 
         animator = new Animator();
@@ -154,7 +164,7 @@ public class Test implements GLEventListener, KeyListener {
 
         GL gl = getCorrespondingGl(drawable);
 
-        assert checkGLVersion(gl);
+        assert checkGLVersion();
 
         assert begin(gl);
     }
@@ -240,16 +250,17 @@ public class Test implements GLEventListener, KeyListener {
         return view;
     }
 
-    private boolean checkGLVersion(GL gl) {
+    private boolean checkGLVersion() {
 
-        int[] majorVersionContext = new int[]{0};
-        int[] minorVersionContext = new int[]{0};
-        gl.glGetIntegerv(GL_MAJOR_VERSION, majorVersionContext, 0);
-        gl.glGetIntegerv(GL_MINOR_VERSION, minorVersionContext, 0);
+        int majorVersionContext = GLContext.getMaxMajor(GLContext.CONTEXT_CURRENT);
+        int minorVersionContext = GLContext.getMaxMinor(GLContext.CONTEXT_CURRENT, majorVersionContext);
+//        gl.glGetIntegerv(GL_MAJOR_VERSION, majorVersionContext, 0);
+//        gl.glGetIntegerv(GL_MINOR_VERSION, minorVersionContext, 0);
         System.out.println("OpenGL Version Needed " + major + "." + minor
-                + " ( " + majorVersionContext[0] + "," + minorVersionContext[0] + " found)");
-        return version(majorVersionContext[0], minorVersionContext[0])
-                >= version(major, minor);
+                + " ( " + majorVersionContext + "," + minorVersionContext + " found)");
+//        return version(majorVersionContext[0], minorVersionContext[0])
+//                >= version(major, minor);
+        return GLContext.isValidGLVersion(GLContext.CONTEXT_CURRENT, 4, 3);
     }
 
     private int version(int major, int minor) {
@@ -288,16 +299,16 @@ public class Test implements GLEventListener, KeyListener {
     }
 
     protected boolean checkExtension(GL3 gl3, String extensionName) {
-
-        int[] extensionCount = {0};
-        gl3.glGetIntegerv(GL_NUM_EXTENSIONS, extensionCount, 0);
-        for (int i = 0; i < extensionCount[0]; i++) {
-            if (gl3.glGetStringi(GL_EXTENSIONS, i).equals(extensionName)) {
-                return true;
-            }
-        }
-        System.out.println("Failed to find Extension: " + extensionName);
-        return false;
+        return gl3.isExtensionAvailable(extensionName);
+//        int[] extensionCount = {0};
+//        gl3.glGetIntegerv(GL_NUM_EXTENSIONS, extensionCount, 0);
+//        for (int i = 0; i < extensionCount[0]; i++) {
+//            if (gl3.glGetStringi(GL_EXTENSIONS, i).equals(extensionName)) {
+//                return true;
+//            }
+//        }
+//        System.out.println("Failed to find Extension: " + extensionName);
+//        return false;
     }
 
     protected boolean isFramebufferComplete(GL gl, int framebufferName) {
@@ -392,7 +403,7 @@ public class Test implements GLEventListener, KeyListener {
 
         return success;
     }
-    
+
     protected float cameraDistance() {
         return translationCurrent.y;
     }

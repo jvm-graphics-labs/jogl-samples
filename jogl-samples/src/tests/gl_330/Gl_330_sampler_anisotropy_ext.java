@@ -201,7 +201,7 @@ public class Gl_330_sampler_anisotropy_ext extends Test {
                         texture.dimensions(level)[1],
                         0,
                         texture.size(level),
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             gl3.glActiveTexture(GL_TEXTURE0);

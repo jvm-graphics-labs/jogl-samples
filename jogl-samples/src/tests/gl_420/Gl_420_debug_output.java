@@ -17,6 +17,7 @@ import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
 import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.jogamp.opengl.GL.GL_TRUE;
 import static com.jogamp.opengl.GL.GL_UNSIGNED_SHORT;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_OUTPUT;
 import static com.jogamp.opengl.GL2ES2.GL_DEBUG_OUTPUT_SYNCHRONOUS;
 import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SEVERITY_MEDIUM;
 import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SOURCE_APPLICATION;
@@ -30,13 +31,11 @@ import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
 import static com.jogamp.opengl.GL2ES3.GL_COLOR;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.GLContext;
-import com.jogamp.opengl.GLDebugListener;
-import com.jogamp.opengl.GLDebugMessage;
 import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.GlDebugOutput;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -49,18 +48,24 @@ import jglm.Vec2;
  *
  * @author GBarbieri
  */
-public class Gl_420_debug_output extends Test implements GLDebugListener {
+public class Gl_420_debug_output extends Test {
 
     public static void main(String[] args) {
         Gl_420_debug_output gl_420_debug_output = new Gl_420_debug_output();
     }
 
     public Gl_420_debug_output() {
-        super("gl-420-debug-output", Profile.CORE, 4, 2, new Vec2(0.25f, 0.25f));
+        /**
+         * It's mandatory to enable glDebugOutput before GLContext creation!
+         * Here through the boolean true.
+         */
+        super("gl-420-debug-output", Profile.CORE, 4, 2, new Vec2(0.25f, 0.25f), true);
     }
 
     private final String SHADERS_SOURCE = "debug-output";
     private final String SHADERS_ROOT = "src/data/gl_420";
+
+    private final boolean useJoglUtils = true;
 
     private int vertexCount = 4;
     private int positionSize = vertexCount * 2 * Float.BYTES;
@@ -107,8 +112,7 @@ public class Gl_420_debug_output extends Test implements GLDebugListener {
             validated = initVertexArray(gl4);
         }
 
-        glWindow.getContext().addGLDebugListener(this);
-
+//        glWindow.getContext().addGLDebugListener(this);
         return validated;
     }
 
@@ -185,51 +189,97 @@ public class Gl_420_debug_output extends Test implements GLDebugListener {
         return true;
     }
 
-    @Override
-    public void messageSent(GLDebugMessage event) {
-//        if (event.getDbgMsg().equals("Message 1")) {
-        System.out.println(event.toString());
-//        }
-    }
-
     private boolean initDebugOutput(GL4 gl4) {
 
-//        gl4.glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-        glWindow.getContext().enableGLDebugMessage(true);
-//        glWindow.getContext().setGLDebugSynchronous(false);
+        if (useJoglUtils) {
+            glWindow.getContext().enableGLDebugMessage(true);
+            glWindow.getContext().setGLDebugSynchronous(true);
+        } else {
+//        gl4.glDisable(GL_DEBUG_OUTPUT);
+            gl4.glEnable(GL_DEBUG_OUTPUT);
+            gl4.glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+        }
+        // from the constructor.
         System.out.println("isGLDebugEnabled " + glWindow.getContext().isGLDebugEnabled());
+        // from enableGLDebugMessage()
         System.out.println("isGLDebugMessageEnabled " + glWindow.getContext().isGLDebugMessageEnabled());
+        // from setGLDebugSynchronous
         System.out.println("isGLDebugSynchronous " + glWindow.getContext().isGLDebugSynchronous());
-//		gl4.glDebugMessageCallbackARB(&test::debugOutput, this);
-        gl4.glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, null, 0, true);
+
+        glWindow.getContext().addGLDebugListener(new GlDebugOutput());
+
+        if (useJoglUtils) {
+            glWindow.getContext().glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, null, 0, true);
+        } else {
+            gl4.glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, null, 0, true);
+        }
 
         int[] messageId = {4};
-        gl4.glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION,
-                GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 0, null, 0, true);
-        gl4.glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION,
-                GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 1, messageId, 0, false);
+        if (useJoglUtils) {
+            glWindow.getContext().glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER,
+                    GL_DONT_CARE, 0, null, 0, true);
+            glWindow.getContext().glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER,
+                    GL_DONT_CARE, 1, messageId, 0, false);
+        } else {
+            gl4.glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, GL_DONT_CARE, 0, null, 0, true);
+            gl4.glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER,
+                    GL_DONT_CARE, 1, messageId, 0, false);
+        }
+
         String message1 = "Message 1";
-        gl4.glDebugMessageInsert(
-                GL_DEBUG_SOURCE_APPLICATION,
-                GL_DEBUG_TYPE_OTHER, 1,
-                GL_DEBUG_SEVERITY_MEDIUM,
-                message1.length(), message1);
+        if (useJoglUtils) {
+            glWindow.getContext().glDebugMessageInsert(
+                    GL_DEBUG_SOURCE_APPLICATION,
+                    GL_DEBUG_TYPE_OTHER, 1,
+                    GL_DEBUG_SEVERITY_MEDIUM,
+                    message1);
+        } else {
+            gl4.glDebugMessageInsert(
+                    GL_DEBUG_SOURCE_APPLICATION,
+                    GL_DEBUG_TYPE_OTHER, 1,
+                    GL_DEBUG_SEVERITY_MEDIUM,
+                    message1.length(), message1);
+        }
         String message2 = "Message 2";
-        gl4.glDebugMessageInsert(
-                GL_DEBUG_SOURCE_THIRD_PARTY,
-                GL_DEBUG_TYPE_OTHER, 2,
-                GL_DEBUG_SEVERITY_MEDIUM,
-                message2.length(), message2);
-        gl4.glDebugMessageInsert(
-                GL_DEBUG_SOURCE_APPLICATION,
-                GL_DEBUG_TYPE_OTHER, 2,
-                GL_DEBUG_SEVERITY_MEDIUM,
-                -1, "Message 3");
-        gl4.glDebugMessageInsert(
-                GL_DEBUG_SOURCE_APPLICATION,
-                GL_DEBUG_TYPE_OTHER, messageId[0],
-                GL_DEBUG_SEVERITY_MEDIUM,
-                -1, "Message 4");
+        if (useJoglUtils) {
+            glWindow.getContext().glDebugMessageInsert(
+                    GL_DEBUG_SOURCE_THIRD_PARTY,
+                    GL_DEBUG_TYPE_OTHER, 2,
+                    GL_DEBUG_SEVERITY_MEDIUM,
+                    message2);
+        } else {
+            gl4.glDebugMessageInsert(
+                    GL_DEBUG_SOURCE_THIRD_PARTY,
+                    GL_DEBUG_TYPE_OTHER, 2,
+                    GL_DEBUG_SEVERITY_MEDIUM,
+                    message2.length(), message2);
+        }
+        if (useJoglUtils) {
+            glWindow.getContext().glDebugMessageInsert(
+                    GL_DEBUG_SOURCE_APPLICATION,
+                    GL_DEBUG_TYPE_OTHER, 2,
+                    GL_DEBUG_SEVERITY_MEDIUM,
+                    "Message 3");
+        } else {
+            gl4.glDebugMessageInsert(
+                    GL_DEBUG_SOURCE_APPLICATION,
+                    GL_DEBUG_TYPE_OTHER, 2,
+                    GL_DEBUG_SEVERITY_MEDIUM,
+                    -1, "Message 3");
+        }
+        if (useJoglUtils) {
+            glWindow.getContext().glDebugMessageInsert(
+                    GL_DEBUG_SOURCE_APPLICATION,
+                    GL_DEBUG_TYPE_OTHER, messageId[0],
+                    GL_DEBUG_SEVERITY_MEDIUM,
+                    "Message 4");
+        } else {
+            gl4.glDebugMessageInsert(
+                    GL_DEBUG_SOURCE_APPLICATION,
+                    GL_DEBUG_TYPE_OTHER, messageId[0],
+                    GL_DEBUG_SEVERITY_MEDIUM,
+                    -1, "Message 4");
+        }
 
         return true;
     }
@@ -268,5 +318,20 @@ public class Gl_420_debug_output extends Test implements GLDebugListener {
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
 
         return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        boolean validated = true;
+
+        gl4.glDeleteProgramPipelines(1, pipelineName, 0);
+        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteProgram(programName);
+
+        return validated;
     }
 }

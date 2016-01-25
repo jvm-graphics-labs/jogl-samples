@@ -163,7 +163,7 @@ public class Gl_320_texture_integer extends Test {
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         0,
                         GL_RGB_INTEGER, GL_UNSIGNED_BYTE,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
             gl3.glGenerateMipmap(GL_TEXTURE_2D);
 

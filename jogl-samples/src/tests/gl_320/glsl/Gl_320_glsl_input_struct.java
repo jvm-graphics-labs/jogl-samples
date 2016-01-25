@@ -202,7 +202,7 @@ public class Gl_320_glsl_input_struct extends Test {
                         texture.dimensions(level)[1],
                         0,
                         format.external.value, format.type.value,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             if (texture.levels() == 1) {

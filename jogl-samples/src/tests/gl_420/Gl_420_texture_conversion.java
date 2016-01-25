@@ -267,7 +267,7 @@ public class Gl_420_texture_conversion extends Test {
                             0, 0,
                             texture.dimensions(level)[0], texture.dimensions(level)[1],
                             textureFormat[i], GL_UNSIGNED_BYTE,
-                            texture.data(0, 0, level));
+                            texture.data(level));
                 }
             }
 

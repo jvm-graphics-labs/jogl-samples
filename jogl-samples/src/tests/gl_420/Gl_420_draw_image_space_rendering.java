@@ -258,7 +258,7 @@ public class Gl_420_draw_image_space_rendering extends Test {
                         texture.dimensions(level)[0],
                         GL_COMPRESSED_RGB_S3TC_DXT1_EXT,
                         texture.size(level),
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);

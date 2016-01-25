@@ -242,7 +242,7 @@ public class Gl_400_program_subroutine extends Test {
                             texture.dimensions(level)[0], texture.dimensions(level)[1],
                             0,
                             format.external.value, format.type.value,
-                            texture.data(0, 0, level));
+                            texture.data(level));
                 }
 
             }
@@ -268,7 +268,7 @@ public class Gl_400_program_subroutine extends Test {
                             texture.dimensions(level)[0], texture.dimensions(level)[1],
                             0,
                             texture.size(level),
-                            texture.data(0, 0, level));
+                            texture.data(level));
                 }
             }
         } catch (IOException ex) {

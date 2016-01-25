@@ -312,7 +312,7 @@ public class Gl_400_texture_derivative extends Test {
                     texture.dimensions(level)[0], texture.dimensions(level)[1],
                     0,
                     format.external.value, format.type.value,
-                    texture.data(0, 0, level));
+                    texture.data(level));
         }
 
         gl4.glActiveTexture(GL_TEXTURE0);

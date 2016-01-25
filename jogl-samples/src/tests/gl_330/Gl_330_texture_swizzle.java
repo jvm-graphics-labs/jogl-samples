@@ -197,7 +197,7 @@ public class Gl_330_texture_swizzle extends Test {
                         texture.dimensions(level)[1],
                         0,
                         texture.size(level),
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             swizzleR[Viewport.V00.ordinal()] = GL_RED;

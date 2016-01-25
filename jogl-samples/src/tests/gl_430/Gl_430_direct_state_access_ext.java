@@ -256,7 +256,7 @@ public class Gl_430_direct_state_access_ext extends Test {
                         0, 0,
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         format.external.value, format.type.value,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             gl4.glTextureParameteri(textureName[Texture.MULTISAMPLE.ordinal()], GL_TEXTURE_BASE_LEVEL, 0);

@@ -341,7 +341,7 @@ public class Gl_410_program_binary extends Test {
                         texture.dimensions(level)[1],
                         0,
                         texture.size(level),
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
             gl4.glBindTexture(GL_TEXTURE_2D, 0);
 

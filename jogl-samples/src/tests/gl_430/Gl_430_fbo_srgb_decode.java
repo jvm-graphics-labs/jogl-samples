@@ -276,7 +276,7 @@ public class Gl_430_fbo_srgb_decode extends Test {
                         0, 0, 0,
                         texture.dimensions(level)[0], texture.dimensions(level)[1], 1,
                         format.external.value, format.type.value,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             gl4.glTextureView(textureName[Texture.DIFFUSE_RGB.ordinal()], GL_TEXTURE_2D_ARRAY,

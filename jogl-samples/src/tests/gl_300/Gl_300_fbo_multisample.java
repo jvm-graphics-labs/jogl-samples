@@ -169,7 +169,7 @@ public class Gl_300_fbo_multisample extends Test {
 
                 gl3.glTexImage2D(GL_TEXTURE_2D, level, glFormat.internal.value,
                         texture.dimensions(level)[0], texture.dimensions(level)[1], 0,
-                        glFormat.external.value, glFormat.type.value, texture.data(0, 0, level));
+                        glFormat.external.value, glFormat.type.value, texture.data(level));
             }
         } catch (IOException ex) {
             Logger.getLogger(Gl_300_fbo_multisample.class.getName()).log(Level.SEVERE, null, ex);

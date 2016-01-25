@@ -280,7 +280,7 @@ public class Gl_320_fbo_blend extends Test {
                         texture.dimensions(level)[1],
                         0,
                         format.external.value, format.type.value,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);

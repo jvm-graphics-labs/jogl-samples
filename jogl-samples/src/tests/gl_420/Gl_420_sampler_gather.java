@@ -201,7 +201,7 @@ public class Gl_420_sampler_gather extends Test {
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         0,
                         texture.size(level),
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
         } catch (IOException ex) {

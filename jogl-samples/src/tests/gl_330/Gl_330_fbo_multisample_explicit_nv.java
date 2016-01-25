@@ -232,7 +232,7 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         0,
                         format.external.value, format.type.value,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
             gl3.glBindTexture(GL_TEXTURE_2D, 0);
 

@@ -233,7 +233,7 @@ public class Gl_410_program_separate extends Test {
                         texture.dimensions(level)[1],
                         0,
                         texture.size(level),
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
         } catch (IOException ex) {

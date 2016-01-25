@@ -219,7 +219,7 @@ public class Gl_430_fbo_without_attachment extends Test {
                         0, 0,
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         format.external.value, format.type.value,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);

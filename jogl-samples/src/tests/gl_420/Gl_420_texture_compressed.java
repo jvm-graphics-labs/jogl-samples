@@ -241,7 +241,7 @@ public class Gl_420_texture_compressed extends Test {
                             texture.dimensions(level)[0], texture.dimensions(level)[1],
                             format.internal.value,
                             texture.size(level),
-                            texture.data(0, 0, level));
+                            texture.data(level));
                 }
             }
 
@@ -267,7 +267,7 @@ public class Gl_420_texture_compressed extends Test {
                             texture.dimensions()[0], texture.dimensions()[1],
                             format.internal.value,
                             texture.size(level),
-                            texture.data(0, 0, level));
+                            texture.data(level));
                 }
             }
 
@@ -292,7 +292,7 @@ public class Gl_420_texture_compressed extends Test {
                             0, 0,
                             texture.dimensions()[0], texture.dimensions()[1],
                             format.external.value, format.type.value,
-                            texture.data(0, 0, level));
+                            texture.data(level));
                 }
             }
 
@@ -317,7 +317,7 @@ public class Gl_420_texture_compressed extends Test {
                             0, 0,
                             texture.dimensions(level)[0], texture.dimensions(level)[1],
                             format.external.value, format.type.value,
-                            texture.data(0, 0, level));
+                            texture.data(level));
                 }
             }
 

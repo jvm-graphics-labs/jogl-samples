@@ -161,7 +161,7 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
                     texture.dimensions(0)[0], texture.dimensions(0)[1],
                     0,
                     format.external.value, format.type.value,
-                    texture.data(0, 0, 0));
+                    texture.data());
 
         } catch (IOException ex) {
             Logger.getLogger(Gl_330_texture_integer_rgb10a2ui.class.getName()).log(Level.SEVERE, null, ex);

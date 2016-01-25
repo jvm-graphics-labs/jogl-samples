@@ -246,7 +246,7 @@ public class Gl_430_debug extends Test {
                         texture.dimensions(level)[0],
                         texture.dimensions(level)[1],
                         GL_BGR, GL_UNSIGNED_BYTE,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);

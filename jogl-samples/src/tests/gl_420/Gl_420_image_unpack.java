@@ -199,7 +199,7 @@ public class Gl_420_image_unpack extends Test {
                         0, 0,
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         format.external.value, format.type.value,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
             imageSize.x = texture.dimensions(0)[0];
             imageSize.y = texture.dimensions(0)[1];

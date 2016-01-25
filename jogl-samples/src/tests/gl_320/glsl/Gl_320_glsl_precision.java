@@ -192,13 +192,13 @@ public class Gl_320_glsl_precision extends Test {
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
-            for (int Level = 0; Level < texture.levels(); ++Level) {
-                gl3.glTexImage2D(GL_TEXTURE_2D, Level,
+            for (int level = 0; level < texture.levels(); ++level) {
+                gl3.glTexImage2D(GL_TEXTURE_2D, level,
                         format.internal.value,
-                        texture.dimensions(Level)[0], texture.dimensions(Level)[1],
+                        texture.dimensions(level)[0], texture.dimensions(level)[1],
                         0,
                         format.external.value, format.type.value,
-                        texture.data(0, 0, Level));
+                        texture.data(level));
             }
 
             if (texture.levels() == 1) {

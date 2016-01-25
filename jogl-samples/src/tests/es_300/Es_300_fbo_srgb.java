@@ -279,7 +279,7 @@ public class Es_300_fbo_srgb extends Test {
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         0,
                         format.external.value, format.type.value,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             gl3es3.glActiveTexture(GL_TEXTURE0);

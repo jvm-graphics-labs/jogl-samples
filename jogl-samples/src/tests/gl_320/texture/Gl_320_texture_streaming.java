@@ -211,7 +211,7 @@ public class Gl_320_texture_streaming extends Test {
             gl3.glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pixelBuffer[0]);
             gl3.glBufferData(GL_PIXEL_UNPACK_BUFFER, textureSize, null, GL_STREAM_DRAW);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, textureSize, GL_MAP_WRITE_BIT);
-            pointer.put(texture.data(0, 0, 0)).rewind();
+            pointer.put(texture.data(0)).rewind();
             gl3.glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
             gl3.glTexSubImage2D(GL_TEXTURE_2D, 0,

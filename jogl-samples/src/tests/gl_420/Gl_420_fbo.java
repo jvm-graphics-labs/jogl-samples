@@ -277,7 +277,7 @@ public class Gl_420_fbo extends Test {
                         texture.dimensions(level)[1],
                         GL_COMPRESSED_RGB_S3TC_DXT1_EXT,
                         texture.size(level),
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);

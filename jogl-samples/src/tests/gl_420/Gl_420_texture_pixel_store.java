@@ -249,7 +249,7 @@ public class Gl_420_texture_pixel_store extends Test {
                         levelWidth, levelHeight,
                         GL_COMPRESSED_RGB_S3TC_DXT1_EXT,
                         levelSize,
-                        texture.data(0, 0, level));
+                        texture.data(level));
             }
 
             gl4.glActiveTexture(GL_TEXTURE0);
