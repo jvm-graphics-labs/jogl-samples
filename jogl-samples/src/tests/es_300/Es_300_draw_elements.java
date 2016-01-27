@@ -26,6 +26,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Mat4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -69,6 +70,7 @@ public class Es_300_draw_elements extends Test {
 
     private int[] vertexArrayName, arrayBufferName, elementBufferName;
     private int programName, uniformMvp, uniformDiffuse;
+    private Mat4 mvp = new Mat4();
 
     public Es_300_draw_elements() {
         super("es_300_draw_elements", Profile.ES, 3, 0);
@@ -200,11 +202,9 @@ public class Es_300_draw_elements extends Test {
         int[] buffer = new int[]{GL_BACK};
         gl3es3.glDrawBuffers(1, buffer, 0);
 
-        // Compute the MVP (Model View Projection matrix)
-        float[] projection = FloatUtil.makePerspective(new float[16], 0,
-                true, FloatUtil.QUARTER_PI, 4f / 3f, .1f, 100f);
-        float[] model = FloatUtil.makeIdentity(new float[16]);
-        float[] mvp = FloatUtil.multMatrix(projection, FloatUtil.multMatrix(view(), model));
+        // Compute the MVP (Model View Projection matrix)        
+        mvp.identity().mulPerspective((float)Math.PI*0.25f, 4.0f/3.0f, 0.1f, 100.0f)
+                .mul(viewMat4());
 
         // Set the display viewport
         gl3es3.glViewport(0, 0, windowSize.x, windowSize.y);
@@ -218,7 +218,7 @@ public class Es_300_draw_elements extends Test {
         gl3es3.glUseProgram(programName);
 
         // Set the value of MVP uniform.
-        gl3es3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl3es3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFloatArray(tmpMat4), 0);
 
         gl3es3.glBindVertexArray(vertexArrayName[0]);
 

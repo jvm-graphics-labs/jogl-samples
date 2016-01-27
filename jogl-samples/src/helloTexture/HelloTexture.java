@@ -324,7 +324,7 @@ public class HelloTexture implements GLEventListener, KeyListener {
              * We bind the uniform texture0UL to the Texture Image Units zero
              * or, in other words, Semantic.Uniform.TEXTURE0.
              */
-            gl4.glUniform1i(texture0UL, Semantic.Uniform.TEXTURE0);
+            gl4.glUniform1i(texture0UL, Semantic.Sampler.DIFFUSE);
         }
         gl4.glUseProgram(0);
 
@@ -397,14 +397,14 @@ public class HelloTexture implements GLEventListener, KeyListener {
                  * glActiveTexture is defined in terms of an enumerator rather
                  * than integer texture image units.
                  */
-                gl4.glActiveTexture(GL4.GL_TEXTURE0 + Semantic.Uniform.TEXTURE0);
+                gl4.glActiveTexture(GL4.GL_TEXTURE0 + Semantic.Sampler.DIFFUSE);
                 gl4.glBindTexture(GL4.GL_TEXTURE_2D, objects[Semantic.Object.TEXTURE]);
                 {
-                    gl4.glBindSampler(Semantic.Uniform.TEXTURE0, objects[Semantic.Object.SAMPLER]);
+                    gl4.glBindSampler(Semantic.Sampler.DIFFUSE, objects[Semantic.Object.SAMPLER]);
                     {
                         gl4.glDrawElements(GL4.GL_TRIANGLES, indexData.length, GL4.GL_UNSIGNED_SHORT, 0);
                     }
-                    gl4.glBindSampler(Semantic.Uniform.TEXTURE0, 0);
+                    gl4.glBindSampler(Semantic.Sampler.DIFFUSE, 0);
                 }
                 gl4.glBindTexture(GL4.GL_TEXTURE_2D, 0);
             }

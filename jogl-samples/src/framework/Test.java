@@ -61,6 +61,7 @@ import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
+import dev.Mat4;
 import static framework.Profile.ES;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -238,14 +239,22 @@ public class Test implements GLEventListener, KeyListener {
 
     private float[] viewTranslate = new float[16], viewRotateX = new float[16],
             viewRotateY = new float[16], view = new float[16];
-    protected float[] tmpVec = new float[3];
+    protected Mat4 viewMat4 = new Mat4();
+    protected float[] tmpVec3 = new float[3];
+    protected float[] tmpMat4 = new float[16];
+
+    protected final Mat4 viewMat4() {
+        return viewMat4.identity().translate(0.0f, 0.0f, -translationCurrent.y)
+                .rotate(rotationCurrent.y, 1.f, 0.f, 0.f)
+                .rotate(rotationCurrent.x, 0.f, 1.f, 0.f);
+    }
 
     protected final float[] view() {
 
         FloatUtil.makeTranslation(viewTranslate, true, 0, 0, -translationCurrent.y);
-        FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec);
+        FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec3);
         FloatUtil.multMatrix(viewTranslate, viewRotateX, viewRotateX);
-        FloatUtil.makeRotationAxis(viewRotateY, 0, rotationCurrent.x, 0f, 1f, 0f, tmpVec);
+        FloatUtil.makeRotationAxis(viewRotateY, 0, rotationCurrent.x, 0f, 1f, 0f, tmpVec3);
         FloatUtil.multMatrix(viewRotateX, viewRotateY, view);
         return view;
     }

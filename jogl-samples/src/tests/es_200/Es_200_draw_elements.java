@@ -21,10 +21,10 @@ import static com.jogamp.opengl.GL.GL_VERSION;
 import com.jogamp.opengl.GL2ES2;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Mat4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -61,7 +61,6 @@ public class Es_200_draw_elements extends Test {
     };
 
     private enum Buffer {
-
         vertex,
         element,
         max
@@ -69,6 +68,7 @@ public class Es_200_draw_elements extends Test {
 
     private final int[] bufferName = new int[Buffer.max.ordinal()];
     private int programName, uniformMvp, uniformDiffuse;
+    private Mat4 mvp = new Mat4();
 
     public Es_200_draw_elements() {
         super("es_200_draw_elements", Profile.ES, 2, 0);
@@ -160,10 +160,8 @@ public class Es_200_draw_elements extends Test {
         GL2ES2 gl2es2 = (GL2ES2) gl;
 
         // Compute the MVP (Model View Projection matrix)
-        float[] projection = FloatUtil.makePerspective(new float[16], 0,
-                true, FloatUtil.QUARTER_PI, 4f / 3f, .1f, 100f);
-        float[] model = FloatUtil.makeIdentity(new float[16]);
-        float[] mvp = FloatUtil.multMatrix(projection, FloatUtil.multMatrix(view(), model));
+        mvp.identity().mulPerspective((float)Math.PI*0.25f, 4.0f/3.0f, 0.1f, 100.0f)
+                .mul(viewMat4());
 
         // Set the display viewport
         gl2es2.glViewport(0, 0, windowSize.x, windowSize.y);
@@ -177,7 +175,7 @@ public class Es_200_draw_elements extends Test {
         gl2es2.glUseProgram(programName);
 
         // Set the value of MVP uniform.
-        gl2es2.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl2es2.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFloatArray(tmpMat4), 0);
 
         gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
         {

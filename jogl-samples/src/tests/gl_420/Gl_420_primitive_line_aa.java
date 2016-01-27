@@ -52,6 +52,7 @@ import java.nio.FloatBuffer;
 import static jdk.nashorn.internal.objects.ArrayBufferView.buffer;
 import jglm.Vec2;
 import jglm.Vec2i;
+import static jdk.nashorn.internal.objects.ArrayBufferView.buffer;
 
 /**
  *

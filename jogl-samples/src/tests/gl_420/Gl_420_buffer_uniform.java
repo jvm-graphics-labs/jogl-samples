@@ -224,7 +224,7 @@ public class Gl_420_buffer_uniform extends Test {
             FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
 
             {
-                FloatUtil.makeRotationAxis(model, 0, (float) Math.PI * 0.25f, 0.f, 1.f, 0.f, tmpVec);
+                FloatUtil.makeRotationAxis(model, 0, (float) Math.PI * 0.25f, 0.f, 1.f, 0.f, tmpVec3);
                 FloatUtil.multMatrix(projection, view(), mvp);
                 FloatUtil.multMatrix(mvp, model);
 
@@ -233,7 +233,7 @@ public class Gl_420_buffer_uniform extends Test {
                 }
             }
             {
-                FloatUtil.makeRotationAxis(model, 0, (float) (Math.PI * 0.50f + Math.PI * 0.25f), 0.f, 1.f, 0.f, tmpVec);
+                FloatUtil.makeRotationAxis(model, 0, (float) (Math.PI * 0.50f + Math.PI * 0.25f), 0.f, 1.f, 0.f, tmpVec3);
                 FloatUtil.multMatrix(projection, view(), mvp);
                 FloatUtil.multMatrix(mvp, model);
 

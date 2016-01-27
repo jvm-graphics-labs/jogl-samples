@@ -586,7 +586,7 @@ public class Gl_430_buffer_uniform extends Test {
 
             FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
             view = view();
-            FloatUtil.makeRotationAxis(model, 0, -(float) Math.PI * 0.5f, 0.0f, 0.0f, 1.0f, tmpVec);
+            FloatUtil.makeRotationAxis(model, 0, -(float) Math.PI * 0.5f, 0.0f, 0.0f, 1.0f, tmpVec3);
 
             FloatUtil.multMatrix(view, model, mv);
 

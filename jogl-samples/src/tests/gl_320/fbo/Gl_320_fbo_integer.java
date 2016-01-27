@@ -289,7 +289,7 @@ public class Gl_320_fbo_integer extends Test {
 
             FloatUtil.makeOrtho(projection, 0, true, -2.0f, 2.0f, 2.0f, -2.0f, 2.0f, -2.0f);
             FloatUtil.makeIdentity(view);
-            FloatUtil.makeRotationAxis(model, 0, -0.3f, 0.f, 0.f, 1.f, tmpVec);
+            FloatUtil.makeRotationAxis(model, 0, -0.3f, 0.f, 0.f, 1.f, tmpVec3);
 
             FloatUtil.multMatrix(projection, view, mvp);
             FloatUtil.multMatrix(mvp, model);
