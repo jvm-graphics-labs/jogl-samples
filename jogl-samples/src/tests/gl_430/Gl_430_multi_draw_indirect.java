@@ -62,6 +62,7 @@ import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import framework.BufferUtils;
 import framework.DrawElementsIndirectCommand;
+import framework.GlDebugOutput;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -89,7 +90,7 @@ public class Gl_430_multi_draw_indirect extends Test {
 
     public Gl_430_multi_draw_indirect() {
         super("gl-430-multi-draw-indirect", Profile.CORE, 4, 3, new Vec2i(640, 480),
-                new Vec2(-(float) Math.PI * 0.2f, -(float) Math.PI * 0.2f));
+                new Vec2(-(float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "multi-draw-indirect";
@@ -108,17 +109,19 @@ public class Gl_430_multi_draw_indirect extends Test {
     private int vertexCount = 11;
     private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f,
-        -0.5f, -1.0f, 0.0f, 1.0f,
-        +1.5f, -1.0f, 1.0f, 1.0f,
-        +0.5f, +1.0f, 1.0f, 0.0f,
-        -0.5f, -1.0f, 0.0f, 1.0f,
-        +0.5f, -1.0f, 1.0f, 1.0f,
-        +1.5f, +1.0f, 1.0f, 0.0f,
-        -1.5f, +1.0f, 0.0f, 0.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f,
+        //        
+        -0.5f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.5f, -1.0f,/**/ 1.0f, 1.0f,
+        +0.5f, +1.0f,/**/ 1.0f, 0.0f,
+        //        
+        -0.5f, -1.0f,/**/ 0.0f, 1.0f,
+        +0.5f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.5f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.5f, +1.0f,/**/ 0.0f, 0.0f};
 
     private int drawDataCount = 3;
     private int drawSize = drawDataCount * Integer.BYTES;
@@ -178,6 +181,8 @@ public class Gl_430_multi_draw_indirect extends Test {
         gl4.glEnable(GL_DEPTH_TEST);
         gl4.glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
 
+        glWindow.getContext().addGLDebugListener(new GlDebugOutput());
+
         return validated;
     }
 
@@ -219,18 +224,12 @@ public class Gl_430_multi_draw_indirect extends Test {
             int[] params = {0};
 
             if (stringName.equals("transform.MVP[0]")) {
-                gl4.glGetActiveUniformsiv(programName, 1,
-                        uniformIndices, 0,
-                        GL_UNIFORM_ARRAY_STRIDE,
-                        params, 0);
+                gl4.glGetActiveUniformsiv(programName, 1, uniformIndices, 0, GL_UNIFORM_ARRAY_STRIDE, params, 0);
                 uniformArrayStrideMat = params[0];
             }
 
             if (stringName.equals("indirection.Transform[0]")) {
-                gl4.glGetActiveUniformsiv(programName, 1,
-                        uniformIndices, 0,
-                        GL_UNIFORM_ARRAY_STRIDE,
-                        params, 0);
+                gl4.glGetActiveUniformsiv(programName, 1, uniformIndices, 0, GL_UNIFORM_ARRAY_STRIDE, params, 0);
                 uniformArrayStrideInt = params[0];
             }
         }
@@ -251,33 +250,33 @@ public class Gl_430_multi_draw_indirect extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
+//        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.DRAW_ID.ordinal()]);
         IntBuffer drawIdBuffer = GLBuffers.newDirectIntBuffer(drawIdData);
         gl4.glBufferData(GL_ARRAY_BUFFER, drawSize, drawIdBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(drawIdBuffer);
+//        BufferUtils.destroyDirectBuffer(drawIdBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
+//        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         int[] vertexIndirection = {0, 1, 2};
         int paddingInt = Math.max(Integer.BYTES, uniformArrayStrideInt);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.VERTEX_INDIRECTION.ordinal()]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, paddingInt * 3, null, GL_DYNAMIC_DRAW);
-        IntBuffer paddingIntBuffer = GLBuffers.newDirectIntBuffer(paddingInt / Integer.BYTES);
+        IntBuffer paddingIntBuffer = GLBuffers.newDirectIntBuffer(1);
         paddingIntBuffer.put(vertexIndirection[0]).rewind();
         gl4.glBufferSubData(GL_UNIFORM_BUFFER, paddingInt * 0, paddingInt, paddingIntBuffer);
         paddingIntBuffer.put(vertexIndirection[1]).rewind();
         gl4.glBufferSubData(GL_UNIFORM_BUFFER, paddingInt * 1, paddingInt, paddingIntBuffer);
         paddingIntBuffer.put(vertexIndirection[2]).rewind();
         gl4.glBufferSubData(GL_UNIFORM_BUFFER, paddingInt * 2, paddingInt, paddingIntBuffer);
-        BufferUtils.destroyDirectBuffer(paddingIntBuffer);
+//        BufferUtils.destroyDirectBuffer(paddingIntBuffer);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         int paddingMat = Math.max(projection.length * Float.BYTES, uniformArrayStrideMat);
@@ -301,13 +300,13 @@ public class Gl_430_multi_draw_indirect extends Test {
         drawOffset[2] = 3;
 
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName[Buffer.INDIRECT.ordinal()]);
-        IntBuffer commandsBuffer = GLBuffers.newDirectIntBuffer(commands[0].toIntArray().length * commands.length);
+        IntBuffer commandsBuffer = GLBuffers.newDirectIntBuffer(5 * commands.length);
         for (DrawElementsIndirectCommand command : commands) {
             commandsBuffer.put(command.toIntArray());
         }
         gl4.glBufferData(GL_DRAW_INDIRECT_BUFFER, commandsBuffer.capacity() * Integer.BYTES,
                 commandsBuffer.rewind(), GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(commandsBuffer);
+//        BufferUtils.destroyDirectBuffer(commandsBuffer);
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
         return true;
@@ -453,14 +452,14 @@ public class Gl_430_multi_draw_indirect extends Test {
 
         float[] depth = {1.0f};
         gl4.glClearBufferfv(GL_DEPTH, 0, depth, 0);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
                     projection.length * Float.BYTES * 3, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 
+            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
                     windowSize.x / 3.0f / windowSize.y, 0.1f, 100.0f);
             view = view();
             FloatUtil.makeIdentity(model);
@@ -499,10 +498,13 @@ public class Gl_430_multi_draw_indirect extends Test {
         validate(gl4);
 
         for (int i = 0; i < indirectBufferCount; ++i) {
+
             gl4.glViewportIndexedfv(0, viewport[i].toFloatArray(), 0);
-            IntBuffer buffer = GLBuffers.newDirectIntBuffer(1);
-            buffer.put(5 * Integer.BYTES * drawOffset[i]).rewind();
-            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, buffer, drawCount[i], 5 * Integer.BYTES);
+//            IntBuffer buffer = GLBuffers.newDirectIntBuffer(1);
+//            IntBuffer buffer = GLBuffers.newDirectIntBuffer(new int[]{5 * Integer.BYTES * drawOffset[i]});
+//            buffer.put(5 * Integer.BYTES * drawOffset[i]).rewind();
+//            buffer.put(0).rewind();
+            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i], 5 * Integer.BYTES);
         }
 
         return true;

@@ -309,4 +309,17 @@ public class Gl_430_texture_buffer extends Test {
 
         return true;
     }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteProgram(programName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+
+        return true;
+    }
 }
