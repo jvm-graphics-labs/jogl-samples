@@ -165,8 +165,6 @@ public class Test implements GLEventListener, KeyListener {
 
         GL gl = getCorrespondingGl(drawable);
 
-        
-        
         assert checkGLVersion();
 
         assert begin(gl);
@@ -235,7 +233,7 @@ public class Test implements GLEventListener, KeyListener {
 
         assert render(gl);
 
-//        assert checkError(gl, "render");
+        assert checkError(gl, "render");
     }
 
     protected boolean render(GL gl) {
