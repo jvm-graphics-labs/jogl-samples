@@ -66,7 +66,7 @@ public class Gl_320_caps extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glViewport(0, 0, glWindow.getWidth(), glWindow.getHeight());
+        gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
         return true;

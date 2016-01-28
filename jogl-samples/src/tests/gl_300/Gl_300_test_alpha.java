@@ -24,10 +24,11 @@ import static com.jogamp.opengl.GL2ES2.GL_MAX_VARYING_VECTORS;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import static com.jogamp.opengl.GL2ES3.GL_MAX_VARYING_COMPONENTS;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Mat4;
+import dev.Vec2;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -56,36 +57,20 @@ public class Gl_300_test_alpha extends Test {
     private final String SHADERS_ROOT = "src/data/gl_300";
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
-    public static class Vertex {
-
-        public float[] position;
-        public float[] texCoord;
-        public static final int SIZEOF = 2 * 2 * Float.BYTES;
-
-        public Vertex(float[] position, float[] texCoord) {
-            this.position = position;
-            this.texCoord = texCoord;
-        }
-
-        public float[] toFloatArray() {
-            return new float[]{position[0], position[1], texCoord[0], texCoord[1]};
-        }
-    }
-
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * Vertex.SIZEOF;
-    private Vertex[] vertexData = {
-        new Vertex(new float[]{-1.0f, -1.0f}, new float[]{0.0f, 1.0f}),
-        new Vertex(new float[]{+1.0f, -1.0f}, new float[]{1.0f, 1.0f}),
-        new Vertex(new float[]{+1.0f, +1.0f}, new float[]{1.0f, 0.0f}),
-        new Vertex(new float[]{+1.0f, +1.0f}, new float[]{1.0f, 0.0f}),
-        new Vertex(new float[]{-1.0f, +1.0f}, new float[]{0.0f, 0.0f}),
-        new Vertex(new float[]{-1.0f, -1.0f}, new float[]{0.0f, 1.0f})};
+    private int vertexSize = vertexCount * 2 * Vec2.SIZEOF;
+    private float[] vertexData = {
+        -1.0f, -1.0f, 0.0f, 1.0f,
+        +1.0f, -1.0f, 1.0f, 1.0f,
+        +1.0f, +1.0f, 1.0f, 0.0f,
+        +1.0f, +1.0f, 1.0f, 0.0f,
+        -1.0f, +1.0f, 0.0f, 0.0f,
+        -1.0f, -1.0f, 0.0f, 1.0f};
 
     private int[] vertexArrayName = new int[1], bufferName = new int[1], texture2dName = new int[1];
     private int programName, uniformMvp, uniformDiffuse;
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
+    private final Mat4 mvp = new Mat4(), model = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -167,10 +152,7 @@ public class Gl_300_test_alpha extends Test {
         gl3.glGenBuffers(1, bufferName, 0);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexCount * 4);
-        for (Vertex vertex : vertexData) {
-            vertexBuffer.put(vertex.toFloatArray());
-        }
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer.rewind(), GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -211,8 +193,8 @@ public class Gl_300_test_alpha extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex.SIZEOF, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex.SIZEOF, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Vec2.SIZEOF, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Vec2.SIZEOF, Vec2.SIZEOF);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -228,11 +210,8 @@ public class Gl_300_test_alpha extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        mvp.perspective((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f)
+                .mul(viewMat4()).mul(model.identity());
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glClearColor(1.0f, 0.5f, 0.0f, 1.0f);
@@ -240,7 +219,7 @@ public class Gl_300_test_alpha extends Test {
 
         gl3.glUseProgram(programName);
         gl3.glUniform1i(uniformDiffuse, 0);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA(new float[16]), 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
         gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[0]);

@@ -190,9 +190,17 @@ public class Test implements GLEventListener, KeyListener {
                     case 2:
                         return drawable.getGL().getGL2();
                     case 3:
-                        return drawable.getGL().getGL3();
+                        if (profile == Profile.COMPATIBILITY) {
+                            return drawable.getGL().getGL3bc();
+                        } else {
+                            return drawable.getGL().getGL3();
+                        }
                     case 4:
-                        return drawable.getGL().getGL4();
+                        if (profile == Profile.COMPATIBILITY) {
+                            return drawable.getGL().getGL4bc();
+                        } else {
+                            return drawable.getGL().getGL4();
+                        }
                     default:
                         return drawable.getGL();
                 }
@@ -239,7 +247,7 @@ public class Test implements GLEventListener, KeyListener {
 
     private float[] viewTranslate = new float[16], viewRotateX = new float[16],
             viewRotateY = new float[16], view = new float[16];
-    protected Mat4 viewMat4 = new Mat4();
+    private Mat4 viewMat4 = new Mat4();
     protected float[] tmpVec3 = new float[3];
     protected float[] tmpMat4 = new float[16];
 
@@ -302,10 +310,9 @@ public class Test implements GLEventListener, KeyListener {
                     break;
             }
             System.out.println("OpenGL Error(" + errorString + "): " + title);
-//            throw new Error();
+            throw new Error();
         }
-//        return error == GL_NO_ERROR;
-        return true;
+        return error == GL_NO_ERROR;
     }
 
     protected boolean checkExtension(GL3 gl3, String extensionName) {

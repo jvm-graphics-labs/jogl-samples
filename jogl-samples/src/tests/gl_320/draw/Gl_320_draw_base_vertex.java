@@ -8,10 +8,10 @@ package tests.gl_320.draw;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Mat4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -77,7 +77,7 @@ public class Gl_320_draw_base_vertex extends Test {
 
     private int[] bufferName = new int[Buffer.MAX.ordinal()], vertexArrayName = new int[1];
     private int programName, uniformTransform;
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
+    private final Mat4 projection = new Mat4(), model = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -194,20 +194,16 @@ public class Gl_320_draw_base_vertex extends Test {
             ByteBuffer transformBuffer = gl.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, 16 * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) glWindow.getWidth() / glWindow.getHeight(), 0.1f, 100.0f);
-            FloatUtil.makeIdentity(model);
+            projection.perspective((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f)
+                    .mul(viewMat4()).mul(model.identity());
 
-            FloatUtil.multMatrix(projection, view(), mvp);
-            FloatUtil.multMatrix(mvp, model);
-
-            transformBuffer.asFloatBuffer().put(mvp).rewind();
+            transformBuffer.asFloatBuffer().put(projection.toFA(new float[16]));
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
 
-        gl.glViewport(0, 0, glWindow.getWidth(), glWindow.getHeight());
+        gl.glViewport(0, 0, windowSize.x, windowSize.y);
 
         float[] depth = new float[]{1.0f};
         gl3.glClearBufferfv(GL_DEPTH, 0, depth, 0);

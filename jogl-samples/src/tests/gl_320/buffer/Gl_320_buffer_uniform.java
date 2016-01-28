@@ -24,10 +24,13 @@ import static com.jogamp.opengl.GL2ES3.GL_COLOR;
 import static com.jogamp.opengl.GL2ES3.GL_DEPTH;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Mat3;
+import dev.Mat4;
+import dev.Vec3;
+import dev.Vec4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -53,62 +56,45 @@ public class Gl_320_buffer_uniform extends Test {
     private final String SHADERS_SOURCE = "buffer-uniform";
     private final String SHADERS_ROOT = "src/data/gl_320/buffer";
 
-    public class Vertex_v3fn3fc4f {
+    private class Vertex_v3fn3fc4f {
 
-        public float[] position;
-        public float[] normal;
-        public float[] color;
-        public static final int sizeOf = (3 + 3 + 4) * Float.BYTES;
-
-        public Vertex_v3fn3fc4f(float[] position, float[] normal, float[] color) {
-            this.position = position;
-            this.normal = normal;
-            this.color = color;
-        }
-
-        public float[] toFloatArray() {
-            float[] floatArray = new float[3 + 3 + 4];
-            System.arraycopy(position, 0, floatArray, 0, position.length);
-            System.arraycopy(normal, 0, floatArray, position.length, normal.length);
-            System.arraycopy(color, 0, floatArray, position.length + normal.length, color.length);
-            return floatArray;
-        }
+        public static final int SIZEOF = 2 * Vec3.SIZEOF + Vec4.SIZEOF;
     }
 
-    public class Transform {
+    private class Transform {
 
-        public float[] p;
-        public float[] mv;
-        public float[] normal;
+        public Mat4 p;
+        public Mat4 mv;
+        public Mat3 normal;
 
-        public static final int sizeOf = (16 + 16 + 9) * Float.BYTES;
+        public static final int SIZEOF = 2 * Mat4.SIZEOF + Mat3.SIZEOF;
     }
 
-    public class Light {
+    private class Light {
 
-        public float[] position;
-        public static final int sizeOf = 3 * Float.BYTES;
+        public Vec3 position;
+        public static final int SIZEOF = Vec3.SIZEOF;
 
-        public Light(float[] position) {
+        public Light(Vec3 position) {
             this.position = position;
         }
 
         public float[] toFloatArray() {
-            return position;
+            return position.toFA(new float[3]);
         }
     }
 
-    public class Material {
+    private class Material {
 
-        public float[] ambient;
+        public Vec3 ambient;
         public float padding1;
-        public float[] diffuse;
+        public Vec3 diffuse;
         public float padding2;
-        public float[] specular;
+        public Vec3 specular;
         public float shininess;
-        public static final int sizeOf = (3 + 1 + 3 + 1 + 3 + 1) * Float.BYTES;
+        public static final int SIZEOF = 3 * Vec3.SIZEOF + 3 * Float.BYTES;
 
-        public Material(float[] ambient, float[] diffuse, float[] specular, float shininess) {
+        public Material(Vec3 ambient, Vec3 diffuse, Vec3 specular, float shininess) {
             this.ambient = ambient;
             this.diffuse = diffuse;
             this.specular = specular;
@@ -116,23 +102,25 @@ public class Gl_320_buffer_uniform extends Test {
         }
 
         public float[] toFloatArray() {
-            float[] floatArray = new float[3 + 1 + 3 + 1 + 3 + 1];
-            System.arraycopy(ambient, 0, floatArray, 0, 3);
-            System.arraycopy(diffuse, 0, floatArray, 4, 3);
-            System.arraycopy(specular, 0, floatArray, 8, 3);
-            floatArray[11] = shininess;
+            float[] floatArray = new float[]{
+                ambient.x, ambient.y, ambient.z,
+                padding1,
+                diffuse.x, diffuse.y, diffuse.z,
+                padding2,
+                specular.x, specular.y, specular.z,
+                shininess};
             return floatArray;
         }
     }
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * Vertex_v3fn3fc4f.sizeOf;
-    private Vertex_v3fn3fc4f[] vertexData = new Vertex_v3fn3fc4f[]{
-        new Vertex_v3fn3fc4f(new float[]{-1.0f, -1.0f, 0.0f}, new float[]{0.0f, 0.0f, 1.0f}, new float[]{1.0f, 0.0f, 0.0f, 1.0f}),
-        new Vertex_v3fn3fc4f(new float[]{+1.0f, -1.0f, 0.0f}, new float[]{0.0f, 0.0f, 1.0f}, new float[]{0.0f, 1.0f, 0.0f, 1.0f}),
-        new Vertex_v3fn3fc4f(new float[]{+1.0f, +1.0f, 0.0f}, new float[]{0.0f, 0.0f, 1.0f}, new float[]{0.0f, 0.0f, 1.0f, 1.0f}),
-        new Vertex_v3fn3fc4f(new float[]{-1.0f, +1.0f, 0.0f}, new float[]{0.0f, 0.0f, 1.0f}, new float[]{1.0f, 1.0f, 1.0f, 1.0f})
-    };
+    private int vertexSize = vertexCount * Vertex_v3fn3fc4f.SIZEOF;
+    private float[] vertexData = new float[]{
+        -1.0f, -1.0f, 0.0f,/**/ 0.0f, 0.0f, 1.0f,/**/ 1.0f, 0.0f, 0.0f, 1.0f,
+        +1.0f, -1.0f, 0.0f,/**/ 0.0f, 0.0f, 1.0f,/**/ 0.0f, 1.0f, 0.0f, 1.0f,
+        +1.0f, +1.0f, 0.0f,/**/ 0.0f, 0.0f, 1.0f,/**/ 0.0f, 0.0f, 1.0f, 1.0f,
+        -1.0f, +1.0f, 0.0f,/**/ 0.0f, 0.0f, 1.0f,/**/ 1.0f, 1.0f, 1.0f, 1.0f};
+
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
     private short[] elementData = new short[]{
@@ -152,8 +140,8 @@ public class Gl_320_buffer_uniform extends Test {
         vertex, element, perScene, perPass, perDraw, max
     }
 
-    private float[] projection = new float[16], model = new float[16], normal = new float[9],
-            view = new float[16], mv = new float[16];
+    private final Mat4 projection = new Mat4(), view = new Mat4(), model = new Mat4(), mv = new Mat4();
+    private final Mat3 normal = new Mat3();
 
     @Override
     protected boolean begin(GL gl) {
@@ -230,37 +218,34 @@ public class Gl_320_buffer_uniform extends Test {
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexSize);
-        for (Vertex_v3fn3fc4f vertex : vertexData) {
-            vertexBuffer.put(vertex.toFloatArray());
-        }
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer.rewind(), GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.perDraw.ordinal()]);
-            gl3.glBufferData(GL_UNIFORM_BUFFER, Transform.sizeOf, null, GL_DYNAMIC_DRAW);
+            gl3.glBufferData(GL_UNIFORM_BUFFER, Transform.SIZEOF, null, GL_DYNAMIC_DRAW);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
         {
-            Light light = new Light(new float[]{0.0f, 0.0f, 100.f});
+            Light light = new Light(new Vec3(0.0f, 0.0f, 100.f));
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.perPass.ordinal()]);
             FloatBuffer lightBuffer = GLBuffers.newDirectFloatBuffer(light.toFloatArray());
-            gl3.glBufferData(GL_UNIFORM_BUFFER, Light.sizeOf, lightBuffer, GL_STATIC_DRAW);
+            gl3.glBufferData(GL_UNIFORM_BUFFER, Light.SIZEOF, lightBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(lightBuffer);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
         {
-            Material material = new Material(new float[]{0.7f, 0.0f, 0.0f},
-                    new float[]{0.0f, 0.5f, 0.0f}, new float[]{0.0f, 0.0f, 0.5f}, 128.0f);
+            Material material = new Material(new Vec3(0.7f, 0.0f, 0.0f), new Vec3(0.0f, 0.5f, 0.0f),
+                    new Vec3(0.0f, 0.0f, 0.5f), 128.0f);
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.perScene.ordinal()]);
             FloatBuffer materialBuffer = GLBuffers.newDirectFloatBuffer(material.toFloatArray());
-            gl3.glBufferData(GL_UNIFORM_BUFFER, Material.sizeOf, materialBuffer, GL_STATIC_DRAW);
+            gl3.glBufferData(GL_UNIFORM_BUFFER, Material.SIZEOF, materialBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(materialBuffer);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
@@ -275,11 +260,11 @@ public class Gl_320_buffer_uniform extends Test {
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false,
-                    Vertex_v3fn3fc4f.sizeOf, 0);
+                    Vertex_v3fn3fc4f.SIZEOF, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false,
-                    Vertex_v3fn3fc4f.sizeOf, 3 * Float.BYTES);
+                    Vertex_v3fn3fc4f.SIZEOF, Vec3.SIZEOF);
             gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false,
-                    Vertex_v3fn3fc4f.sizeOf, (3 + 3) * Float.BYTES);
+                    Vertex_v3fn3fc4f.SIZEOF, 2 * Vec3.SIZEOF);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -299,25 +284,23 @@ public class Gl_320_buffer_uniform extends Test {
         GL3 gl3 = (GL3) gl;
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.perDraw.ordinal()]);
-            ByteBuffer transform = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Transform.sizeOf,
+            ByteBuffer transform = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Transform.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-            view = view();
-            FloatUtil.makeRotationAxis(model, 0, (float) -Math.PI * 0.5f, 0.0f, 0.0f, 1.0f, tmpVec3);
+            projection.perspective((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+            view.set(viewMat4());
+            model.identity().rotate((float) -Math.PI * 0.5f, 0.0f, 0.0f, 1.0f);
 
-            FloatUtil.multMatrix(view, model, mv);
-            for (int c = 0; c < 3; c++) {
-                for (int r = 0; r < 3; r++) {
-                    normal[c * 3 + r] = view[c * 4 + r];
-                }
-            }
-            transform.asFloatBuffer().put(projection).put(mv).put(normal).rewind();
+            mv.set(view.mul(model));
+            normal.set(mv).invTransp();
+
+            transform.asFloatBuffer().put(projection.toFA(new float[16]))
+                    .put(mv.toFA(new float[16])).put(normal.toFloatArray(new float[9]));
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
-        gl3.glViewport(0, 0, glWindow.getWidth(), glWindow.getHeight());
+        gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.2f, 0.2f, 0.2f, 1.0f}, 0);
         gl3.glClearBufferfv(GL_DEPTH, 0, new float[]{1.0f}, 0);
 

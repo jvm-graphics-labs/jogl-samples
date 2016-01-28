@@ -50,14 +50,16 @@ import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT;
 import static com.jogamp.opengl.GL2GL3.GL_BACK_LEFT;
 import static com.jogamp.opengl.GL2GL3.GL_TEXTURE_SWIZZLE_RGBA;
 import com.jogamp.opengl.GL3ES3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Mat4;
+import dev.Vec2;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fv2f;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -86,7 +88,7 @@ public class Es_300_fbo_srgb extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZEOF;
     private float[] vertexData = {
         -1.0f, -1.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 1.0f, 1.0f,
@@ -131,7 +133,7 @@ public class Es_300_fbo_srgb extends Test {
             vertexArrayName = new int[Program.MAX.ordinal()], bufferName = new int[Buffer.MAX.ordinal()],
             textureName = new int[Texture.MAX.ordinal()], uniformDiffuse = new int[Program.MAX.ordinal()];
     private int framebufferScale = 2, uniformTransform;
-    private float[] projection = new float[16];
+    private final Mat4 projection = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -238,7 +240,7 @@ public class Es_300_fbo_srgb extends Test {
 
         int[] uniformBufferOffset = {0};
         gl3es3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
 
         gl3es3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
         gl3es3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -288,9 +290,9 @@ public class Es_300_fbo_srgb extends Test {
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            gl3es3.glTexStorage2D(GL_TEXTURE_2D, 1, 
+            gl3es3.glTexStorage2D(GL_TEXTURE_2D, 1,
                     GL_SRGB8_ALPHA8,
-//                    GL_RGBA8,
+                    //                    GL_RGBA8,
                     windowSize.x * framebufferScale, windowSize.y * framebufferScale);
 
             gl3es3.glActiveTexture(GL_TEXTURE0);
@@ -316,8 +318,8 @@ public class Es_300_fbo_srgb extends Test {
         gl3es3.glBindVertexArray(vertexArrayName[Program.TEXTURE.ordinal()]);
         {
             gl3es3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
-            gl3es3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl3es3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl3es3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZEOF, 0);
+            gl3es3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZEOF, Vec2.SIZEOF);
             gl3es3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3es3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -365,15 +367,14 @@ public class Es_300_fbo_srgb extends Test {
         {
             gl3es3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
             ByteBuffer pointer = gl3es3.glMapBufferRange(GL_UNIFORM_BUFFER,
-                    0, 16 * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+                    0, Mat4.SIZEOF, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+            projection.perspective((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f)
+                    .mul(viewMat4());
 
-            FloatUtil.multMatrix(projection, view());
+            //glm::mat4 Projection = glm::perspectiveFov(glm::pi<float>() * 0.25f, 640.f, 480.f, 0.1f, 100.0f);
+            pointer.asFloatBuffer().put(projection.toFA(new float[16]));
 
-            pointer.asFloatBuffer().put(projection).rewind();
-            
             // Make sure the uniform buffer is uploaded
             gl3es3.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }

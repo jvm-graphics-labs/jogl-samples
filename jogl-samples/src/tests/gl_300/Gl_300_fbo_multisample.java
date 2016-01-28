@@ -14,6 +14,8 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Mat4;
+import dev.Vec2;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -24,7 +26,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Gl;
 import jgli.Load;
-import jglm.Vec2i;
+import dev.Vec2i;
+import dev.Vec4;
+import glf.Vertex_v2fv2f;
 
 /**
  *
@@ -46,7 +50,7 @@ public class Gl_300_fbo_multisample extends Test {
     private Vec2i FRAMEBUFFER_SIZE = new Vec2i(160, 120);
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * 4 * Float.BYTES;
+    private int vertexSize = vertexCount * Vec4.SIZEOF;
     private float[] vertexData = new float[]{
         -2.0f, -1.5f, 0.0f, 0.0f,
         +2.0f, -1.5f, 1.0f, 0.0f,
@@ -58,7 +62,7 @@ public class Gl_300_fbo_multisample extends Test {
     private int programName, uniformMvp, uniformDiffuse;
     private int[] vertexArrayName, bufferName, textureName, colorRenderbufferName,
             colorTextureName, framebufferRenderName, framebufferResolveName;
-    private float[] perspective = new float[16], model = new float[16], mvp = new float[16];
+    private final Mat4 mvp = new Mat4(), model = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -137,8 +141,8 @@ public class Gl_300_fbo_multisample extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZEOF, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZEOF, Vec2.SIZEOF);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -255,12 +259,9 @@ public class Gl_300_fbo_multisample extends Test {
         gl3.glClearColor(0.0f, 0.5f, 1.0f, 1.0f);
         gl3.glClear(GL_COLOR_BUFFER_BIT);
 
-        FloatUtil.makePerspective(perspective, 0, true, (float) (Math.PI * 0.25f),
-                (float) (FRAMEBUFFER_SIZE.x) / FRAMEBUFFER_SIZE.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(perspective, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        mvp.perspective((float) (Math.PI * 0.25f), (float) (FRAMEBUFFER_SIZE.x) / FRAMEBUFFER_SIZE.y, 0.1f, 100.0f)
+                .mul(viewMat4()).mul(model.identity());
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA(new float[16]), 0);
 
         gl3.glViewport(0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
 
@@ -275,12 +276,9 @@ public class Gl_300_fbo_multisample extends Test {
 
     private void renderFB(GL3 gl3, int texture2dName) {
 
-        FloatUtil.makePerspective(perspective, 0, true, (float) Math.PI * 0.25f,
-                (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(perspective, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        mvp.perspective((float) (Math.PI * 0.25f), (float) (FRAMEBUFFER_SIZE.x) / FRAMEBUFFER_SIZE.y, 0.1f, 100.0f)
+                .mul(viewMat4()).mul(model.identity());
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA(new float[16]), 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
         gl3.glBindTexture(GL_TEXTURE_2D, texture2dName);

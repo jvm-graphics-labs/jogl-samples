@@ -35,14 +35,14 @@ import jglm.Vec2;
  *
  * @author GBarbieri
  */
-public class Gl_320_image_space extends Test {
+public class Gl_320_draw_image_space extends Test {
 
     public static void main(String[] args) {
-        Gl_320_image_space gl_320_image_space = new Gl_320_image_space();
+        Gl_320_draw_image_space gl_320_image_space = new Gl_320_draw_image_space();
     }
 
-    public Gl_320_image_space() {
-        super("gl-320-image-space", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+    public Gl_320_draw_image_space() {
+        super("gl-320-draw-image-space", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "draw-image-space";
@@ -129,7 +129,7 @@ public class Gl_320_image_space extends Test {
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
         } catch (IOException ex) {
-            Logger.getLogger(Gl_320_image_space.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Gl_320_draw_image_space.class.getName()).log(Level.SEVERE, null, ex);
         }
         return true;
     }

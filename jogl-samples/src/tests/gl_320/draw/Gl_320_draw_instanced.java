@@ -190,7 +190,7 @@ public class Gl_320_draw_instanced extends Test {
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) glWindow.getWidth() / glWindow.getHeight(), 0.1f, 100.0f);
+                    (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
             FloatUtil.makeTranslation(modelA, true, -1.1f, 0.0f, 0.0f);
             FloatUtil.makeTranslation(modelB, true, +1.1f, 0.0f, 0.0f);
 
@@ -205,7 +205,7 @@ public class Gl_320_draw_instanced extends Test {
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
 
-        gl4.glViewport(0, 0, glWindow.getWidth(), glWindow.getHeight());
+        gl4.glViewport(0, 0, windowSize.x, windowSize.y);
 
         float[] depth = new float[]{1.0f};
         gl4.glClearBufferfv(GL_DEPTH, 0, depth, 0);

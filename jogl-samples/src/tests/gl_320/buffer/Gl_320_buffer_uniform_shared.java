@@ -22,10 +22,12 @@ import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BLOCK_DATA_SIZE;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Mat4;
+import dev.Vec2;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -52,7 +54,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/buffer";
 
     private final int vertexCount = 4;
-    private final int positionSize = vertexCount * 2 * Float.BYTES;
+    private final int positionSize = vertexCount * Vec2.SIZEOF;
     private final float[] positionData = new float[]{
         -1f, -1f,
         +1f, -1f,
@@ -79,7 +81,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
     private final int[] bufferName = new int[Buffer.max.ordinal()];
     private int programName, uniformMaterial, uniformTransform;
     private int[] uniformBlockSizeTransform, uniformBlockSizeMaterial, vertexArrayName;
-    private float[] projection = new float[16], model = new float[16];
+    private final Mat4 mvp = new Mat4(), model = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -195,22 +197,20 @@ public class Gl_320_buffer_uniform_shared extends Test {
         GL3 gl3 = (GL3) gl;
         {
             // Compute the MVP (Model View Projection matrix)
-            FloatUtil.makePerspective(projection, 0, true, FloatUtil.QUARTER_PI,
-                    (float) windowSize.x / windowSize.y, .1f, 100f);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model);
+            mvp.perspective((float)Math.PI*0.25f, (float) windowSize.x / windowSize.y, .1f, 100f)
+                    .mul(viewMat4()).mul(model.identity());
 
             float[] diffuse = new float[]{1f, .5f, 0f, 1f};
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.uniform.ordinal()]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
-                    uniformBlockSizeTransform[0] + diffuse.length * Float.BYTES,
+                    uniformBlockSizeTransform[0] + Vec3.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            pointer.asFloatBuffer().put(projection);
+            pointer.asFloatBuffer().put(mvp.toFA(new float[16]));
             pointer.position(uniformBlockSizeTransform[0]);
-            pointer.asFloatBuffer().put(diffuse).rewind();
+            pointer.asFloatBuffer().put(diffuse);
+            pointer.rewind();
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

@@ -22,11 +22,11 @@ import static com.jogamp.opengl.GL.GL_VERSION;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import com.jogamp.opengl.GL3ES3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import dev.Mat4;
+import dev.Vec2;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -61,7 +61,7 @@ public class Es_300_draw_elements extends Test {
         0, 2, 3};
 
     private final int vertexCount = 4;
-    private final int positionSize = vertexCount * 2 * Float.BYTES;
+    private final int positionSize = vertexCount * Vec2.SIZEOF;
     private final float[] positionData = new float[]{
         -1f, -1f,
         +1f, -1f,
@@ -70,7 +70,7 @@ public class Es_300_draw_elements extends Test {
 
     private int[] vertexArrayName, arrayBufferName, elementBufferName;
     private int programName, uniformMvp, uniformDiffuse;
-    private Mat4 mvp = new Mat4();
+    private final Mat4 mvp = new Mat4(), model = new Mat4();
 
     public Es_300_draw_elements() {
         super("es_300_draw_elements", Profile.ES, 3, 0);
@@ -203,8 +203,8 @@ public class Es_300_draw_elements extends Test {
         gl3es3.glDrawBuffers(1, buffer, 0);
 
         // Compute the MVP (Model View Projection matrix)        
-        mvp.identity().mulPerspective((float)Math.PI*0.25f, 4.0f/3.0f, 0.1f, 100.0f)
-                .mul(viewMat4());
+        mvp.identity().mulPerspective((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f)
+                .mul(viewMat4()).mul(model.identity());
 
         // Set the display viewport
         gl3es3.glViewport(0, 0, windowSize.x, windowSize.y);
@@ -218,7 +218,7 @@ public class Es_300_draw_elements extends Test {
         gl3es3.glUseProgram(programName);
 
         // Set the value of MVP uniform.
-        gl3es3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFloatArray(tmpMat4), 0);
+        gl3es3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA(tmpMat4), 0);
 
         gl3es3.glBindVertexArray(vertexArrayName[0]);
 

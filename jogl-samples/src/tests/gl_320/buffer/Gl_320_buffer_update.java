@@ -23,10 +23,11 @@ import static com.jogamp.opengl.GL2ES3.GL_COPY_WRITE_BUFFER;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BLOCK_DATA_SIZE;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Mat4;
+import dev.Vec2;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -52,7 +53,7 @@ public class Gl_320_buffer_update extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/buffer";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZEOF;
     private float[] positionData = new float[]{
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -68,7 +69,7 @@ public class Gl_320_buffer_update extends Test {
 
     private int[] bufferName = new int[Buffer.max.ordinal()], vertexArrayName = new int[1];
     private int programName, uniformTransform, uniformMaterial;
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
+    private final Mat4 mvp = new Mat4(), model = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -212,8 +213,7 @@ public class Gl_320_buffer_update extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.copy.ordinal()]);
-            int stride = 2 * Float.BYTES, offset = 0;
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, stride, offset);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vec2.SIZEOF, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -231,23 +231,20 @@ public class Gl_320_buffer_update extends Test {
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.transform.ordinal()]);
             ByteBuffer transformBuffer = gl3.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
+                    GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) glWindow.getWidth() / glWindow.getHeight(), 0.1f, 100.0f);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model, mvp);
+            mvp.perspective((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f)
+                    .mul(viewMat4()).mul(model.identity());            
 
-            transformBuffer.asFloatBuffer().put(mvp).rewind();
+            transformBuffer.asFloatBuffer().put(mvp.toFA(new float[16]));
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
-        gl3.glViewport(0, 0, glWindow.getWidth(), glWindow.getHeight());
+        gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
 
         gl3.glUseProgram(programName);
