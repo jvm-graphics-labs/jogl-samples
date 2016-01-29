@@ -41,6 +41,7 @@ import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import core.glm;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Test;
 import java.nio.ByteBuffer;
@@ -119,7 +120,6 @@ public class Gl_430_texture_fetch_dependent extends Test {
             shaderProgram.link(gl4, System.out);
         }
 
-        // Get variables locations
         if (validated) {
 
             gl4.glGenProgramPipelines(1, pipelineName, 0);
@@ -151,12 +151,13 @@ public class Gl_430_texture_fetch_dependent extends Test {
                 colors[colorIndex * 4 + 2] = (byte) (glm.linearRand(0, 1) * 255f);
                 colors[colorIndex * 4 + 3] = (byte) 1;
             }
-            gl4.glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, 1, 1, colors.length * Byte.BYTES);
+            gl4.glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8, 1, 1, colors.length / 4 * Byte.BYTES);
             ByteBuffer colorsBuffer = GLBuffers.newDirectByteBuffer(colors);
-//            gl4.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
-//                    0, 0, 0,
-//                    1, 1, 2048,
-//                    GL_RGBA, GL_UNSIGNED_BYTE, colorsBuffer);
+            gl4.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
+                    0, 0, 0,
+                    1, 1, 2048,
+                    GL_RGBA, GL_UNSIGNED_BYTE, colorsBuffer);
+//            BufferUtils.destroyDirectBuffer(colorsBuffer);
         }
 
         {
@@ -176,12 +177,13 @@ public class Gl_430_texture_fetch_dependent extends Test {
                 long signedInt = (long) (glm.linearRand(0, 1) * data.length - 1);
                 data[index] = Integer.parseUnsignedInt("" + signedInt);
             }
-//            gl4.glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_R32UI, windowSize.x, windowSize.y, 1);
-//            IntBuffer dataBuffer = GLBuffers.newDirectIntBuffer(data);
-//            gl4.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
-//                    0, 0, 0,
-//                    windowSize.x, windowSize.y, 1,
-//                    GL_RED_INTEGER, GL_UNSIGNED_INT, dataBuffer);
+            gl4.glTexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_R32UI, windowSize.x, windowSize.y, 1);
+            IntBuffer dataBuffer = GLBuffers.newDirectIntBuffer(data);
+            gl4.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
+                    0, 0, 0,
+                    windowSize.x, windowSize.y, 1,
+                    GL_RED_INTEGER, GL_UNSIGNED_INT, dataBuffer);
+//            BufferUtils.destroyDirectBuffer(dataBuffer);
         }
 
         return true;
@@ -199,19 +201,31 @@ public class Gl_430_texture_fetch_dependent extends Test {
     @Override
     protected boolean render(GL gl) {
 
-//        GL4 gl4 = (GL4) gl;
-//
-//        gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
-//
-//        gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//        gl4.glBindProgramPipeline(pipelineName[0]);
-//        gl4.glBindVertexArray(vertexArrayName[0]);
-//        gl4.glActiveTexture(GL_TEXTURE0);
-//        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE.ordinal()]);
-//        gl4.glActiveTexture(GL_TEXTURE1);
-//        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.INDIRECTION.ordinal()]);
-//
-//        gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
+        GL4 gl4 = (GL4) gl;
+
+        gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
+
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        gl4.glBindProgramPipeline(pipelineName[0]);
+        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glActiveTexture(GL_TEXTURE0);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE.ordinal()]);
+        gl4.glActiveTexture(GL_TEXTURE1);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.INDIRECTION.ordinal()]);
+
+        gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
+        return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        gl4.glDeleteProgram(programName);
+        gl4.glDeleteProgramPipelines(1, pipelineName, 0);
+        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
 
         return true;
     }

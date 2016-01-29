@@ -181,7 +181,6 @@ public class Gl_430_texture_storage extends Test {
             shaderProgram.link(gl4, System.out);
         }
 
-        // Get variables locations
         if (validated) {
 
             gl4.glGenProgramPipelines(1, pipelineName, 0);
