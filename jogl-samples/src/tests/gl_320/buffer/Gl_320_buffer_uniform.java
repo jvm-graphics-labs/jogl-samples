@@ -27,6 +27,7 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
 import dev.Mat3;
 import dev.Mat4;
 import dev.Vec3;
@@ -139,9 +140,6 @@ public class Gl_320_buffer_uniform extends Test {
 
         vertex, element, perScene, perPass, perDraw, max
     }
-
-    private final Mat4 projection = new Mat4(), view = new Mat4(), model = new Mat4(), mv = new Mat4();
-    private final Mat3 normal = new Mat3();
 
     @Override
     protected boolean begin(GL gl) {
@@ -287,15 +285,18 @@ public class Gl_320_buffer_uniform extends Test {
             ByteBuffer transform = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Transform.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            projection.perspective((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-            view.set(viewMat4());
-            model.identity().rotate((float) -Math.PI * 0.5f, 0.0f, 0.0f, 1.0f);
+            Mat4 projection = new Mat4().perspective((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+            Mat4 view = viewMat4();
+            Mat4 model = new Mat4(1.0f).rotate((float) -Math.PI * 0.5f, 0.0f, 0.0f, 1.0f);
 
-            mv.set(view.mul(model));
-            normal.set(mv).invTransp();
+            Mat4 mv = view.mul(model);
+            Mat4 p = projection;
+            Mat3 normal = new Mat3(mv.invTransp(new Mat4()));
 
-            transform.asFloatBuffer().put(projection.toFA(new float[16]))
-                    .put(mv.toFA(new float[16])).put(normal.toFloatArray(new float[9]));
+            transform.asFloatBuffer()
+                    .put(p.toFA_())
+                    .put(mv.toFA_())
+                    .put(normal.toFA_());
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);

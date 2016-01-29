@@ -1,6 +1,11 @@
 #version 420 core
 
-#include fbo-texture-2d.glsl
+#define POSITION	0
+#define COLOR		3
+#define TEXCOORD	4
+#define FRAG_COLOR	0
+
+#define TRANSFORM0	1
 
 precision highp float;
 precision highp int;
@@ -27,5 +32,5 @@ out Block
 void main()
 {	
     outBlock.texCoord = texCoord;
-    gl_Position = transform.mvp * vec4(position.xy, position.z + float(gl_InstanceID) * 0.5 - 0.25, 1.0);
+    gl_Position = transform.mvp * vec4(position, 1.0);
 }

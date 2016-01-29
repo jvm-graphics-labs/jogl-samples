@@ -26,6 +26,7 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
 import dev.Mat4;
 import dev.Vec2;
 import framework.BufferUtils;
@@ -69,7 +70,6 @@ public class Gl_320_buffer_update extends Test {
 
     private int[] bufferName = new int[Buffer.max.ordinal()], vertexArrayName = new int[1];
     private int programName, uniformTransform, uniformMaterial;
-    private final Mat4 mvp = new Mat4(), model = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -234,10 +234,12 @@ public class Gl_320_buffer_update extends Test {
                     GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            mvp.perspective((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f)
-                    .mul(viewMat4()).mul(model.identity());            
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 
+                    (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
+            Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
-            transformBuffer.asFloatBuffer().put(mvp.toFA(new float[16]));
+            transformBuffer.asFloatBuffer().put(mvp.toFA_());
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

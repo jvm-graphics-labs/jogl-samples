@@ -5,8 +5,6 @@
  */
 package tests.gl_420;
 
-import com.jogamp.common.net.Uri;
-import com.jogamp.common.util.IOUtil;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ALPHA;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
@@ -152,7 +150,7 @@ public class Gl_420_draw_image_space_rendering extends Test {
         if (validated) {
 
             ShaderProgram shaderProgram = new ShaderProgram();
-            
+
             ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
             ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
@@ -316,5 +314,22 @@ public class Gl_420_draw_image_space_rendering extends Test {
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
 
         return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        boolean validated = true;
+
+        gl4.glDeleteProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
+        gl4.glDeleteProgram(programName[Pipeline.SPLASH.ordinal()]);
+        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteSamplers(1, samplerName, 0);
+        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+
+        return validated;
     }
 }

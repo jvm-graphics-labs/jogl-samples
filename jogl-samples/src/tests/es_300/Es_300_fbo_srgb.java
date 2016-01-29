@@ -53,6 +53,7 @@ import com.jogamp.opengl.GL3ES3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
 import dev.Mat4;
 import dev.Vec2;
 import framework.BufferUtils;
@@ -133,7 +134,6 @@ public class Es_300_fbo_srgb extends Test {
             vertexArrayName = new int[Program.MAX.ordinal()], bufferName = new int[Buffer.MAX.ordinal()],
             textureName = new int[Texture.MAX.ordinal()], uniformDiffuse = new int[Program.MAX.ordinal()];
     private int framebufferScale = 2, uniformTransform;
-    private final Mat4 projection = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -369,11 +369,10 @@ public class Es_300_fbo_srgb extends Test {
             ByteBuffer pointer = gl3es3.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, Mat4.SIZEOF, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            projection.perspective((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f)
-                    .mul(viewMat4());
-
             //glm::mat4 Projection = glm::perspectiveFov(glm::pi<float>() * 0.25f, 640.f, 480.f, 0.1f, 100.0f);
-            pointer.asFloatBuffer().put(projection.toFA(new float[16]));
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float)windowSize.x / windowSize.y, 0.1f, 100.0f);
+        
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).toFA_());
 
             // Make sure the uniform buffer is uploaded
             gl3es3.glUnmapBuffer(GL_UNIFORM_BUFFER);

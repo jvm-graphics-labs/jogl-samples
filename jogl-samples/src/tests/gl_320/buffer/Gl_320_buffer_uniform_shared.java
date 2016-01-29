@@ -25,9 +25,11 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
 import dev.Mat4;
 import dev.Vec2;
 import dev.Vec3;
+import dev.Vec4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -81,7 +83,6 @@ public class Gl_320_buffer_uniform_shared extends Test {
     private final int[] bufferName = new int[Buffer.max.ordinal()];
     private int programName, uniformMaterial, uniformTransform;
     private int[] uniformBlockSizeTransform, uniformBlockSizeMaterial, vertexArrayName;
-    private final Mat4 mvp = new Mat4(), model = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -197,17 +198,18 @@ public class Gl_320_buffer_uniform_shared extends Test {
         GL3 gl3 = (GL3) gl;
         {
             // Compute the MVP (Model View Projection matrix)
-            mvp.perspective((float)Math.PI*0.25f, (float) windowSize.x / windowSize.y, .1f, 100f)
-                    .mul(viewMat4()).mul(model.identity());
-
+            Mat4 projection = glm.perspective_((float)Math.PI*0.25f, (float) windowSize.x / windowSize.y, .1f, 100f);
+            Mat4 model = new Mat4(1.0f);
+            Mat4 mvp = projection.mul(viewMat4()).mul(model);
+            
             float[] diffuse = new float[]{1f, .5f, 0f, 1f};
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.uniform.ordinal()]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
-                    uniformBlockSizeTransform[0] + Vec3.SIZEOF,
+                    uniformBlockSizeTransform[0] + Vec4.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            pointer.asFloatBuffer().put(mvp.toFA(new float[16]));
+            pointer.asFloatBuffer().put(mvp.toFA_());
             pointer.position(uniformBlockSizeTransform[0]);
             pointer.asFloatBuffer().put(diffuse);
             pointer.rewind();

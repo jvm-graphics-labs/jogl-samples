@@ -24,6 +24,7 @@ import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
 import dev.Mat4;
 import dev.Vec2;
 import framework.BufferUtils;
@@ -69,7 +70,6 @@ public class Es_200_draw_elements extends Test {
 
     private final int[] bufferName = new int[Buffer.max.ordinal()];
     private int programName, uniformMvp, uniformDiffuse;
-    private final Mat4 mvp = new Mat4(), model = new Mat4();
 
     public Es_200_draw_elements() {
         super("es_200_draw_elements", Profile.ES, 2, 0);
@@ -161,9 +161,9 @@ public class Es_200_draw_elements extends Test {
         GL2ES2 gl2es2 = (GL2ES2) gl;
 
         // Compute the MVP (Model View Projection matrix)
-        mvp.identity().mulPerspective((float)Math.PI*0.25f, 4.0f/3.0f, 0.1f, 100.0f)
-                .mul(viewMat4())
-                .mul(model.identity());
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         // Set the display viewport
         gl2es2.glViewport(0, 0, windowSize.x, windowSize.y);
@@ -177,7 +177,7 @@ public class Es_200_draw_elements extends Test {
         gl2es2.glUseProgram(programName);
 
         // Set the value of MVP uniform.
-        gl2es2.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA(tmpMat4), 0);
+        gl2es2.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA_(), 0);
 
         gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
         {

@@ -56,6 +56,7 @@ import static com.jogamp.opengl.GL4.GL_VERTEX_ATTRIB_ARRAY_LONG;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLDebugListener;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.math.FloatUtil;
@@ -132,7 +133,7 @@ public class Test implements GLEventListener, KeyListener {
 
         Display display = NewtFactory.createDisplay(null);
         Screen screen = NewtFactory.createScreen(display, screenIdx);
-        GLProfile glProfile = GLProfile.getDefault();
+        GLProfile glProfile = getGlProfile();
         GLCapabilities glCapabilities = new GLCapabilities(glProfile);
         glWindow = GLWindow.create(screen, glCapabilities);
         if (glDebug) {
@@ -150,6 +151,9 @@ public class Test implements GLEventListener, KeyListener {
         glWindow.setSize(windowSize.x, windowSize.y);
         glWindow.setVisible(true);
         glWindow.addGLEventListener(this);
+        if (glDebug) {
+            glWindow.getContext().addGLDebugListener(new GlDebugOutput());
+        }
         glWindow.addKeyListener(this);
 
         animator = new Animator();
@@ -163,14 +167,48 @@ public class Test implements GLEventListener, KeyListener {
     @Override
     public final void init(GLAutoDrawable drawable) {
 
-        GL gl = getCorrespondingGl(drawable);
+        GL gl = getGl(drawable);
 
         assert checkGLVersion();
 
         assert begin(gl);
     }
 
-    private GL getCorrespondingGl(GLAutoDrawable drawable) {
+    private GLProfile getGlProfile() {
+        switch (profile) {
+            case ES:
+                switch (major) {
+                    case 1:
+                        return GLProfile.get(GLProfile.GL2ES1);
+                    case 2:
+                        return GLProfile.get(GLProfile.GL2ES2);
+                    case 3:
+                        return GLProfile.get(GLProfile.GL4ES3);
+                }
+            case CORE:
+                switch (major) {
+                    case 1:
+                        return GLProfile.get(GLProfile.GL2);
+                    case 2:
+                        return GLProfile.get(GLProfile.GL2);
+                    case 3:
+                        if (profile == Profile.COMPATIBILITY) {
+                            return GLProfile.get(GLProfile.GL3bc);
+                        } else {
+                            return GLProfile.get(GLProfile.GL3);
+                        }
+                    case 4:
+                        if (profile == Profile.COMPATIBILITY) {
+                            return GLProfile.get(GLProfile.GL4bc);
+                        } else {
+                            return GLProfile.get(GLProfile.GL4);
+                        }
+                }
+        }
+        return GLProfile.getDefault();
+    }
+
+    private GL getGl(GLAutoDrawable drawable) {
         switch (profile) {
             case ES:
                 switch (major) {
@@ -217,7 +255,7 @@ public class Test implements GLEventListener, KeyListener {
     @Override
     public final void dispose(GLAutoDrawable drawable) {
 
-        GL gl = getCorrespondingGl(drawable);
+        GL gl = getGl(drawable);
         assert end(gl);
         System.exit(0);
     }
@@ -229,11 +267,11 @@ public class Test implements GLEventListener, KeyListener {
     @Override
     public final void display(GLAutoDrawable drawable) {
 
-        GL gl = getCorrespondingGl(drawable);
+        GL gl = getGl(drawable);
 
         assert render(gl);
 
-        assert checkError(gl, "render");
+//        assert checkError(gl, "render");
     }
 
     protected boolean render(GL gl) {

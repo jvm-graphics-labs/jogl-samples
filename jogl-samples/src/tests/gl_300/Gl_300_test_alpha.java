@@ -27,6 +27,7 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
 import dev.Mat4;
 import dev.Vec2;
 import framework.BufferUtils;
@@ -70,7 +71,6 @@ public class Gl_300_test_alpha extends Test {
 
     private int[] vertexArrayName = new int[1], bufferName = new int[1], texture2dName = new int[1];
     private int programName, uniformMvp, uniformDiffuse;
-    private final Mat4 mvp = new Mat4(), model = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -210,8 +210,9 @@ public class Gl_300_test_alpha extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        mvp.perspective((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f)
-                .mul(viewMat4()).mul(model.identity());
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glClearColor(1.0f, 0.5f, 0.0f, 1.0f);
@@ -219,7 +220,7 @@ public class Gl_300_test_alpha extends Test {
 
         gl3.glUseProgram(programName);
         gl3.glUniform1i(uniformDiffuse, 0);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA(new float[16]), 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA_(), 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
         gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[0]);

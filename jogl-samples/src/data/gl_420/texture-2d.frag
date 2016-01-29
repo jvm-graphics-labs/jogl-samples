@@ -1,6 +1,6 @@
 #version 420 core
 
-#include "texture-2d.glsl"
+#include texture-2d.glsl
 #line 5
 
 precision highp float;

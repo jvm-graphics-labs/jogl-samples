@@ -3,20 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tests.gl_420;
+package tests.gl_430;
 
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ALPHA;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_COMPRESSED_RGB_S3TC_DXT1_EXT;
 import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
 import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_LINEAR;
+import static com.jogamp.opengl.GL.GL_LINEAR_MIPMAP_LINEAR;
 import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
-import static com.jogamp.opengl.GL.GL_MAP_UNSYNCHRONIZED_BIT;
 import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
-import static com.jogamp.opengl.GL.GL_NEAREST;
-import static com.jogamp.opengl.GL.GL_NEAREST_MIPMAP_NEAREST;
+import static com.jogamp.opengl.GL.GL_RGBA8;
+import static com.jogamp.opengl.GL.GL_SAMPLES;
 import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
 import static com.jogamp.opengl.GL.GL_TEXTURE0;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
@@ -30,14 +30,13 @@ import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER_BIT;
 import static com.jogamp.opengl.GL2ES2.GL_PROGRAM_SEPARABLE;
 import static com.jogamp.opengl.GL2ES2.GL_RED;
-import static com.jogamp.opengl.GL2ES2.GL_UNPACK_ROW_LENGTH;
-import static com.jogamp.opengl.GL2ES2.GL_UNPACK_SKIP_PIXELS;
-import static com.jogamp.opengl.GL2ES2.GL_UNPACK_SKIP_ROWS;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
 import static com.jogamp.opengl.GL2ES3.GL_BLUE;
 import static com.jogamp.opengl.GL2ES3.GL_COLOR;
 import static com.jogamp.opengl.GL2ES3.GL_GREEN;
+import static com.jogamp.opengl.GL2ES3.GL_NUM_SAMPLE_COUNTS;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_2D_ARRAY;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_A;
@@ -46,15 +45,16 @@ import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_G;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_R;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT;
-import static com.jogamp.opengl.GL2GL3.GL_UNPACK_COMPRESSED_BLOCK_DEPTH;
-import static com.jogamp.opengl.GL2GL3.GL_UNPACK_COMPRESSED_BLOCK_HEIGHT;
-import static com.jogamp.opengl.GL2GL3.GL_UNPACK_COMPRESSED_BLOCK_SIZE;
-import static com.jogamp.opengl.GL2GL3.GL_UNPACK_COMPRESSED_BLOCK_WIDTH;
+import static com.jogamp.opengl.GL2GL3.GL_FILTER;
+import static com.jogamp.opengl.GL2GL3.GL_INTERNALFORMAT_PREFERRED;
+import static com.jogamp.opengl.GL2GL3.GL_RGB4;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec2;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -71,22 +71,22 @@ import jgli.Texture2d;
  *
  * @author GBarbieri
  */
-public class Gl_420_texture_pixel_store extends Test {
+public class Gl_430_texture_storage extends Test {
 
     public static void main(String[] args) {
-        Gl_420_texture_pixel_store gl_420_texture_pixel_store = new Gl_420_texture_pixel_store();
+        Gl_430_texture_storage gl_430_texture_storage = new Gl_430_texture_storage();
     }
 
-    public Gl_420_texture_pixel_store() {
-        super("gl-420-texture-pixel-store", Profile.CORE, 4, 2);
+    public Gl_430_texture_storage() {
+        super("gl-430-texture-storage", Profile.CORE, 4, 3);
     }
 
-    private final String SHADERS_SOURCE = "texture-2d";
-    private final String SHADERS_ROOT = "src/data/gl_420";
-    private final String TEXTURE_DIFFUSE_BC1 = "kueken7_rgb_dxt1_unorm.dds";
+    private final String SHADERS_SOURCE = "texture-storage";
+    private final String SHADERS_ROOT = "src/data/gl_430";
+    private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * 2 * Vec2.SIZEOF;
     private float[] vertexData = {
         -1.0f, -1.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 1.0f, 1.0f,
@@ -99,6 +99,12 @@ public class Gl_420_texture_pixel_store extends Test {
         0, 1, 2,
         2, 3, 0};
 
+    private enum Program {
+        VERTEX,
+        FRAGMENT,
+        MAX
+    }
+
     private enum Buffer {
         VERTEX,
         ELEMENT,
@@ -106,9 +112,8 @@ public class Gl_420_texture_pixel_store extends Test {
         MAX
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = {0}, bufferName = new int[Buffer.MAX.ordinal()];
-    private int programName;
-    private float[] projection = new float[16], model = new float[16];
+    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = {0},
+            programName = new int[Program.MAX.ordinal()], bufferName = new int[Buffer.MAX.ordinal()];
 
     @Override
     protected boolean begin(GL gl) {
@@ -116,11 +121,23 @@ public class Gl_420_texture_pixel_store extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_EXT_texture_compression_s3tc");
+        validated = validated && checkExtension(gl4, "GL_ARB_internalformat_query2");
 
-        if (validated) {
-            validated = initTexture(gl4);
+        long[] query_COMPRESSED_RGB8_ETC2 = {0};
+        gl4.glGetInternalformati64v(GL_TEXTURE_2D, GL_RGB4, GL_INTERNALFORMAT_PREFERRED,
+                Long.BYTES, query_COMPRESSED_RGB8_ETC2, 0);
+        long[] query_RGBA8 = {0};
+        gl4.glGetInternalformati64v(GL_TEXTURE_2D, GL_RGBA8, GL_FILTER, Long.BYTES, query_RGBA8, 0);
+        long[] query_COMPRESSED_RGBA_BPTC_UNORM = {0};
+        gl4.glGetInternalformati64v(GL_TEXTURE_2D, GL_RGBA8, GL_NUM_SAMPLE_COUNTS,
+                Long.BYTES, query_COMPRESSED_RGBA_BPTC_UNORM, 0);
+
+        if (query_COMPRESSED_RGBA_BPTC_UNORM[0] > 0) {
+            long[] query_SamplesCOMPRESSED_RGBA_BPTC_UNORM = new long[(int) query_COMPRESSED_RGBA_BPTC_UNORM[0]];
+            gl4.glGetInternalformati64v(GL_TEXTURE_2D, GL_RGBA8, GL_SAMPLES, Long.BYTES,
+                    query_SamplesCOMPRESSED_RGBA_BPTC_UNORM, 0);
         }
+
         if (validated) {
             validated = initProgram(gl4);
         }
@@ -130,6 +147,9 @@ public class Gl_420_texture_pixel_store extends Test {
         if (validated) {
             validated = initVertexArray(gl4);
         }
+        if (validated) {
+            validated = initTexture(gl4);
+        }
 
         return validated;
     }
@@ -138,36 +158,43 @@ public class Gl_420_texture_pixel_store extends Test {
 
         boolean validated = true;
 
-        gl4.glGenProgramPipelines(1, pipelineName, 0);
-
+        // Create program
         if (validated) {
-
-            ShaderProgram shaderProgram = new ShaderProgram();
 
             ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
             ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
+            ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.init(gl4);
-            programName = shaderProgram.program();
-            gl4.glProgramParameteri(programName, GL_PROGRAM_SEPARABLE, GL_TRUE);
-
+            programName[Program.VERTEX.ordinal()] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Program.VERTEX.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
-            shaderProgram.add(fragShaderCode);
+            shaderProgram.link(gl4, System.out);
 
+            shaderProgram = new ShaderProgram();
+            shaderProgram.init(gl4);
+            programName[Program.FRAGMENT.ordinal()] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Program.FRAGMENT.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
         }
 
+        // Get variables locations
         if (validated) {
 
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName);
+            gl4.glGenProgramPipelines(1, pipelineName, 0);
+            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT, programName[Program.VERTEX.ordinal()]);
+            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAGMENT.ordinal()]);
         }
 
         return validated & checkError(gl4, "initProgram");
     }
 
     private boolean initBuffer(GL4 gl4) {
+
+        boolean validated = true;
 
         gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
 
@@ -184,91 +211,67 @@ public class Gl_420_texture_pixel_store extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = {0};
-
-        gl4.glGetIntegerv(
-                GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT,
-                uniformBufferOffset, 0);
-
-        int uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
+        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
+        int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        return true;
+        return validated;
     }
 
     private boolean initTexture(GL4 gl4) {
 
         try {
-            int dxt1BlockWidth = 4;
-            int dxt1BlockHeight = 4;
-            int dxt1BlockDepth = 1;
-            int dxt1BlockSize = 8;
+            jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
+            jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-            gl4.glPixelStorei(GL_UNPACK_COMPRESSED_BLOCK_WIDTH, dxt1BlockWidth);
-            gl4.glPixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, dxt1BlockHeight);
-            gl4.glPixelStorei(GL_UNPACK_COMPRESSED_BLOCK_DEPTH, dxt1BlockDepth);
-            gl4.glPixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, dxt1BlockSize);
-
-            jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC1));
-            assert (!texture.empty());
 
             gl4.glGenTextures(1, textureName, 0);
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[0]);
-            gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-            gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-            gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
-            gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
-            gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
-            gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
-            gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
-            gl4.glTexStorage2D(GL_TEXTURE_2D,
-                    texture.levels() - 1, GL_COMPRESSED_RGB_S3TC_DXT1_EXT,
-                    texture.dimensions(0)[0] / 2, texture.dimensions(0)[1] / 2);
+            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[0]);
+            gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_RED);
+            gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
+            gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
+            gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
+            gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
+            gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
+            gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-            for (int level = 0; level < texture.levels() - 1; ++level) {
-                gl4.glPixelStorei(GL_UNPACK_ROW_LENGTH, texture.dimensions(level)[0]);
-                gl4.glPixelStorei(GL_UNPACK_SKIP_PIXELS, Math.max(texture.dimensions(level)[0] / 4, 4));
-                gl4.glPixelStorei(GL_UNPACK_SKIP_ROWS, Math.max(texture.dimensions(level)[1] / 4, 4));
+            gl4.glTexStorage3D(GL_TEXTURE_2D_ARRAY, texture.levels(),
+                    format.internal.value,
+                    texture.dimensions(0)[0], texture.dimensions(0)[1], 1);
 
-                int levelWidth = texture.dimensions(level)[0] / 2;
-                int levelHeight = texture.dimensions(level)[1] / 2;
-                int levelSize = Math.max(texture.size(level) / 4, dxt1BlockSize);
-                //GLsizei(DXT1BlockSize * GLsizei(glm::ceil(Texture[Level].dimensions().x / DXT1BlockWidth)) * GLsizei(glm::ceil(Texture[Level].dimensions().y / DXT1BlockHeight))),
+            for (int level = 0; level < texture.levels(); ++level) {
 
-                if (levelWidth < dxt1BlockWidth) {
-                    break;
-                }
-
-                gl4.glCompressedTexSubImage2D(GL_TEXTURE_2D, level,
-                        0, 0,
-                        levelWidth, levelHeight,
-                        GL_COMPRESSED_RGB_S3TC_DXT1_EXT,
-                        levelSize,
+                gl4.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, level,
+                        0, 0, 0,
+                        texture.dimensions(level)[0], texture.dimensions(level)[1], 1,
+                        format.external.value, format.type.value,
                         texture.data(level));
             }
 
-            gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, 0);
+            gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
         } catch (IOException ex) {
-            Logger.getLogger(Gl_420_texture_pixel_store.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Gl_430_texture_storage.class.getName()).log(Level.SEVERE, null, ex);
         }
         return true;
     }
 
     private boolean initVertexArray(GL4 gl4) {
 
+        boolean validated = true;
+
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Vec2.SIZEOF, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Vec2.SIZEOF, Vec2.SIZEOF);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -278,7 +281,7 @@ public class Gl_420_texture_pixel_store extends Test {
         }
         gl4.glBindVertexArray(0);
 
-        return true;
+        return validated;
     }
 
     @Override
@@ -289,19 +292,13 @@ public class Gl_420_texture_pixel_store extends Test {
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
             ByteBuffer pointer = gl4.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, projection.length * Float.BYTES,
-                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+                    GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
+                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model);
+            Mat4 projection = glm.perspectiveFov_((float) Math.PI * 0.25f, windowSize.x, windowSize.y, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
 
-            for (float f : projection) {
-                pointer.putFloat(f);
-            }
-            pointer.rewind();
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFA_());
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
@@ -312,9 +309,9 @@ public class Gl_420_texture_pixel_store extends Test {
 
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[0]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[0]);
         gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
 
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
 
@@ -327,7 +324,8 @@ public class Gl_420_texture_pixel_store extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glDeleteProgramPipelines(1, pipelineName, 0);
-        gl4.glDeleteProgram(programName);
+        gl4.glDeleteProgram(programName[Program.FRAGMENT.ordinal()]);
+        gl4.glDeleteProgram(programName[Program.VERTEX.ordinal()]);
         gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
         gl4.glDeleteTextures(1, textureName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);

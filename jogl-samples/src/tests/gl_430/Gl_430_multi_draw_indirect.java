@@ -181,8 +181,6 @@ public class Gl_430_multi_draw_indirect extends Test {
         gl4.glEnable(GL_DEPTH_TEST);
         gl4.glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
 
-        glWindow.getContext().addGLDebugListener(new GlDebugOutput());
-
         return validated;
     }
 

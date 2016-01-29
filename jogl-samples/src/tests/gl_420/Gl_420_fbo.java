@@ -397,4 +397,20 @@ public class Gl_420_fbo extends Test {
 
         return true;
     }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        gl4.glDeleteProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
+        gl4.glDeleteProgram(programName[Pipeline.SPLASH.ordinal()]);
+        gl4.glDeleteProgram(programName[Pipeline.TEXTURE.ordinal()]);
+        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteFramebuffers(1, framebufferName, 0);
+        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteVertexArrays(Pipeline.MAX.ordinal(), vertexArrayName, 0);
+
+        return true;
+    }
 }

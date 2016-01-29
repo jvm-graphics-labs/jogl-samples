@@ -14,6 +14,7 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
 import dev.Mat4;
 import dev.Vec2;
 import framework.BufferUtils;
@@ -62,7 +63,6 @@ public class Gl_300_fbo_multisample extends Test {
     private int programName, uniformMvp, uniformDiffuse;
     private int[] vertexArrayName, bufferName, textureName, colorRenderbufferName,
             colorTextureName, framebufferRenderName, framebufferResolveName;
-    private final Mat4 mvp = new Mat4(), model = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -259,9 +259,11 @@ public class Gl_300_fbo_multisample extends Test {
         gl3.glClearColor(0.0f, 0.5f, 1.0f, 1.0f);
         gl3.glClear(GL_COLOR_BUFFER_BIT);
 
-        mvp.perspective((float) (Math.PI * 0.25f), (float) (FRAMEBUFFER_SIZE.x) / FRAMEBUFFER_SIZE.y, 0.1f, 100.0f)
-                .mul(viewMat4()).mul(model.identity());
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA(new float[16]), 0);
+        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f,
+                (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = perspective.mul(viewMat4()).mul(model);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA_(), 0);
 
         gl3.glViewport(0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
 
@@ -276,9 +278,10 @@ public class Gl_300_fbo_multisample extends Test {
 
     private void renderFB(GL3 gl3, int texture2dName) {
 
-        mvp.perspective((float) (Math.PI * 0.25f), (float) (FRAMEBUFFER_SIZE.x) / FRAMEBUFFER_SIZE.y, 0.1f, 100.0f)
-                .mul(viewMat4()).mul(model.identity());
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA(new float[16]), 0);
+        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = perspective.mul(viewMat4()).mul(model);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA_(), 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
         gl3.glBindTexture(GL_TEXTURE_2D, texture2dName);

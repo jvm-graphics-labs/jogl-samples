@@ -1,20 +1,20 @@
 #version 420 core
 
-#include "fbo-splash.glsl"
+#include fbo-splash.glsl
 
 precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-layout(binding = DIFFUSE) uniform sampler2D Diffuse;
+layout(binding = DIFFUSE) uniform sampler2D diffuse;
 
 in vec4 gl_FragCoord;
-layout(location = FRAG_COLOR, index = 0) out vec4 Color;
+layout(location = FRAG_COLOR, index = 0) out vec4 color;
 
 void main()
 {
-	vec2 TextureSize = vec2(textureSize(Diffuse, 0));
+    vec2 textSize = vec2(textureSize(diffuse, 0));
 
-	Color = texture(Diffuse, gl_FragCoord.xy / TextureSize);
-	//Color = texelFetch(Diffuse, ivec2(gl_FragCoord.xy), 0);
+    color = texture(diffuse, gl_FragCoord.xy / textSize);
+    //Color = texelFetch(Diffuse, ivec2(gl_FragCoord.xy), 0);
 }
