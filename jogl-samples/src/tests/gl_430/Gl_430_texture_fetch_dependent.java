@@ -64,7 +64,6 @@ public class Gl_430_texture_fetch_dependent extends Test {
 
     private final String SHADERS_SOURCE = "texture-fetch-dependent";
     private final String SHADERS_ROOT = "src/data/gl_430";
-    private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private enum Texture {
         DIFFUSE,
@@ -157,7 +156,7 @@ public class Gl_430_texture_fetch_dependent extends Test {
                     0, 0, 0,
                     1, 1, 2048,
                     GL_RGBA, GL_UNSIGNED_BYTE, colorsBuffer);
-//            BufferUtils.destroyDirectBuffer(colorsBuffer);
+            BufferUtils.destroyDirectBuffer(colorsBuffer);
         }
 
         {
@@ -183,7 +182,7 @@ public class Gl_430_texture_fetch_dependent extends Test {
                     0, 0, 0,
                     windowSize.x, windowSize.y, 1,
                     GL_RED_INTEGER, GL_UNSIGNED_INT, dataBuffer);
-//            BufferUtils.destroyDirectBuffer(dataBuffer);
+            BufferUtils.destroyDirectBuffer(dataBuffer);
         }
 
         return true;
