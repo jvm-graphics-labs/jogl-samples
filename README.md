@@ -6,8 +6,6 @@ The project aims to promote the new OpenGL features making easier version transi
 
 These samples use [NEWT](http://jogamp.org/jogl/doc/NEWT-Overview.html) to create window and [jogl](http://jogamp.org/jogl/www/) of [Jogamp](http://jogamp.org/) as OpenGL wrapper, [jglm](https://github.com/elect86/Jglm) as math library and to replace OpenGL fixed pipeline functions and [jgli](https://github.com/elect86/jgli) to load images. 
 
-Ps: Hello Triangle and Hello Texture were moved into a stand-alone [project](https://github.com/elect86/helloTriangle)
-
 Samples divided per profiles:
 
 * es-200
@@ -22,3 +20,6 @@ Samples divided per profiles:
 * gl-440
 * gl-450
 * gl-500
+
+
+Ps: Hello Triangle and Hello Texture were moved into a stand-alone [project](https://github.com/elect86/helloTriangle)
