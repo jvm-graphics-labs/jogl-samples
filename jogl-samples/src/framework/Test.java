@@ -143,7 +143,7 @@ public class Test implements GLEventListener, KeyListener {
         glWindow.setVisible(true);
         glWindow.addGLEventListener(this);
         if (glDebug) {
-            glWindow.getContext().addGLDebugListener(new GlDebugOutput());
+//            glWindow.getContext().addGLDebugListener(new GlDebugOutput());
         }
         glWindow.addKeyListener(this);
 

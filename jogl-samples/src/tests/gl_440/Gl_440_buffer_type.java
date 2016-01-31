@@ -54,7 +54,7 @@ public class Gl_440_buffer_type extends Test {
     }
 
     public Gl_440_buffer_type() {
-        super("gl-430-buffer-type", Profile.CORE, 4, 4);
+        super("gl-440-buffer-type", Profile.CORE, 4, 4);
     }
 
     private final String SHADERS_SOURCE = "buffer-type";
@@ -63,12 +63,12 @@ public class Gl_440_buffer_type extends Test {
     private int vertexCount = 6;
     private int positionSizeF16 = vertexCount * Short.BYTES * 2;
     private short[] positionDataF16 = {
-        (short) 0.0f, (short) 0.0f,
-        (short) 1.0f, (short) 0.0f,
-        (short) 1.0f, (short) 1.0f,
-        (short) 1.0f, (short) 1.0f,
-        (short) 0.0f, (short) 1.0f,
-        (short) 0.0f, (short) 0.0f};
+        glm.packHalf1x16(0.0f), glm.packHalf1x16(0.0f),
+        glm.packHalf1x16(1.0f), glm.packHalf1x16(0.0f),
+        glm.packHalf1x16(1.0f), glm.packHalf1x16(1.0f),
+        glm.packHalf1x16(1.0f), glm.packHalf1x16(1.0f),
+        glm.packHalf1x16(0.0f), glm.packHalf1x16(1.0f),
+        glm.packHalf1x16(0.0f), glm.packHalf1x16(0.0f)};
 
     private int positionSizeF32 = vertexCount * Vec2.SIZEOF;
     private float[] positionDataF32 = {
@@ -246,19 +246,29 @@ public class Gl_440_buffer_type extends Test {
         ByteBuffer dataBuffer = GLBuffers.newDirectByteBuffer(data);
 
         int currentOffset = 0;
-        dataBuffer.asIntBuffer().put(positionSizeF32);
+        dataBuffer.asFloatBuffer().put(positionDataF32);
+
         currentOffset += positionSizeF32;
         dataBuffer.position(currentOffset);
         dataBuffer.put(positionDataI8);
+
         currentOffset += positionSizeI8;
         dataBuffer.position(currentOffset);
         dataBuffer.asIntBuffer().put(positionDataI32);
+
         currentOffset += positionSizeI32;
+        dataBuffer.position(currentOffset);
         dataBuffer.asIntBuffer().put(positionDataRGB10A2);
+
         currentOffset += positionSizeRGB10A2;
+        dataBuffer.position(currentOffset);
         dataBuffer.asShortBuffer().put(positionDataF16);
+
         currentOffset += positionSizeF16;
+        dataBuffer.position(currentOffset);
         dataBuffer.asIntBuffer().put(positionDataRG11FB10F);
+
+        dataBuffer.rewind();
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
         gl4.glBufferStorage(GL_ARRAY_BUFFER, data.length * Byte.BYTES, dataBuffer, 0);

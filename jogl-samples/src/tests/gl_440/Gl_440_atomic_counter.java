@@ -45,7 +45,7 @@ public class Gl_440_atomic_counter extends Test {
     }
 
     public Gl_440_atomic_counter() {
-        super("gl-430-atomic-counter", Profile.CORE, 4, 4, new Vec2i(1280, 720));
+        super("gl-440-atomic-counter", Profile.CORE, 4, 4, new Vec2i(1280, 720));
     }
 
     private final String SHADERS_SOURCE = "atomic-counter";

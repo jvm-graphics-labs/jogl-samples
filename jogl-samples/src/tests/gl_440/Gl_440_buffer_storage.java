@@ -68,7 +68,7 @@ public class Gl_440_buffer_storage extends Test {
     }
 
     public Gl_440_buffer_storage() {
-        super("gl-430-buffer-storage", Profile.CORE, 4, 4);
+        super("gl-440-buffer-storage", Profile.CORE, 4, 4);
     }
 
     private final String SHADERS_SOURCE = "buffer-storage";
