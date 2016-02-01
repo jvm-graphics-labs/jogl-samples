@@ -36,7 +36,6 @@ public class Gl_400_blend_rtt extends Test {
     private final String SHADERS_SOURCE1 = "blend-rtt";
     private final String SHADERS_SOURCE2 = "blend-rtt-blit";
     private final String SHADERS_ROOT = "src/data/gl_400";
-    private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
     private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
@@ -53,29 +52,32 @@ public class Gl_400_blend_rtt extends Test {
         2, 3, 0
     };
 
-    private enum Texture {
-        R,
-        G,
-        B,
-        MAX
+    private class Texture {
+
+        public static final int R = 0;
+        public static final int G = 1;
+        public static final int B = 2;
+        public static final int MAX = 3;
     };
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Program {
-        COLORBUFFERS,
-        BLIT,
-        MAX
+    private class Program {
+
+        public static final int COLORBUFFERS = 0;
+        public static final int BLIT = 1;
+        public static final int MAX = 2;
     }
 
     private int uniformMvpSingle, uniformDiffuseSingle, uniformMvpMultiple;
-    private int[] framebufferName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()], programName = new int[Program.MAX.ordinal()];
-    private Vec4i[] viewport = new Vec4i[Texture.MAX.ordinal()];
+    private int[] framebufferName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX],
+            textureName = new int[Texture.MAX], programName = new int[Program.MAX];
+    private Vec4i[] viewport = new Vec4i[Texture.MAX];
     private float[] projection = new float[16], viewTranslate = new float[16], view = new float[16],
             model = new float[16], mvp = new float[16];
 
@@ -84,10 +86,10 @@ public class Gl_400_blend_rtt extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        viewport[Texture.R.ordinal()] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.G.ordinal()] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
+        viewport[Texture.R] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.G] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
                 windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.B.ordinal()] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.B] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
 
         boolean validated = true;
 
@@ -131,14 +133,14 @@ public class Gl_400_blend_rtt extends Test {
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
 
-            programName[Program.COLORBUFFERS.ordinal()] = shaderProgram.program();
+            programName[Program.COLORBUFFERS] = shaderProgram.program();
 
             shaderProgram.link(gl4, System.out);
         }
 
         if (validated) {
 
-            uniformMvpMultiple = gl4.glGetUniformLocation(programName[Program.COLORBUFFERS.ordinal()], "mvp");
+            uniformMvpMultiple = gl4.glGetUniformLocation(programName[Program.COLORBUFFERS], "mvp");
         }
 
         if (validated) {
@@ -155,15 +157,15 @@ public class Gl_400_blend_rtt extends Test {
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
 
-            programName[Program.BLIT.ordinal()] = shaderProgram.program();
+            programName[Program.BLIT] = shaderProgram.program();
 
             shaderProgram.link(gl4, System.out);
         }
 
         if (validated) {
 
-            uniformMvpSingle = gl4.glGetUniformLocation(programName[Program.BLIT.ordinal()], "mvp");
-            uniformDiffuseSingle = gl4.glGetUniformLocation(programName[Program.BLIT.ordinal()], "diffuse");
+            uniformMvpSingle = gl4.glGetUniformLocation(programName[Program.BLIT], "mvp");
+            uniformDiffuseSingle = gl4.glGetUniformLocation(programName[Program.BLIT], "diffuse");
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -171,14 +173,14 @@ public class Gl_400_blend_rtt extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -189,9 +191,9 @@ public class Gl_400_blend_rtt extends Test {
     private boolean initTexture(GL4 gl4) {
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glGenTextures(Texture.MAX, textureName, 0);
 
-        for (int i = Texture.R.ordinal(); i <= Texture.B.ordinal(); ++i) {
+        for (int i = Texture.R; i <= Texture.B; ++i) {
             gl4.glBindTexture(GL_TEXTURE_2D, textureName[i]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -243,7 +245,7 @@ public class Gl_400_blend_rtt extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -251,7 +253,7 @@ public class Gl_400_blend_rtt extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
@@ -302,7 +304,7 @@ public class Gl_400_blend_rtt extends Test {
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
 
-        gl4.glUseProgram(programName[Program.COLORBUFFERS.ordinal()]);
+        gl4.glUseProgram(programName[Program.COLORBUFFERS]);
         gl4.glUniformMatrix4fv(uniformMvpMultiple, 1, false, mvp, 0);
 
         gl4.glBindVertexArray(vertexArrayName[0]);
@@ -312,7 +314,7 @@ public class Gl_400_blend_rtt extends Test {
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.5f, 0.5f, 0.5f, 0.5f}, 0);
 
-        gl4.glUseProgram(programName[Program.BLIT.ordinal()]);
+        gl4.glUseProgram(programName[Program.BLIT]);
         gl4.glUniform1i(uniformDiffuseSingle, 0);
 
         {
@@ -324,7 +326,7 @@ public class Gl_400_blend_rtt extends Test {
             gl4.glUniformMatrix4fv(uniformMvpSingle, 1, false, mvp, 0);
         }
 
-        for (int i = 0; i < Texture.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Texture.MAX; ++i) {
             gl4.glViewport(viewport[i].x, viewport[i].y, viewport[i].z, viewport[i].w);
 
             gl4.glActiveTexture(GL_TEXTURE0);
@@ -342,10 +344,10 @@ public class Gl_400_blend_rtt extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
-        gl4.glDeleteProgram(programName[Program.BLIT.ordinal()]);
-        gl4.glDeleteProgram(programName[Program.COLORBUFFERS.ordinal()]);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
+        gl4.glDeleteProgram(programName[Program.BLIT]);
+        gl4.glDeleteProgram(programName[Program.COLORBUFFERS]);
         gl4.glDeleteFramebuffers(1, framebufferName, 0);
 
         return checkError(gl4, "end");

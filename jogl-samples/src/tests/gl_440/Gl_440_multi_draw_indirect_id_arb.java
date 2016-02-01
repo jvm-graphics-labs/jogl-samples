@@ -157,6 +157,7 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
 
         shaderProgram.add(vertShaderCode);
         shaderProgram.add(fragShaderCode);
+        shaderProgram.link(gl4, System.out);
 
         int[] activeUniform = {0};
         gl4.glGetProgramiv(programName, GL_ACTIVE_UNIFORMS, activeUniform, 0);
