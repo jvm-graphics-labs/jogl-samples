@@ -6,28 +6,11 @@
 package tests.gl_320.buffer;
 
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_BACK;
-import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
-import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
-import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL.GL_FRAMEBUFFER;
-import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
-import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
-import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
-import static com.jogamp.opengl.GL.GL_TRIANGLES;
-import static com.jogamp.opengl.GL.GL_UNSIGNED_SHORT;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static com.jogamp.opengl.GL2ES3.GL_COLOR;
-import static com.jogamp.opengl.GL2ES3.GL_DEPTH;
-import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
+import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import core.glm;
 import dev.Mat3;
 import dev.Mat4;
 import dev.Vec3;
@@ -129,16 +112,24 @@ public class Gl_320_buffer_uniform extends Test {
         2, 3, 0
     };
     private int programName, uniformPerDraw, uniformPerPass, uniformPerScene;
-    private int[] vertexArrayName, bufferName;
+    private int[] vertexArrayName = {0}, bufferName = {0};
 
-    private enum Uniform {
+    private class Buffer {
 
-        perScene, perPass, perDraw, light
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int PER_SCENE = 2;
+        public static final int PER_PASS = 3;
+        public static final int PER_DRAW = 4;
+        public static final int MAX = 5;
     }
 
-    private enum Buffer {
+    private class Uniform {
 
-        vertex, element, perScene, perPass, perDraw, max
+        public static final int PER_SCENE = 0;
+        public static final int PER_PASS = 1;
+        public static final int PER_DRAW = 2;
+        public static final int LIGHT = 3;
     }
 
     @Override
@@ -196,9 +187,9 @@ public class Gl_320_buffer_uniform extends Test {
             uniformPerPass = gl3.glGetUniformBlockIndex(programName, "PerPass");
             uniformPerScene = gl3.glGetUniformBlockIndex(programName, "PerScene");
 
-            gl3.glUniformBlockBinding(programName, uniformPerDraw, Uniform.perDraw.ordinal());
-            gl3.glUniformBlockBinding(programName, uniformPerPass, Uniform.perPass.ordinal());
-            gl3.glUniformBlockBinding(programName, uniformPerScene, Uniform.perScene.ordinal());
+            gl3.glUniformBlockBinding(programName, uniformPerDraw, Uniform.PER_DRAW);
+            gl3.glUniformBlockBinding(programName, uniformPerPass, Uniform.PER_PASS);
+            gl3.glUniformBlockBinding(programName, uniformPerScene, Uniform.PER_SCENE);
         }
 
         return validated & checkError(gl3, "initProgram");
@@ -206,23 +197,22 @@ public class Gl_320_buffer_uniform extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        bufferName = new int[Buffer.max.ordinal()];
-        gl3.glGenBuffers(Buffer.max.ordinal(), bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
+        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer.rewind(), GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.perDraw.ordinal()]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_DRAW]);
             gl3.glBufferData(GL_UNIFORM_BUFFER, Transform.SIZEOF, null, GL_DYNAMIC_DRAW);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
@@ -230,7 +220,7 @@ public class Gl_320_buffer_uniform extends Test {
         {
             Light light = new Light(new Vec3(0.0f, 0.0f, 100.f));
 
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.perPass.ordinal()]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_PASS]);
             FloatBuffer lightBuffer = GLBuffers.newDirectFloatBuffer(light.toFloatArray());
             gl3.glBufferData(GL_UNIFORM_BUFFER, Light.SIZEOF, lightBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(lightBuffer);
@@ -241,7 +231,7 @@ public class Gl_320_buffer_uniform extends Test {
             Material material = new Material(new Vec3(0.7f, 0.0f, 0.0f), new Vec3(0.0f, 0.5f, 0.0f),
                     new Vec3(0.0f, 0.0f, 0.5f), 128.0f);
 
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.perScene.ordinal()]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_SCENE]);
             FloatBuffer materialBuffer = GLBuffers.newDirectFloatBuffer(material.toFloatArray());
             gl3.glBufferData(GL_UNIFORM_BUFFER, Material.SIZEOF, materialBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(materialBuffer);
@@ -252,11 +242,10 @@ public class Gl_320_buffer_uniform extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        vertexArrayName = new int[1];
         gl3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false,
                     Vertex_v3fn3fc4f.SIZEOF, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false,
@@ -269,7 +258,7 @@ public class Gl_320_buffer_uniform extends Test {
             gl3.glEnableVertexAttribArray(Semantic.Attr.NORMAL);
             gl3.glEnableVertexAttribArray(Semantic.Attr.COLOR);
 
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl3.glBindVertexArray(0);
 
@@ -281,7 +270,7 @@ public class Gl_320_buffer_uniform extends Test {
 
         GL3 gl3 = (GL3) gl;
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.perDraw.ordinal()]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_DRAW]);
             ByteBuffer transform = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Transform.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -306,9 +295,9 @@ public class Gl_320_buffer_uniform extends Test {
         gl3.glClearBufferfv(GL_DEPTH, 0, new float[]{1.0f}, 0);
 
         gl3.glUseProgram(programName);
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.perScene.ordinal(), bufferName[Buffer.perScene.ordinal()]);
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.perPass.ordinal(), bufferName[Buffer.perPass.ordinal()]);
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.perDraw.ordinal(), bufferName[Buffer.perDraw.ordinal()]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.PER_SCENE, bufferName[Buffer.PER_SCENE]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.PER_PASS, bufferName[Buffer.PER_PASS]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.PER_DRAW, bufferName[Buffer.PER_DRAW]);
         gl3.glBindVertexArray(vertexArrayName[0]);
 
         gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
@@ -322,7 +311,7 @@ public class Gl_320_buffer_uniform extends Test {
         GL3 gl3 = (GL3) gl;
 
         gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl3.glDeleteBuffers(Buffer.max.ordinal(), bufferName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl3.glDeleteProgram(programName);
 
         return true;

@@ -135,8 +135,8 @@ public class Es_300_fbo_srgb extends Test {
         private static final int MAX = 4;
     }
 
-    private int[] framebufferName = new int[1], programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
-            textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX];
+    private int[] framebufferName = {0}, programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
+            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX];
     private int framebufferScale = 2, uniformTransform;
 
     @Override
@@ -216,8 +216,7 @@ public class Es_300_fbo_srgb extends Test {
 
             gl3es3.glUseProgram(programName[Program.TEXTURE]);
             gl3es3.glUniform1i(uniformDiffuse[Program.TEXTURE], 0);
-            gl3es3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform,
-                    Semantic.Uniform.TRANSFORM0);
+            gl3es3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform, Semantic.Uniform.TRANSFORM0);
 
             gl3es3.glUseProgram(programName[Program.SPLASH]);
             gl3es3.glUniform1i(uniformDiffuse[Program.SPLASH], 0);
@@ -295,8 +294,8 @@ public class Es_300_fbo_srgb extends Test {
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             gl3es3.glTexStorage2D(GL_TEXTURE_2D, 1,
-//                    GL_SRGB8_ALPHA8,
-                                        GL_RGBA8,
+                    //                    GL_SRGB8_ALPHA8,
+                    GL_RGBA8,
                     windowSize.x * framebufferScale, windowSize.y * framebufferScale);
 
             gl3es3.glActiveTexture(GL_TEXTURE0);
@@ -359,7 +358,7 @@ public class Es_300_fbo_srgb extends Test {
         gl3es3.glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT,
                 GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING, encoding, 0);
         //if (Encoding != GL_SRGB)
-        
+
         gl3es3.glEnable(GL_FRAMEBUFFER_SRGB);
 
         return true;

@@ -6,26 +6,8 @@
 package tests.gl_410;
 
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL.GL_FRONT_AND_BACK;
-import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
-import static com.jogamp.opengl.GL.GL_TRUE;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES2.GL_PROGRAM_SEPARABLE;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES3.GL_COLOR;
-import static com.jogamp.opengl.GL2ES3.GL_GEOMETRY_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES3.GL_TESS_CONTROL_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES3.GL_TESS_EVALUATION_SHADER_BIT;
 import static com.jogamp.opengl.GL2GL3.GL_LINE;
-import static com.jogamp.opengl.GL3ES3.GL_GEOMETRY_SHADER;
-import static com.jogamp.opengl.GL3ES3.GL_PATCHES;
-import static com.jogamp.opengl.GL3ES3.GL_PATCH_VERTICES;
-import static com.jogamp.opengl.GL3ES3.GL_TESS_CONTROL_SHADER;
-import static com.jogamp.opengl.GL3ES3.GL_TESS_EVALUATION_SHADER;
+import static com.jogamp.opengl.GL3ES3.*;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;

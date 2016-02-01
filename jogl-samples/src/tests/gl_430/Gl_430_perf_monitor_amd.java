@@ -11,7 +11,6 @@ import framework.Profile;
 import framework.Test;
 import jglm.Vec2;
 import jglm.Vec2i;
-import jogamp.graph.font.typecast.ot.table.Program;
 
 /**
  *

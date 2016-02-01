@@ -60,8 +60,8 @@ public class Gl_300_fbo_multisample extends Test {
         -2.0f, -1.5f, 0.0f, 0.0f
     };
     private int programName, uniformMvp, uniformDiffuse;
-    private int[] vertexArrayName, bufferName, textureName, colorRenderbufferName,
-            colorTextureName, framebufferRenderName, framebufferResolveName;
+    private int[] vertexArrayName = {0}, bufferName = {0}, textureName = {0}, colorRenderbufferName = {0},
+            colorTextureName = {0}, framebufferRenderName = {0}, framebufferResolveName = {0};
 
     @Override
     protected boolean begin(GL gl) {
@@ -122,7 +122,6 @@ public class Gl_300_fbo_multisample extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        bufferName = new int[1];
         gl3.glGenBuffers(1, bufferName, 0);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
@@ -135,7 +134,6 @@ public class Gl_300_fbo_multisample extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        vertexArrayName = new int[1];
         gl3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
@@ -157,7 +155,6 @@ public class Gl_300_fbo_multisample extends Test {
         try {
             jgli.Texture texture = Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE);
 
-            textureName = new int[1];
             gl3.glGenTextures(1, textureName, 0);
             gl3.glActiveTexture(GL_TEXTURE0);
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
@@ -182,13 +179,11 @@ public class Gl_300_fbo_multisample extends Test {
 
     private boolean initFramebuffer(GL3 gl3) {
 
-        colorRenderbufferName = new int[1];
         gl3.glGenRenderbuffers(1, colorRenderbufferName, 0);
         gl3.glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbufferName[0]);
         gl3.glRenderbufferStorageMultisample(GL_RENDERBUFFER, 8, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
         // The second parameter is the number of samples.
 
-        framebufferRenderName = new int[1];
         gl3.glGenFramebuffers(1, framebufferRenderName, 0);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferRenderName[0]);
         gl3.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbufferName[0]);
@@ -197,7 +192,6 @@ public class Gl_300_fbo_multisample extends Test {
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        colorTextureName = new int[1];
         gl3.glGenTextures(1, colorTextureName, 0);
         gl3.glBindTexture(GL_TEXTURE_2D, colorTextureName[0]);
         gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -205,7 +199,6 @@ public class Gl_300_fbo_multisample extends Test {
         gl3.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
                 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
 
-        framebufferResolveName = new int[1];
         gl3.glGenFramebuffers(1, framebufferResolveName, 0);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferResolveName[0]);
         gl3.glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, colorTextureName[0], 0);
@@ -258,8 +251,8 @@ public class Gl_300_fbo_multisample extends Test {
         gl3.glClearColor(0.0f, 0.5f, 1.0f, 1.0f);
         gl3.glClear(GL_COLOR_BUFFER_BIT);
 
-        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f,
-                (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y, 0.1f, 100.0f);
+        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y,
+                0.1f, 100.0f);
         Mat4 model = new Mat4(1.0f);
         Mat4 mvp = perspective.mul(viewMat4()).mul(model);
         gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA_(), 0);

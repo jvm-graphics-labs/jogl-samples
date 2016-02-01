@@ -55,7 +55,7 @@ public class Es_300_draw_elements extends Test {
         +1f, +1f,
         -1f, +1f};
 
-    private int[] vertexArrayName, arrayBufferName, elementBufferName;
+    private int[] vertexArrayName = {0}, arrayBufferName = {0}, elementBufferName = {0};
     private int programName, uniformMvp, uniformDiffuse;
 
     public Es_300_draw_elements() {
@@ -146,7 +146,7 @@ public class Es_300_draw_elements extends Test {
     }
 
     private boolean initBuffer(GL3ES3 gl3es3) {
-        arrayBufferName = new int[1];
+
         gl3es3.glGenBuffers(1, arrayBufferName, 0);
         gl3es3.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
@@ -154,7 +154,6 @@ public class Es_300_draw_elements extends Test {
         BufferUtils.destroyDirectBuffer(positionBuffer);
         gl3es3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        elementBufferName = new int[1];
         gl3es3.glGenBuffers(1, elementBufferName, 0);
         gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferName[0]);
         IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
@@ -166,7 +165,7 @@ public class Es_300_draw_elements extends Test {
     }
 
     private boolean initVertexArray(GL3ES3 gl3es3) {
-        vertexArrayName = new int[1];
+
         gl3es3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3es3.glBindVertexArray(vertexArrayName[0]);
         gl3es3.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);

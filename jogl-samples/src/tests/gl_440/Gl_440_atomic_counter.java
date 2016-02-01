@@ -6,24 +6,7 @@
 package tests.gl_440;
 
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
-import static com.jogamp.opengl.GL.GL_RGBA;
-import static com.jogamp.opengl.GL.GL_TRIANGLES;
-import static com.jogamp.opengl.GL.GL_TRUE;
-import static com.jogamp.opengl.GL.GL_UNSIGNED_INT;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES2.GL_PROGRAM_SEPARABLE;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES3.GL_ATOMIC_COUNTER_BUFFER;
-import static com.jogamp.opengl.GL2ES3.GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS;
-import static com.jogamp.opengl.GL2ES3.GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS;
-import static com.jogamp.opengl.GL2ES3.GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS;
-import static com.jogamp.opengl.GL2ES3.GL_MAX_TESS_CONTROL_ATOMIC_COUNTER_BUFFERS;
-import static com.jogamp.opengl.GL2ES3.GL_MAX_TESS_EVALUATION_ATOMIC_COUNTER_BUFFERS;
-import static com.jogamp.opengl.GL2ES3.GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS;
-import static com.jogamp.opengl.GL2ES3.GL_R8UI;
+import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;

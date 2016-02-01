@@ -6,22 +6,7 @@
 package tests.gl_320.transform;
 
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
-import static com.jogamp.opengl.GL.GL_TRIANGLES;
-import static com.jogamp.opengl.GL2ES2.GL_ACTIVE_UNIFORMS;
-import static com.jogamp.opengl.GL2ES2.GL_FLOAT_VEC4;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_QUERY_COUNTER_BITS;
-import static com.jogamp.opengl.GL2ES2.GL_QUERY_RESULT;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static com.jogamp.opengl.GL2ES3.GL_COLOR;
-import static com.jogamp.opengl.GL2ES3.GL_INTERLEAVED_ATTRIBS;
-import static com.jogamp.opengl.GL2ES3.GL_RASTERIZER_DISCARD;
-import static com.jogamp.opengl.GL2ES3.GL_STATIC_COPY;
-import static com.jogamp.opengl.GL2ES3.GL_TRANSFORM_FEEDBACK_BUFFER;
-import static com.jogamp.opengl.GL2ES3.GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN;
+import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
