@@ -6,21 +6,8 @@
 package tests.es_200;
 
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT;
-import static com.jogamp.opengl.GL.GL_DEPTH_BUFFER_BIT;
-import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_EXTENSIONS;
-import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL.GL_RENDERER;
-import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
-import static com.jogamp.opengl.GL.GL_TRIANGLES;
-import static com.jogamp.opengl.GL.GL_UNSIGNED_SHORT;
-import static com.jogamp.opengl.GL.GL_VENDOR;
-import static com.jogamp.opengl.GL.GL_VERSION;
 import com.jogamp.opengl.GL2ES2;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
+import static com.jogamp.opengl.GL2ES2.*;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
@@ -62,13 +49,13 @@ public class Es_200_draw_elements extends Test {
         -1f, +1f
     };
 
-    private enum Buffer {
-        vertex,
-        element,
-        max
+    private class Buffer {
+        private static final int VERTEX=0;
+        private static final int ELEMENT=1;
+        private static final int MAX=2;
     }
 
-    private final int[] bufferName = new int[Buffer.max.ordinal()];
+    private final int[] bufferName = new int[Buffer.MAX];
     private int programName, uniformMvp, uniformDiffuse;
 
     public Es_200_draw_elements() {
@@ -140,13 +127,13 @@ public class Es_200_draw_elements extends Test {
     private boolean initBuffer(GL2ES2 gl2es2) {
         gl2es2.glGenBuffers(bufferName.length, bufferName, 0);
 
-        gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
+        gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl2es2.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(positionBuffer);
         gl2es2.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl2es2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
+        gl2es2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer shortBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl2es2.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, shortBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(shortBuffer);
@@ -179,12 +166,12 @@ public class Es_200_draw_elements extends Test {
         // Set the value of MVP uniform.
         gl2es2.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA_(), 0);
 
-        gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.vertex.ordinal()]);
+        gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         {
             gl2es2.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
         }
         gl2es2.glBindBuffer(GL_ARRAY_BUFFER, 0);
-        gl2es2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.element.ordinal()]);
+        gl2es2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
 
         gl2es2.glEnableVertexAttribArray(Semantic.Attr.POSITION);
         {

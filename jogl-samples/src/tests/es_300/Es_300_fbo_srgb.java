@@ -18,13 +18,14 @@ import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
 import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_FRAMEBUFFER;
+import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_SRGB;
 import static com.jogamp.opengl.GL.GL_LINEAR;
 import static com.jogamp.opengl.GL.GL_LINEAR_MIPMAP_LINEAR;
 import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
 import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
 import static com.jogamp.opengl.GL.GL_NEAREST;
+import static com.jogamp.opengl.GL.GL_RGBA8;
 import static com.jogamp.opengl.GL.GL_SRGB;
-import static com.jogamp.opengl.GL.GL_SRGB8_ALPHA8;
 import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
 import static com.jogamp.opengl.GL.GL_TEXTURE0;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
@@ -102,37 +103,40 @@ public class Es_300_fbo_srgb extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        private static final int VERTEX = 0;
+        private static final int ELEMENT = 1;
+        private static final int TRANSFORM = 2;
+        private static final int MAX = 3;
     }
 
-    private enum Texture {
-        DIFFUSE,
-        COLORBUFFER,
-        RENDERBUFFER,
-        MAX
+    private class Texture {
+
+        private static final int DIFFUSE = 0;
+        private static final int COLORBUFFER = 1;
+        private static final int RENDERBUFFER = 2;
+        private static final int MAX = 3;
     }
 
-    private enum Program {
-        TEXTURE,
-        SPLASH,
-        MAX
+    private class Program {
+
+        private static final int TEXTURE = 0;
+        private static final int SPLASH = 1;
+        private static final int MAX = 2;
     }
 
-    private enum Shader {
-        VERT_TEXTURE,
-        FRAG_TEXTURE,
-        VERT_SPLASH,
-        FRAG_SPLASH,
-        MAX
+    private class Shader {
+
+        private static final int VERT_TEXTURE = 0;
+        private static final int FRAG_TEXTURE = 1;
+        private static final int VERT_SPLASH = 2;
+        private static final int FRAG_SPLASH = 3;
+        private static final int MAX = 4;
     }
 
-    private int[] framebufferName = new int[1], programName = new int[Program.MAX.ordinal()],
-            vertexArrayName = new int[Program.MAX.ordinal()], bufferName = new int[Buffer.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()], uniformDiffuse = new int[Program.MAX.ordinal()];
+    private int[] framebufferName = new int[1], programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
+            textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX];
     private int framebufferScale = 2, uniformTransform;
 
     @Override
@@ -165,58 +169,58 @@ public class Es_300_fbo_srgb extends Test {
 
         boolean validated = true;
 
-        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX.ordinal()];
+        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
 
         if (validated) {
 
-            shaderCodes[Shader.VERT_TEXTURE.ordinal()] = ShaderCode.create(gl3es3, GL_VERTEX_SHADER,
+            shaderCodes[Shader.VERT_TEXTURE] = ShaderCode.create(gl3es3, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "vert", null, true);
-            shaderCodes[Shader.FRAG_TEXTURE.ordinal()] = ShaderCode.create(gl3es3, GL_FRAGMENT_SHADER,
+            shaderCodes[Shader.FRAG_TEXTURE] = ShaderCode.create(gl3es3, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
-            shaderProgram.add(shaderCodes[Shader.VERT_TEXTURE.ordinal()]);
-            shaderProgram.add(shaderCodes[Shader.FRAG_TEXTURE.ordinal()]);
+            shaderProgram.add(shaderCodes[Shader.VERT_TEXTURE]);
+            shaderProgram.add(shaderCodes[Shader.FRAG_TEXTURE]);
 
             shaderProgram.init(gl3es3);
 
-            programName[Program.TEXTURE.ordinal()] = shaderProgram.program();
+            programName[Program.TEXTURE] = shaderProgram.program();
 
             shaderProgram.link(gl3es3, System.out);
         }
 
         if (validated) {
 
-            shaderCodes[Shader.VERT_SPLASH.ordinal()] = ShaderCode.create(gl3es3, GL_VERTEX_SHADER,
+            shaderCodes[Shader.VERT_SPLASH] = ShaderCode.create(gl3es3, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPASH, "vert", null, true);
-            shaderCodes[Shader.FRAG_SPLASH.ordinal()] = ShaderCode.create(gl3es3, GL_FRAGMENT_SHADER,
+            shaderCodes[Shader.FRAG_SPLASH] = ShaderCode.create(gl3es3, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPASH, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
-            shaderProgram.add(shaderCodes[Shader.VERT_SPLASH.ordinal()]);
-            shaderProgram.add(shaderCodes[Shader.FRAG_SPLASH.ordinal()]);
+            shaderProgram.add(shaderCodes[Shader.VERT_SPLASH]);
+            shaderProgram.add(shaderCodes[Shader.FRAG_SPLASH]);
 
             shaderProgram.init(gl3es3);
 
-            programName[Program.SPLASH.ordinal()] = shaderProgram.program();
+            programName[Program.SPLASH] = shaderProgram.program();
 
             shaderProgram.link(gl3es3, System.out);
         }
         if (validated) {
 
-            uniformTransform = gl3es3.glGetUniformBlockIndex(programName[Program.TEXTURE.ordinal()], "transform");
-            uniformDiffuse[Program.TEXTURE.ordinal()]
-                    = gl3es3.glGetUniformLocation(programName[Program.TEXTURE.ordinal()], "Diffuse");
-            uniformDiffuse[Program.SPLASH.ordinal()]
-                    = gl3es3.glGetUniformLocation(programName[Program.SPLASH.ordinal()], "Diffuse");
+            uniformTransform = gl3es3.glGetUniformBlockIndex(programName[Program.TEXTURE], "transform");
+            uniformDiffuse[Program.TEXTURE]
+                    = gl3es3.glGetUniformLocation(programName[Program.TEXTURE], "Diffuse");
+            uniformDiffuse[Program.SPLASH]
+                    = gl3es3.glGetUniformLocation(programName[Program.SPLASH], "Diffuse");
 
-            gl3es3.glUseProgram(programName[Program.TEXTURE.ordinal()]);
-            gl3es3.glUniform1i(uniformDiffuse[Program.TEXTURE.ordinal()], 0);
-            gl3es3.glUniformBlockBinding(programName[Program.TEXTURE.ordinal()], uniformTransform,
+            gl3es3.glUseProgram(programName[Program.TEXTURE]);
+            gl3es3.glUniform1i(uniformDiffuse[Program.TEXTURE], 0);
+            gl3es3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform,
                     Semantic.Uniform.TRANSFORM0);
 
-            gl3es3.glUseProgram(programName[Program.SPLASH.ordinal()]);
-            gl3es3.glUniform1i(uniformDiffuse[Program.SPLASH.ordinal()], 0);
+            gl3es3.glUseProgram(programName[Program.SPLASH]);
+            gl3es3.glUniform1i(uniformDiffuse[Program.SPLASH], 0);
         }
 
         return validated & checkError(gl3es3, "initProgram");
@@ -224,15 +228,15 @@ public class Es_300_fbo_srgb extends Test {
 
     private boolean initBuffer(GL3ES3 gl3es3) {
 
-        gl3es3.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3es3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl3es3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl3es3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl3es3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3es3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -242,7 +246,7 @@ public class Es_300_fbo_srgb extends Test {
         gl3es3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
 
-        gl3es3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl3es3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3es3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl3es3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -260,10 +264,10 @@ public class Es_300_fbo_srgb extends Test {
 
             gl3es3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl3es3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl3es3.glGenTextures(Texture.MAX, textureName, 0);
 
             gl3es3.glActiveTexture(GL_TEXTURE0);
-            gl3es3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
+            gl3es3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -285,18 +289,18 @@ public class Es_300_fbo_srgb extends Test {
             }
 
             gl3es3.glActiveTexture(GL_TEXTURE0);
-            gl3es3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+            gl3es3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             gl3es3.glTexStorage2D(GL_TEXTURE_2D, 1,
-                    GL_SRGB8_ALPHA8,
-                    //                    GL_RGBA8,
+//                    GL_SRGB8_ALPHA8,
+                                        GL_RGBA8,
                     windowSize.x * framebufferScale, windowSize.y * framebufferScale);
 
             gl3es3.glActiveTexture(GL_TEXTURE0);
-            gl3es3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RENDERBUFFER.ordinal()]);
+            gl3es3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RENDERBUFFER]);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -314,10 +318,10 @@ public class Es_300_fbo_srgb extends Test {
 
     private boolean initVertexArray(GL3ES3 gl3es3) {
 
-        gl3es3.glGenVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
-        gl3es3.glBindVertexArray(vertexArrayName[Program.TEXTURE.ordinal()]);
+        gl3es3.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
+        gl3es3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
         {
-            gl3es3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl3es3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl3es3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZEOF, 0);
             gl3es3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZEOF, Vec2.SIZEOF);
             gl3es3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -325,11 +329,11 @@ public class Es_300_fbo_srgb extends Test {
             gl3es3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl3es3.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl3es3.glBindVertexArray(0);
 
-        gl3es3.glBindVertexArray(vertexArrayName[Program.SPLASH.ordinal()]);
+        gl3es3.glBindVertexArray(vertexArrayName[Program.SPLASH]);
         gl3es3.glBindVertexArray(0);
 
         return true;
@@ -340,9 +344,9 @@ public class Es_300_fbo_srgb extends Test {
         gl3es3.glGenFramebuffers(1, framebufferName, 0);
         gl3es3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
         gl3es3.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
-                textureName[Texture.COLORBUFFER.ordinal()], 0);
+                textureName[Texture.COLORBUFFER], 0);
         gl3es3.glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D,
-                textureName[Texture.RENDERBUFFER.ordinal()], 0);
+                textureName[Texture.RENDERBUFFER], 0);
 
         if (!isFramebufferComplete(gl3es3, framebufferName[0])) {
             return false;
@@ -355,6 +359,8 @@ public class Es_300_fbo_srgb extends Test {
         gl3es3.glGetFramebufferAttachmentParameteriv(GL_DRAW_FRAMEBUFFER, GL_BACK_LEFT,
                 GL_FRAMEBUFFER_ATTACHMENT_COLOR_ENCODING, encoding, 0);
         //if (Encoding != GL_SRGB)
+        
+        gl3es3.glEnable(GL_FRAMEBUFFER_SRGB);
 
         return true;
     }
@@ -365,13 +371,13 @@ public class Es_300_fbo_srgb extends Test {
         GL3ES3 gl3es3 = (GL3ES3) gl;
 
         {
-            gl3es3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl3es3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3es3.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, Mat4.SIZEOF, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             //glm::mat4 Projection = glm::perspectiveFov(glm::pi<float>() * 0.25f, 640.f, 480.f, 0.1f, 100.0f);
-            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float)windowSize.x / windowSize.y, 0.1f, 100.0f);
-        
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+
             pointer.asFloatBuffer().put(projection.mul(viewMat4()).toFA_());
 
             // Make sure the uniform buffer is uploaded
@@ -387,12 +393,12 @@ public class Es_300_fbo_srgb extends Test {
             gl3es3.glClearBufferfv(GL_DEPTH, 0, depth, 0);
             gl3es3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-            gl3es3.glUseProgram(programName[Program.TEXTURE.ordinal()]);
+            gl3es3.glUseProgram(programName[Program.TEXTURE]);
 
             gl3es3.glActiveTexture(GL_TEXTURE0);
-            gl3es3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
-            gl3es3.glBindVertexArray(vertexArrayName[Program.TEXTURE.ordinal()]);
-            gl3es3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl3es3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+            gl3es3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
+            gl3es3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
 
             gl3es3.glDrawElementsInstanced(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1);
         }
@@ -404,11 +410,11 @@ public class Es_300_fbo_srgb extends Test {
             gl3es3.glViewport(0, 0, windowSize.x, windowSize.y);
             gl3es3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            gl3es3.glUseProgram(programName[Program.SPLASH.ordinal()]);
+            gl3es3.glUseProgram(programName[Program.SPLASH]);
 
             gl3es3.glActiveTexture(GL_TEXTURE0);
-            gl3es3.glBindVertexArray(vertexArrayName[Program.SPLASH.ordinal()]);
-            gl3es3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+            gl3es3.glBindVertexArray(vertexArrayName[Program.SPLASH]);
+            gl3es3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
 
             gl3es3.glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 1);
         }
