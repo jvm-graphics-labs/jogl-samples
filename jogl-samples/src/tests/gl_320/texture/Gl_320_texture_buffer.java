@@ -45,14 +45,15 @@ public class Gl_320_texture_buffer extends Test {
         -1.0f, +1.0f,
         -1.0f, -1.0f};
 
-    private enum Buffer {
-        VERTEX,
-        DISPLACEMENT,
-        DIFFUSE,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int DISPLACEMENT = 1;
+        public static final int DIFFUSE = 2;
+        public static final int MAX = 3;
     }
 
-    private int[] vertexArrayName = new int[1], bufferName = new int[Buffer.MAX.ordinal()],
+    private int[] vertexArrayName = new int[1], bufferName = new int[Buffer.MAX],
             displacementTextureName = new int[1], diffuseTextureName = new int[1];
     private int programName, uniformMvp, uniformDiffuse, uniformDisplacement;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
@@ -127,9 +128,9 @@ public class Gl_320_texture_buffer extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, GLBuffers.newDirectFloatBuffer(positionData), GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -140,7 +141,7 @@ public class Gl_320_texture_buffer extends Test {
             +0.3f, +0.2f, +0.5f, +1.0f,
             +0.1f, -0.3f, +1.0f, +1.0f};
 
-        gl3.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DISPLACEMENT.ordinal()]);
+        gl3.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DISPLACEMENT]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(position);
         gl3.glBufferData(GL_TEXTURE_BUFFER, position.length * Float.BYTES, positionBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_TEXTURE_BUFFER, 0);
@@ -155,7 +156,7 @@ public class Gl_320_texture_buffer extends Test {
         int[] maxTextureBufferSize = {0};
         gl3.glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, maxTextureBufferSize, 0);
 
-        gl3.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DIFFUSE.ordinal()]);
+        gl3.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DIFFUSE]);
         gl3.glBufferData(GL_TEXTURE_BUFFER, 500000, null, GL_STATIC_DRAW);
         //glBufferData(GL_TEXTURE_BUFFER, sizeof(Diffuse), Diffuse, GL_STATIC_DRAW);
         gl3.glBufferSubData(GL_TEXTURE_BUFFER, 0, diffuse.length * Byte.BYTES, GLBuffers.newDirectByteBuffer(diffuse));
@@ -168,12 +169,12 @@ public class Gl_320_texture_buffer extends Test {
 
         gl3.glGenTextures(1, displacementTextureName, 0);
         gl3.glBindTexture(GL_TEXTURE_BUFFER, displacementTextureName[0]);
-        gl3.glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.DISPLACEMENT.ordinal()]);
+        gl3.glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.DISPLACEMENT]);
         gl3.glBindTexture(GL_TEXTURE_BUFFER, 0);
 
         gl3.glGenTextures(1, diffuseTextureName, 0);
         gl3.glBindTexture(GL_TEXTURE_BUFFER, diffuseTextureName[0]);
-        gl3.glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA8, bufferName[Buffer.DIFFUSE.ordinal()]);
+        gl3.glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA8, bufferName[Buffer.DIFFUSE]);
         gl3.glBindTexture(GL_TEXTURE_BUFFER, 0);
 
         return checkError(gl3, "initTexture");
@@ -184,7 +185,7 @@ public class Gl_320_texture_buffer extends Test {
         gl3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             {
                 gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
             }
@@ -240,7 +241,7 @@ public class Gl_320_texture_buffer extends Test {
 
         gl3.glDeleteTextures(1, diffuseTextureName, 0);
         gl3.glDeleteTextures(1, displacementTextureName, 0);
-        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl3.glDeleteProgram(programName);
         gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
 

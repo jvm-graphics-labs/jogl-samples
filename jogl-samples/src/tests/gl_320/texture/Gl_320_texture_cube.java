@@ -47,16 +47,16 @@ public class Gl_320_texture_cube extends Test {
         -1.0f, +1.0f,
         -1.0f, -1.0f};
 
-    private enum Shader {
-        VERT,
-        FRAG,
-        MAX
+    private class Shader {
+
+        public static final int VERT = 0;
+        public static final int FRAG = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] shaderName = new int[Shader.MAX.ordinal()], vertexArrayName = new int[1], bufferName = new int[1],
+    private int[] shaderName = new int[Shader.MAX], vertexArrayName = new int[1], bufferName = new int[1],
             textureName = new int[1];
     private int programName, uniformMv, uniformMvp, uniformEnvironment, uniformCamera;
-    private Vec4i[] viewport;
     private float[] projection = new float[16], view = new float[16], model = new float[16],
             mv = new float[16], mvp = new float[16];
 
@@ -156,7 +156,7 @@ public class Gl_320_texture_cube extends Test {
         gl3.glTexParameterf(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_LOD_BIAS, 0.0f);
         gl3.glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_MODE, GL_NONE);
         gl3.glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-        
+
         jgli.Gl.Format format = jgli.Gl.translate(texture.format());
         for (int face = 0; face < 6; ++face) {
             gl3.glTexImage2D(

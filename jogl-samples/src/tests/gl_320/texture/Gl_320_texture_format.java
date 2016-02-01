@@ -55,18 +55,20 @@ public class Gl_320_texture_format extends Test {
         -1.0f, +1.0f, 0.0f, 0.0f,
         -1.0f, -1.0f, 0.0f, 1.0f};
 
-    private enum Texture {
-        RGBA8, // GL_RGBA8
-        RGBA8UI, // GL_RGBA8UI
-        RGBA16F, // GL_RGBA16F
-        RGBA8_SNORM, // GL_RGBA8_SNORM
-        MAX
+    private class Texture {
+
+        public static final int RGBA8 = 0; // GL_RGBA8
+        public static final int RGBA8UI = 1; // GL_RGBA8UI
+        public static final int RGBA16F = 2; // GL_RGBA16F
+        public static final int RGBA8_SNORM = 3; // GL_RGBA8_SNORM
+        public static final int MAX = 4;
     }
 
-    private enum Program {
-        NORMALIZED,
-        UINT,
-        MAX
+    private class Program {
+
+        public static final int NORMALIZED = 0;
+        public static final int UINT = 1;
+        public static final int MAX = 2;
     }
 
     private int[] textureInternalFormat = {
@@ -83,9 +85,9 @@ public class Gl_320_texture_format extends Test {
         GL_RGB
     };
 
-    private int[] vertexArrayName = {0}, programName = new int[Program.MAX.ordinal()], bufferName = {0},
-            textureName = new int[Texture.MAX.ordinal()], uniformMvp = new int[Program.MAX.ordinal()],
-            uniformDiffuse = new int[Program.MAX.ordinal()];
+    private int[] vertexArrayName = {0}, programName = new int[Program.MAX], bufferName = {0},
+            textureName = new int[Texture.MAX], uniformMvp = new int[Program.MAX],
+            uniformDiffuse = new int[Program.MAX];
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     private Vec4i[] viewport = new Vec4i[]{
@@ -95,11 +97,12 @@ public class Gl_320_texture_format extends Test {
         new Vec4i(0, 240, 320, 240)
     };
 
-    private enum Shader {
-        VERT,
-        FRAG_NORMALIZED,
-        FRAG_UINT,
-        MAX
+    private class Shader {
+
+        public static final int VERT = 0;
+        public static final int FRAG_NORMALIZED = 1;
+        public static final int FRAG_UINT = 2;
+        public static final int MAX = 3;
     }
 
     @Override
@@ -129,21 +132,21 @@ public class Gl_320_texture_format extends Test {
 
         boolean validated = true;
 
-        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX.ordinal()];
+        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
 
-        shaderCodes[Shader.VERT.ordinal()] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+        shaderCodes[Shader.VERT] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
                 this.getClass(), SHADERS_ROOT, null, VERT_SHADERS_SOURCE, "vert", null, true);
 
-        for (int i = 0; i < Program.MAX.ordinal(); i++) {
-            shaderCodes[Shader.FRAG_NORMALIZED.ordinal() + i] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+        for (int i = 0; i < Program.MAX; i++) {
+            shaderCodes[Shader.FRAG_NORMALIZED + i] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT, null, FRAG_SHADERS_SOURCE[i], "frag", null, true);
         }
 
-        for (int i = 0; (i < Program.MAX.ordinal() && validated); i++) {
+        for (int i = 0; (i < Program.MAX && validated); i++) {
 
             ShaderProgram shaderProgram = new ShaderProgram();
-            shaderProgram.add(shaderCodes[Shader.VERT.ordinal()]);
-            shaderProgram.add(shaderCodes[Shader.FRAG_NORMALIZED.ordinal() + i]);
+            shaderProgram.add(shaderCodes[Shader.VERT]);
+            shaderProgram.add(shaderCodes[Shader.FRAG_NORMALIZED + i]);
 
             shaderProgram.init(gl3);
 
@@ -182,10 +185,10 @@ public class Gl_320_texture_format extends Test {
 
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl3.glGenTextures(Texture.MAX, textureName, 0);
             gl3.glActiveTexture(GL_TEXTURE0);
 
-            for (int i = 0; i < Texture.MAX.ordinal(); ++i) {
+            for (int i = 0; i < Texture.MAX; ++i) {
 
                 gl3.glBindTexture(GL_TEXTURE_2D, textureName[i]);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -245,11 +248,11 @@ public class Gl_320_texture_format extends Test {
             gl3.glViewport(viewport[viewportIndex].x, viewport[viewportIndex].y,
                     viewport[viewportIndex].z, viewport[viewportIndex].w);
 
-            gl3.glUseProgram(programName[Program.UINT.ordinal()]);
-            gl3.glUniform1i(uniformDiffuse[Program.UINT.ordinal()], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.UINT.ordinal()], 1, false, mvp, 0);
+            gl3.glUseProgram(programName[Program.UINT]);
+            gl3.glUniform1i(uniformDiffuse[Program.UINT], 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.UINT], 1, false, mvp, 0);
 
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA8UI.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA8UI]);
 
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
@@ -259,11 +262,11 @@ public class Gl_320_texture_format extends Test {
             gl3.glViewport(viewport[viewportIndex].x, viewport[viewportIndex].y,
                     viewport[viewportIndex].z, viewport[viewportIndex].w);
 
-            gl3.glUseProgram(programName[Program.NORMALIZED.ordinal()]);
-            gl3.glUniform1i(uniformDiffuse[Program.NORMALIZED.ordinal()], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.NORMALIZED.ordinal()], 1, false, mvp, 0);
+            gl3.glUseProgram(programName[Program.NORMALIZED]);
+            gl3.glUniform1i(uniformDiffuse[Program.NORMALIZED], 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.NORMALIZED], 1, false, mvp, 0);
 
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA16F.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA16F]);
 
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
@@ -273,11 +276,11 @@ public class Gl_320_texture_format extends Test {
             gl3.glViewport(viewport[viewportIndex].x, viewport[viewportIndex].y,
                     viewport[viewportIndex].z, viewport[viewportIndex].w);
 
-            gl3.glUseProgram(programName[Program.NORMALIZED.ordinal()]);
-            gl3.glUniform1i(uniformDiffuse[Program.NORMALIZED.ordinal()], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.NORMALIZED.ordinal()], 1, false, mvp, 0);
+            gl3.glUseProgram(programName[Program.NORMALIZED]);
+            gl3.glUniform1i(uniformDiffuse[Program.NORMALIZED], 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.NORMALIZED], 1, false, mvp, 0);
 
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA8.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA8]);
 
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
@@ -287,11 +290,11 @@ public class Gl_320_texture_format extends Test {
             gl3.glViewport(viewport[viewportIndex].x, viewport[viewportIndex].y,
                     viewport[viewportIndex].z, viewport[viewportIndex].w);
 
-            gl3.glUseProgram(programName[Program.NORMALIZED.ordinal()]);
-            gl3.glUniform1i(uniformDiffuse[Program.NORMALIZED.ordinal()], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.NORMALIZED.ordinal()], 1, false, mvp, 0);
+            gl3.glUseProgram(programName[Program.NORMALIZED]);
+            gl3.glUniform1i(uniformDiffuse[Program.NORMALIZED], 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.NORMALIZED], 1, false, mvp, 0);
 
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA8_SNORM.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA8_SNORM]);
 
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
@@ -305,10 +308,10 @@ public class Gl_320_texture_format extends Test {
         GL3 gl3 = (GL3) gl;
 
         gl3.glDeleteBuffers(1, bufferName, 0);
-        for (int i = 0; i < Program.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Program.MAX; ++i) {
             gl3.glDeleteProgram(programName[i]);
         }
-        gl3.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl3.glDeleteTextures(Texture.MAX, textureName, 0);
         gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
 
         return checkError(gl3, "end");

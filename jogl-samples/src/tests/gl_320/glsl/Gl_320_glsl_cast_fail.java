@@ -46,14 +46,15 @@ public class Gl_320_glsl_cast_fail extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MAX = 3;
     }
 
-    private int[] vertexArrayName = new int[1], textureName = new int[1], bufferName = new int[Buffer.MAX.ordinal()];
+    private int[] vertexArrayName = new int[1], textureName = new int[1], bufferName = new int[Buffer.MAX];
     private int programName, uniformTransform, uniformDiffuse;
 
     @Override

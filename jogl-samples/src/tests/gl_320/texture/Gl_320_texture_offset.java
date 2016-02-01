@@ -60,30 +60,33 @@ public class Gl_320_texture_offset extends Test {
         2, 3, 0
     };
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Program {
-        OFFSET,
-        BICUBIC,
-        MAX
+    private class Program {
+
+        public static final int OFFSET = 0;
+        public static final int BICUBIC = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Shader {
-        VERT,
-        FRAG,
-        FRAG_BICUBIC,
-        MAX
+    private class Shader {
+
+        public static final int VERT = 0;
+        public static final int FRAG = 1;
+        public static final int FRAG_BICUBIC = 2;
+        public static final int MAX = 3;
     }
 
-    private int[] vertexArrayName = {0}, textureName = {0}, bufferName = new int[Buffer.MAX.ordinal()],
-            programName = new int[Program.MAX.ordinal()], uniformMvp = new int[Program.MAX.ordinal()],
-            uniformDiffuse = new int[Program.MAX.ordinal()];
+    private int[] vertexArrayName = {0}, textureName = {0}, bufferName = new int[Buffer.MAX],
+            programName = new int[Program.MAX], uniformMvp = new int[Program.MAX],
+            uniformDiffuse = new int[Program.MAX];
     private int uniformOffset;
-    private Vec4i[] viewport = new Vec4i[Program.MAX.ordinal()];
+    private Vec4i[] viewport = new Vec4i[Program.MAX];
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
@@ -96,9 +99,9 @@ public class Gl_320_texture_offset extends Test {
         int border = 1;
         Vec2i viewportSize = new Vec2i(windowSize.x / 2 - border * 2, windowSize.x / 2 - border * 2);
 
-        viewport[Program.OFFSET.ordinal()] = new Vec4i(border, border,
+        viewport[Program.OFFSET] = new Vec4i(border, border,
                 windowSize.x / 2 - border * 2, windowSize.y - border * 2);
-        viewport[Program.BICUBIC.ordinal()] = new Vec4i(border + windowSize.x / 2, border,
+        viewport[Program.BICUBIC] = new Vec4i(border + windowSize.x / 2, border,
                 windowSize.x / 2 - border * 2, windowSize.y - border * 2);
 
         if (validated) {
@@ -121,20 +124,20 @@ public class Gl_320_texture_offset extends Test {
 
         boolean validated = true;
 
-        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX.ordinal()];
+        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
 
-        shaderCodes[Shader.VERT.ordinal()] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+        shaderCodes[Shader.VERT] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
                 this.getClass(), SHADERS_ROOT, null, SHADERS_VERT, "vert", null, true);
-        shaderCodes[Shader.FRAG.ordinal()] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                this.getClass(), SHADERS_ROOT, null, SHADERS_FRAG[Program.OFFSET.ordinal()], "frag", null, true);
-        shaderCodes[Shader.FRAG_BICUBIC.ordinal()] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                this.getClass(), SHADERS_ROOT, null, SHADERS_FRAG[Program.BICUBIC.ordinal()], "frag", null, true);
+        shaderCodes[Shader.FRAG] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+                this.getClass(), SHADERS_ROOT, null, SHADERS_FRAG[Program.OFFSET], "frag", null, true);
+        shaderCodes[Shader.FRAG_BICUBIC] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+                this.getClass(), SHADERS_ROOT, null, SHADERS_FRAG[Program.BICUBIC], "frag", null, true);
 
-        for (int i = 0; i < Program.MAX.ordinal(); i++) {
+        for (int i = 0; i < Program.MAX; i++) {
 
             ShaderProgram shaderProgram = new ShaderProgram();
-            shaderProgram.add(shaderCodes[Shader.VERT.ordinal()]);
-            shaderProgram.add(shaderCodes[Shader.FRAG.ordinal() + i]);
+            shaderProgram.add(shaderCodes[Shader.VERT]);
+            shaderProgram.add(shaderCodes[Shader.FRAG + i]);
 
             shaderProgram.init(gl3);
 
@@ -148,7 +151,7 @@ public class Gl_320_texture_offset extends Test {
 
             uniformMvp[i] = gl3.glGetUniformLocation(programName[i], "mvp");
             uniformDiffuse[i] = gl3.glGetUniformLocation(programName[i], "diffuse");
-            if (i == Program.OFFSET.ordinal()) {
+            if (i == Program.OFFSET) {
                 uniformOffset = gl3.glGetUniformLocation(programName[i], "offset");
             }
         }
@@ -158,14 +161,14 @@ public class Gl_320_texture_offset extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -211,7 +214,7 @@ public class Gl_320_texture_offset extends Test {
         gl3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -219,7 +222,7 @@ public class Gl_320_texture_offset extends Test {
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl3.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl3.glBindVertexArray(0);
 
@@ -244,10 +247,10 @@ public class Gl_320_texture_offset extends Test {
 
         gl3.glBindVertexArray(vertexArrayName[0]);
 
-        gl3.glUseProgram(programName[Program.OFFSET.ordinal()]);
+        gl3.glUseProgram(programName[Program.OFFSET]);
         gl3.glUniform2iv(uniformOffset, 1, new int[]{48, -80}, 0);
 
-        for (int i = 0; i < Program.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Program.MAX; ++i) {
             gl3.glUseProgram(programName[i]);
             gl3.glUniformMatrix4fv(uniformMvp[i], 1, false, mvp, 0);
             gl3.glUniform1i(uniformDiffuse[i], 0);
@@ -265,8 +268,8 @@ public class Gl_320_texture_offset extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
-        for (int i = 0; i < Program.MAX.ordinal(); ++i) {
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        for (int i = 0; i < Program.MAX; ++i) {
             gl3.glDeleteProgram(programName[i]);
         }
         gl3.glDeleteTextures(1, textureName, 0);

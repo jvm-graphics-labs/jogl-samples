@@ -70,24 +70,26 @@ public class Gl_320_texture_compressed_ext extends Test {
         new Vertex(new float[]{-1.0f, 1.0f}, new float[]{0.0f, 0.0f}),
         new Vertex(new float[]{-1.0f, -1.0f}, new float[]{0.0f, 1.0f})};
 
-    private enum Texture {
-        BC1,
-        BC3,
-        BC4,
-        BC5,
-        MAX
+    private class Texture {
+
+        public static final int BC1 = 0;
+        public static final int BC3 = 1;
+        public static final int BC4 = 2;
+        public static final int BC5 = 3;
+        public static final int MAX = 4;
     };
 
-    private enum Shader {
-        VERT,
-        FRAG,
-        MAX
+    private class Shader {
+
+        public static final int VERT = 0;
+        public static final int FRAG = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] shaderName = new int[Shader.MAX.ordinal()], vertexArrayName = new int[1], bufferName = new int[1],
-            textureName = new int[Texture.MAX.ordinal()];
+    private int[] shaderName = new int[Shader.MAX], vertexArrayName = new int[1], bufferName = new int[1],
+            textureName = new int[Texture.MAX];
     private int programName, uniformMvp, uniformDiffuse;
-    private Vec4i[] viewport = new Vec4i[Texture.MAX.ordinal()];
+    private Vec4i[] viewport = new Vec4i[Texture.MAX];
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
@@ -95,11 +97,11 @@ public class Gl_320_texture_compressed_ext extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        viewport[Texture.BC1.ordinal()] = new Vec4i(0, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.BC3.ordinal()] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.BC4.ordinal()] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
+        viewport[Texture.BC1] = new Vec4i(0, 0, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.BC3] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.BC4] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
                 windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.BC5.ordinal()] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.BC5] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
 
         boolean validated = true;
         validated = validated && checkExtension(gl3, "GL_EXT_texture_compression_s3tc");
@@ -173,13 +175,13 @@ public class Gl_320_texture_compressed_ext extends Test {
 
         try {
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl3.glGenTextures(Texture.MAX, textureName, 0);
 
             {
                 jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC1));
                 assert (!texture.empty());
 
-                gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BC1.ordinal()]);
+                gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BC1]);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
 
@@ -198,7 +200,7 @@ public class Gl_320_texture_compressed_ext extends Test {
                 jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC3));
                 assert (!texture.empty());
 
-                gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BC3.ordinal()]);
+                gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BC3]);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
 
@@ -217,7 +219,7 @@ public class Gl_320_texture_compressed_ext extends Test {
                 jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC4));
                 assert (!texture.empty());
 
-                gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BC4.ordinal()]);
+                gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BC4]);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
 
@@ -236,7 +238,7 @@ public class Gl_320_texture_compressed_ext extends Test {
                 jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_BC5));
                 assert (!texture.empty());
 
-                gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BC5.ordinal()]);
+                gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BC5]);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
 
@@ -298,7 +300,7 @@ public class Gl_320_texture_compressed_ext extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        for (int index = 0; index < Texture.MAX.ordinal(); ++index) {
+        for (int index = 0; index < Texture.MAX; ++index) {
             gl3.glViewport(viewport[index].x, viewport[index].y, viewport[index].z, viewport[index].w);
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[index]);
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
@@ -314,7 +316,7 @@ public class Gl_320_texture_compressed_ext extends Test {
 
         gl3.glDeleteBuffers(1, bufferName, 0);
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl3.glDeleteTextures(Texture.MAX, textureName, 0);
         gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
 
         return true;

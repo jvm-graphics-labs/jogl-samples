@@ -46,28 +46,31 @@ public class Gl_320_transform_feedback_separated extends Test {
         -1.0f, +1.0f, 0.0f, 1.0f,
         -1.0f, -1.0f, 0.0f, 1.0f};
 
-    private enum Program {
-        TRANSFORM,
-        FEEDBACK,
-        MAX
+    private class Program {
+
+        public static final int TRANSFORM = 0;
+        public static final int FEEDBACK = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Buffer {
-        VERTEX,
-        POSITION,
-        COLOR,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int POSITION = 1;
+        public static final int COLOR = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Shader {
-        VERT_TRANSFORM,
-        VERT_FEEDBACK,
-        FRAG_FEEDBACK,
-        MAX
+    private class Shader {
+
+        public static final int VERT_TRANSFORM = 0;
+        public static final int VERT_FEEDBACK = 1;
+        public static final int FRAG_FEEDBACK = 2;
+        public static final int MAX = 3;
     }
 
-    private int[] bufferName = new int[Buffer.MAX.ordinal()], vertexArrayName = new int[Program.MAX.ordinal()],
-            programName = new int[Program.MAX.ordinal()], queryName = {0};
+    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = new int[Program.MAX],
+            programName = new int[Program.MAX], queryName = {0};
     private int uniformMvp;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
@@ -98,29 +101,29 @@ public class Gl_320_transform_feedback_separated extends Test {
 
         boolean validated = true;
 
-        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX.ordinal()];
+        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
 
-        shaderCodes[Shader.VERT_TRANSFORM.ordinal()] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+        shaderCodes[Shader.VERT_TRANSFORM] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
                 this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TRANSFORM, "vert", null, true);
-        shaderCodes[Shader.VERT_FEEDBACK.ordinal()] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+        shaderCodes[Shader.VERT_FEEDBACK] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
                 this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_FEEDBACK, "vert", null, true);
-        shaderCodes[Shader.FRAG_FEEDBACK.ordinal()] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+        shaderCodes[Shader.FRAG_FEEDBACK] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
                 this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_FEEDBACK, "frag", null, true);
 
         if (validated) {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            shaderProgram.add(shaderCodes[Shader.VERT_TRANSFORM.ordinal()]);
+            shaderProgram.add(shaderCodes[Shader.VERT_TRANSFORM]);
 
             shaderProgram.init(gl3);
 
-            programName[Program.TRANSFORM.ordinal()] = shaderProgram.program();
+            programName[Program.TRANSFORM] = shaderProgram.program();
 
-            gl3.glBindAttribLocation(programName[Program.TRANSFORM.ordinal()], Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName[Program.TRANSFORM], Semantic.Attr.POSITION, "position");
 
             String[] strings = {"gl_Position", "Block.color"};
-            gl3.glTransformFeedbackVaryings(programName[Program.TRANSFORM.ordinal()], 2, strings, GL_SEPARATE_ATTRIBS);
+            gl3.glTransformFeedbackVaryings(programName[Program.TRANSFORM], 2, strings, GL_SEPARATE_ATTRIBS);
 
             shaderProgram.link(gl3, System.out);
 
@@ -130,7 +133,7 @@ public class Gl_320_transform_feedback_separated extends Test {
             int[] type = {0};
 
             gl3.glGetTransformFeedbackVarying(
-                    programName[Program.TRANSFORM.ordinal()],
+                    programName[Program.TRANSFORM],
                     0,
                     name.length,
                     length, 0,
@@ -143,7 +146,7 @@ public class Gl_320_transform_feedback_separated extends Test {
         // Get variables locations
         if (validated) {
 
-            uniformMvp = gl3.glGetUniformLocation(programName[Program.TRANSFORM.ordinal()], "mvp");
+            uniformMvp = gl3.glGetUniformLocation(programName[Program.TRANSFORM], "mvp");
             validated = validated && (uniformMvp >= 0);
         }
 
@@ -152,16 +155,16 @@ public class Gl_320_transform_feedback_separated extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            shaderProgram.add(shaderCodes[Shader.VERT_FEEDBACK.ordinal()]);
-            shaderProgram.add(shaderCodes[Shader.FRAG_FEEDBACK.ordinal()]);
+            shaderProgram.add(shaderCodes[Shader.VERT_FEEDBACK]);
+            shaderProgram.add(shaderCodes[Shader.FRAG_FEEDBACK]);
 
             shaderProgram.init(gl3);
 
-            programName[Program.FEEDBACK.ordinal()] = shaderProgram.program();
+            programName[Program.FEEDBACK] = shaderProgram.program();
 
-            gl3.glBindAttribLocation(programName[Program.FEEDBACK.ordinal()], Semantic.Attr.POSITION, "position");
-            gl3.glBindAttribLocation(programName[Program.FEEDBACK.ordinal()], Semantic.Attr.COLOR, "color");
-            gl3.glBindFragDataLocation(programName[Program.FEEDBACK.ordinal()], Semantic.Frag.COLOR, "color");
+            gl3.glBindAttribLocation(programName[Program.FEEDBACK], Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName[Program.FEEDBACK], Semantic.Attr.COLOR, "color");
+            gl3.glBindFragDataLocation(programName[Program.FEEDBACK], Semantic.Frag.COLOR, "color");
 
             shaderProgram.link(gl3, System.out);
         }
@@ -171,12 +174,12 @@ public class Gl_320_transform_feedback_separated extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
+        gl3.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
 
         // Build a vertex array object
-        gl3.glBindVertexArray(vertexArrayName[Program.TRANSFORM.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Program.TRANSFORM]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 0, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -185,11 +188,11 @@ public class Gl_320_transform_feedback_separated extends Test {
         gl3.glBindVertexArray(0);
 
         // Build a vertex array object
-        gl3.glBindVertexArray(vertexArrayName[Program.FEEDBACK.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Program.FEEDBACK]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 0, 0);
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR]);
             gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, 0, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -203,16 +206,16 @@ public class Gl_320_transform_feedback_separated extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION]);
         gl3.glBufferData(GL_ARRAY_BUFFER, 4 * Float.BYTES * vertexCount, null, GL_STATIC_DRAW);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR]);
         gl3.glBufferData(GL_ARRAY_BUFFER, 4 * Float.BYTES * vertexCount, null, GL_STATIC_DRAW);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -254,13 +257,13 @@ public class Gl_320_transform_feedback_separated extends Test {
             // Disable rasterisation, vertices processing only!
             gl3.glEnable(GL_RASTERIZER_DISCARD);
 
-            gl3.glUseProgram(programName[Program.TRANSFORM.ordinal()]);
+            gl3.glUseProgram(programName[Program.TRANSFORM]);
             gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
 
-            gl3.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, bufferName[Buffer.POSITION.ordinal()]);
-            gl3.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, bufferName[Buffer.COLOR.ordinal()]);
+            gl3.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, bufferName[Buffer.POSITION]);
+            gl3.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, bufferName[Buffer.COLOR]);
 
-            gl3.glBindVertexArray(vertexArrayName[Program.TRANSFORM.ordinal()]);
+            gl3.glBindVertexArray(vertexArrayName[Program.TRANSFORM]);
 
             gl3.glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryName[0]);
             gl3.glBeginTransformFeedback(GL_TRIANGLES);
@@ -275,12 +278,12 @@ public class Gl_320_transform_feedback_separated extends Test {
 
         // Second draw, reuse the captured attributes
         {
-            gl3.glUseProgram(programName[Program.FEEDBACK.ordinal()]);
+            gl3.glUseProgram(programName[Program.FEEDBACK]);
 
             int[] primitivesWritten = {0};
             gl3.glGetQueryObjectuiv(queryName[0], GL_QUERY_RESULT, primitivesWritten, 0);
 
-            gl3.glBindVertexArray(vertexArrayName[Program.FEEDBACK.ordinal()]);
+            gl3.glBindVertexArray(vertexArrayName[Program.FEEDBACK]);
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, primitivesWritten[0] * 3, 1);
         }
 
@@ -292,11 +295,11 @@ public class Gl_320_transform_feedback_separated extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        for (int i = 0; i < Program.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Program.MAX; ++i) {
             gl3.glDeleteProgram(programName[i]);
         }
-        gl3.glDeleteVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
-        gl3.glDeleteBuffers(Program.MAX.ordinal(), bufferName, 0);
+        gl3.glDeleteVertexArrays(Program.MAX, vertexArrayName, 0);
+        gl3.glDeleteBuffers(Program.MAX, bufferName, 0);
         gl3.glDeleteQueries(1, queryName, 0);
 
         return checkError(gl3, "end");

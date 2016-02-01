@@ -43,36 +43,40 @@ public class Gl_320_primitive_line_msaa extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int TRANSFORM = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Texture {
-        COLORBUFFER,
-        RENDERBUFFER,
-        MAX
+    private class Texture {
+
+        public static final int COLORBUFFER = 0;
+        public static final int RENDERBUFFER = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Program {
-        TEXTURE,
-        SPLASH,
-        MAX
+    private class Program {
+
+        public static final int TEXTURE = 0;
+        public static final int SPLASH = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Shader {
-        VERT_TEXTURE,
-        FRAG_TEXTURE,
-        VERT_SPLASH,
-        FRAG_SPLASH,
-        MAX
+    private class Shader {
+
+        public static final int VERT_TEXTURE = 0;
+        public static final int FRAG_TEXTURE = 1;
+        public static final int VERT_SPLASH = 2;
+        public static final int FRAG_SPLASH = 3;
+        public static final int MAX = 4;
     }
 
     private int framebufferScale = 3, vertexCount, uniformTransform;
-    private int[] programName = new int[Program.MAX.ordinal()], vertexArrayName = new int[Program.MAX.ordinal()],
-            bufferName = new int[Buffer.MAX.ordinal()], textureName = new int[Texture.MAX.ordinal()],
-            uniformDiffuse = new int[Program.MAX.ordinal()], framebufferName = new int[Texture.MAX.ordinal()];
+    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
+            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX],
+            uniformDiffuse = new int[Program.MAX], framebufferName = new int[Texture.MAX];
     private float[] projection = new float[16], model = new float[16];
 
     @Override
@@ -105,63 +109,63 @@ public class Gl_320_primitive_line_msaa extends Test {
 
         boolean validated = true;
 
-        ShaderCode[] shaderCode = new ShaderCode[Shader.MAX.ordinal()];
+        ShaderCode[] shaderCode = new ShaderCode[Shader.MAX];
 
         if (validated) {
 
-            shaderCode[Shader.VERT_TEXTURE.ordinal()] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+            shaderCode[Shader.VERT_TEXTURE] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "vert", null, true);
-            shaderCode[Shader.FRAG_TEXTURE.ordinal()] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+            shaderCode[Shader.FRAG_TEXTURE] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
-            shaderProgram.add(shaderCode[Shader.VERT_TEXTURE.ordinal()]);
-            shaderProgram.add(shaderCode[Shader.FRAG_TEXTURE.ordinal()]);
+            shaderProgram.add(shaderCode[Shader.VERT_TEXTURE]);
+            shaderProgram.add(shaderCode[Shader.FRAG_TEXTURE]);
 
             shaderProgram.init(gl3);
 
-            programName[Program.TEXTURE.ordinal()] = shaderProgram.program();
+            programName[Program.TEXTURE] = shaderProgram.program();
 
-            gl3.glBindAttribLocation(programName[Program.TEXTURE.ordinal()], Semantic.Attr.POSITION, "position");
-            gl3.glBindAttribLocation(programName[Program.TEXTURE.ordinal()], Semantic.Attr.TEXCOORD, "color");
-            gl3.glBindFragDataLocation(programName[Program.TEXTURE.ordinal()], Semantic.Frag.COLOR, "color");
+            gl3.glBindAttribLocation(programName[Program.TEXTURE], Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName[Program.TEXTURE], Semantic.Attr.TEXCOORD, "color");
+            gl3.glBindFragDataLocation(programName[Program.TEXTURE], Semantic.Frag.COLOR, "color");
 
             shaderProgram.link(gl3, System.out);
         }
         if (validated) {
 
-            shaderCode[Shader.VERT_SPLASH.ordinal()] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+            shaderCode[Shader.VERT_SPLASH] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "vert", null, true);
-            shaderCode[Shader.FRAG_SPLASH.ordinal()] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+            shaderCode[Shader.FRAG_SPLASH] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
-            shaderProgram.add(shaderCode[Shader.VERT_SPLASH.ordinal()]);
-            shaderProgram.add(shaderCode[Shader.FRAG_SPLASH.ordinal()]);
+            shaderProgram.add(shaderCode[Shader.VERT_SPLASH]);
+            shaderProgram.add(shaderCode[Shader.FRAG_SPLASH]);
 
             shaderProgram.init(gl3);
 
-            programName[Program.SPLASH.ordinal()] = shaderProgram.program();
+            programName[Program.SPLASH] = shaderProgram.program();
 
-            gl3.glBindFragDataLocation(programName[Program.SPLASH.ordinal()], Semantic.Frag.COLOR, "color");
+            gl3.glBindFragDataLocation(programName[Program.SPLASH], Semantic.Frag.COLOR, "color");
 
             shaderProgram.link(gl3, System.out);
         }
         if (validated) {
 
-            uniformTransform = gl3.glGetUniformBlockIndex(programName[Program.TEXTURE.ordinal()], "Transform");
-            uniformDiffuse[Program.TEXTURE.ordinal()]
-                    = gl3.glGetUniformLocation(programName[Program.TEXTURE.ordinal()], "diffuse");
-            uniformDiffuse[Program.SPLASH.ordinal()]
-                    = gl3.glGetUniformLocation(programName[Program.SPLASH.ordinal()], "diffuse");
+            uniformTransform = gl3.glGetUniformBlockIndex(programName[Program.TEXTURE], "Transform");
+            uniformDiffuse[Program.TEXTURE]
+                    = gl3.glGetUniformLocation(programName[Program.TEXTURE], "diffuse");
+            uniformDiffuse[Program.SPLASH]
+                    = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
 
-            gl3.glUseProgram(programName[Program.TEXTURE.ordinal()]);
-            gl3.glUniform1i(uniformDiffuse[Program.TEXTURE.ordinal()], 0);
-            gl3.glUniformBlockBinding(programName[Program.TEXTURE.ordinal()], uniformTransform,
+            gl3.glUseProgram(programName[Program.TEXTURE]);
+            gl3.glUniform1i(uniformDiffuse[Program.TEXTURE], 0);
+            gl3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform,
                     Semantic.Uniform.TRANSFORM0);
 
-            gl3.glUseProgram(programName[Program.SPLASH.ordinal()]);
-            gl3.glUniform1i(uniformDiffuse[Program.SPLASH.ordinal()], 0);
+            gl3.glUseProgram(programName[Program.SPLASH]);
+            gl3.glUniform1i(uniformDiffuse[Program.SPLASH], 0);
         }
 
         return validated & checkError(gl3, "initProgram");
@@ -169,7 +173,7 @@ public class Gl_320_primitive_line_msaa extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
         float[] data = new float[2 * 36];
         for (int i = 0; i < 36; ++i) {
@@ -179,7 +183,7 @@ public class Gl_320_primitive_line_msaa extends Test {
         }
         vertexCount = 18;//static_cast<GLsizei>(Data.size() - 8);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(data);
         gl3.glBufferData(GL_ARRAY_BUFFER, data.length * Float.BYTES, vertexBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -188,7 +192,7 @@ public class Gl_320_primitive_line_msaa extends Test {
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -199,10 +203,10 @@ public class Gl_320_primitive_line_msaa extends Test {
 
         boolean validated = true;
 
-        gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl3.glGenTextures(Texture.MAX, textureName, 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
         gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -211,7 +215,7 @@ public class Gl_320_primitive_line_msaa extends Test {
                 windowSize.y >> framebufferScale, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName[Texture.RENDERBUFFER.ordinal()]);
+        gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName[Texture.RENDERBUFFER]);
         //glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_BASE_LEVEL, 0);
         //glTexParameteri(GL_TEXTURE_2D_MULTISAMPLE, GL_TEXTURE_MAX_LEVEL, 0);
         gl3.glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA8, windowSize.x >> framebufferScale,
@@ -222,10 +226,10 @@ public class Gl_320_primitive_line_msaa extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE.ordinal()]);
+        gl3.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
+        gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -235,7 +239,7 @@ public class Gl_320_primitive_line_msaa extends Test {
         }
         gl3.glBindVertexArray(0);
 
-        gl3.glBindVertexArray(vertexArrayName[Program.SPLASH.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Program.SPLASH]);
         gl3.glBindVertexArray(0);
 
         return true;
@@ -243,18 +247,18 @@ public class Gl_320_primitive_line_msaa extends Test {
 
     private boolean initFramebuffer(GL3 gl3) {
 
-        gl3.glGenFramebuffers(Texture.MAX.ordinal(), framebufferName, 0);
+        gl3.glGenFramebuffers(Texture.MAX, framebufferName, 0);
 
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Texture.RENDERBUFFER.ordinal()]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.RENDERBUFFER.ordinal()], 0);
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Texture.RENDERBUFFER]);
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.RENDERBUFFER], 0);
 
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Texture.COLORBUFFER.ordinal()]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER.ordinal()], 0);
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Texture.COLORBUFFER]);
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
 
-        if (!isFramebufferComplete(gl3, framebufferName[Texture.RENDERBUFFER.ordinal()])) {
+        if (!isFramebufferComplete(gl3, framebufferName[Texture.RENDERBUFFER])) {
             return false;
         }
-        if (!isFramebufferComplete(gl3, framebufferName[Texture.COLORBUFFER.ordinal()])) {
+        if (!isFramebufferComplete(gl3, framebufferName[Texture.COLORBUFFER])) {
             return false;
         }
 
@@ -268,7 +272,7 @@ public class Gl_320_primitive_line_msaa extends Test {
         GL3 gl3 = (GL3) gl;
 
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -287,29 +291,29 @@ public class Gl_320_primitive_line_msaa extends Test {
         }
 
         gl3.glViewport(0, 0, windowSize.x >> framebufferScale, windowSize.y >> framebufferScale);
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Texture.RENDERBUFFER.ordinal()]);
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Texture.RENDERBUFFER]);
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
-        gl3.glUseProgram(programName[Program.TEXTURE.ordinal()]);
+        gl3.glUseProgram(programName[Program.TEXTURE]);
 
-        gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE.ordinal()]);
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
 
         gl3.glDrawArraysInstanced(GL_LINE_LOOP, 0, vertexCount, 1);
 
-        gl3.glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferName[Texture.RENDERBUFFER.ordinal()]);
-        gl3.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferName[Texture.COLORBUFFER.ordinal()]);
+        gl3.glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferName[Texture.RENDERBUFFER]);
+        gl3.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferName[Texture.COLORBUFFER]);
         gl3.glBlitFramebuffer(0, 0, windowSize.x >> framebufferScale, windowSize.y >> framebufferScale, 0, 0,
                 windowSize.x >> framebufferScale, windowSize.y >> framebufferScale, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        gl3.glUseProgram(programName[Program.SPLASH.ordinal()]);
+        gl3.glUseProgram(programName[Program.SPLASH]);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindVertexArray(vertexArrayName[Program.SPLASH.ordinal()]);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Program.SPLASH]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
 
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 1);
 
@@ -321,13 +325,13 @@ public class Gl_320_primitive_line_msaa extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteFramebuffers(Texture.MAX.ordinal(), framebufferName, 0);
-        gl3.glDeleteProgram(programName[Program.SPLASH.ordinal()]);
-        gl3.glDeleteProgram(programName[Program.TEXTURE.ordinal()]);
+        gl3.glDeleteFramebuffers(Texture.MAX, framebufferName, 0);
+        gl3.glDeleteProgram(programName[Program.SPLASH]);
+        gl3.glDeleteProgram(programName[Program.TEXTURE]);
 
-        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
-        gl3.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
-        gl3.glDeleteVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl3.glDeleteTextures(Texture.MAX, textureName, 0);
+        gl3.glDeleteVertexArrays(Program.MAX, vertexArrayName, 0);
 
         return true;
     }

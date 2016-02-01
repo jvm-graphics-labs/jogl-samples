@@ -55,38 +55,33 @@ public class Gl_320_fbo_rtt extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Texture {
-        TEXTURE_R,
-        TEXTURE_G,
-        TEXTURE_B,
-        MAX
+    private class Texture {
+
+        public static final int R = 0;
+        public static final int G = 1;
+        public static final int B = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Program {
-        SINGLE,
-        MULTIPLE,
-        MAX
+    private class Program {
+
+        public static final int SINGLE = 0;
+        public static final int MULTIPLE = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Shader {
-        VERT1,
-        FRAG1,
-        VERT2,
-        FRAG2,
-        MAX
-    }
-
-    private int[] framebufferName = new int[1], programName = new int[Program.MAX.ordinal()],
-            uniformMvp = new int[Program.MAX.ordinal()], uniformDiffuse = new int[Program.MAX.ordinal()],
-            vertexArrayName = new int[Program.MAX.ordinal()], bufferName = new int[Buffer.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()];
-    private Vec4i[] viewport = new Vec4i[Texture.MAX.ordinal()];
+    private int[] framebufferName = new int[1], programName = new int[Program.MAX],
+            uniformMvp = new int[Program.MAX], uniformDiffuse = new int[Program.MAX],
+            vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
+            textureName = new int[Texture.MAX];
+    private Vec4i[] viewport = new Vec4i[Texture.MAX];
     private float[] projection = new float[16], viewTranslate = new float[16], view = new float[16],
             model = new float[16], mvp = new float[16];
 
@@ -95,10 +90,10 @@ public class Gl_320_fbo_rtt extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        viewport[Texture.TEXTURE_R.ordinal()] = new Vec4i(windowSize.x >> 1, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
-        viewport[Texture.TEXTURE_G.ordinal()]
+        viewport[Texture.R] = new Vec4i(windowSize.x >> 1, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
+        viewport[Texture.G]
                 = new Vec4i(windowSize.x >> 1, windowSize.y >> 1, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
-        viewport[Texture.TEXTURE_B.ordinal()] = new Vec4i(0, windowSize.y >> 1, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
+        viewport[Texture.B] = new Vec4i(0, windowSize.y >> 1, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
 
         boolean validated = true;
 
@@ -138,18 +133,18 @@ public class Gl_320_fbo_rtt extends Test {
 
             shaderProgram.init(gl3);
 
-            programName[Program.MULTIPLE.ordinal()] = shaderProgram.program();
+            programName[Program.MULTIPLE] = shaderProgram.program();
 
-            gl3.glBindAttribLocation(programName[Program.MULTIPLE.ordinal()], Semantic.Attr.POSITION, "position");
-            gl3.glBindFragDataLocation(programName[Program.MULTIPLE.ordinal()], Semantic.Frag.RED, "red");
-            gl3.glBindFragDataLocation(programName[Program.MULTIPLE.ordinal()], Semantic.Frag.GREEN, "green");
-            gl3.glBindFragDataLocation(programName[Program.MULTIPLE.ordinal()], Semantic.Frag.BLUE, "blue");
+            gl3.glBindAttribLocation(programName[Program.MULTIPLE], Semantic.Attr.POSITION, "position");
+            gl3.glBindFragDataLocation(programName[Program.MULTIPLE], Semantic.Frag.RED, "red");
+            gl3.glBindFragDataLocation(programName[Program.MULTIPLE], Semantic.Frag.GREEN, "green");
+            gl3.glBindFragDataLocation(programName[Program.MULTIPLE], Semantic.Frag.BLUE, "blue");
 
             shaderProgram.link(gl3, System.out);
         }
         if (validated) {
-            uniformMvp[Program.MULTIPLE.ordinal()]
-                    = gl3.glGetUniformLocation(programName[Program.MULTIPLE.ordinal()], "mvp");
+            uniformMvp[Program.MULTIPLE]
+                    = gl3.glGetUniformLocation(programName[Program.MULTIPLE], "mvp");
         }
         if (validated) {
 
@@ -164,20 +159,20 @@ public class Gl_320_fbo_rtt extends Test {
 
             shaderProgram.init(gl3);
 
-            programName[Program.SINGLE.ordinal()] = shaderProgram.program();
+            programName[Program.SINGLE] = shaderProgram.program();
 
-            gl3.glBindAttribLocation(programName[Program.SINGLE.ordinal()], Semantic.Attr.POSITION, "position");
-            gl3.glBindAttribLocation(programName[Program.SINGLE.ordinal()], Semantic.Attr.TEXCOORD, "texCoord");
-            gl3.glBindFragDataLocation(programName[Program.SINGLE.ordinal()], Semantic.Frag.COLOR, "color");
+            gl3.glBindAttribLocation(programName[Program.SINGLE], Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName[Program.SINGLE], Semantic.Attr.TEXCOORD, "texCoord");
+            gl3.glBindFragDataLocation(programName[Program.SINGLE], Semantic.Frag.COLOR, "color");
 
             shaderProgram.link(gl3, System.out);
         }
         if (validated) {
 
-            uniformMvp[Program.SINGLE.ordinal()]
-                    = gl3.glGetUniformLocation(programName[Program.SINGLE.ordinal()], "mvp");
-            uniformDiffuse[Program.SINGLE.ordinal()]
-                    = gl3.glGetUniformLocation(programName[Program.SINGLE.ordinal()], "diffuse");
+            uniformMvp[Program.SINGLE]
+                    = gl3.glGetUniformLocation(programName[Program.SINGLE], "mvp");
+            uniformDiffuse[Program.SINGLE]
+                    = gl3.glGetUniformLocation(programName[Program.SINGLE], "diffuse");
         }
 
         return validated & checkError(gl3, "initProgram");
@@ -185,15 +180,15 @@ public class Gl_320_fbo_rtt extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -205,9 +200,9 @@ public class Gl_320_fbo_rtt extends Test {
     private boolean initTexture(GL3 gl3) {
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl3.glGenTextures(Texture.MAX, textureName, 0);
 
-        for (int i = Texture.TEXTURE_R.ordinal(); i <= Texture.TEXTURE_B.ordinal(); ++i) {
+        for (int i = Texture.R; i <= Texture.B; ++i) {
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[i]);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
@@ -256,23 +251,23 @@ public class Gl_320_fbo_rtt extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
+        gl3.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
 
-        gl3.glBindVertexArray(vertexArrayName[Program.MULTIPLE.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Program.MULTIPLE]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl3.glBindVertexArray(0);
 
-        gl3.glBindVertexArray(vertexArrayName[Program.SINGLE.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Program.SINGLE]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -280,7 +275,7 @@ public class Gl_320_fbo_rtt extends Test {
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl3.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl3.glBindVertexArray(0);
 
@@ -309,10 +304,10 @@ public class Gl_320_fbo_rtt extends Test {
             gl3.glScissor(border, border, FRAMEBUFFER_SIZE.x - border * 2, FRAMEBUFFER_SIZE.y - border * 2);
             gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-            gl3.glUseProgram(programName[Program.MULTIPLE.ordinal()]);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.MULTIPLE.ordinal()], 1, false, mvp, 0);
+            gl3.glUseProgram(programName[Program.MULTIPLE]);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.MULTIPLE], 1, false, mvp, 0);
 
-            gl3.glBindVertexArray(vertexArrayName[Program.MULTIPLE.ordinal()]);
+            gl3.glBindVertexArray(vertexArrayName[Program.MULTIPLE]);
             gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
         }
 
@@ -328,18 +323,18 @@ public class Gl_320_fbo_rtt extends Test {
             gl3.glViewport(0, 0, windowSize.x, windowSize.y);
             gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-            gl3.glUseProgram(programName[Program.SINGLE.ordinal()]);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.SINGLE.ordinal()], 1, false, mvp, 0);
-            gl3.glUniform1i(uniformDiffuse[Program.SINGLE.ordinal()], 0);
+            gl3.glUseProgram(programName[Program.SINGLE]);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.SINGLE], 1, false, mvp, 0);
+            gl3.glUniform1i(uniformDiffuse[Program.SINGLE], 0);
         }
 
-        for (int i = 0; i < Texture.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Texture.MAX; ++i) {
             gl3.glViewport(viewport[i].x, viewport[i].y, viewport[i].z, viewport[i].w);
 
             gl3.glActiveTexture(GL_TEXTURE0);
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[i]);
 
-            gl3.glBindVertexArray(vertexArrayName[Program.SINGLE.ordinal()]);
+            gl3.glBindVertexArray(vertexArrayName[Program.SINGLE]);
             gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
         }
 
@@ -351,12 +346,12 @@ public class Gl_320_fbo_rtt extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        for (int i = 0; i < Program.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Program.MAX; ++i) {
             gl3.glDeleteProgram(programName[i]);
         }
 
-        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
-        gl3.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl3.glDeleteTextures(Texture.MAX, textureName, 0);
         gl3.glDeleteFramebuffers(1, framebufferName, 0);
 
         return checkError(gl3, "end");
