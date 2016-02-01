@@ -60,41 +60,41 @@ public class Gl_320_fbo_depth_stencil extends Test {
         2, 3, 0
     };
 
-    private enum Buffer {
+    private class Buffer {
 
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MAX
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Texture {
+    private class Texture {
 
-        DIFFUSE,
-        COLORBUFFER,
-        RENDERBUFFER,
-        MAX
+        public static final int DIFFUSE = 0;
+        public static final int COLORBUFFER = 1;
+        public static final int RENDERBUFFER = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Program {
+    private class Program {
 
-        TEXTURE,
-        SPLASH,
-        MAX
+        public static final int TEXTURE = 0;
+        public static final int SPLASH = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Shader {
+    private class Shader {
 
-        VERT_TEXTURE,
-        FRAG_TEXTURE,
-        VERT_SPLASH,
-        FRAG_SPLASH,
-        MAX
+        public static final int VERT_TEXTURE = 0;
+        public static final int FRAG_TEXTURE = 1;
+        public static final int VERT_SPLASH = 2;
+        public static final int FRAG_SPLASH = 3;
+        public static final int MAX = 4;
     }
 
-    private int[] programName = new int[Program.MAX.ordinal()], vertexArrayName = new int[Program.MAX.ordinal()],
-            bufferName = new int[Buffer.MAX.ordinal()], textureName = new int[Texture.MAX.ordinal()],
-            uniformDiffuse = new int[Program.MAX.ordinal()], framebufferName = new int[1];
+    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
+            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX],
+            uniformDiffuse = new int[Program.MAX], framebufferName = new int[1];
     private int framebufferScale = 2, uniformTransform;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
@@ -128,76 +128,76 @@ public class Gl_320_fbo_depth_stencil extends Test {
 
         boolean validated = true;
 
-        ShaderCode[] shaderCode = new ShaderCode[Shader.MAX.ordinal()];
+        ShaderCode[] shaderCode = new ShaderCode[Shader.MAX];
 
         // Create program
         if (validated) {
 
-            shaderCode[Shader.VERT_TEXTURE.ordinal()] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+            shaderCode[Shader.VERT_TEXTURE] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT_TEXTURE, null, SHADERS_SOURCE_TEXTURE, "vert", null, true);
-            shaderCode[Shader.FRAG_TEXTURE.ordinal()] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+            shaderCode[Shader.FRAG_TEXTURE] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT_TEXTURE, null, SHADERS_SOURCE_TEXTURE, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
-            program.add(shaderCode[Shader.VERT_TEXTURE.ordinal()]);
-            program.add(shaderCode[Shader.FRAG_TEXTURE.ordinal()]);
+            program.add(shaderCode[Shader.VERT_TEXTURE]);
+            program.add(shaderCode[Shader.FRAG_TEXTURE]);
             program.init(gl3);
 
-            programName[Program.TEXTURE.ordinal()] = program.program();
+            programName[Program.TEXTURE] = program.program();
 
-            gl3.glBindAttribLocation(programName[Program.TEXTURE.ordinal()], Semantic.Attr.POSITION, "position");
-            gl3.glBindAttribLocation(programName[Program.TEXTURE.ordinal()], Semantic.Attr.TEXCOORD, "texCoord");
-            gl3.glBindFragDataLocation(programName[Program.TEXTURE.ordinal()], Semantic.Frag.COLOR, "color");
+            gl3.glBindAttribLocation(programName[Program.TEXTURE], Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName[Program.TEXTURE], Semantic.Attr.TEXCOORD, "texCoord");
+            gl3.glBindFragDataLocation(programName[Program.TEXTURE], Semantic.Frag.COLOR, "color");
 
             program.link(gl3, System.out);
         }
         if (validated) {
 
-            shaderCode[Shader.VERT_SPLASH.ordinal()] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+            shaderCode[Shader.VERT_SPLASH] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT_SPLASH, null, SHADERS_SOURCE_SPLASH, "vert", null, true);
-            shaderCode[Shader.FRAG_SPLASH.ordinal()] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+            shaderCode[Shader.FRAG_SPLASH] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT_SPLASH, null, SHADERS_SOURCE_SPLASH, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
-            program.add(shaderCode[Shader.VERT_SPLASH.ordinal()]);
-            program.add(shaderCode[Shader.FRAG_SPLASH.ordinal()]);
+            program.add(shaderCode[Shader.VERT_SPLASH]);
+            program.add(shaderCode[Shader.FRAG_SPLASH]);
             program.init(gl3);
 
-            programName[Program.SPLASH.ordinal()] = program.program();
+            programName[Program.SPLASH] = program.program();
 
-            gl3.glBindFragDataLocation(programName[Program.SPLASH.ordinal()], Semantic.Frag.COLOR, "color");
+            gl3.glBindFragDataLocation(programName[Program.SPLASH], Semantic.Frag.COLOR, "color");
 
             program.link(gl3, System.out);
         }
         if (validated) {
 
-            uniformTransform = gl3.glGetUniformBlockIndex(programName[Program.TEXTURE.ordinal()], "Transform");
-            uniformDiffuse[Program.TEXTURE.ordinal()]
-                    = gl3.glGetUniformLocation(programName[Program.TEXTURE.ordinal()], "diffuse");
-            uniformDiffuse[Program.SPLASH.ordinal()]
-                    = gl3.glGetUniformLocation(programName[Program.SPLASH.ordinal()], "diffuse");
+            uniformTransform = gl3.glGetUniformBlockIndex(programName[Program.TEXTURE], "Transform");
+            uniformDiffuse[Program.TEXTURE]
+                    = gl3.glGetUniformLocation(programName[Program.TEXTURE], "diffuse");
+            uniformDiffuse[Program.SPLASH]
+                    = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
 
-            gl3.glUseProgram(programName[Program.TEXTURE.ordinal()]);
-            gl3.glUniform1i(uniformDiffuse[Program.TEXTURE.ordinal()], 0);
-            gl3.glUniformBlockBinding(programName[Program.TEXTURE.ordinal()], uniformTransform, Semantic.Uniform.TRANSFORM0);
+            gl3.glUseProgram(programName[Program.TEXTURE]);
+            gl3.glUniform1i(uniformDiffuse[Program.TEXTURE], 0);
+            gl3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform, Semantic.Uniform.TRANSFORM0);
 
-            gl3.glUseProgram(programName[Program.SPLASH.ordinal()]);
-            gl3.glUniform1i(uniformDiffuse[Program.SPLASH.ordinal()], 0);
+            gl3.glUseProgram(programName[Program.SPLASH]);
+            gl3.glUniform1i(uniformDiffuse[Program.SPLASH], 0);
         }
         return validated & checkError(gl3, "initProgram");
     }
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -207,7 +207,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffsetAlignment, 0);
         uniformBufferOffsetAlignment[0] = Glm.ceilMultiple(16 * Float.BYTES, uniformBufferOffsetAlignment[0]);
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBufferOffsetAlignment[0] * 2, null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -228,10 +228,10 @@ public class Gl_320_fbo_depth_stencil extends Test {
 
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl3.glGenTextures(Texture.MAX, textureName, 0);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -251,7 +251,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
             }
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -260,7 +260,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
                     windowSize.y * framebufferScale, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RENDERBUFFER.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RENDERBUFFER]);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl3.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH24_STENCIL8, windowSize.x * framebufferScale,
@@ -276,10 +276,10 @@ public class Gl_320_fbo_depth_stencil extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE.ordinal()]);
+        gl3.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
+        gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -287,11 +287,11 @@ public class Gl_320_fbo_depth_stencil extends Test {
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl3.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl3.glBindVertexArray(0);
 
-        gl3.glBindVertexArray(vertexArrayName[Program.SPLASH.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Program.SPLASH]);
         gl3.glBindVertexArray(0);
 
         return true;
@@ -301,9 +301,9 @@ public class Gl_320_fbo_depth_stencil extends Test {
 
         gl3.glGenFramebuffers(1, framebufferName, 0);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER.ordinal()], 0);
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
         gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                textureName[Texture.RENDERBUFFER.ordinal()], 0);
+                textureName[Texture.RENDERBUFFER], 0);
 
         if (!isFramebufferComplete(gl3, framebufferName[0])) {
             return false;
@@ -323,7 +323,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
             gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffsetAlignment, 0);
             uniformBufferOffsetAlignment[0] = Glm.ceilMultiple(16 * Float.BYTES, uniformBufferOffsetAlignment[0]);
 
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, uniformBufferOffsetAlignment[0] * 2,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -340,7 +340,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
 
             FloatUtil.multMatrix(projection, view(), mvp);
             FloatUtil.multMatrix(mvp, model);
-            
+
             pointer.position(uniformBufferOffsetAlignment[0]);
             pointer.asFloatBuffer().put(mvp).rewind();
 
@@ -360,14 +360,14 @@ public class Gl_320_fbo_depth_stencil extends Test {
             gl3.glClearBufferfi(GL_DEPTH_STENCIL, 0, 1.0f, 0);
             gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-            gl3.glUseProgram(programName[Program.TEXTURE.ordinal()]);
+            gl3.glUseProgram(programName[Program.TEXTURE]);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
-            gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+            gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
 
             gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0,
-                    bufferName[Buffer.TRANSFORM.ordinal()], uniformBufferOffsetAlignment[0] * 0,
+                    bufferName[Buffer.TRANSFORM], uniformBufferOffsetAlignment[0] * 0,
                     uniformBufferOffsetAlignment[0]);
 
             gl3.glDisable(GL_DEPTH_TEST);
@@ -378,7 +378,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
             gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
 
             gl3.glBindTexture(GL_TEXTURE_2D, 0); // 
-            gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()],
+            gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM],
                     uniformBufferOffsetAlignment[0] * 1, uniformBufferOffsetAlignment[0]);
 
             gl3.glStencilMask(0x00);
@@ -394,11 +394,11 @@ public class Gl_320_fbo_depth_stencil extends Test {
 
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            gl3.glUseProgram(programName[Program.SPLASH.ordinal()]);
+            gl3.glUseProgram(programName[Program.SPLASH]);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindVertexArray(vertexArrayName[Program.SPLASH.ordinal()]);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+            gl3.glBindVertexArray(vertexArrayName[Program.SPLASH]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
 
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 1);
         }
@@ -412,12 +412,12 @@ public class Gl_320_fbo_depth_stencil extends Test {
         GL3 gl3 = (GL3) gl;
 
         gl3.glDeleteFramebuffers(1, framebufferName, 0);
-        gl3.glDeleteProgram(programName[Program.SPLASH.ordinal()]);
-        gl3.glDeleteProgram(programName[Program.TEXTURE.ordinal()]);
+        gl3.glDeleteProgram(programName[Program.SPLASH]);
+        gl3.glDeleteProgram(programName[Program.TEXTURE]);
 
-        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
-        gl3.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
-        gl3.glDeleteVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl3.glDeleteTextures(Texture.MAX, textureName, 0);
+        gl3.glDeleteVertexArrays(Program.MAX, vertexArrayName, 0);
 
         return true;
     }

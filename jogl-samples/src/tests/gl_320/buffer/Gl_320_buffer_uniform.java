@@ -280,7 +280,7 @@ public class Gl_320_buffer_uniform extends Test {
 
             Mat4 mv = view.mul(model);
             Mat4 p = projection;
-            Mat3 normal = new Mat3(mv.invTransp(new Mat4()));
+            Mat3 normal = new Mat3(mv.invTransp3(new Mat4()));
 
             transform.asFloatBuffer()
                     .put(p.toFA_())

@@ -58,15 +58,15 @@ public class Gl_320_draw_range_elements extends Test {
         6, 7, 4
     };
 
-    private enum Buffer {
+    private class Buffer {
 
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MAX
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MAX = 3;
     }
 
-    private int[] bufferName = new int[Buffer.MAX.ordinal()], vertexArrayName = new int[1];
+    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = new int[1];
     private int programName, uniformTransform;
     private float[] projection = new float[16], model = new float[16];
 
@@ -138,15 +138,15 @@ public class Gl_320_draw_range_elements extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -156,7 +156,7 @@ public class Gl_320_draw_range_elements extends Test {
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -168,12 +168,12 @@ public class Gl_320_draw_range_elements extends Test {
         gl3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl3.glBindVertexArray(0);
 
@@ -186,11 +186,11 @@ public class Gl_320_draw_range_elements extends Test {
         GL3 gl3 = (GL3) gl;
 
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 
+            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
                     windowSize.x / 3.0f / windowSize.y, 0.1f, 100.0f);
             FloatUtil.makeIdentity(model);
 
@@ -210,7 +210,7 @@ public class Gl_320_draw_range_elements extends Test {
 
         gl3.glUseProgram(programName);
 
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
         gl3.glBindVertexArray(vertexArrayName[0]);
 
         gl3.glViewport(windowSize.x * 0 / 3, 0, windowSize.x / 3, windowSize.y);
@@ -230,7 +230,7 @@ public class Gl_320_draw_range_elements extends Test {
     protected boolean end(GL gl) {
 
         GL3 gl3 = (GL3) gl;
-        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl3.glDeleteProgram(programName);
         gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
 

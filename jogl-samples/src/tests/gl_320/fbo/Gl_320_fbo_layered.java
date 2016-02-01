@@ -56,33 +56,33 @@ public class Gl_320_fbo_layered extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
+    private class Buffer {
 
-        VERTEX,
-        ELEMENT,
-        MAX
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Program {
+    private class Program {
 
-        LAYERING,
-        SPLASH,
-        MAX
+        public static final int LAYERING = 0;
+        public static final int SPLASH = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Shader {
+    private class Shader {
 
-        VERT1,
-        GEOM1,
-        FRAG1,
-        VERT2,
-        FRAG2,
-        MAX
+        public static final int VERT1 = 0;
+        public static final int GEOM1 = 1;
+        public static final int FRAG1 = 2;
+        public static final int VERT2 = 3;
+        public static final int FRAG2 = 4;
+        public static final int MAX = 5;
     }
 
-    private int[] framebufferName = new int[1], vertexArrayName = new int[Program.MAX.ordinal()],
-            programName = new int[Program.MAX.ordinal()], uniformMvp = new int[Program.MAX.ordinal()],
-            bufferName = new int[Buffer.MAX.ordinal()], textureColorbufferName = new int[1];
+    private int[] framebufferName = new int[1], vertexArrayName = new int[Program.MAX],
+            programName = new int[Program.MAX], uniformMvp = new int[Program.MAX],
+            bufferName = new int[Buffer.MAX], textureColorbufferName = new int[1];
     private int uniformDiffuse, uniformLayer;
     private Vec4i[] viewport = new Vec4i[4];
     private float[] projection = new float[16], view = new float[16], model = new float[16], mvp = new float[16];
@@ -126,73 +126,73 @@ public class Gl_320_fbo_layered extends Test {
 
         boolean validated = true;
 
-        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX.ordinal()];
+        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
 
         // Create program
         if (validated) {
 
-            shaderCodes[Shader.VERT1.ordinal()] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+            shaderCodes[Shader.VERT1] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE1, "vert", null, true);
-            shaderCodes[Shader.GEOM1.ordinal()] = ShaderCode.create(gl3, GL_GEOMETRY_SHADER,
+            shaderCodes[Shader.GEOM1] = ShaderCode.create(gl3, GL_GEOMETRY_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE1, "geom", null, true);
-            shaderCodes[Shader.FRAG1.ordinal()] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+            shaderCodes[Shader.FRAG1] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE1, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
-            program.add(shaderCodes[Shader.VERT1.ordinal()]);
-            program.add(shaderCodes[Shader.GEOM1.ordinal()]);
-            program.add(shaderCodes[Shader.FRAG1.ordinal()]);
+            program.add(shaderCodes[Shader.VERT1]);
+            program.add(shaderCodes[Shader.GEOM1]);
+            program.add(shaderCodes[Shader.FRAG1]);
             program.init(gl3);
 
-            programName[Program.LAYERING.ordinal()] = program.program();
+            programName[Program.LAYERING] = program.program();
 
-            gl3.glBindAttribLocation(programName[Program.LAYERING.ordinal()], Semantic.Attr.POSITION, "position");
-            gl3.glBindFragDataLocation(programName[Program.LAYERING.ordinal()], Semantic.Frag.COLOR, "fragColor");
+            gl3.glBindAttribLocation(programName[Program.LAYERING], Semantic.Attr.POSITION, "position");
+            gl3.glBindFragDataLocation(programName[Program.LAYERING], Semantic.Frag.COLOR, "fragColor");
 
             program.link(gl3, System.out);
         }
         if (validated) {
 
-            shaderCodes[Shader.VERT2.ordinal()] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+            shaderCodes[Shader.VERT2] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE2, "vert", null, true);
-            shaderCodes[Shader.FRAG2.ordinal()] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+            shaderCodes[Shader.FRAG2] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE2, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
-            program.add(shaderCodes[Shader.VERT2.ordinal()]);
-            program.add(shaderCodes[Shader.FRAG2.ordinal()]);
+            program.add(shaderCodes[Shader.VERT2]);
+            program.add(shaderCodes[Shader.FRAG2]);
             program.init(gl3);
 
-            programName[Program.SPLASH.ordinal()] = program.program();
+            programName[Program.SPLASH] = program.program();
 
-            gl3.glBindAttribLocation(programName[Program.SPLASH.ordinal()], Semantic.Attr.POSITION, "position");
-            gl3.glBindAttribLocation(programName[Program.SPLASH.ordinal()], Semantic.Attr.TEXCOORD, "texCoord");
-            gl3.glBindFragDataLocation(programName[Program.SPLASH.ordinal()], Semantic.Frag.COLOR, "color");
+            gl3.glBindAttribLocation(programName[Program.SPLASH], Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName[Program.SPLASH], Semantic.Attr.TEXCOORD, "texCoord");
+            gl3.glBindFragDataLocation(programName[Program.SPLASH], Semantic.Frag.COLOR, "color");
 
             program.link(gl3, System.out);
         }
         if (validated) {
 
-            for (int i = 0; i < Program.MAX.ordinal(); i++) {
+            for (int i = 0; i < Program.MAX; i++) {
                 uniformMvp[i] = gl3.glGetUniformLocation(programName[i], "mvp");
             }
-            uniformDiffuse = gl3.glGetUniformLocation(programName[Program.SPLASH.ordinal()], "diffuse");
-            uniformLayer = gl3.glGetUniformLocation(programName[Program.SPLASH.ordinal()], "layer");
+            uniformDiffuse = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
+            uniformLayer = gl3.glGetUniformLocation(programName[Program.SPLASH], "layer");
         }
         return validated & checkError(gl3, "initProgram");
     }
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -243,11 +243,11 @@ public class Gl_320_fbo_layered extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
+        gl3.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
 
-        gl3.glBindVertexArray(vertexArrayName[Program.SPLASH.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Program.SPLASH]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -255,19 +255,19 @@ public class Gl_320_fbo_layered extends Test {
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl3.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl3.glBindVertexArray(0);
 
-        gl3.glBindVertexArray(vertexArrayName[Program.LAYERING.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Program.LAYERING]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl3.glBindVertexArray(0);
 
@@ -291,10 +291,10 @@ public class Gl_320_fbo_layered extends Test {
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
             gl3.glViewport(0, 0, framebufferSize.x, framebufferSize.y);
 
-            gl3.glUseProgram(programName[Program.LAYERING.ordinal()]);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.LAYERING.ordinal()], 1, false, mvp, 0);
+            gl3.glUseProgram(programName[Program.LAYERING]);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.LAYERING], 1, false, mvp, 0);
 
-            gl3.glBindVertexArray(vertexArrayName[Program.LAYERING.ordinal()]);
+            gl3.glBindVertexArray(vertexArrayName[Program.LAYERING]);
             gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
         }
 
@@ -303,14 +303,14 @@ public class Gl_320_fbo_layered extends Test {
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
             gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
-            gl3.glUseProgram(programName[Program.SPLASH.ordinal()]);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.SPLASH.ordinal()], 1, false, mvp, 0);
+            gl3.glUseProgram(programName[Program.SPLASH]);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.SPLASH], 1, false, mvp, 0);
             gl3.glUniform1i(uniformDiffuse, 0);
 
             gl3.glActiveTexture(GL_TEXTURE0);
             gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureColorbufferName[0]);
 
-            gl3.glBindVertexArray(vertexArrayName[Program.SPLASH.ordinal()]);
+            gl3.glBindVertexArray(vertexArrayName[Program.SPLASH]);
 
             for (int i = 0; i < 4; ++i) {
                 gl3.glUniform1i(uniformLayer, i);
@@ -327,11 +327,11 @@ public class Gl_320_fbo_layered extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        for (int i = 0; i < Program.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Program.MAX; ++i) {
             gl3.glDeleteProgram(programName[i]);
         }
-        gl3.glDeleteVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
-        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glDeleteVertexArrays(Program.MAX, vertexArrayName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl3.glDeleteTextures(1, textureColorbufferName, 0);
         gl3.glDeleteFramebuffers(1, framebufferName, 0);
 

@@ -70,12 +70,16 @@ public class Gl_320_draw_base_vertex extends Test {
         (byte) 255, (byte) 128, (byte) 0, (byte) 255
     };
 
-    private enum Buffer {
+    private class Buffer {
 
-        POSITION, COLOR, ELEMENT, TRANSFORM, MAX
+        public static final int POSITION = 0;
+        public static final int COLOR = 1;
+        public static final int ELEMENT = 2;
+        public static final int TRANSFORM = 3;
+        public static final int MAX = 4;
     }
 
-    private int[] bufferName = new int[Buffer.MAX.ordinal()], vertexArrayName = new int[1];
+    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = new int[1];
     private int programName, uniformTransform;
     private final Mat4 projection = new Mat4(), model = new Mat4();
 
@@ -136,20 +140,20 @@ public class Gl_320_draw_base_vertex extends Test {
     }
 
     private boolean initBuffer(GL3 gl3) {
-        gl3.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(positionBuffer);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR]);
         ByteBuffer colorBuffer = GLBuffers.newDirectByteBuffer(colorData);
         gl3.glBufferData(GL_ARRAY_BUFFER, colorSize, colorBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(colorBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
@@ -157,7 +161,7 @@ public class Gl_320_draw_base_vertex extends Test {
 
         int[] uniformBlockSize = new int[1];
         gl3.glGetActiveUniformBlockiv(programName, uniformTransform, GL_UNIFORM_BLOCK_DATA_SIZE, uniformBlockSize, 0);
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize[0], null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -169,16 +173,16 @@ public class Gl_320_draw_base_vertex extends Test {
         gl3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, 3 * Float.BYTES, 0);
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR]);
             gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_UNSIGNED_BYTE, true, 4 * Byte.BYTES, 0);
             gl3.glEnableVertexAttribArray(Semantic.Attr.COLOR);
 
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl3.glBindVertexArray(0);
 
@@ -190,7 +194,7 @@ public class Gl_320_draw_base_vertex extends Test {
 
         GL3 gl3 = (GL3) gl;
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer transformBuffer = gl.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, 16 * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -211,7 +215,7 @@ public class Gl_320_draw_base_vertex extends Test {
 
         gl3.glUseProgram(programName);
         gl3.glBindVertexArray(vertexArrayName[0]);
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
 
         gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
         gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 4);
@@ -224,7 +228,7 @@ public class Gl_320_draw_base_vertex extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl3.glDeleteProgram(programName);
         gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
 

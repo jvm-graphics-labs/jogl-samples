@@ -37,7 +37,7 @@ public class Gl_320_draw_image_space extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/draw";
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
-    private int programName, uniformTrasform;
+    private int programName;
     private int[] vertexArrayName = new int[1], textureName = new int[1], bufferName = new int[1];
 
     @Override
