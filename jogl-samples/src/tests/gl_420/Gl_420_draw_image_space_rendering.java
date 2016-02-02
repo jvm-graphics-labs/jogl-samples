@@ -54,26 +54,29 @@ public class Gl_420_draw_image_space_rendering extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Texture {
-        DIFFUSE,
-        MAX
+    private class Texture {
+
+        public static final int DIFFUSE = 0;
+        public static final int MAX = 1;
     }
 
-    private enum Pipeline {
-        SPLASH,
-        MAX
+    private class Pipeline {
+
+        public static final int SPLASH = 0;
+        public static final int MAX = 1;
     }
 
-    private int[] programName = new int[Pipeline.MAX.ordinal()], vertexArrayName = {0}, samplerName = {0},
-            bufferName = new int[Buffer.MAX.ordinal()], textureName = new int[Texture.MAX.ordinal()],
-            pipelineName = new int[Pipeline.MAX.ordinal()];
+    private int[] programName = new int[Pipeline.MAX], vertexArrayName = {0}, samplerName = {0},
+            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX],
+            pipelineName = new int[Pipeline.MAX];
     private float[] projection = new float[16], model = new float[16];
 
     @Override
@@ -117,9 +120,9 @@ public class Gl_420_draw_image_space_rendering extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.SPLASH.ordinal()] = shaderProgram.program();
+            programName[Pipeline.SPLASH] = shaderProgram.program();
 
-            gl4.glProgramParameteri(programName[Pipeline.SPLASH.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            gl4.glProgramParameteri(programName[Pipeline.SPLASH], GL_PROGRAM_SEPARABLE, GL_TRUE);
 
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
@@ -129,9 +132,9 @@ public class Gl_420_draw_image_space_rendering extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
+            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
             gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
-                    programName[Pipeline.SPLASH.ordinal()]);
+                    programName[Pipeline.SPLASH]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -139,14 +142,14 @@ public class Gl_420_draw_image_space_rendering extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -159,7 +162,7 @@ public class Gl_420_draw_image_space_rendering extends Test {
 
         int uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -192,9 +195,9 @@ public class Gl_420_draw_image_space_rendering extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName, 0);
 
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
@@ -242,7 +245,7 @@ public class Gl_420_draw_image_space_rendering extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, projection.length * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -265,10 +268,10 @@ public class Gl_420_draw_image_space_rendering extends Test {
         }
 
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.SPLASH.ordinal()]);
+        gl4.glBindProgramPipeline(pipelineName[Pipeline.SPLASH]);
         gl4.glActiveTexture(GL_TEXTURE0);
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
         gl4.glBindSampler(0, samplerName[0]);
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
@@ -283,11 +286,11 @@ public class Gl_420_draw_image_space_rendering extends Test {
 
         boolean validated = true;
 
-        gl4.glDeleteProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
-        gl4.glDeleteProgram(programName[Pipeline.SPLASH.ordinal()]);
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName, 0);
+        gl4.glDeleteProgram(programName[Pipeline.SPLASH]);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteSamplers(1, samplerName, 0);
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
 
         return validated;

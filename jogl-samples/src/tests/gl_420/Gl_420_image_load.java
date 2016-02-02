@@ -57,24 +57,26 @@ public class Gl_420_image_load extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MATERIAL,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MATERIAL = 3;
+        public static final int MAX = 4;
     }
 
-    private enum Program {
-        VERT,
-        FRAG,
-        MAX
+    private class Program {
+
+        public static final int VERT = 0;
+        public static final int FRAG = 1;
+        public static final int MAX = 2;
     }
 
     private Vec2 imageSize = new Vec2();
 
-    private int[] vertexArrayName = {0}, pipelineName = {0}, programName = new int[Program.MAX.ordinal()],
-            bufferName = new int[Buffer.MAX.ordinal()], textureName = {0};
+    private int[] vertexArrayName = {0}, pipelineName = {0}, programName = new int[Program.MAX],
+            bufferName = new int[Buffer.MAX], textureName = {0};
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
@@ -110,7 +112,7 @@ public class Gl_420_image_load extends Test {
 
                 String[] vertexSourceContent = new String[]{
                     new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE + ".vert")).useDelimiter("\\A").next()};
-                programName[Program.VERT.ordinal()]
+                programName[Program.VERT]
                         = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
             }
 
@@ -118,22 +120,22 @@ public class Gl_420_image_load extends Test {
 
                 String[] fragmentSourceContent = new String[]{
                     new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE + ".frag")).useDelimiter("\\A").next()};
-                programName[Program.FRAG.ordinal()]
+                programName[Program.FRAG]
                         = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
             }
 
             if (validated) {
 
-                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.VERT.ordinal()]);
-                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.FRAG.ordinal()]);
+                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.VERT]);
+                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.FRAG]);
             }
 
             if (validated) {
 
                 gl4.glGenProgramPipelines(1, pipelineName, 0);
                 gl4.glBindProgramPipeline(pipelineName[0]);
-                gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT, programName[Program.VERT.ordinal()]);
-                gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG.ordinal()]);
+                gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT, programName[Program.VERT]);
+                gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
             }
 
         } catch (FileNotFoundException ex) {
@@ -147,14 +149,14 @@ public class Gl_420_image_load extends Test {
 
         boolean validated = true;
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -168,7 +170,7 @@ public class Gl_420_image_load extends Test {
         {
             int uniformBlockSize = Math.max(mvp.length * Float.BYTES, uniformBufferOffset[0]);
 
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
@@ -176,7 +178,7 @@ public class Gl_420_image_load extends Test {
         {
             int uniformBlockSize = Math.max(2 * Float.BYTES, uniformBufferOffset[0]);
 
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
             gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
@@ -232,7 +234,7 @@ public class Gl_420_image_load extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -240,7 +242,7 @@ public class Gl_420_image_load extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
@@ -259,7 +261,7 @@ public class Gl_420_image_load extends Test {
             FloatUtil.multMatrix(projection, view(), mvp);
             FloatUtil.multMatrix(mvp, model);
 
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
                     mvp.length * Float.BYTES, GL_MAP_WRITE_BIT);
 
@@ -272,7 +274,7 @@ public class Gl_420_image_load extends Test {
         }
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
                     2 * Float.BYTES, GL_MAP_WRITE_BIT);
             // unsigned floats!
@@ -286,8 +288,8 @@ public class Gl_420_image_load extends Test {
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL]);
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[0], 0, false, 0, GL_READ_ONLY, GL_RGBA16F);
         gl4.glBindVertexArray(vertexArrayName[0]);
@@ -302,11 +304,11 @@ public class Gl_420_image_load extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteTextures(1, textureName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteProgram(programName[Program.VERT.ordinal()]);
-        gl4.glDeleteProgram(programName[Program.FRAG.ordinal()]);
+        gl4.glDeleteProgram(programName[Program.VERT]);
+        gl4.glDeleteProgram(programName[Program.FRAG]);
         gl4.glDeleteProgramPipelines(1, pipelineName, 0);
 
         return true;
