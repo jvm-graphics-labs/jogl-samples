@@ -37,7 +37,7 @@ public class Gl_450_clip_control extends Test {
     }
 
     public Gl_450_clip_control() {
-        super("gl-450-clip-control", Profile.CORE, 4, 4);
+        super("gl-450-clip-control", Profile.CORE, 4, 5);
     }
 
     private final String SHADERS_SOURCE = "clip-control";

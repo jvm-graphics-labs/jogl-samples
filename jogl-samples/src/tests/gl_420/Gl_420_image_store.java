@@ -36,22 +36,24 @@ public class Gl_420_image_store extends Test {
     private final String SHADERS_SOURCE_READ = "image-store-read";
     private final String SHADERS_ROOT = "src/data/gl_420";
 
-    private enum Program {
-        VERT_SAVE,
-        FRAG_SAVE,
-        VERT_READ,
-        FRAG_READ,
-        MAX
+    private class Program {
+
+        public static final int VERT_SAVE = 0;
+        public static final int FRAG_SAVE = 1;
+        public static final int VERT_READ = 2;
+        public static final int FRAG_READ = 3;
+        public static final int MAX = 4;
     }
 
-    private enum Pipeline {
-        READ,
-        SAVE,
-        MAX
+    private class Pipeline {
+
+        public static final int READ = 0;
+        public static final int SAVE = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, textureName = {0}, programName = new int[Program.MAX.ordinal()],
-            pipelineName = new int[Pipeline.MAX.ordinal()];
+    private int[] vertexArrayName = {0}, textureName = {0}, programName = new int[Program.MAX],
+            pipelineName = new int[Pipeline.MAX];
     private Vec2 imageSize = new Vec2();
 
     @Override
@@ -99,7 +101,7 @@ public class Gl_420_image_store extends Test {
 
                 String[] vertexSourceContent = new String[]{
                     new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE_READ + ".vert")).useDelimiter("\\A").next()};
-                programName[Program.VERT_READ.ordinal()]
+                programName[Program.VERT_READ]
                         = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
             }
 
@@ -107,7 +109,7 @@ public class Gl_420_image_store extends Test {
 
                 String[] fragmentSourceContent = new String[]{
                     new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE_READ + ".frag")).useDelimiter("\\A").next()};
-                programName[Program.FRAG_READ.ordinal()]
+                programName[Program.FRAG_READ]
                         = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
             }
 
@@ -115,7 +117,7 @@ public class Gl_420_image_store extends Test {
 
                 String[] vertexSourceContent = new String[]{
                     new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE_SAVE + ".vert")).useDelimiter("\\A").next()};
-                programName[Program.VERT_SAVE.ordinal()]
+                programName[Program.VERT_SAVE]
                         = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
             }
 
@@ -123,29 +125,29 @@ public class Gl_420_image_store extends Test {
 
                 String[] fragmentSourceContent = new String[]{
                     new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE_SAVE + ".frag")).useDelimiter("\\A").next()};
-                programName[Program.FRAG_SAVE.ordinal()]
+                programName[Program.FRAG_SAVE]
                         = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
             }
 
             if (validated) {
 
-                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.VERT_READ.ordinal()]);
-                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.FRAG_READ.ordinal()]);
-                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.VERT_SAVE.ordinal()]);
-                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.FRAG_SAVE.ordinal()]);
+                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.VERT_READ]);
+                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.FRAG_READ]);
+                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.VERT_SAVE]);
+                validated = validated && framework.Compiler.checkProgram(gl4, programName[Program.FRAG_SAVE]);
             }
 
             if (validated) {
 
-                gl4.glGenProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
-                gl4.glUseProgramStages(pipelineName[Pipeline.READ.ordinal()],
-                        GL_VERTEX_SHADER_BIT, programName[Program.VERT_READ.ordinal()]);
-                gl4.glUseProgramStages(pipelineName[Pipeline.READ.ordinal()],
-                        GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG_READ.ordinal()]);
-                gl4.glUseProgramStages(pipelineName[Pipeline.SAVE.ordinal()],
-                        GL_VERTEX_SHADER_BIT, programName[Program.VERT_SAVE.ordinal()]);
-                gl4.glUseProgramStages(pipelineName[Pipeline.SAVE.ordinal()],
-                        GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG_SAVE.ordinal()]);
+                gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
+                gl4.glUseProgramStages(pipelineName[Pipeline.READ],
+                        GL_VERTEX_SHADER_BIT, programName[Program.VERT_READ]);
+                gl4.glUseProgramStages(pipelineName[Pipeline.READ],
+                        GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG_READ]);
+                gl4.glUseProgramStages(pipelineName[Pipeline.SAVE],
+                        GL_VERTEX_SHADER_BIT, programName[Program.VERT_SAVE]);
+                gl4.glUseProgramStages(pipelineName[Pipeline.SAVE],
+                        GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG_SAVE]);
             }
 
         } catch (FileNotFoundException ex) {
@@ -196,7 +198,7 @@ public class Gl_420_image_store extends Test {
         {
             gl4.glDrawBuffer(GL_NONE);
 
-            gl4.glBindProgramPipeline(pipelineName[Pipeline.SAVE.ordinal()]);
+            gl4.glBindProgramPipeline(pipelineName[Pipeline.SAVE]);
             gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[0], 0, false, 0, GL_WRITE_ONLY, GL_RGBA8);
             gl4.glBindVertexArray(vertexArrayName[0]);
             gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
@@ -210,7 +212,7 @@ public class Gl_420_image_store extends Test {
 
             gl4.glDrawBuffer(GL_BACK);
 
-            gl4.glBindProgramPipeline(pipelineName[Pipeline.READ.ordinal()]);
+            gl4.glBindProgramPipeline(pipelineName[Pipeline.READ]);
             gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[0], 0, false, 0, GL_READ_ONLY, GL_RGBA8);
             gl4.glBindVertexArray(vertexArrayName[0]);
             gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
@@ -228,11 +230,11 @@ public class Gl_420_image_store extends Test {
 
         gl4.glDeleteTextures(1, textureName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteProgram(programName[Program.VERT_SAVE.ordinal()]);
-        gl4.glDeleteProgram(programName[Program.FRAG_SAVE.ordinal()]);
-        gl4.glDeleteProgram(programName[Program.VERT_READ.ordinal()]);
-        gl4.glDeleteProgram(programName[Program.FRAG_READ.ordinal()]);
-        gl4.glDeleteProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
+        gl4.glDeleteProgram(programName[Program.VERT_SAVE]);
+        gl4.glDeleteProgram(programName[Program.FRAG_SAVE]);
+        gl4.glDeleteProgram(programName[Program.VERT_READ]);
+        gl4.glDeleteProgram(programName[Program.FRAG_READ]);
+        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName, 0);
 
         return true;
     }
