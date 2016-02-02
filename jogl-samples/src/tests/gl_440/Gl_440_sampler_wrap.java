@@ -72,7 +72,7 @@ public class Gl_440_sampler_wrap extends Test {
         super("gl-440-sampler-wrap", Profile.CORE, 4, 4);
     }
 
-    private final String SAMPLE_SHADERS = "sampler-wrap";
+    private final String SHADERS_SOURCE = "sampler-wrap";
     private final String SHADERS_ROOT = "src/data/gl_440";
     private final String TEXTURE_DIFFUSE_DXT5 = "kueken7_rgba_dxt5_unorm.dds";
 
@@ -166,9 +166,9 @@ public class Gl_440_sampler_wrap extends Test {
         if (validated) {
 
             ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SAMPLE_SHADERS, "vert", null, true);
+                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
             ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SAMPLE_SHADERS, "frag", null, true);
+                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.init(gl4);
@@ -307,7 +307,7 @@ public class Gl_440_sampler_wrap extends Test {
         {
             float aspect = (windowSize.x * 0.33f) / (windowSize.y * 0.50f);
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, aspect, 0.1f, 100.0f);
-            Mat4 mvp = projection.mul(viewMat4().mul(new Mat4(1.0f)));
+            Mat4 mvp = projection.mul(viewMat4()).mul(new Mat4(1.0f));
 
             uniformPointer.asFloatBuffer().put(mvp.toFA_());
         }

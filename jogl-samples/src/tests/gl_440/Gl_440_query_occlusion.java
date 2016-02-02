@@ -57,7 +57,7 @@ public class Gl_440_query_occlusion extends Test {
         super("gl-440-query-occlusion", Profile.CORE, 4, 4);
     }
 
-    private final String SAMPLE_SHADERS = "query-occlusion";
+    private final String SHADERS_SOURCE = "query-occlusion";
     private final String SHADERS_ROOT = "src/data/gl_440";
 
     private int vertexCount = 6;
@@ -129,9 +129,9 @@ public class Gl_440_query_occlusion extends Test {
         if (validated) {
 
             ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SAMPLE_SHADERS, "vert", null, true);
+                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
             ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SAMPLE_SHADERS, "frag", null, true);
+                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.init(gl4);

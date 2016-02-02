@@ -6,48 +6,7 @@
 package tests.gl_440;
 
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_CLAMP_TO_EDGE;
-import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
-import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL.GL_LEQUAL;
-import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
-import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
-import static com.jogamp.opengl.GL.GL_NEAREST;
-import static com.jogamp.opengl.GL.GL_NEAREST_MIPMAP_NEAREST;
-import static com.jogamp.opengl.GL.GL_NONE;
-import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
-import static com.jogamp.opengl.GL.GL_TEXTURE0;
-import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
-import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
-import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
-import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_S;
-import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_T;
-import static com.jogamp.opengl.GL.GL_TRIANGLES;
-import static com.jogamp.opengl.GL.GL_TRUE;
-import static com.jogamp.opengl.GL.GL_UNSIGNED_SHORT;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES2.GL_PROGRAM_SEPARABLE;
-import static com.jogamp.opengl.GL2ES2.GL_TEXTURE_BORDER_COLOR;
-import static com.jogamp.opengl.GL2ES2.GL_TEXTURE_COMPARE_FUNC;
-import static com.jogamp.opengl.GL2ES2.GL_TEXTURE_COMPARE_MODE;
-import static com.jogamp.opengl.GL2ES2.GL_TEXTURE_WRAP_R;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES3.GL_COLOR;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_2D_ARRAY;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LOD;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MIN_LOD;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_A;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_B;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_G;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_R;
-import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
-import static com.jogamp.opengl.GL2GL3.GL_TEXTURE_LOD_BIAS;
+import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
@@ -56,7 +15,6 @@ import core.glm;
 import dev.Mat4;
 import dev.Vec2;
 import dev.Vec3;
-import dev.Vec4;
 import dev.Vec4i;
 import framework.BufferUtils;
 import framework.Profile;
@@ -83,7 +41,7 @@ public class Gl_440_texture_compressed extends Test {
         super("gl-440-texture-compressed", Profile.CORE, 4, 4);
     }
 
-    private final String SAMPLE_SHADERS = "texture-2d";
+    private final String SHADERS_SOURCE = "texture-2d";
     private final String SHADERS_ROOT = "src/data/gl_440";
     private final String TEXTURE_DIFFUSE_RGB_ETC2_SRGB = "kueken7_rgb_etc2_srgb.ktx";
     private final String TEXTURE_DIFFUSE_RGB9E5_UFLOAT = "kueken7_rgb9e5_ufloat.ktx";
@@ -164,9 +122,9 @@ public class Gl_440_texture_compressed extends Test {
         if (validated) {
 
             ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SAMPLE_SHADERS, "vert", null, true);
+                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
             ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SAMPLE_SHADERS, "frag", null, true);
+                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.init(gl4);
@@ -394,7 +352,7 @@ public class Gl_440_texture_compressed extends Test {
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 1000.0f);
             Mat4 model = new Mat4(1.0f).scale(new Vec3(4.0f));
 
-            pointer.asFloatBuffer().put(projection.mul(viewMat4().mul(model)).toFA_());
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFA_());
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
