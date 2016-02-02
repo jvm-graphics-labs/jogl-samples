@@ -6,26 +6,8 @@
 package tests.gl_440;
 
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
-import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
-import static com.jogamp.opengl.GL.GL_TRIANGLES;
-import static com.jogamp.opengl.GL.GL_TRUE;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES2.GL_PROGRAM_SEPARABLE;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES3.GL_COLOR;
-import static com.jogamp.opengl.GL2ES3.GL_RASTERIZER_DISCARD;
-import static com.jogamp.opengl.GL2ES3.GL_TRANSFORM_FEEDBACK;
-import static com.jogamp.opengl.GL2ES3.GL_TRANSFORM_FEEDBACK_BUFFER;
-import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
-import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT;
 import com.jogamp.opengl.GL4;
-import static com.jogamp.opengl.GL4.GL_MAP_COHERENT_BIT;
-import static com.jogamp.opengl.GL4.GL_MAP_PERSISTENT_BIT;
+import static com.jogamp.opengl.GL4.*;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
