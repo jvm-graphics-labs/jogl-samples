@@ -55,22 +55,24 @@ public class Gl_420_picking extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        PICKING,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int PICKING = 3;
+        public static final int MAX = 4;
     }
 
-    private enum Texture {
-        DIFFUSE,
-        PICKING,
-        MAX
+    private class Texture {
+
+        public static final int DIFFUSE = 0;
+        public static final int PICKING = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = new int[Texture.MAX.ordinal()],
-            bufferName = new int[Buffer.MAX.ordinal()];
+    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = new int[Texture.MAX],
+            bufferName = new int[Buffer.MAX];
     private int programName;
     private float[] projection = new float[16], model = new float[16];
 
@@ -136,14 +138,14 @@ public class Gl_420_picking extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -152,11 +154,11 @@ public class Gl_420_picking extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.PICKING.ordinal()]);
+        gl4.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.PICKING]);
         gl4.glBufferData(GL_TEXTURE_BUFFER, Float.BYTES, null, GL_DYNAMIC_READ);
         gl4.glBindBuffer(GL_TEXTURE_BUFFER, 0);
 
@@ -169,14 +171,14 @@ public class Gl_420_picking extends Test {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
-            gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName, 0);
 
             // Diffuse
             {
                 gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
                 gl4.glActiveTexture(GL_TEXTURE0);
-                gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
+                gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
@@ -202,8 +204,8 @@ public class Gl_420_picking extends Test {
 
             // Piking
             {
-                gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.PICKING.ordinal()]);
-                gl4.glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, bufferName[Buffer.PICKING.ordinal()]);
+                gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.PICKING]);
+                gl4.glTexBuffer(GL_TEXTURE_BUFFER, GL_R32F, bufferName[Buffer.PICKING]);
                 gl4.glBindTexture(GL_TEXTURE_BUFFER, 0);
             }
 
@@ -218,7 +220,7 @@ public class Gl_420_picking extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -226,7 +228,7 @@ public class Gl_420_picking extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
@@ -246,7 +248,7 @@ public class Gl_420_picking extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, projection.length * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -275,15 +277,15 @@ public class Gl_420_picking extends Test {
 
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
-        gl4.glBindImageTexture(Semantic.Image.PICKING, textureName[Texture.PICKING.ordinal()],
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+        gl4.glBindImageTexture(Semantic.Image.PICKING, textureName[Texture.PICKING],
                 0, false, 0, GL_WRITE_ONLY, GL_R32F);
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
 
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.PICKING.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.PICKING]);
         ByteBuffer pointer = gl4.glMapBufferRange(GL_ARRAY_BUFFER, 0, Float.BYTES, GL_MAP_READ_BIT);
         float depth = pointer.getFloat();
         gl4.glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -300,8 +302,8 @@ public class Gl_420_picking extends Test {
 
         gl4.glDeleteProgramPipelines(1, pipelineName, 0);
         gl4.glDeleteProgram(programName);
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
 
         return true;

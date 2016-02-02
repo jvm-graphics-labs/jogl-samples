@@ -39,27 +39,30 @@ public class Gl_420_memory_barrier extends Test {
 
     private int vertexCount = 3;
 
-    private enum Program {
-        UPDATE,
-        BLIT,
-        MAX
+    private class Program {
+
+        public static final int UPDATE = 0;
+        public static final int BLIT = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Pipeline {
-        UPDATE,
-        BLIT,
-        MAX
+    private class Pipeline {
+
+        public static final int UPDATE = 0;
+        public static final int BLIT = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Texture {
-        DIFFUSE,
-        COLORBUFFER,
-        MAX
+    private class Texture {
+
+        public static final int DIFFUSE = 0;
+        public static final int COLORBUFFER = 1;
+        public static final int MAX = 2;
     }
 
     private int[] vertexArrayName = {0}, framebufferName = {0}, samplerName = {0},
-            pipelineName = new int[Pipeline.MAX.ordinal()], programName = new int[Program.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()];
+            pipelineName = new int[Pipeline.MAX], programName = new int[Program.MAX],
+            textureName = new int[Texture.MAX];
     private Vec2i frameBufferSize = new Vec2i();
     private int frameIndex = 0;
 
@@ -104,9 +107,9 @@ public class Gl_420_memory_barrier extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_UPDATE, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Program.UPDATE.ordinal()] = shaderProgram.program();
+            programName[Program.UPDATE] = shaderProgram.program();
 
-            gl4.glProgramParameteri(programName[Program.UPDATE.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            gl4.glProgramParameteri(programName[Program.UPDATE], GL_PROGRAM_SEPARABLE, GL_TRUE);
 
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
@@ -123,9 +126,9 @@ public class Gl_420_memory_barrier extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_BLIT, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Program.BLIT.ordinal()] = shaderProgram.program();
+            programName[Program.BLIT] = shaderProgram.program();
 
-            gl4.glProgramParameteri(programName[Program.BLIT.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            gl4.glProgramParameteri(programName[Program.BLIT], GL_PROGRAM_SEPARABLE, GL_TRUE);
 
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
@@ -134,11 +137,11 @@ public class Gl_420_memory_barrier extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[Pipeline.UPDATE.ordinal()], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Program.UPDATE.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[Pipeline.BLIT.ordinal()], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Program.BLIT.ordinal()]);
+            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
+            gl4.glUseProgramStages(pipelineName[Pipeline.UPDATE], GL_VERTEX_SHADER_BIT
+                    | GL_FRAGMENT_SHADER_BIT, programName[Program.UPDATE]);
+            gl4.glUseProgramStages(pipelineName[Pipeline.BLIT], GL_VERTEX_SHADER_BIT
+                    | GL_FRAGMENT_SHADER_BIT, programName[Program.BLIT]);
         }
 
         return validated & checkError(gl4, "initProgram - stage");
@@ -167,10 +170,10 @@ public class Gl_420_memory_barrier extends Test {
             frameBufferSize.x = texture.dimensions()[0];
             frameBufferSize.y = texture.dimensions()[1];
 
-            gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName, 0);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
@@ -191,7 +194,7 @@ public class Gl_420_memory_barrier extends Test {
                         texture.data(level));
             }
 
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
             gl4.glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, frameBufferSize.x, frameBufferSize.y);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
@@ -212,7 +215,7 @@ public class Gl_420_memory_barrier extends Test {
 
         gl4.glGenFramebuffers(1, framebufferName, 0);
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER.ordinal()], 0);
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
 
         validated = validated && (isFramebufferComplete(gl4, framebufferName[0]));
 
@@ -244,21 +247,21 @@ public class Gl_420_memory_barrier extends Test {
 
         // Update a colorbuffer bound as a framebuffer attachement and as a texture
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.UPDATE.ordinal()]);
+        gl4.glBindProgramPipeline(pipelineName[Pipeline.UPDATE]);
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, frameIndex != 0 ? textureName[Texture.COLORBUFFER.ordinal()]
-                : textureName[Texture.DIFFUSE.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D, frameIndex != 0 ? textureName[Texture.COLORBUFFER]
+                : textureName[Texture.DIFFUSE]);
 
         gl4.glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, vertexCount, 1, 0);
 
         // Blit to framebuffer
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.BLIT.ordinal()]);
+        gl4.glBindProgramPipeline(pipelineName[Pipeline.BLIT]);
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
 
         gl4.glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT);
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, vertexCount, 1, 0);
@@ -273,13 +276,13 @@ public class Gl_420_memory_barrier extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
         gl4.glDeleteFramebuffers(1, framebufferName, 0);
-        gl4.glDeleteProgram(programName[Program.BLIT.ordinal()]);
-        gl4.glDeleteProgram(programName[Program.UPDATE.ordinal()]);
+        gl4.glDeleteProgram(programName[Program.BLIT]);
+        gl4.glDeleteProgram(programName[Program.UPDATE]);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
         gl4.glDeleteSamplers(1, samplerName, 0);
-        gl4.glDeleteProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
+        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName, 0);
 
         return true;
     }

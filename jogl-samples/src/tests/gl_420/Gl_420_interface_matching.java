@@ -43,13 +43,14 @@ public class Gl_420_interface_matching extends Test {
         +1.0f, +1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
         -1.0f, +1.0f, 0.0f, 0.0f, 1.0f, 1.0f};
 
-    private enum Program {
-        VERT,
-        FRAG,
-        MAX
+    private class Program {
+
+        public static final int VERT = 0;
+        public static final int FRAG = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = {0}, programName = new int[Program.MAX.ordinal()];
+    private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = {0}, programName = new int[Program.MAX];
     private int uniformMvp;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
@@ -85,8 +86,8 @@ public class Gl_420_interface_matching extends Test {
         // Create program
         if (validated) {
 
-            ShaderProgram[] shaderPrograms = new ShaderProgram[Program.MAX.ordinal()];
-            for (int i = 0; i < Program.MAX.ordinal(); i++) {
+            ShaderProgram[] shaderPrograms = new ShaderProgram[Program.MAX];
+            for (int i = 0; i < Program.MAX; i++) {
                 shaderPrograms[i] = new ShaderProgram();
             }
 
@@ -101,29 +102,29 @@ public class Gl_420_interface_matching extends Test {
             ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
-            shaderPrograms[Program.VERT.ordinal()].init(gl4);
-            shaderPrograms[Program.FRAG.ordinal()].init(gl4);
-            programName[Program.VERT.ordinal()] = shaderPrograms[Program.VERT.ordinal()].program();
-            programName[Program.FRAG.ordinal()] = shaderPrograms[Program.FRAG.ordinal()].program();
+            shaderPrograms[Program.VERT].init(gl4);
+            shaderPrograms[Program.FRAG].init(gl4);
+            programName[Program.VERT] = shaderPrograms[Program.VERT].program();
+            programName[Program.FRAG] = shaderPrograms[Program.FRAG].program();
 
-            gl4.glProgramParameteri(programName[Program.VERT.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
-            gl4.glProgramParameteri(programName[Program.FRAG.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            gl4.glProgramParameteri(programName[Program.VERT], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            gl4.glProgramParameteri(programName[Program.FRAG], GL_PROGRAM_SEPARABLE, GL_TRUE);
 
-            shaderPrograms[Program.VERT.ordinal()].add(vertShaderCode);
-            shaderPrograms[Program.VERT.ordinal()].add(contShaderCode);
-            shaderPrograms[Program.VERT.ordinal()].add(evalShaderCode);
-            shaderPrograms[Program.VERT.ordinal()].add(geomShaderCode);
-            shaderPrograms[Program.VERT.ordinal()].link(gl4, System.out);
+            shaderPrograms[Program.VERT].add(vertShaderCode);
+            shaderPrograms[Program.VERT].add(contShaderCode);
+            shaderPrograms[Program.VERT].add(evalShaderCode);
+            shaderPrograms[Program.VERT].add(geomShaderCode);
+            shaderPrograms[Program.VERT].link(gl4, System.out);
 
-            shaderPrograms[Program.FRAG.ordinal()].add(fragShaderCode);
-            shaderPrograms[Program.FRAG.ordinal()].link(gl4, System.out);
+            shaderPrograms[Program.FRAG].add(fragShaderCode);
+            shaderPrograms[Program.FRAG].link(gl4, System.out);
         }
 
         if (validated) {
 
             gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT | GL_TESS_CONTROL_SHADER_BIT
-                    | GL_TESS_EVALUATION_SHADER_BIT | GL_GEOMETRY_SHADER_BIT, programName[Program.VERT.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG.ordinal()]);
+                    | GL_TESS_EVALUATION_SHADER_BIT | GL_GEOMETRY_SHADER_BIT, programName[Program.VERT]);
+            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -213,7 +214,7 @@ public class Gl_420_interface_matching extends Test {
         FloatUtil.multMatrix(projection, view(), mvp);
         FloatUtil.multMatrix(mvp, model);
 
-        gl4.glProgramUniformMatrix4fv(programName[Program.VERT.ordinal()], uniformMvp, 1, false, mvp, 0);
+        gl4.glProgramUniformMatrix4fv(programName[Program.VERT], uniformMvp, 1, false, mvp, 0);
 
         gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x, windowSize.y}, 0);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
@@ -223,7 +224,7 @@ public class Gl_420_interface_matching extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         gl4.glPatchParameteri(GL_PATCH_VERTICES, vertexCount);
 
-        assert (!validate(gl4, programName[Program.VERT.ordinal()]));
+        assert (!validate(gl4, programName[Program.VERT]));
         gl4.glDrawArraysInstancedBaseInstance(GL_PATCHES, 0, vertexCount, 1, 0);
 
         return true;
@@ -264,7 +265,7 @@ public class Gl_420_interface_matching extends Test {
         byte[] attribName = new byte[activeAttributeMaxLength[0]];
 
         for (int i = 0; i < activeAttribute[0]; ++i) {
-            
+
             gl4.glGetActiveAttrib(programName,
                     i,
                     activeAttributeMaxLength[0],
@@ -343,7 +344,8 @@ public class Gl_420_interface_matching extends Test {
                         return true;
                     }
                 } else// if((VertexAttrib.Normalized == GL_TRUE) || (GL_VERTEX_ATTRIB_ARRAY_FLOAT == GL_TRUE))
-                 if (!(vertexAttrib.type == GL_FLOAT
+                {
+                    if (!(vertexAttrib.type == GL_FLOAT
                             || vertexAttrib.type == GL_FLOAT_VEC2
                             || vertexAttrib.type == GL_FLOAT_VEC3
                             || vertexAttrib.type == GL_FLOAT_VEC4
@@ -358,6 +360,7 @@ public class Gl_420_interface_matching extends Test {
                             || vertexAttrib.type == GL_FLOAT_MAT4x3)) {
                         return true;
                     } // It could be any vertex array attribute type
+                }
             }
 
             System.out.println("glGetActiveAttrib(" + i + ", " + attribLocation + ", " + attribLength[0]

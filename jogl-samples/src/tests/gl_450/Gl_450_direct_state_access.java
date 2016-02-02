@@ -6,57 +6,8 @@
 package tests.gl_450;
 
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL.GL_CLAMP_TO_EDGE;
-import static com.jogamp.opengl.GL.GL_COLOR_ATTACHMENT0;
-import static com.jogamp.opengl.GL.GL_COLOR_BUFFER_BIT;
-import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL.GL_FRAMEBUFFER;
-import static com.jogamp.opengl.GL.GL_LEQUAL;
-import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
-import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
-import static com.jogamp.opengl.GL.GL_MULTISAMPLE;
-import static com.jogamp.opengl.GL.GL_NEAREST;
-import static com.jogamp.opengl.GL.GL_NEAREST_MIPMAP_NEAREST;
-import static com.jogamp.opengl.GL.GL_NONE;
-import static com.jogamp.opengl.GL.GL_RGBA8;
-import static com.jogamp.opengl.GL.GL_SAMPLES;
-import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
-import static com.jogamp.opengl.GL.GL_TEXTURE_CUBE_MAP_POSITIVE_X;
-import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
-import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
-import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_S;
-import static com.jogamp.opengl.GL.GL_TEXTURE_WRAP_T;
-import static com.jogamp.opengl.GL.GL_TRIANGLES;
-import static com.jogamp.opengl.GL.GL_TRUE;
-import static com.jogamp.opengl.GL.GL_UNSIGNED_SHORT;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES2.GL_PROGRAM_SEPARABLE;
-import static com.jogamp.opengl.GL2ES2.GL_TEXTURE_2D_MULTISAMPLE;
-import static com.jogamp.opengl.GL2ES2.GL_TEXTURE_BORDER_COLOR;
-import static com.jogamp.opengl.GL2ES2.GL_TEXTURE_COMPARE_FUNC;
-import static com.jogamp.opengl.GL2ES2.GL_TEXTURE_COMPARE_MODE;
-import static com.jogamp.opengl.GL2ES2.GL_TEXTURE_WRAP_R;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES3.GL_COLOR;
-import static com.jogamp.opengl.GL2ES3.GL_SAMPLE_SHADING;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LOD;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MIN_LOD;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_A;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_B;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_G;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_R;
-import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
-import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT;
-import static com.jogamp.opengl.GL2GL3.GL_LOWER_LEFT;
-import static com.jogamp.opengl.GL2GL3.GL_TEXTURE_LOD_BIAS;
 import com.jogamp.opengl.GL4;
-import static com.jogamp.opengl.GL4.GL_MAP_COHERENT_BIT;
-import static com.jogamp.opengl.GL4.GL_MAP_PERSISTENT_BIT;
-import static com.jogamp.opengl.GL4.GL_NEGATIVE_ONE_TO_ONE;
+import static com.jogamp.opengl.GL4.*;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
@@ -458,6 +409,7 @@ public class Gl_450_direct_state_access extends Test {
             Mat4 projectionB = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
             uniformPointer.position(uniformBlockSize);
             uniformPointer.asFloatBuffer().put(projectionB.mul(viewMat4()).scale(new Vec3(2), new Mat4(1)).toFA_());
+            uniformPointer.rewind();
         }
 
         // Step 1, render the scene in a multisampled framebuffer
