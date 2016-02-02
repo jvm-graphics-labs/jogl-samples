@@ -58,14 +58,15 @@ public class Gl_420_debug_output extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        ELEMENT,
-        VERTEX,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int ELEMENT = 0;
+        public static final int VERTEX = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MAX = 3;
     }
 
-    private int[] bufferName = new int[Buffer.MAX.ordinal()], pipelineName = {0}, vertexArrayName = {0};
+    private int[] bufferName = new int[Buffer.MAX], pipelineName = {0}, vertexArrayName = {0};
     private int programName;
     private float[] projection = new float[16], model = new float[16];
 
@@ -133,12 +134,12 @@ public class Gl_420_debug_output extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
@@ -147,19 +148,19 @@ public class Gl_420_debug_output extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, 16 * Float.BYTES, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -266,7 +267,7 @@ public class Gl_420_debug_output extends Test {
 
         GL4 gl4 = (GL4) gl;
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
 
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, 16 * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -290,7 +291,7 @@ public class Gl_420_debug_output extends Test {
 
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
 
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
 
@@ -306,7 +307,7 @@ public class Gl_420_debug_output extends Test {
 
         gl4.glDeleteProgramPipelines(1, pipelineName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteProgram(programName);
 
         return validated;
