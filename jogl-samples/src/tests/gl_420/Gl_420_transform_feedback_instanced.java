@@ -53,22 +53,24 @@ public class Gl_420_transform_feedback_instanced extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Pipeline {
-        TRANSFORM,
-        FEEDBACK,
-        MAX
+    private class Pipeline {
+
+        public static final int TRANSFORM = 0;
+        public static final int FEEDBACK = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Buffer {
-        TRANSFORM_ELEMENT,
-        TRANSFORM_VERTEX,
-        FEEDBACK_VERTEX,
-        MAX
+    private class Buffer {
+
+        public static final int TRANSFORM_ELEMENT = 0;
+        public static final int TRANSFORM_VERTEX = 1;
+        public static final int FEEDBACK_VERTEX = 2;
+        public static final int MAX = 3;
     }
 
-    private int[] feedbackName = {0}, pipelineName = new int[Pipeline.MAX.ordinal()],
-            programName = new int[Pipeline.MAX.ordinal()], vertexArrayName = new int[Pipeline.MAX.ordinal()],
-            bufferName = new int[Buffer.MAX.ordinal()];
+    private int[] feedbackName = {0}, pipelineName = new int[Pipeline.MAX],
+            programName = new int[Pipeline.MAX], vertexArrayName = new int[Pipeline.MAX],
+            bufferName = new int[Buffer.MAX];
     private int transformUniformMvp, feedbackUniformMvp;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
@@ -112,13 +114,13 @@ public class Gl_420_transform_feedback_instanced extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TRANSFORM, "geom", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.TRANSFORM.ordinal()] = shaderProgram.program();
-            gl4.glProgramParameteri(programName[Pipeline.TRANSFORM.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.TRANSFORM] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.TRANSFORM], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(geomShaderCode);
 
             String[] strings = {"gl_Position", "Block.color"};
-            gl4.glTransformFeedbackVaryings(programName[Pipeline.TRANSFORM.ordinal()], 2, strings, GL_INTERLEAVED_ATTRIBS);
+            gl4.glTransformFeedbackVaryings(programName[Pipeline.TRANSFORM], 2, strings, GL_INTERLEAVED_ATTRIBS);
 
             shaderProgram.link(gl4, System.out);
         }
@@ -126,7 +128,7 @@ public class Gl_420_transform_feedback_instanced extends Test {
         // Get variables locations
         if (validated) {
 
-            transformUniformMvp = gl4.glGetUniformLocation(programName[Pipeline.TRANSFORM.ordinal()], "mvp");
+            transformUniformMvp = gl4.glGetUniformLocation(programName[Pipeline.TRANSFORM], "mvp");
             validated = validated && (transformUniformMvp >= 0);
         }
 
@@ -141,8 +143,8 @@ public class Gl_420_transform_feedback_instanced extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_FEEDBACK, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.FEEDBACK.ordinal()] = shaderProgram.program();
-            gl4.glProgramParameteri(programName[Pipeline.FEEDBACK.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.FEEDBACK] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.FEEDBACK], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -151,17 +153,17 @@ public class Gl_420_transform_feedback_instanced extends Test {
         // Get variables locations
         if (validated) {
 
-            feedbackUniformMvp = gl4.glGetUniformLocation(programName[Pipeline.FEEDBACK.ordinal()], "mvp");
+            feedbackUniformMvp = gl4.glGetUniformLocation(programName[Pipeline.FEEDBACK], "mvp");
             validated = validated && (feedbackUniformMvp >= 0);
         }
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[Pipeline.FEEDBACK.ordinal()], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.FEEDBACK.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[Pipeline.TRANSFORM.ordinal()], GL_VERTEX_SHADER_BIT
-                    | GL_GEOMETRY_SHADER_BIT, programName[Pipeline.TRANSFORM.ordinal()]);
+            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
+            gl4.glUseProgramStages(pipelineName[Pipeline.FEEDBACK], GL_VERTEX_SHADER_BIT
+                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.FEEDBACK]);
+            gl4.glUseProgramStages(pipelineName[Pipeline.TRANSFORM], GL_VERTEX_SHADER_BIT
+                    | GL_GEOMETRY_SHADER_BIT, programName[Pipeline.TRANSFORM]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -170,23 +172,23 @@ public class Gl_420_transform_feedback_instanced extends Test {
     private boolean initVertexArray(GL4 gl4) {
 
         // Build a vertex array objects
-        gl4.glGenVertexArrays(Pipeline.MAX.ordinal(), vertexArrayName, 0);
+        gl4.glGenVertexArrays(Pipeline.MAX, vertexArrayName, 0);
 
-        gl4.glBindVertexArray(vertexArrayName[Pipeline.TRANSFORM.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[Pipeline.TRANSFORM]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.TRANSFORM_VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.TRANSFORM_VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 0, 0);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.TRANSFORM_ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.TRANSFORM_ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
-        gl4.glBindVertexArray(vertexArrayName[Pipeline.FEEDBACK.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[Pipeline.FEEDBACK]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.FEEDBACK_VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.FEEDBACK_VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 2 * 4 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, 2 * 4 * Float.BYTES, 4 * Float.BYTES);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -206,7 +208,7 @@ public class Gl_420_transform_feedback_instanced extends Test {
         // Generate a buffer object
         gl4.glGenTransformFeedbacks(1, feedbackName, 0);
         gl4.glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackName[0]);
-        gl4.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, bufferName[Buffer.FEEDBACK_VERTEX.ordinal()]);
+        gl4.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, bufferName[Buffer.FEEDBACK_VERTEX]);
         gl4.glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 
         return true;
@@ -214,21 +216,21 @@ public class Gl_420_transform_feedback_instanced extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.TRANSFORM_ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.TRANSFORM_ELEMENT]);
         IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.TRANSFORM_VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.TRANSFORM_VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.FEEDBACK_VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.FEEDBACK_VERTEX]);
         gl4.glBufferData(GL_ARRAY_BUFFER, 2 * 4 * Float.BYTES * elementCount, null, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -245,9 +247,9 @@ public class Gl_420_transform_feedback_instanced extends Test {
         FloatUtil.multMatrix(projection, view(), mvp);
         FloatUtil.multMatrix(mvp, model);
 
-        gl4.glProgramUniformMatrix4fv(programName[Pipeline.TRANSFORM.ordinal()],
+        gl4.glProgramUniformMatrix4fv(programName[Pipeline.TRANSFORM],
                 transformUniformMvp, 1, false, mvp, 0);
-        gl4.glProgramUniformMatrix4fv(programName[Pipeline.FEEDBACK.ordinal()],
+        gl4.glProgramUniformMatrix4fv(programName[Pipeline.FEEDBACK],
                 feedbackUniformMvp, 1, false, mvp, 0);
 
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
@@ -260,8 +262,8 @@ public class Gl_420_transform_feedback_instanced extends Test {
         // Disable rasterisation, vertices processing only!
         gl4.glEnable(GL_RASTERIZER_DISCARD);
 
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.TRANSFORM.ordinal()]);
-        gl4.glBindVertexArray(vertexArrayName[Pipeline.TRANSFORM.ordinal()]);
+        gl4.glBindProgramPipeline(pipelineName[Pipeline.TRANSFORM]);
+        gl4.glBindVertexArray(vertexArrayName[Pipeline.TRANSFORM]);
 
         gl4.glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackName[0]);
         gl4.glBeginTransformFeedback(GL_TRIANGLES);
@@ -273,8 +275,8 @@ public class Gl_420_transform_feedback_instanced extends Test {
         gl4.glDisable(GL_RASTERIZER_DISCARD);
 
         // Second draw, reuse the captured attributes
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.FEEDBACK.ordinal()]);
-        gl4.glBindVertexArray(vertexArrayName[Pipeline.FEEDBACK.ordinal()]);
+        gl4.glBindProgramPipeline(pipelineName[Pipeline.FEEDBACK]);
+        gl4.glBindVertexArray(vertexArrayName[Pipeline.FEEDBACK]);
 
         gl4.glDrawTransformFeedbackStreamInstanced(GL_TRIANGLE_STRIP, feedbackName[0], 0, 5);
 
@@ -286,11 +288,11 @@ public class Gl_420_transform_feedback_instanced extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
-        gl4.glDeleteVertexArrays(Pipeline.MAX.ordinal(), vertexArrayName, 0);
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
-        gl4.glDeleteProgram(programName[Pipeline.TRANSFORM.ordinal()]);
-        gl4.glDeleteProgram(programName[Pipeline.FEEDBACK.ordinal()]);
+        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName, 0);
+        gl4.glDeleteVertexArrays(Pipeline.MAX, vertexArrayName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteProgram(programName[Pipeline.TRANSFORM]);
+        gl4.glDeleteProgram(programName[Pipeline.FEEDBACK]);
         gl4.glDeleteTransformFeedbacks(1, feedbackName, 0);
 
         return true;

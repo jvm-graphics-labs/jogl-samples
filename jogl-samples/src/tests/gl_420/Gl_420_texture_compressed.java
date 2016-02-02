@@ -60,25 +60,27 @@ public class Gl_420_texture_compressed extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Texture {
-        RGB8,
-        DXT5,
-        RGTC,
-        BPTC,
-        MAX
+    private class Texture {
+
+        public static final int RGB8 = 0;
+        public static final int DXT5 = 1;
+        public static final int RGTC = 2;
+        public static final int BPTC = 3;
+        public static final int MAX = 4;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, samplerName = {0}, bufferName = new int[Buffer.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()];
+    private int[] pipelineName = {0}, vertexArrayName = {0}, samplerName = {0}, bufferName = new int[Buffer.MAX],
+            textureName = new int[Texture.MAX];
     private int programName;
-    private Vec4i[] viewport = new Vec4i[Texture.MAX.ordinal()];
+    private Vec4i[] viewport = new Vec4i[Texture.MAX];
     private float[] projection = new float[16], model = new float[16];
 
     @Override
@@ -86,11 +88,11 @@ public class Gl_420_texture_compressed extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        viewport[Texture.RGB8.ordinal()] = new Vec4i(0, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.DXT5.ordinal()] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.RGTC.ordinal()] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
+        viewport[Texture.RGB8] = new Vec4i(0, 0, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.DXT5] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.RGTC] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
                 windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.BPTC.ordinal()] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.BPTC] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
 
         boolean validated = true;
 
@@ -149,21 +151,21 @@ public class Gl_420_texture_compressed extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, projection.length * Float.BYTES, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -175,7 +177,7 @@ public class Gl_420_texture_compressed extends Test {
         try {
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName, 0);
 
             {
 
@@ -184,7 +186,7 @@ public class Gl_420_texture_compressed extends Test {
                 jgli.Gl.Format format = jgli.Gl.translate(texture.format());
                 jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
-                gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BPTC.ordinal()]);
+                gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.BPTC]);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, swizzles.r.value);
@@ -210,7 +212,7 @@ public class Gl_420_texture_compressed extends Test {
                 jgli.Gl.Format format = jgli.Gl.translate(texture.format());
                 jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
-                gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DXT5.ordinal()]);
+                gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DXT5]);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, swizzles.r.value);
@@ -236,7 +238,7 @@ public class Gl_420_texture_compressed extends Test {
                 jgli.Gl.Format format = jgli.Gl.translate(texture.format());
                 jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
-                gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGTC.ordinal()]);
+                gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGTC]);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, swizzles.r.value);
@@ -261,7 +263,7 @@ public class Gl_420_texture_compressed extends Test {
                 jgli.Gl.Format format = jgli.Gl.translate(texture.format());
                 jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
-                gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGB8.ordinal()]);
+                gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGB8]);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, swizzles.r.value);
@@ -294,7 +296,7 @@ public class Gl_420_texture_compressed extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -302,7 +304,7 @@ public class Gl_420_texture_compressed extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
@@ -333,7 +335,7 @@ public class Gl_420_texture_compressed extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, projection.length * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
@@ -358,12 +360,12 @@ public class Gl_420_texture_compressed extends Test {
 
         // Bind rendering objects
         gl4.glBindProgramPipeline(pipelineName[0]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
         gl4.glBindSampler(0, samplerName[0]);
         gl4.glBindVertexArray(vertexArrayName[0]);
 
         // Draw each texture in different viewports
-        for (int index = 0; index < Texture.MAX.ordinal(); ++index) {
+        for (int index = 0; index < Texture.MAX; ++index) {
             gl4.glViewportIndexedfv(0, viewport[index].toFloatArray(), 0);
 
             gl4.glActiveTexture(GL_TEXTURE0);
