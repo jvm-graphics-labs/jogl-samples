@@ -36,16 +36,17 @@ public class Gl_400_fbo_rtt extends Test {
 
     private int vertexCount = 3;
 
-    private enum Texture {
-        R,
-        G,
-        B,
-        MAX
+    private class Texture {
+
+        public static final int R = 0;
+        public static final int G = 1;
+        public static final int B = 2;
+        public static final int MAX = 3;
     };
 
-    private int[] framebufferName = {0}, vertexArrayName = {0}, textureName = new int[Texture.MAX.ordinal()];
+    private int[] framebufferName = {0}, vertexArrayName = {0}, textureName = new int[Texture.MAX];
     private int programName, uniformDiffuse;
-    private Vec4[] viewport = new Vec4[Texture.MAX.ordinal()];
+    private Vec4[] viewport = new Vec4[Texture.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -54,10 +55,10 @@ public class Gl_400_fbo_rtt extends Test {
 
         Vec2i framebufferSize = new Vec2i(windowSize.x / FRAMEBUFFER_FACTOR, windowSize.y / FRAMEBUFFER_FACTOR);
 
-        viewport[Texture.R.ordinal()] = new Vec4(windowSize.x >> 1, 0, framebufferSize.x, framebufferSize.y);
-        viewport[Texture.G.ordinal()] = new Vec4(windowSize.x >> 1, windowSize.y >> 1,
+        viewport[Texture.R] = new Vec4(windowSize.x >> 1, 0, framebufferSize.x, framebufferSize.y);
+        viewport[Texture.G] = new Vec4(windowSize.x >> 1, windowSize.y >> 1,
                 framebufferSize.x, framebufferSize.y);
-        viewport[Texture.B.ordinal()] = new Vec4(0, windowSize.y >> 1, framebufferSize.x, framebufferSize.y);
+        viewport[Texture.B] = new Vec4(0, windowSize.y >> 1, framebufferSize.x, framebufferSize.y);
 
         boolean validated = true;
 
@@ -112,9 +113,9 @@ public class Gl_400_fbo_rtt extends Test {
     private boolean initTexture(GL4 gl4) {
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glGenTextures(Texture.MAX, textureName, 0);
 
-        for (int i = Texture.R.ordinal(); i <= Texture.B.ordinal(); ++i) {
+        for (int i = Texture.R; i <= Texture.B; ++i) {
             gl4.glBindTexture(GL_TEXTURE_2D, textureName[i]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
@@ -190,7 +191,7 @@ public class Gl_400_fbo_rtt extends Test {
 
         gl4.glBindVertexArray(vertexArrayName[0]);
 
-        for (int i = 0; i < Texture.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Texture.MAX; ++i) {
             gl4.glViewport((int) viewport[i].x, (int) viewport[i].y, (int) viewport[i].z, (int) viewport[i].w);
 
             gl4.glActiveTexture(GL_TEXTURE0);
@@ -209,7 +210,7 @@ public class Gl_400_fbo_rtt extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
         gl4.glDeleteFramebuffers(1, framebufferName, 0);
         gl4.glDeleteProgram(programName);
 

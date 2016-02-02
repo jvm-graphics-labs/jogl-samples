@@ -56,21 +56,23 @@ public class Gl_400_sampler_array extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Texture {
-        RGB,
-        BGR,
-        MAX
+    private class Texture {
+
+        public static final int RGB = 0;
+        public static final int BGR = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, samplerName = {0}, bufferName = new int[Buffer.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()];
+    private int[] vertexArrayName = {0}, samplerName = {0}, bufferName = new int[Buffer.MAX],
+            textureName = new int[Texture.MAX];
     private int programName, uniformDiffuseIndex;
     private float[] projection = new float[16], model = new float[16];
 
@@ -144,14 +146,14 @@ public class Gl_400_sampler_array extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -160,7 +162,7 @@ public class Gl_400_sampler_array extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -188,12 +190,12 @@ public class Gl_400_sampler_array extends Test {
     private boolean initTexture(GL4 gl4) {
 
         try {
-            gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName, 0);
 
             {
 
                 gl4.glActiveTexture(GL_TEXTURE0);
-                gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.RGB.ordinal()]);
+                gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.RGB]);
                 gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_RED);
                 gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
                 gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
@@ -215,7 +217,7 @@ public class Gl_400_sampler_array extends Test {
 
             {
                 gl4.glActiveTexture(GL_TEXTURE1);
-                gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.BGR.ordinal()]);
+                gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.BGR]);
                 gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_BLUE);
                 gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
                 gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_B, GL_RED);
@@ -244,14 +246,14 @@ public class Gl_400_sampler_array extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
@@ -267,7 +269,7 @@ public class Gl_400_sampler_array extends Test {
         diffuseIndex++;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
                     16 * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -292,14 +294,14 @@ public class Gl_400_sampler_array extends Test {
         gl4.glUseProgram(programName);
         gl4.glUniform1ui(uniformDiffuseIndex, (diffuseIndex / 100) % 2);
 
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.RGB.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.RGB]);
         gl4.glBindSampler(0, samplerName[0]);
 
         gl4.glActiveTexture(GL_TEXTURE1);
-        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.BGR.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.BGR]);
         gl4.glBindSampler(1, samplerName[0]);
 
         gl4.glBindVertexArray(vertexArrayName[0]);
@@ -313,9 +315,9 @@ public class Gl_400_sampler_array extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteProgram(programName);
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
         gl4.glDeleteSamplers(1, samplerName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
 

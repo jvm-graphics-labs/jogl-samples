@@ -51,10 +51,11 @@ public class Gl_400_texture_cube extends Test {
         -1.0f, +1.0f,
         -1.0f, -1.0f};
 
-    private enum Buffer {
-        VERTEX,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int TRANSFORM = 1;
+        public static final int MAX = 2;
     }
 
     private class Transform {
@@ -67,7 +68,7 @@ public class Gl_400_texture_cube extends Test {
     };
 
     private int programName;
-    private int[] vertexArrayName = {0}, textureName = {0}, samplerName = {0}, bufferName = new int[Buffer.MAX.ordinal()];
+    private int[] vertexArrayName = {0}, textureName = {0}, samplerName = {0}, bufferName = new int[Buffer.MAX];
     private float[] projection = new float[16], view = new float[16], model = new float[16],
             mvp = new float[16], mv = new float[16];
 
@@ -138,9 +139,9 @@ public class Gl_400_texture_cube extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -149,7 +150,7 @@ public class Gl_400_texture_cube extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(Transform.SIZEOF, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -209,7 +210,7 @@ public class Gl_400_texture_cube extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Float.BYTES, 0);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -226,7 +227,7 @@ public class Gl_400_texture_cube extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, Transform.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -262,7 +263,7 @@ public class Gl_400_texture_cube extends Test {
         gl4.glActiveTexture(GL_TEXTURE0);
         gl4.glBindTexture(GL_TEXTURE_CUBE_MAP_ARRAY, textureName[0]);
         gl4.glBindSampler(0, samplerName[0]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
         gl4.glBindVertexArray(vertexArrayName[0]);
 
         gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
@@ -275,7 +276,7 @@ public class Gl_400_texture_cube extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteProgram(programName);
         gl4.glDeleteTextures(1, textureName, 0);
         gl4.glDeleteSamplers(1, samplerName, 0);
