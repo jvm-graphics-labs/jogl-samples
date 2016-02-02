@@ -57,20 +57,22 @@ public class Gl_410_program_separate extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Program {
-        VERTEX,
-        FRAGMENT,
-        MAX
+    private class Program {
+
+        public static final int VERTEX = 0;
+        public static final int FRAGMENT = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, separateProgramName = new int[Program.MAX.ordinal()],
-            bufferName = new int[Buffer.MAX.ordinal()], vertexArrayName = {0}, textureName = {0};
+    private int[] pipelineName = {0}, separateProgramName = new int[Program.MAX],
+            bufferName = new int[Buffer.MAX], vertexArrayName = {0}, textureName = {0};
     private int separateUniformMvp, separateUniformDiffuse, unifiedProgramName, unifiedUniformMvp, unifiedUniformDiffuse;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
@@ -144,7 +146,7 @@ public class Gl_410_program_separate extends Test {
 
                 String[] vertexSourceContent = new String[]{
                     new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE + ".vert")).useDelimiter("\\A").next()};
-                separateProgramName[Program.VERTEX.ordinal()]
+                separateProgramName[Program.VERTEX]
                         = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
             }
 
@@ -152,30 +154,30 @@ public class Gl_410_program_separate extends Test {
 
                 String[] fragmentSourceContent = new String[]{
                     new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE + ".frag")).useDelimiter("\\A").next()};
-                separateProgramName[Program.FRAGMENT.ordinal()]
+                separateProgramName[Program.FRAGMENT]
                         = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
             }
 
             if (validated) {
 
-                validated = validated &&
-                        framework.Compiler.checkProgram(gl4, separateProgramName[Program.VERTEX.ordinal()]);
-                validated = validated && 
-                        framework.Compiler.checkProgram(gl4, separateProgramName[Program.FRAGMENT.ordinal()]);
+                validated = validated
+                        && framework.Compiler.checkProgram(gl4, separateProgramName[Program.VERTEX]);
+                validated = validated
+                        && framework.Compiler.checkProgram(gl4, separateProgramName[Program.FRAGMENT]);
             }
             if (validated) {
 
                 gl4.glGenProgramPipelines(1, pipelineName, 0);
                 gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT,
-                        separateProgramName[Program.VERTEX.ordinal()]);
+                        separateProgramName[Program.VERTEX]);
                 gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT,
-                        separateProgramName[Program.FRAGMENT.ordinal()]);
+                        separateProgramName[Program.FRAGMENT]);
             }
             if (validated) {
 
-                separateUniformMvp = gl4.glGetUniformLocation(separateProgramName[Program.VERTEX.ordinal()], "mvp");
+                separateUniformMvp = gl4.glGetUniformLocation(separateProgramName[Program.VERTEX], "mvp");
                 separateUniformDiffuse
-                        = gl4.glGetUniformLocation(separateProgramName[Program.FRAGMENT.ordinal()], "diffuse");
+                        = gl4.glGetUniformLocation(separateProgramName[Program.FRAGMENT], "diffuse");
             }
 
         } catch (FileNotFoundException ex) {
@@ -221,14 +223,14 @@ public class Gl_410_program_separate extends Test {
 
     private boolean initVertexBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -241,7 +243,7 @@ public class Gl_410_program_separate extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -270,13 +272,13 @@ public class Gl_410_program_separate extends Test {
 
         gl4.glBindTexture(GL_TEXTURE_2D, textureName[0]);
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
 
         // Render with the separate programs
         gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x / 2, windowSize.y}, 0);
-        gl4.glProgramUniformMatrix4fv(separateProgramName[Program.VERTEX.ordinal()],
+        gl4.glProgramUniformMatrix4fv(separateProgramName[Program.VERTEX],
                 separateUniformMvp, 1, false, mvp, 0);
-        gl4.glProgramUniform1i(separateProgramName[Program.FRAGMENT.ordinal()], separateUniformDiffuse, 0);
+        gl4.glProgramUniform1i(separateProgramName[Program.FRAGMENT], separateUniformDiffuse, 0);
         gl4.glBindProgramPipeline(pipelineName[0]);
         {
             gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 0, 1, 0);
@@ -301,11 +303,11 @@ public class Gl_410_program_separate extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
         gl4.glDeleteTextures(1, textureName, 0);
-        gl4.glDeleteProgram(separateProgramName[Program.VERTEX.ordinal()]);
-        gl4.glDeleteProgram(separateProgramName[Program.FRAGMENT.ordinal()]);
+        gl4.glDeleteProgram(separateProgramName[Program.VERTEX]);
+        gl4.glDeleteProgram(separateProgramName[Program.FRAGMENT]);
         gl4.glDeleteProgram(unifiedProgramName);
         gl4.glDeleteProgramPipelines(1, pipelineName, 0);
 

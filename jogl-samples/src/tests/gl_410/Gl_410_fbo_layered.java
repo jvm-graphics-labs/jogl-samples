@@ -54,21 +54,23 @@ public class Gl_410_fbo_layered extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int MAX = 2;
     };
 
-    private enum Program {
-        LAYERING,
-        VIEWPORT,
-        MAX
+    private class Program {
+
+        public static final int LAYERING = 0;
+        public static final int VIEWPORT = 1;
+        public static final int MAX = 2;
     };
 
-    private int[] framebufferName = {0}, vertexArrayName = new int[Program.MAX.ordinal()],
-            programName = new int[Program.MAX.ordinal()], uniformMvp = new int[Program.MAX.ordinal()],
-            samplerName = {0}, bufferName = new int[Buffer.MAX.ordinal()], textureColorbufferName = {0};
+    private int[] framebufferName = {0}, vertexArrayName = new int[Program.MAX],
+            programName = new int[Program.MAX], uniformMvp = new int[Program.MAX],
+            samplerName = {0}, bufferName = new int[Buffer.MAX], textureColorbufferName = {0};
     private int uniformDiffuse;
     private float[] projection = new float[16], view = new float[16], model = new float[16], mvp = new float[16];
 
@@ -123,7 +125,7 @@ public class Gl_410_fbo_layered extends Test {
             shaderProgram.add(geometryShaderCode);
             shaderProgram.add(fragmentShaderCode);
 
-            programName[Program.LAYERING.ordinal()] = shaderProgram.program();
+            programName[Program.LAYERING] = shaderProgram.program();
 
             shaderProgram.link(gl4, System.out);
         }
@@ -146,7 +148,7 @@ public class Gl_410_fbo_layered extends Test {
             shaderProgram.add(geometryShaderCode);
             shaderProgram.add(fragmentShaderCode);
 
-            programName[Program.VIEWPORT.ordinal()] = shaderProgram.program();
+            programName[Program.VIEWPORT] = shaderProgram.program();
 
             shaderProgram.link(gl4, System.out);
 
@@ -155,10 +157,10 @@ public class Gl_410_fbo_layered extends Test {
         // Get variables locations
         if (validated) {
 
-            for (int i = 0; i < Program.MAX.ordinal(); ++i) {
+            for (int i = 0; i < Program.MAX; ++i) {
                 uniformMvp[i] = gl4.glGetUniformLocation(programName[i], "mvp");
             }
-            uniformDiffuse = gl4.glGetUniformLocation(programName[Program.VIEWPORT.ordinal()], "diffuse");
+            uniformDiffuse = gl4.glGetUniformLocation(programName[Program.VIEWPORT], "diffuse");
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -166,14 +168,14 @@ public class Gl_410_fbo_layered extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -250,11 +252,11 @@ public class Gl_410_fbo_layered extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
+        gl4.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
 
-        gl4.glBindVertexArray(vertexArrayName[Program.VIEWPORT.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[Program.VIEWPORT]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -262,19 +264,19 @@ public class Gl_410_fbo_layered extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
-        gl4.glBindVertexArray(vertexArrayName[Program.LAYERING.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[Program.LAYERING]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
@@ -292,20 +294,20 @@ public class Gl_410_fbo_layered extends Test {
         FloatUtil.multMatrix(projection, view, mvp);
         FloatUtil.multMatrix(mvp, model);
 
-        gl4.glProgramUniformMatrix4fv(programName[Program.LAYERING.ordinal()],
-                uniformMvp[Program.LAYERING.ordinal()], 1, false, mvp, 0);
-        gl4.glProgramUniformMatrix4fv(programName[Program.VIEWPORT.ordinal()],
-                uniformMvp[Program.VIEWPORT.ordinal()], 1, false, mvp, 0);
-        gl4.glProgramUniform1i(programName[Program.VIEWPORT.ordinal()], uniformDiffuse, 0);
+        gl4.glProgramUniformMatrix4fv(programName[Program.LAYERING],
+                uniformMvp[Program.LAYERING], 1, false, mvp, 0);
+        gl4.glProgramUniformMatrix4fv(programName[Program.VIEWPORT],
+                uniformMvp[Program.VIEWPORT], 1, false, mvp, 0);
+        gl4.glProgramUniform1i(programName[Program.VIEWPORT], uniformDiffuse, 0);
 
         // Pass 1
         {
             gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
             gl4.glViewportIndexedfv(0, new float[]{0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y}, 0);
 
-            gl4.glUseProgram(programName[Program.LAYERING.ordinal()]);
+            gl4.glUseProgram(programName[Program.LAYERING]);
 
-            gl4.glBindVertexArray(vertexArrayName[Program.LAYERING.ordinal()]);
+            gl4.glBindVertexArray(vertexArrayName[Program.LAYERING]);
             gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
         }
 
@@ -326,13 +328,13 @@ public class Gl_410_fbo_layered extends Test {
             gl4.glViewportIndexedfv(3, new float[]{border, windowSize.y * 0.5f + border,
                 windowSize.x * 0.5f - 2.0f * border, windowSize.y * 0.5f - 2.0f * border}, 0);
 
-            gl4.glUseProgram(programName[Program.VIEWPORT.ordinal()]);
+            gl4.glUseProgram(programName[Program.VIEWPORT]);
 
             gl4.glActiveTexture(GL_TEXTURE0);
             gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureColorbufferName[0]);
             gl4.glBindSampler(0, samplerName[0]);
 
-            gl4.glBindVertexArray(vertexArrayName[Program.VIEWPORT.ordinal()]);
+            gl4.glBindVertexArray(vertexArrayName[Program.VIEWPORT]);
             gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
         }
 
@@ -344,12 +346,12 @@ public class Gl_410_fbo_layered extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteVertexArrays(Program.MAX, vertexArrayName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteTextures(1, textureColorbufferName, 0);
         gl4.glDeleteFramebuffers(1, framebufferName, 0);
-        gl4.glDeleteProgram(programName[Program.VIEWPORT.ordinal()]);
-        gl4.glDeleteProgram(programName[Program.LAYERING.ordinal()]);
+        gl4.glDeleteProgram(programName[Program.VIEWPORT]);
+        gl4.glDeleteProgram(programName[Program.LAYERING]);
         gl4.glDeleteSamplers(1, samplerName, 0);
 
         return true;

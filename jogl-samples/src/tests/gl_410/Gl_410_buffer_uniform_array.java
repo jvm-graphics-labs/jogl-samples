@@ -52,16 +52,17 @@ public class Gl_410_buffer_uniform_array extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        INSTANCE,
-        ELEMENT,
-        TRANSFORM,
-        MATERIAL,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int INSTANCE = 1;
+        public static final int ELEMENT = 2;
+        public static final int TRANSFORM = 3;
+        public static final int MATERIAL = 4;
+        public static final int MAX = 5;
     }
 
-    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX.ordinal()], uniformBufferAlignment = {0};
+    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX], uniformBufferAlignment = {0};
     private int programName;
     private float[] projection = new float[16], model0 = new float[16], model1 = new float[16];
 
@@ -136,16 +137,16 @@ public class Gl_410_buffer_uniform_array extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.INSTANCE.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.INSTANCE]);
             gl4.glVertexAttribIPointer(Semantic.Attr.DRAW_ID, 1, GL_INT, 0, 0);
             gl4.glVertexAttribDivisor(Semantic.Attr.DRAW_ID, 1);
             gl4.glEnableVertexAttribArray(Semantic.Attr.DRAW_ID);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
@@ -156,22 +157,22 @@ public class Gl_410_buffer_uniform_array extends Test {
 
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferAlignment, 0);
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] instance = {0, 1};
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.INSTANCE.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.INSTANCE]);
         IntBuffer instanceBuffer = GLBuffers.newDirectIntBuffer(instance);
         gl4.glBufferData(GL_ARRAY_BUFFER, instance.length * Integer.BYTES, instanceBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(instanceBuffer);
@@ -180,7 +181,7 @@ public class Gl_410_buffer_uniform_array extends Test {
         int uniformBufferSize = Math.max(uniformBufferAlignment[0], projection.length * Float.BYTES) * 2;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBufferSize, null, GL_DYNAMIC_DRAW);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
@@ -189,7 +190,7 @@ public class Gl_410_buffer_uniform_array extends Test {
             FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(
                     new float[]{1.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 1.0f});
 
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
             gl4.glBufferData(GL_UNIFORM_BUFFER, diffuseBuffer.capacity() * Float.BYTES, diffuseBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(diffuseBuffer);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -207,7 +208,7 @@ public class Gl_410_buffer_uniform_array extends Test {
         int uniformBufferRange = uniformBufferOffset * 2;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
                     uniformBufferRange, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -235,13 +236,13 @@ public class Gl_410_buffer_uniform_array extends Test {
         gl4.glUseProgram(programName);
 
         // Attach the buffer to UBO binding point semantic::uniform::MATERIAL
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL]);
         gl4.glBindVertexArray(vertexArrayName[0]);
 
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
-        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()],
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM],
                 0, model0.length * Float.BYTES);
-        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM1, bufferName[Buffer.TRANSFORM.ordinal()],
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM1, bufferName[Buffer.TRANSFORM],
                 uniformBufferOffset, model1.length * Float.BYTES);
 
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
@@ -256,7 +257,7 @@ public class Gl_410_buffer_uniform_array extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteProgram(programName);
 
         return true;

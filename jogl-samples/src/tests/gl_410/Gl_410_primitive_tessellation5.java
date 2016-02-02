@@ -43,16 +43,17 @@ public class Gl_410_primitive_tessellation5 extends Test {
         +1.0f, +1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
         -1.0f, +1.0f, 0.0f, 0.0f, 1.0f, 1.0f};
 
-    private enum Program {
-        VERT,
-        CONT,
-        EVAL,
-        GEOM,
-        FRAG,
-        MAX
+    private class Program {
+
+        public static final int VERT = 0;
+        public static final int CONT = 1;
+        public static final int EVAL = 2;
+        public static final int GEOM = 3;
+        public static final int FRAG = 4;
+        public static final int MAX = 5;
     }
 
-    private int[] pipelineName = {0}, programName = new int[Program.MAX.ordinal()], arrayBufferName = {0},
+    private int[] pipelineName = {0}, programName = new int[Program.MAX], arrayBufferName = {0},
             vertexArrayName = {0};
     private int uniformMvp;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
@@ -88,7 +89,7 @@ public class Gl_410_primitive_tessellation5 extends Test {
         // Create program
         if (validated) {
 
-            ShaderProgram[] shaderPrograms = new ShaderProgram[Program.MAX.ordinal()];
+            ShaderProgram[] shaderPrograms = new ShaderProgram[Program.MAX];
 
             ShaderCode[] shaderCodes = new ShaderCode[]{
                 ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE,
@@ -102,7 +103,7 @@ public class Gl_410_primitive_tessellation5 extends Test {
                 ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE,
                 "frag", null, true)};
 
-            for (int i = 0; i < Program.MAX.ordinal(); i++) {
+            for (int i = 0; i < Program.MAX; i++) {
 
                 shaderPrograms[i] = new ShaderProgram();
                 shaderPrograms[i].init(gl4);
@@ -115,18 +116,18 @@ public class Gl_410_primitive_tessellation5 extends Test {
 
         if (validated) {
 
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT, programName[Program.VERT.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[0], GL_TESS_CONTROL_SHADER_BIT, programName[Program.CONT.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[0], GL_TESS_EVALUATION_SHADER_BIT, programName[Program.EVAL.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[0], GL_GEOMETRY_SHADER_BIT, programName[Program.GEOM.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG.ordinal()]);
+            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT, programName[Program.VERT]);
+            gl4.glUseProgramStages(pipelineName[0], GL_TESS_CONTROL_SHADER_BIT, programName[Program.CONT]);
+            gl4.glUseProgramStages(pipelineName[0], GL_TESS_EVALUATION_SHADER_BIT, programName[Program.EVAL]);
+            gl4.glUseProgramStages(pipelineName[0], GL_GEOMETRY_SHADER_BIT, programName[Program.GEOM]);
+            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
 
         }
 
         // Get variables locations
         if (validated) {
 
-            uniformMvp = gl4.glGetUniformLocation(programName[Program.VERT.ordinal()], "mvp");
+            uniformMvp = gl4.glGetUniformLocation(programName[Program.VERT], "mvp");
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -175,7 +176,7 @@ public class Gl_410_primitive_tessellation5 extends Test {
         FloatUtil.multMatrix(projection, view(), mvp);
         FloatUtil.multMatrix(mvp, model);
 
-        gl4.glProgramUniformMatrix4fv(programName[Program.VERT.ordinal()], uniformMvp, 1, false, mvp, 0);
+        gl4.glProgramUniformMatrix4fv(programName[Program.VERT], uniformMvp, 1, false, mvp, 0);
 
         gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x, windowSize.y}, 0);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
@@ -196,7 +197,7 @@ public class Gl_410_primitive_tessellation5 extends Test {
 
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
         gl4.glDeleteBuffers(1, arrayBufferName, 0);
-        for (int i = 0; i < Program.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Program.MAX; ++i) {
             gl4.glDeleteProgram(programName[i]);
         }
 

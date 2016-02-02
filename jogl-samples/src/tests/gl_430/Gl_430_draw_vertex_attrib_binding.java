@@ -207,19 +207,17 @@ public class Gl_430_draw_vertex_attrib_binding extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            int bindingIndex = 0;
-
-            gl4.glVertexAttribBinding(Semantic.Attr.POSITION, bindingIndex);
+            gl4.glVertexAttribBinding(Semantic.Attr.POSITION, Semantic.Buffer.STATIC);
             gl4.glVertexAttribFormat(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0);
 
-            gl4.glVertexAttribBinding(Semantic.Attr.TEXCOORD, bindingIndex);
+            gl4.glVertexAttribBinding(Semantic.Attr.TEXCOORD, Semantic.Buffer.STATIC);
             gl4.glVertexAttribFormat(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Float.BYTES);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
             gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
-            gl4.glBindVertexBuffer(bindingIndex, bufferName[Buffer.VERTEX.ordinal()], 0, 2 * 2 * Float.BYTES);
+            gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName[Buffer.VERTEX.ordinal()], 0, 2 * 2 * Float.BYTES);
         }
         gl4.glBindVertexArray(0);
 

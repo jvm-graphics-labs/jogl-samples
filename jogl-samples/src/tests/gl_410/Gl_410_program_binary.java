@@ -57,21 +57,23 @@ public class Gl_410_program_binary extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Program {
-        VERT,
-        GEOM,
-        FRAG,
-        MAX
+    private class Program {
+
+        public static final int VERT = 0;
+        public static final int GEOM = 1;
+        public static final int FRAG = 2;
+        public static final int MAX = 3;
     }
 
-    private int[] pipelineName = {0}, programName = new int[Program.MAX.ordinal()],
-            bufferName = new int[Buffer.MAX.ordinal()], vertexArrayName = {0}, texture2dName = {0};
+    private int[] pipelineName = {0}, programName = new int[Program.MAX],
+            bufferName = new int[Buffer.MAX], vertexArrayName = {0}, texture2dName = {0};
     private int uniformMvp, uniformDiffuse;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
@@ -104,17 +106,17 @@ public class Gl_410_program_binary extends Test {
 
         gl4.glGenProgramPipelines(1, pipelineName, 0);
 
-        programName[Program.VERT.ordinal()] = gl4.glCreateProgram();
-        gl4.glProgramParameteri(programName[Program.VERT.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
-        gl4.glProgramParameteri(programName[Program.VERT.ordinal()], GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+        programName[Program.VERT] = gl4.glCreateProgram();
+        gl4.glProgramParameteri(programName[Program.VERT], GL_PROGRAM_SEPARABLE, GL_TRUE);
+        gl4.glProgramParameteri(programName[Program.VERT], GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 
-        programName[Program.GEOM.ordinal()] = gl4.glCreateProgram();
-        gl4.glProgramParameteri(programName[Program.GEOM.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
-        gl4.glProgramParameteri(programName[Program.GEOM.ordinal()], GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+        programName[Program.GEOM] = gl4.glCreateProgram();
+        gl4.glProgramParameteri(programName[Program.GEOM], GL_PROGRAM_SEPARABLE, GL_TRUE);
+        gl4.glProgramParameteri(programName[Program.GEOM], GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 
-        programName[Program.FRAG.ordinal()] = gl4.glCreateProgram();
-        gl4.glProgramParameteri(programName[Program.FRAG.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
-        gl4.glProgramParameteri(programName[Program.FRAG.ordinal()], GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
+        programName[Program.FRAG] = gl4.glCreateProgram();
+        gl4.glProgramParameteri(programName[Program.FRAG], GL_PROGRAM_SEPARABLE, GL_TRUE);
+        gl4.glProgramParameteri(programName[Program.FRAG], GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
 
         int[] numProgramBinaryFormats = {0};
         gl4.glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, numProgramBinaryFormats, 0);
@@ -138,16 +140,16 @@ public class Gl_410_program_binary extends Test {
 
         if (validated) {
 
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT, programName[Program.VERT.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[0], GL_GEOMETRY_SHADER_BIT, programName[Program.GEOM.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG.ordinal()]);
+            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT, programName[Program.VERT]);
+            gl4.glUseProgramStages(pipelineName[0], GL_GEOMETRY_SHADER_BIT, programName[Program.GEOM]);
+            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
             validated = validated && checkError(gl4, "initProgram - stage");
         }
 
         if (validated) {
 
-            uniformMvp = gl4.glGetUniformLocation(programName[Program.VERT.ordinal()], "mvp");
-            uniformDiffuse = gl4.glGetUniformLocation(programName[Program.FRAG.ordinal()], "diffuse");
+            uniformMvp = gl4.glGetUniformLocation(programName[Program.VERT], "mvp");
+            uniformDiffuse = gl4.glGetUniformLocation(programName[Program.FRAG], "diffuse");
         }
 
         return validated && checkError(gl4, "initProgram");
@@ -155,7 +157,7 @@ public class Gl_410_program_binary extends Test {
 
     /**
      * We will first create the shader in the old-way, then save them
-     * as binary and finally load them as binary. 
+     * as binary and finally load them as binary.
      * In this way you can also still modify them if you want.
      */
     private boolean loadVertexShader(GL4 gl4) throws IOException {
@@ -196,9 +198,9 @@ public class Gl_410_program_binary extends Test {
         Files.write(Paths.get(path), data);
         data = Files.readAllBytes(Paths.get(path));
 
-        gl4.glProgramBinary(programName[Program.VERT.ordinal()], binaryFormat[0],
+        gl4.glProgramBinary(programName[Program.VERT], binaryFormat[0],
                 GLBuffers.newDirectByteBuffer(data), length[0]);
-        gl4.glGetProgramiv(programName[Program.VERT.ordinal()], GL_LINK_STATUS, success, 0);
+        gl4.glGetProgramiv(programName[Program.VERT], GL_LINK_STATUS, success, 0);
 
         return success[0] == GL_TRUE;
     }
@@ -237,9 +239,9 @@ public class Gl_410_program_binary extends Test {
         Files.write(Paths.get(path), data);
         data = Files.readAllBytes(Paths.get(path));
 
-        gl4.glProgramBinary(programName[Program.GEOM.ordinal()], binaryFormat[0],
+        gl4.glProgramBinary(programName[Program.GEOM], binaryFormat[0],
                 GLBuffers.newDirectByteBuffer(data), length[0]);
-        gl4.glGetProgramiv(programName[Program.GEOM.ordinal()], GL_LINK_STATUS, success, 0);
+        gl4.glGetProgramiv(programName[Program.GEOM], GL_LINK_STATUS, success, 0);
 
         return success[0] == GL_TRUE;
     }
@@ -278,9 +280,9 @@ public class Gl_410_program_binary extends Test {
         Files.write(Paths.get(path), data);
         data = Files.readAllBytes(Paths.get(path));
 
-        gl4.glProgramBinary(programName[Program.FRAG.ordinal()], binaryFormat[0],
+        gl4.glProgramBinary(programName[Program.FRAG], binaryFormat[0],
                 GLBuffers.newDirectByteBuffer(data), length[0]);
-        gl4.glGetProgramiv(programName[Program.FRAG.ordinal()], GL_LINK_STATUS, success, 0);
+        gl4.glGetProgramiv(programName[Program.FRAG], GL_LINK_STATUS, success, 0);
 
         return success[0] == GL_TRUE;
     }
@@ -321,14 +323,14 @@ public class Gl_410_program_binary extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -342,7 +344,7 @@ public class Gl_410_program_binary extends Test {
 
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -365,8 +367,8 @@ public class Gl_410_program_binary extends Test {
         FloatUtil.multMatrix(projection, view(), mvp);
         FloatUtil.multMatrix(mvp, model);
 
-        gl4.glProgramUniformMatrix4fv(programName[Program.VERT.ordinal()], uniformMvp, 1, false, mvp, 0);
-        gl4.glProgramUniform1i(programName[Program.FRAG.ordinal()], uniformDiffuse, 0);
+        gl4.glProgramUniformMatrix4fv(programName[Program.VERT], uniformMvp, 1, false, mvp, 0);
+        gl4.glProgramUniform1i(programName[Program.FRAG], uniformDiffuse, 0);
 
         gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x, windowSize.y}, 0);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
@@ -378,7 +380,7 @@ public class Gl_410_program_binary extends Test {
 
         gl4.glBindVertexArray(vertexArrayName[0]);
         //!\ Need to be called after glBindVertexArray
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 0, 1, 0);
 
         return true;
@@ -389,10 +391,10 @@ public class Gl_410_program_binary extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
         gl4.glDeleteTextures(1, texture2dName, 0);
-        for (int i = 0; i < Program.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Program.MAX; ++i) {
             gl4.glDeleteProgram(programName[i]);
         }
         gl4.glDeleteProgramPipelines(1, pipelineName, 0);
