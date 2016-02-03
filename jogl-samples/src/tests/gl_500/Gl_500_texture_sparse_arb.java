@@ -178,72 +178,72 @@ public class Gl_500_texture_sparse_arb extends Test {
     
     private boolean initTexture(GL4 gl4)	{
         
-		gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		int size=16384;
-		std::size_t const Levels = gli::levels(size);
-		std::size_t const MaxLevels = 4;
-
-		gl4.glGenTextures(1, &TextureName);
-		gl4.glActiveTexture(GL_TEXTURE0);
-		gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, TextureName);
-		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_RED);
-		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
-		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
-		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
-		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
-		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, MaxLevels - 1);
-		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SPARSE_ARB, GL_TRUE);
-		gl4.glTexStorage3D(GL_TEXTURE_2D_ARRAY, static_cast<GLsizei>(gli::levels(size)), GL_RGBA8, GLsizei(size), GLsizei(size), 1);
-
-		glm::ivec3 PageSize;
-		gl4.glGetInternalformativ(GL_TEXTURE_2D_ARRAY, GL_RGBA8, GL_VIRTUAL_PAGE_SIZE_X_ARB, 1, &PageSize.x);
-		gl4.glGetInternalformativ(GL_TEXTURE_2D_ARRAY, GL_RGBA8, GL_VIRTUAL_PAGE_SIZE_Y_ARB, 1, &PageSize.y);
-		gl4.glGetInternalformativ(GL_TEXTURE_2D_ARRAY, GL_RGBA8, GL_VIRTUAL_PAGE_SIZE_Z_ARB, 1, &PageSize.z);
-
-		std::vector<glm::u8vec4> Page;
-		Page.resize(static_cast<std::size_t>(PageSize.x * PageSize.y * PageSize.z));
-
-		GLint Page3DSizeX(0);
-		GLint Page3DSizeY(0);
-		GLint Page3DSizeZ(0);
-		gl4.glGetInternalformativ(GL_TEXTURE_3D, GL_RGBA32F, GL_VIRTUAL_PAGE_SIZE_X_ARB, 1, &Page3DSizeX);
-		gl4.glGetInternalformativ(GL_TEXTURE_3D, GL_RGBA32F, GL_VIRTUAL_PAGE_SIZE_Y_ARB, 1, &Page3DSizeY);
-		gl4.glGetInternalformativ(GL_TEXTURE_3D, GL_RGBA32F, GL_VIRTUAL_PAGE_SIZE_Z_ARB, 1, &Page3DSizeZ);
-
-		for(std::size_t Level = 0; Level < MaxLevels; ++Level)
-		{
-			GLsizei LevelSize = (size >> Level);
-			GLsizei TileCountY = LevelSize / PageSize.y;
-			GLsizei TileCountX = LevelSize / PageSize.x;
-
-			for(GLsizei j = 0; j < TileCountY; ++j)
-			for(GLsizei i = 0; i < TileCountX; ++i)
-			{
-				if(glm::abs(glm::length(glm::vec2(i, j) / glm::vec2(TileCountX, TileCountY) * 2.0f - 1.0f)) > 1.0f)
-					continue;
-
-				std::fill(Page.begin(), Page.end(), glm::u8vec4(
-					static_cast<unsigned char>(float(i) / float(LevelSize / PageSize.x) * 255),
-					static_cast<unsigned char>(float(j) / float(LevelSize / PageSize.y) * 255),
-					static_cast<unsigned char>(float(Level) / float(MaxLevels) * 255), 255));
-
-		gl4.		glTexPageCommitmentARB(GL_TEXTURE_2D_ARRAY, static_cast<GLint>(Level),
-					static_cast<GLsizei>(PageSize.x) * i, static_cast<GLsizei>(PageSize.y) * j, 0,
-					static_cast<GLsizei>(PageSize.x), static_cast<GLsizei>(PageSize.y), 1,
-					GL_TRUE);
-
-		gl4.		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, static_cast<GLint>(Level),
-					static_cast<GLsizei>(PageSize.x) * i, static_cast<GLsizei>(PageSize.y) * j, 0,
-					static_cast<GLsizei>(PageSize.x), static_cast<GLsizei>(PageSize.y), 1,
-					GL_RGBA, GL_UNSIGNED_BYTE,
-					&Page[0][0]);
-			}
-		}
-
-		gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+//		gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//
+//		int size=16384;
+//		std::size_t const Levels = gli::levels(size);
+//		std::size_t const MaxLevels = 4;
+//
+//		gl4.glGenTextures(1, &TextureName);
+//		gl4.glActiveTexture(GL_TEXTURE0);
+//		gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, TextureName);
+//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_RED);
+//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
+//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
+//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
+//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
+//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, MaxLevels - 1);
+//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SPARSE_ARB, GL_TRUE);
+//		gl4.glTexStorage3D(GL_TEXTURE_2D_ARRAY, static_cast<GLsizei>(gli::levels(size)), GL_RGBA8, GLsizei(size), GLsizei(size), 1);
+//
+//		glm::ivec3 PageSize;
+//		gl4.glGetInternalformativ(GL_TEXTURE_2D_ARRAY, GL_RGBA8, GL_VIRTUAL_PAGE_SIZE_X_ARB, 1, &PageSize.x);
+//		gl4.glGetInternalformativ(GL_TEXTURE_2D_ARRAY, GL_RGBA8, GL_VIRTUAL_PAGE_SIZE_Y_ARB, 1, &PageSize.y);
+//		gl4.glGetInternalformativ(GL_TEXTURE_2D_ARRAY, GL_RGBA8, GL_VIRTUAL_PAGE_SIZE_Z_ARB, 1, &PageSize.z);
+//
+//		std::vector<glm::u8vec4> Page;
+//		Page.resize(static_cast<std::size_t>(PageSize.x * PageSize.y * PageSize.z));
+//
+//		GLint Page3DSizeX(0);
+//		GLint Page3DSizeY(0);
+//		GLint Page3DSizeZ(0);
+//		gl4.glGetInternalformativ(GL_TEXTURE_3D, GL_RGBA32F, GL_VIRTUAL_PAGE_SIZE_X_ARB, 1, &Page3DSizeX);
+//		gl4.glGetInternalformativ(GL_TEXTURE_3D, GL_RGBA32F, GL_VIRTUAL_PAGE_SIZE_Y_ARB, 1, &Page3DSizeY);
+//		gl4.glGetInternalformativ(GL_TEXTURE_3D, GL_RGBA32F, GL_VIRTUAL_PAGE_SIZE_Z_ARB, 1, &Page3DSizeZ);
+//
+//		for(std::size_t Level = 0; Level < MaxLevels; ++Level)
+//		{
+//			GLsizei LevelSize = (size >> Level);
+//			GLsizei TileCountY = LevelSize / PageSize.y;
+//			GLsizei TileCountX = LevelSize / PageSize.x;
+//
+//			for(GLsizei j = 0; j < TileCountY; ++j)
+//			for(GLsizei i = 0; i < TileCountX; ++i)
+//			{
+//				if(glm::abs(glm::length(glm::vec2(i, j) / glm::vec2(TileCountX, TileCountY) * 2.0f - 1.0f)) > 1.0f)
+//					continue;
+//
+//				std::fill(Page.begin(), Page.end(), glm::u8vec4(
+//					static_cast<unsigned char>(float(i) / float(LevelSize / PageSize.x) * 255),
+//					static_cast<unsigned char>(float(j) / float(LevelSize / PageSize.y) * 255),
+//					static_cast<unsigned char>(float(Level) / float(MaxLevels) * 255), 255));
+//
+//		gl4.		glTexPageCommitmentARB(GL_TEXTURE_2D_ARRAY, static_cast<GLint>(Level),
+//					static_cast<GLsizei>(PageSize.x) * i, static_cast<GLsizei>(PageSize.y) * j, 0,
+//					static_cast<GLsizei>(PageSize.x), static_cast<GLsizei>(PageSize.y), 1,
+//					GL_TRUE);
+//
+//		gl4.		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, static_cast<GLint>(Level),
+//					static_cast<GLsizei>(PageSize.x) * i, static_cast<GLsizei>(PageSize.y) * j, 0,
+//					static_cast<GLsizei>(PageSize.x), static_cast<GLsizei>(PageSize.y), 1,
+//					GL_RGBA, GL_UNSIGNED_BYTE,
+//					&Page[0][0]);
+//			}
+//		}
+//
+//		gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
 		return true;
 	}
