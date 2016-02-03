@@ -45,7 +45,7 @@ public class Gl_450_culling extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZEOF;
+    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ 0.0f, 1.0f,
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,
@@ -148,7 +148,7 @@ public class Gl_450_culling extends Test {
                 GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT,
                 uniformBufferOffset, 0);
 
-        int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -204,13 +204,13 @@ public class Gl_450_culling extends Test {
             gl4.glVertexAttribFormat(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0);
 
             gl4.glVertexAttribBinding(Semantic.Attr.TEXCOORD, Semantic.Buffer.STATIC);
-            gl4.glVertexAttribFormat(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vec2.SIZEOF);
+            gl4.glVertexAttribFormat(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vec2.SIZE);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
             gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
-            gl4.glBindVertexBuffer(0, bufferName[Buffer.VERTEX], 0, glf.Vertex_v2fv2f.SIZEOF);
+            gl4.glBindVertexBuffer(0, bufferName[Buffer.VERTEX], 0, glf.Vertex_v2fv2f.SIZE);
         }
         gl4.glBindVertexArray(0);
 
@@ -224,8 +224,7 @@ public class Gl_450_culling extends Test {
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer pointer = gl4.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
+            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);

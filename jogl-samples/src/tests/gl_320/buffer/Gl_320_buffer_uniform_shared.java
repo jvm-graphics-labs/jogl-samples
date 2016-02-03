@@ -42,7 +42,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/buffer";
 
     private final int vertexCount = 4;
-    private final int positionSize = vertexCount * Vec2.SIZEOF;
+    private final int positionSize = vertexCount * Vec2.SIZE;
     private final float[] positionData = new float[]{
         -1f, -1f,
         +1f, -1f,
@@ -204,7 +204,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.UNIFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
-                    uniformBlockSizeTransform[0] + Vec4.SIZEOF,
+                    uniformBlockSizeTransform[0] + Vec4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             pointer.asFloatBuffer().put(mvp.toFA_());

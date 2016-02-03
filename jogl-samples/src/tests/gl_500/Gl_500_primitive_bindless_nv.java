@@ -6,36 +6,7 @@
 package tests.gl_500;
 
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL.GL_ALPHA;
-import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
-import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
-import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
-import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
-import static com.jogamp.opengl.GL.GL_TRIANGLES;
-import static com.jogamp.opengl.GL.GL_TRUE;
-import static com.jogamp.opengl.GL.GL_UNPACK_ALIGNMENT;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES2.GL_PROGRAM_SEPARABLE;
-import static com.jogamp.opengl.GL2ES2.GL_RED;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES3.GL_BLUE;
-import static com.jogamp.opengl.GL2ES3.GL_COLOR;
-import static com.jogamp.opengl.GL2ES3.GL_GREEN;
-import static com.jogamp.opengl.GL2ES3.GL_READ_ONLY;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_A;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_B;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_G;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_R;
-import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
-import static com.jogamp.opengl.GL2GL3.GL_BUFFER_GPU_ADDRESS_NV;
-import static com.jogamp.opengl.GL2GL3.GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV;
-import static com.jogamp.opengl.GL2GL3.GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV;
+import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
@@ -74,7 +45,7 @@ public class Gl_500_primitive_bindless_nv extends Test {
 
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZEOF;
+    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ 0.0f, 1.0f,
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,
@@ -174,7 +145,7 @@ public class Gl_500_primitive_bindless_nv extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-        gl4.glBufferData(GL_UNIFORM_BUFFER, Mat4.SIZEOF, null, GL_DYNAMIC_DRAW);
+        gl4.glBufferData(GL_UNIFORM_BUFFER, Mat4.SIZE, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         return true;
@@ -220,8 +191,8 @@ public class Gl_500_primitive_bindless_nv extends Test {
         gl4.glCreateVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glVertexAttribFormatNV(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZEOF);
-            gl4.glVertexAttribFormatNV(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZEOF);
+            gl4.glVertexAttribFormatNV(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE);
+            gl4.glVertexAttribFormatNV(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE);
 
             gl4.glEnableClientState(GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV);
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -260,7 +231,7 @@ public class Gl_500_primitive_bindless_nv extends Test {
             Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF, GL_MAP_WRITE_BIT);
+            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE, GL_MAP_WRITE_BIT);
             pointer.asFloatBuffer().put(mvp.toFA_());
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
@@ -274,8 +245,8 @@ public class Gl_500_primitive_bindless_nv extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
 
         gl4.glBufferAddressRangeNV(GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, Semantic.Attr.POSITION, address[0], vertexSize);
-        gl4.glBufferAddressRangeNV(GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, Semantic.Attr.TEXCOORD, address[0] + Vec2.SIZEOF,
-                vertexSize - Vec2.SIZEOF);
+        gl4.glBufferAddressRangeNV(GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, Semantic.Attr.TEXCOORD, address[0] + Vec2.SIZE,
+                vertexSize - Vec2.SIZE);
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, vertexCount, 1, 0);
 

@@ -48,7 +48,7 @@ public class Es_300_draw_elements extends Test {
         0, 2, 3};
 
     private final int vertexCount = 4;
-    private final int positionSize = vertexCount * Vec2.SIZEOF;
+    private final int positionSize = vertexCount * Vec2.SIZE;
     private final float[] positionData = new float[]{
         -1f, -1f,
         +1f, -1f,

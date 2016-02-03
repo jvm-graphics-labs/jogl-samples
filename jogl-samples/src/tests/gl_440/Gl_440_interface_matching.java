@@ -40,7 +40,7 @@ public class Gl_440_interface_matching extends Test {
     private final String SHADERS_ROOT = "src/data/gl_440";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * Vertex_v2fc4d.SIZEOF;
+    private int vertexSize = vertexCount * Vertex_v2fc4d.SIZE;
     private Vertex_v2fc4d[] vertexData = {
         new Vertex_v2fc4d(new Vec2(-1.0f, -1.0f), new Vec4d(1.0f, 0.0f, 0.0f, 1.0f)),
         new Vertex_v2fc4d(new Vec2(+1.0f, -1.0f), new Vec4d(1.0f, 1.0f, 0.0f, 1.0f)),
@@ -275,7 +275,7 @@ public class Gl_440_interface_matching extends Test {
                 GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT,
                 uniformBufferOffset, 0);
 
-        int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferStorage(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT);
@@ -339,9 +339,9 @@ public class Gl_440_interface_matching extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION + 0, 2, GL_FLOAT, false, Vertex_v2fc4d.SIZEOF, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION + 1, 2, GL_FLOAT, false, Vertex_v2fc4d.SIZEOF, 0);
-            gl4.glVertexAttribLPointer(Semantic.Attr.COLOR, 4, GL_DOUBLE, Vertex_v2fc4d.SIZEOF, Vec2.SIZEOF);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION + 0, 2, GL_FLOAT, false, Vertex_v2fc4d.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION + 1, 2, GL_FLOAT, false, Vertex_v2fc4d.SIZE, 0);
+            gl4.glVertexAttribLPointer(Semantic.Attr.COLOR, 4, GL_DOUBLE, Vertex_v2fc4d.SIZE, Vec2.SIZE);
             //glVertexAttribLPointer(semantic::attr::COLOR, 4, GL_DOUBLE, sizeof(glf::vertex_v2fc4d), BUFFER_OFFSET(sizeof(glm::vec2)));
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -372,8 +372,7 @@ public class Gl_440_interface_matching extends Test {
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer pointer = gl4.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
+            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);

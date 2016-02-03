@@ -59,7 +59,7 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         0, 2, 3};
 
     private int vertexCount = 11;
-    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZEOF;
+    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ 0.0f, 1.0f,
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,
@@ -216,7 +216,7 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-        gl4.glBufferData(GL_UNIFORM_BUFFER, Mat4.SIZEOF * indirectBufferCount, null, GL_DYNAMIC_DRAW);
+        gl4.glBufferData(GL_UNIFORM_BUFFER, Mat4.SIZE * indirectBufferCount, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         DrawElementsIndirectCommand[] commands = new DrawElementsIndirectCommand[6];
@@ -257,8 +257,8 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZEOF, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZEOF, Vec2.SIZEOF);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -388,7 +388,7 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF * indirectBufferCount,
+            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE * indirectBufferCount,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, windowSize.x / 3.0f / windowSize.y,
@@ -397,9 +397,9 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
             Mat4 model = new Mat4(1.0f);
 
             pointer.asFloatBuffer().put(projection.mul(view, new Mat4()).translate(0.0f, 0.0f, 0.5f).toFA_());
-            pointer.position(Mat4.SIZEOF * 1);
+            pointer.position(Mat4.SIZE * 1);
             pointer.asFloatBuffer().put(projection.mul(view, new Mat4()).translate(0.0f, 0.0f, 0.0f).toFA_());
-            pointer.position(Mat4.SIZEOF * 2);
+            pointer.position(Mat4.SIZE * 2);
             pointer.asFloatBuffer().put(projection.mul(view, new Mat4()).translate(0.0f, 0.0f, -0.5f).toFA_());
             pointer.rewind();
 

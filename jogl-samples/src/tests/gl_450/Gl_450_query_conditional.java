@@ -41,7 +41,7 @@ public class Gl_450_query_conditional extends Test {
     private final String SHADERS_ROOT = "src/data/gl_450";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * Vec2.SIZEOF;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -143,13 +143,13 @@ public class Gl_450_query_conditional extends Test {
         BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        uniformTransformOffset = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
+        uniformTransformOffset = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformTransformOffset * 2, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        uniformMaterialOffset = Math.max(Vec4.SIZEOF, uniformBufferOffset[0]);
+        uniformMaterialOffset = Math.max(Vec4.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformMaterialOffset * 2, null, GL_STATIC_DRAW);
@@ -214,8 +214,8 @@ public class Gl_450_query_conditional extends Test {
 
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL], 0, Vec4.SIZEOF);
-        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM], 0, Mat4.SIZEOF);
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL], 0, Vec4.SIZE);
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM], 0, Mat4.SIZE);
 
         // The first orange quad is not written in the framebuffer.
         gl4.glColorMaski(0, false, false, false, false);
@@ -232,7 +232,7 @@ public class Gl_450_query_conditional extends Test {
         gl4.glColorMaski(0, true, true, true, true);
 
         gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM],
-                uniformTransformOffset, Mat4.SIZEOF);
+                uniformTransformOffset, Mat4.SIZE);
 
         // Draw only if one sample went through the tests, 
         // we don't need to get the query result which prevent the rendering pipeline to stall.
@@ -240,7 +240,7 @@ public class Gl_450_query_conditional extends Test {
         {	// Clear color buffer with white
             gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
-            gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL], 0, Vec4.SIZEOF);
+            gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL], 0, Vec4.SIZE);
             gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
         gl4.glEndConditionalRender();
@@ -249,7 +249,7 @@ public class Gl_450_query_conditional extends Test {
             gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
 
             gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL],
-                    uniformMaterialOffset, Vec4.SIZEOF);
+                    uniformMaterialOffset, Vec4.SIZE);
             gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
         gl4.glEndConditionalRender();

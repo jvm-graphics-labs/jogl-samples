@@ -49,7 +49,7 @@ public class Gl_450_direct_state_access extends Test {
     private final Vec2i FRAMEBUFFER_SIZE = new Vec2i(160, 160);
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * glf.Vertex_v2fc4d.SIZEOF;
+    private int vertexSize = vertexCount * glf.Vertex_v2fc4d.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ 0.0f, 0.0f,
         +1.0f, -1.0f,/**/ 1.0f, 0.0f,
@@ -164,7 +164,7 @@ public class Gl_450_direct_state_access extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
+        uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glCreateBuffers(Buffer.MAX, bufferName, 0);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementSize);
@@ -386,12 +386,12 @@ public class Gl_450_direct_state_access extends Test {
         gl4.glEnableVertexArrayAttrib(vertexArrayName[0], Semantic.Attr.POSITION);
 
         gl4.glVertexArrayAttribBinding(vertexArrayName[0], Semantic.Attr.TEXCOORD, Semantic.Buffer.STATIC);
-        gl4.glVertexArrayAttribFormat(vertexArrayName[0], Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vec2.SIZEOF);
+        gl4.glVertexArrayAttribFormat(vertexArrayName[0], Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vec2.SIZE);
         gl4.glEnableVertexArrayAttrib(vertexArrayName[0], Semantic.Attr.TEXCOORD);
 
         gl4.glVertexArrayElementBuffer(vertexArrayName[0], bufferName[Buffer.ELEMENT]);
         gl4.glVertexArrayVertexBuffer(vertexArrayName[0], Semantic.Buffer.STATIC, bufferName[Buffer.VERTEX], 0, 
-                glf.Vertex_v2fv2f.SIZEOF);
+                glf.Vertex_v2fv2f.SIZE);
 
         return true;
     }

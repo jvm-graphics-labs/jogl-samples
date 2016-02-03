@@ -165,8 +165,8 @@ public class Gl_430_texture_buffer extends Test {
         int[] textureBufferOffsetAlignment = {0};
         gl4.glGetIntegerv(GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT, textureBufferOffsetAlignment, 0);
 
-        int displacementSize = Vec3.SIZEOF * displacement.length;
-        int diffuseSize = Vec3.SIZEOF * diffuse.length;
+        int displacementSize = Vec3.SIZE * displacement.length;
+        int diffuseSize = Vec3.SIZE * diffuse.length;
         int displacementMultiple = glm.ceilMultiple(displacementSize, textureBufferOffsetAlignment[0]);
         int diffuseMultiple = glm.ceilMultiple(diffuseSize, textureBufferOffsetAlignment[0]);
 
@@ -206,7 +206,7 @@ public class Gl_430_texture_buffer extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -224,12 +224,12 @@ public class Gl_430_texture_buffer extends Test {
 
         gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.DISPLACEMENT]);
         gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGB32F, bufferName[Buffer.DISPLACEMENT],
-                textureBufferOffsetAlignment[0], Vec3.SIZEOF * 5);
+                textureBufferOffsetAlignment[0], Vec3.SIZE * 5);
         gl4.glBindTexture(GL_TEXTURE_BUFFER, 0);
 
         gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.DIFFUSE]);
         gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGB32F, bufferName[Buffer.DIFFUSE],
-                textureBufferOffsetAlignment[0], Vec3.SIZEOF * 5);
+                textureBufferOffsetAlignment[0], Vec3.SIZE * 5);
         gl4.glBindTexture(GL_TEXTURE_BUFFER, 0);
 
         return true;
@@ -257,7 +257,7 @@ public class Gl_430_texture_buffer extends Test {
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
+            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             projection.perspectiveFov((float) Math.PI * 0.25f, windowSize.x, windowSize.y, 0.1f, 100.0f)

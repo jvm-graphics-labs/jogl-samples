@@ -42,7 +42,7 @@ public class Gl_320_buffer_uniform extends Test {
 
     private class Vertex_v3fn3fc4f {
 
-        public static final int SIZEOF = 2 * Vec3.SIZEOF + Vec4.SIZEOF;
+        public static final int SIZEOF = 2 * Vec3.SIZE + Vec4.SIZE;
     }
 
     private class Transform {
@@ -51,13 +51,13 @@ public class Gl_320_buffer_uniform extends Test {
         public Mat4 mv;
         public Mat3 normal;
 
-        public static final int SIZEOF = 2 * Mat4.SIZEOF + Mat3.SIZEOF;
+        public static final int SIZEOF = 2 * Mat4.SIZE + Mat3.SIZE;
     }
 
     private class Light {
 
         public Vec3 position;
-        public static final int SIZEOF = Vec3.SIZEOF;
+        public static final int SIZEOF = Vec3.SIZE;
 
         public Light(Vec3 position) {
             this.position = position;
@@ -76,7 +76,7 @@ public class Gl_320_buffer_uniform extends Test {
         public float padding2;
         public Vec3 specular;
         public float shininess;
-        public static final int SIZEOF = 3 * Vec3.SIZEOF + 3 * Float.BYTES;
+        public static final int SIZEOF = 3 * Vec3.SIZE + 3 * Float.BYTES;
 
         public Material(Vec3 ambient, Vec3 diffuse, Vec3 specular, float shininess) {
             this.ambient = ambient;
@@ -249,9 +249,9 @@ public class Gl_320_buffer_uniform extends Test {
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false,
                     Vertex_v3fn3fc4f.SIZEOF, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false,
-                    Vertex_v3fn3fc4f.SIZEOF, Vec3.SIZEOF);
+                    Vertex_v3fn3fc4f.SIZEOF, Vec3.SIZE);
             gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false,
-                    Vertex_v3fn3fc4f.SIZEOF, 2 * Vec3.SIZEOF);
+                    Vertex_v3fn3fc4f.SIZEOF, 2 * Vec3.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);

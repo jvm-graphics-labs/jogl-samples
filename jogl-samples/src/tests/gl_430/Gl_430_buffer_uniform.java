@@ -38,7 +38,7 @@ public class Gl_430_buffer_uniform extends Test {
     private final String SHADERS_ROOT = "src/data/gl_430";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * glf.Vertex_v3fn3fc4f.SIZEOF;
+    private int vertexSize = vertexCount * glf.Vertex_v3fn3fc4f.SIZE;
     public float[] vertexData = {
         -1.0f, -1.0f, 0.0f,/**/ 0.0f, 0.0f, 1.0f,/**/ 1.0f, 0.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 0.0f,/**/ 0.0f, 0.0f, 1.0f,/**/ 0.0f, 1.0f, 0.0f, 1.0f,
@@ -405,11 +405,11 @@ public class Gl_430_buffer_uniform extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, glf.Vertex_v3fn3fc4f.SIZEOF,
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, glf.Vertex_v3fn3fc4f.SIZE,
                     glf.Vertex_v3fn3fc4f.OFFSET_POSITION);
-            gl4.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false, glf.Vertex_v3fn3fc4f.SIZEOF,
+            gl4.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false, glf.Vertex_v3fn3fc4f.SIZE,
                     glf.Vertex_v3fn3fc4f.OFFSET_NORMAL);
-            gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, glf.Vertex_v3fn3fc4f.SIZEOF,
+            gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, glf.Vertex_v3fn3fc4f.SIZE,
                     glf.Vertex_v3fn3fc4f.OFFSET_COLOR);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 

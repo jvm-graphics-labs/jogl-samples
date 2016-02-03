@@ -47,7 +47,7 @@ public class Es_300_fbo_srgb extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZEOF;
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 1.0f, 1.0f,
@@ -200,7 +200,7 @@ public class Es_300_fbo_srgb extends Test {
 
         int[] uniformBufferOffset = {0};
         gl3es3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl3es3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3es3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -278,8 +278,8 @@ public class Es_300_fbo_srgb extends Test {
         gl3es3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
         {
             gl3es3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl3es3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZEOF, 0);
-            gl3es3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZEOF, Vec2.SIZEOF);
+            gl3es3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
+            gl3es3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3es3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3es3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -329,7 +329,7 @@ public class Es_300_fbo_srgb extends Test {
         {
             gl3es3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3es3.glMapBufferRange(GL_UNIFORM_BUFFER,
-                    0, Mat4.SIZEOF, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+                    0, Mat4.SIZE, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             //glm::mat4 Projection = glm::perspectiveFov(glm::pi<float>() * 0.25f, 640.f, 480.f, 0.1f, 100.0f);
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);

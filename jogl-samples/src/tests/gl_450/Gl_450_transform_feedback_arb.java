@@ -40,7 +40,7 @@ public class Gl_450_transform_feedback_arb extends Test {
     private final String SHADERS_ROOT = "src/data/gl_450";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * Vec4.SIZEOF;
+    private int positionSize = vertexCount * Vec4.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 0.0f, 1.0f,
@@ -92,8 +92,7 @@ public class Gl_450_transform_feedback_arb extends Test {
         }
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-        uniformPointer = gl4.glMapBufferRange(
-                GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
+        uniformPointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                 GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
         return validated;
@@ -167,7 +166,7 @@ public class Gl_450_transform_feedback_arb extends Test {
             gl4.glVertexAttribBinding(Semantic.Attr.POSITION, Semantic.Buffer.STATIC);
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-            gl4.glVertexAttribFormat(Semantic.Attr.COLOR, 4, GL_FLOAT, false, Vec4.SIZEOF);
+            gl4.glVertexAttribFormat(Semantic.Attr.COLOR, 4, GL_FLOAT, false, Vec4.SIZE);
             gl4.glVertexAttribBinding(Semantic.Attr.COLOR, Semantic.Buffer.STATIC);
             gl4.glEnableVertexAttribArray(Semantic.Attr.COLOR);
         }
@@ -207,12 +206,12 @@ public class Gl_450_transform_feedback_arb extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.FEEDBACK]);
-        gl4.glBufferStorage(GL_ARRAY_BUFFER, glf.Vertex_v4fc4f.SIZEOF * vertexCount, null, 0);
+        gl4.glBufferStorage(GL_ARRAY_BUFFER, glf.Vertex_v4fc4f.SIZE * vertexCount, null, 0);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferStorage(GL_UNIFORM_BUFFER, uniformBlockSize, null,
@@ -249,7 +248,7 @@ public class Gl_450_transform_feedback_arb extends Test {
         gl4.glBindProgramPipeline(pipelineName[Program.TRANSFORM]);
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
         gl4.glBindVertexArray(vertexArrayName[Program.TRANSFORM]);
-        gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName[Buffer.VERTEX], 0, Vec4.SIZEOF);
+        gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName[Buffer.VERTEX], 0, Vec4.SIZE);
 
         gl4.glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackName[0]);
 
@@ -273,7 +272,7 @@ public class Gl_450_transform_feedback_arb extends Test {
             // Second draw, reuse the captured attributes
             gl4.glBindProgramPipeline(pipelineName[Program.FEEDBACK]);
             gl4.glBindVertexArray(vertexArrayName[Program.FEEDBACK]);
-            gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName[Buffer.FEEDBACK], 0, glf.Vertex_v4fc4f.SIZEOF);
+            gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName[Buffer.FEEDBACK], 0, glf.Vertex_v4fc4f.SIZE);
 
             gl4.glDrawTransformFeedback(GL_TRIANGLES, feedbackName[0]);
         }

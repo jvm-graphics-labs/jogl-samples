@@ -49,7 +49,7 @@ public class Gl_500_conservative_raster_nv extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgb_dxt1_unorm.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZEOF;
+    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ 0.0f, 1.0f,
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,
@@ -178,7 +178,7 @@ public class Gl_500_conservative_raster_nv extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         Vec4 material0 = new Vec4(1.0f, 0.5f, 0.0f, 1.0f);
         Vec4 material1 = new Vec4(0.0f, 0.5f, 1.0f, 1.0f);
@@ -192,8 +192,8 @@ public class Gl_500_conservative_raster_nv extends Test {
         gl4.glNamedBufferStorage(bufferName[Buffer.VERTEX], vertexSize, vertexBuffer, 0);
         gl4.glNamedBufferStorage(bufferName[Buffer.ELEMENT], elementSize, elementBuffer, 0);
         gl4.glNamedBufferStorage(bufferName[Buffer.TRANSFORM], uniformBlockSize, null, GL_MAP_WRITE_BIT);
-        gl4.glNamedBufferStorage(bufferName[Buffer.MATERIAL0], Vec4.SIZEOF, material0Buffer, 0);
-        gl4.glNamedBufferStorage(bufferName[Buffer.MATERIAL1], Vec4.SIZEOF, material1Buffer, 0);
+        gl4.glNamedBufferStorage(bufferName[Buffer.MATERIAL0], Vec4.SIZE, material0Buffer, 0);
+        gl4.glNamedBufferStorage(bufferName[Buffer.MATERIAL1], Vec4.SIZE, material1Buffer, 0);
 
         return true;
     }

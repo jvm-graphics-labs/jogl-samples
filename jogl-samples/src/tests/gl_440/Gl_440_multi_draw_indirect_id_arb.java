@@ -60,7 +60,7 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
         0, 2, 3};
 
     private int vertexCount = 11;
-    private int vertexSize = vertexCount * 2 * dev.Vec2.SIZEOF;
+    private int vertexSize = vertexCount * 2 * dev.Vec2.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ 0.0f, 1.0f,
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,
@@ -232,7 +232,7 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
         BufferUtils.destroyDirectBuffer(vertexIndirectionBuffer);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        int padding = Math.max(Mat4.SIZEOF, uniformArrayStride[0]);
+        int padding = Math.max(Mat4.SIZE, uniformArrayStride[0]);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, padding * 3, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -387,7 +387,7 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
         {
-            int padding = Math.max(Mat4.SIZEOF, uniformArrayStride[0]);
+            int padding = Math.max(Mat4.SIZE, uniformArrayStride[0]);
 
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, padding * 3, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);

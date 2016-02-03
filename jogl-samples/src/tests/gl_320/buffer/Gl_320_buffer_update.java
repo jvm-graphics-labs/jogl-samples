@@ -39,7 +39,7 @@ public class Gl_320_buffer_update extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/buffer";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * Vec2.SIZEOF;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = new float[]{
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -202,7 +202,7 @@ public class Gl_320_buffer_update extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COPY]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vec2.SIZEOF, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vec2.SIZE, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -219,8 +219,7 @@ public class Gl_320_buffer_update extends Test {
 
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer transformBuffer = gl3.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
+            ByteBuffer transformBuffer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f,

@@ -79,7 +79,7 @@ public class Gl_500_buffer_sparse_arb extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZEOF;
+    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ 0.0f, 1.0f,
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,
@@ -125,8 +125,7 @@ public class Gl_500_buffer_sparse_arb extends Test {
             validated = initTexture(gl4);
         }
         if (validated) {
-            uniformPointer = gl4.glMapNamedBufferRange(
-                    bufferName[Buffer.TRANSFORM], 0, Mat4.SIZEOF,
+            uniformPointer = gl4.glMapNamedBufferRange(bufferName[Buffer.TRANSFORM], 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
         }
 
@@ -206,7 +205,7 @@ public class Gl_500_buffer_sparse_arb extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glNamedBufferStorage(bufferName[Buffer.TRANSFORM], uniformBlockSize, null,
                 GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);

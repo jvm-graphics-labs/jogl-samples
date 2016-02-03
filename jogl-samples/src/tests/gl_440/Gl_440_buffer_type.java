@@ -50,7 +50,7 @@ public class Gl_440_buffer_type extends Test {
         glm.packHalf1x16(0.0f), glm.packHalf1x16(1.0f),
         glm.packHalf1x16(0.0f), glm.packHalf1x16(0.0f)};
 
-    private int positionSizeF32 = vertexCount * Vec2.SIZEOF;
+    private int positionSizeF32 = vertexCount * Vec2.SIZE;
     private float[] positionDataF32 = {
         0.0f, 0.0f,
         1.0f, 0.0f,
@@ -59,7 +59,7 @@ public class Gl_440_buffer_type extends Test {
         0.0f, 1.0f,
         0.0f, 0.0f};
 
-    private int positionSizeI8 = vertexCount * Vec2i8.SIZEOF;
+    private int positionSizeI8 = vertexCount * Vec2i8.SIZE;
     private byte[] positionDataI8 = {
         (byte) 0, (byte) 0,
         (byte) 1, (byte) 0,
@@ -77,7 +77,7 @@ public class Gl_440_buffer_type extends Test {
         glm.packSnorm3x10_1x2(new Vec4(0.0f, 1.0f, 0.0f, 1.0f)),
         glm.packSnorm3x10_1x2(new Vec4(0.0f, 0.0f, 0.0f, 1.0f))};
 
-    private int positionSizeI32 = vertexCount * Vec2i.SIZEOF;
+    private int positionSizeI32 = vertexCount * Vec2i.SIZE;
     private int[] positionDataI32 = {
         0, 0,
         1, 0,
@@ -176,8 +176,7 @@ public class Gl_440_buffer_type extends Test {
         }
         if (validated) {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            uniformPointer = gl4.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
+            uniformPointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
         }
 
@@ -258,7 +257,7 @@ public class Gl_440_buffer_type extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferStorage(GL_UNIFORM_BUFFER, uniformBlockSize, null,
@@ -275,17 +274,17 @@ public class Gl_440_buffer_type extends Test {
 
         int currentOffset = 0;
         gl4.glBindVertexArray(vertexArrayName[VertexFormat.F32]);
-        gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vec2.SIZEOF, currentOffset);
+        gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vec2.SIZE, currentOffset);
         gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
         currentOffset += positionSizeF32;
         gl4.glBindVertexArray(vertexArrayName[VertexFormat.I8]);
-        gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_BYTE, false, Vec2i8.SIZEOF, currentOffset);
+        gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_BYTE, false, Vec2i8.SIZE, currentOffset);
         gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
         currentOffset += positionSizeI8;
         gl4.glBindVertexArray(vertexArrayName[VertexFormat.I32]);
-        gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_INT, false, Vec2i.SIZEOF, currentOffset);
+        gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_INT, false, Vec2i.SIZE, currentOffset);
         gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
         currentOffset += positionSizeI32;

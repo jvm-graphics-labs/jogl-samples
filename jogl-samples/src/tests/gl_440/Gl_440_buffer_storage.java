@@ -41,7 +41,7 @@ public class Gl_440_buffer_storage extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * Vec2.SIZEOF;
+    private int vertexSize = vertexCount * 2 * Vec2.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 1.0f, 1.0f,
@@ -90,8 +90,7 @@ public class Gl_440_buffer_storage extends Test {
         }
         if (validated) {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            uniformPointer = gl4.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
+            uniformPointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
         }
 
@@ -172,7 +171,7 @@ public class Gl_440_buffer_storage extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferStorage(GL_UNIFORM_BUFFER, uniformBlockSize, null,

@@ -78,7 +78,7 @@ public class Gl_440_sampler_wrap extends Test {
 
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * 2 * dev.Vec2.SIZEOF;
+    private int vertexSize = vertexCount * 2 * dev.Vec2.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ -2.0f, +2.0f,
         +1.0f, -1.0f,/**/ +2.0f, +2.0f,
@@ -151,8 +151,7 @@ public class Gl_440_sampler_wrap extends Test {
         }
         if (validated) {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            uniformPointer = gl4.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
+            uniformPointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
         }
 
@@ -204,7 +203,7 @@ public class Gl_440_sampler_wrap extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferStorage(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT
@@ -290,7 +289,7 @@ public class Gl_440_sampler_wrap extends Test {
             gl4.glVertexAttribBinding(Semantic.Attr.POSITION, Semantic.Buffer.STATIC);
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-            gl4.glVertexAttribFormat(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vec2.SIZEOF);
+            gl4.glVertexAttribFormat(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vec2.SIZE);
             gl4.glVertexAttribBinding(Semantic.Attr.TEXCOORD, Semantic.Buffer.STATIC);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
         }
@@ -318,7 +317,7 @@ public class Gl_440_sampler_wrap extends Test {
         gl4.glBindBuffersBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, 1, bufferName, Buffer.TRANSFORM);
         gl4.glBindTextures(Semantic.Sampler.DIFFUSE, 1, textureName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName[Buffer.VERTEX], 0, 2 * Vec2.SIZEOF);
+        gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName[Buffer.VERTEX], 0, 2 * Vec2.SIZE);
 
         for (int index = 0; index < Viewport.MAX; ++index) {
 
