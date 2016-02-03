@@ -83,52 +83,57 @@ public class Gl_430_program_compute_image extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Program {
-        GRAPHICS,
-        COMPUTE,
-        MAX
+    private class Program {
+
+        public static final int GRAPHICS = 0;
+        public static final int COMPUTE = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Buffer {
-        ELEMENT,
-        TRANSFORM,
-        POSITION_INPUT,
-        TEXCOORD_INPUT,
-        COLOR_INPUT,
-        POSITION_OUTPUT,
-        TEXCOORD_OUTPUT,
-        COLOR_OUTPUT,
-        MAX
+    private class Buffer {
+
+        public static final int ELEMENT = 0;
+        public static final int TRANSFORM = 1;
+        public static final int POSITION_INPUT = 2;
+        public static final int TEXCOORD_INPUT = 3;
+        public static final int COLOR_INPUT = 4;
+        public static final int POSITION_OUTPUT = 5;
+        public static final int TEXCOORD_OUTPUT = 6;
+        public static final int COLOR_OUTPUT = 7;
+        public static final int MAX = 8;
     }
 
-    private enum Texture {
-        DIFFUSE,
-        POSITION_INPUT,
-        TEXCOORD_INPUT,
-        COLOR_INPUT,
-        POSITION_OUTPUT,
-        TEXCOORD_OUTPUT,
-        COLOR_OUTPUT,
-        MAX
+    private class Texture {
+
+        public static final int DIFFUSE = 0;
+        public static final int POSITION_INPUT = 1;
+        public static final int TEXCOORD_INPUT = 2;
+        public static final int COLOR_INPUT = 3;
+        public static final int POSITION_OUTPUT = 4;
+        public static final int TEXCOORD_OUTPUT = 5;
+        public static final int COLOR_OUTPUT = 6;
+        public static final int MAX = 7;
     }
 
-    private enum Image {
-        POSITION_INPUT,
-        TEXCOORD_INPUT,
-        COLOR_INPUT,
-        POSITION_OUTPUT,
-        TEXCOORD_OUTPUT,
-        COLOR_OUTPUT
+    private class Image {
+
+        public static final int POSITION_INPUT = 0;
+        public static final int TEXCOORD_INPUT = 1;
+        public static final int COLOR_INPUT = 2;
+        public static final int POSITION_OUTPUT = 3;
+        public static final int TEXCOORD_OUTPUT = 4;
+        public static final int COLOR_OUTPUT = 5;
     }
 
-    private enum Semantics {
-        INPUT,
-        OUTPUT
+    private class Semantics {
+
+        public static final int INPUT = 0;
+        public static final int OUTPUT = 1;
     }
 
-    private int[] vertexArrayName = {0}, pipelineName = new int[Program.MAX.ordinal()],
-            programName = new int[Program.MAX.ordinal()], bufferName = new int[Buffer.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()];
+    private int[] vertexArrayName = {0}, pipelineName = new int[Program.MAX],
+            programName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
+            textureName = new int[Texture.MAX];
     private float[] projection = new float[16], model = new float[16];
 
     @Override
@@ -170,7 +175,7 @@ public class Gl_430_program_compute_image extends Test {
 
         boolean validated = true;
 
-        gl4.glGenProgramPipelines(Program.MAX.ordinal(), pipelineName, 0);
+        gl4.glGenProgramPipelines(Program.MAX, pipelineName, 0);
 
         // Create program
         if (validated) {
@@ -187,9 +192,9 @@ public class Gl_430_program_compute_image extends Test {
                 ShaderProgram shaderProgram = new ShaderProgram();
                 shaderProgram.init(gl4);
 
-                programName[Program.GRAPHICS.ordinal()] = shaderProgram.program();
+                programName[Program.GRAPHICS] = shaderProgram.program();
 
-                gl4.glProgramParameteri(programName[Program.GRAPHICS.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+                gl4.glProgramParameteri(programName[Program.GRAPHICS], GL_PROGRAM_SEPARABLE, GL_TRUE);
 
                 shaderProgram.add(vertShaderCode);
                 shaderProgram.add(fragShaderCode);
@@ -202,9 +207,9 @@ public class Gl_430_program_compute_image extends Test {
                 ShaderProgram shaderProgram = new ShaderProgram();
                 shaderProgram.init(gl4);
 
-                programName[Program.COMPUTE.ordinal()] = shaderProgram.program();
+                programName[Program.COMPUTE] = shaderProgram.program();
 
-                gl4.glProgramParameteri(programName[Program.COMPUTE.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+                gl4.glProgramParameteri(programName[Program.COMPUTE], GL_PROGRAM_SEPARABLE, GL_TRUE);
 
                 shaderProgram.add(compShaderCode);
 
@@ -214,10 +219,10 @@ public class Gl_430_program_compute_image extends Test {
 
         if (validated) {
 
-            gl4.glUseProgramStages(pipelineName[Program.GRAPHICS.ordinal()], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Program.GRAPHICS.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[Program.COMPUTE.ordinal()], GL_COMPUTE_SHADER_BIT,
-                    programName[Program.COMPUTE.ordinal()]);
+            gl4.glUseProgramStages(pipelineName[Program.GRAPHICS], GL_VERTEX_SHADER_BIT
+                    | GL_FRAGMENT_SHADER_BIT, programName[Program.GRAPHICS]);
+            gl4.glUseProgramStages(pipelineName[Program.COMPUTE], GL_COMPUTE_SHADER_BIT,
+                    programName[Program.COMPUTE]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -225,42 +230,42 @@ public class Gl_430_program_compute_image extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION_INPUT.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION_INPUT]);
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize * 2, null, GL_STATIC_DRAW);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl4.glBufferSubData(GL_ARRAY_BUFFER, 0, positionSize, positionBuffer);
         BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.TEXCOORD_INPUT.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.TEXCOORD_INPUT]);
         FloatBuffer texCoordBuffer = GLBuffers.newDirectFloatBuffer(texCoordData);
         gl4.glBufferData(GL_ARRAY_BUFFER, texCoordSize * 2, texCoordBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(texCoordBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR_INPUT.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR_INPUT]);
         FloatBuffer colorBuffer = GLBuffers.newDirectFloatBuffer(colorData);
         gl4.glBufferData(GL_ARRAY_BUFFER, colorSize * 2, colorBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(colorBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION_OUTPUT.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION_OUTPUT]);
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize * 2, null, GL_STATIC_COPY);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.TEXCOORD_OUTPUT.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.TEXCOORD_OUTPUT]);
         gl4.glBufferData(GL_ARRAY_BUFFER, texCoordSize * 2, null, GL_STATIC_COPY);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR_OUTPUT.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR_OUTPUT]);
         gl4.glBufferData(GL_ARRAY_BUFFER, colorSize * 2, null, GL_STATIC_COPY);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -270,7 +275,7 @@ public class Gl_430_program_compute_image extends Test {
                 uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -286,9 +291,9 @@ public class Gl_430_program_compute_image extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName, 0);
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
@@ -313,23 +318,23 @@ public class Gl_430_program_compute_image extends Test {
             gl4.glGetIntegerv(GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT, textureBufferOffset, 0);
             int textureBufferRange = Math.max(positionSize, textureBufferOffset[0]);
 
-            gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.POSITION_INPUT.ordinal()]);
-            gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.POSITION_INPUT.ordinal()], 0,
+            gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.POSITION_INPUT]);
+            gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.POSITION_INPUT], 0,
                     textureBufferRange);
-            gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.TEXCOORD_INPUT.ordinal()]);
-            gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.TEXCOORD_INPUT.ordinal()], 0,
+            gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.TEXCOORD_INPUT]);
+            gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.TEXCOORD_INPUT], 0,
                     textureBufferRange);
-            gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.COLOR_INPUT.ordinal()]);
-            gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.COLOR_INPUT.ordinal()], 0,
+            gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.COLOR_INPUT]);
+            gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.COLOR_INPUT], 0,
                     textureBufferRange);
-            gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.POSITION_OUTPUT.ordinal()]);
-            gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.POSITION_OUTPUT.ordinal()], 0,
+            gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.POSITION_OUTPUT]);
+            gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.POSITION_OUTPUT], 0,
                     textureBufferRange);
-            gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.TEXCOORD_OUTPUT.ordinal()]);
-            gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.TEXCOORD_OUTPUT.ordinal()], 0,
+            gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.TEXCOORD_OUTPUT]);
+            gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.TEXCOORD_OUTPUT], 0,
                     textureBufferRange);
-            gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.COLOR_OUTPUT.ordinal()]);
-            gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.COLOR_OUTPUT.ordinal()], 0,
+            gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.COLOR_OUTPUT]);
+            gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.COLOR_OUTPUT], 0,
                     textureBufferRange);
             gl4.glBindTexture(GL_TEXTURE_BUFFER, 0);
 
@@ -344,7 +349,7 @@ public class Gl_430_program_compute_image extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
@@ -357,7 +362,7 @@ public class Gl_430_program_compute_image extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, projection.length * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -376,38 +381,38 @@ public class Gl_430_program_compute_image extends Test {
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
 
-        gl4.glBindProgramPipeline(pipelineName[Program.COMPUTE.ordinal()]);
-        gl4.glBindImageTexture(Image.POSITION_INPUT.ordinal(), textureName[Texture.POSITION_INPUT.ordinal()],
+        gl4.glBindProgramPipeline(pipelineName[Program.COMPUTE]);
+        gl4.glBindImageTexture(Image.POSITION_INPUT, textureName[Texture.POSITION_INPUT],
                 0, false, 0, GL_READ_ONLY, GL_RGBA32F);
-        gl4.glBindImageTexture(Image.TEXCOORD_INPUT.ordinal(), textureName[Texture.TEXCOORD_INPUT.ordinal()],
+        gl4.glBindImageTexture(Image.TEXCOORD_INPUT, textureName[Texture.TEXCOORD_INPUT],
                 0, false, 0, GL_READ_ONLY, GL_RGBA32F);
-        gl4.glBindImageTexture(Image.COLOR_INPUT.ordinal(), textureName[Texture.COLOR_INPUT.ordinal()],
+        gl4.glBindImageTexture(Image.COLOR_INPUT, textureName[Texture.COLOR_INPUT],
                 0, false, 0, GL_READ_ONLY, GL_RGBA32F);
-        gl4.glBindImageTexture(Image.POSITION_OUTPUT.ordinal(), textureName[Texture.POSITION_OUTPUT.ordinal()],
+        gl4.glBindImageTexture(Image.POSITION_OUTPUT, textureName[Texture.POSITION_OUTPUT],
                 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
-        gl4.glBindImageTexture(Image.TEXCOORD_OUTPUT.ordinal(), textureName[Texture.TEXCOORD_OUTPUT.ordinal()],
+        gl4.glBindImageTexture(Image.TEXCOORD_OUTPUT, textureName[Texture.TEXCOORD_OUTPUT],
                 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
-        gl4.glBindImageTexture(Image.COLOR_OUTPUT.ordinal(), textureName[Texture.COLOR_OUTPUT.ordinal()],
+        gl4.glBindImageTexture(Image.COLOR_OUTPUT, textureName[Texture.COLOR_OUTPUT],
                 0, false, 0, GL_WRITE_ONLY, GL_RGBA32F);
 
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
         gl4.glDispatchCompute(vertexCount, 1, 1);
 
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
-        gl4.glBindProgramPipeline(pipelineName[Program.GRAPHICS.ordinal()]);
+        gl4.glBindProgramPipeline(pipelineName[Program.GRAPHICS]);
         gl4.glActiveTexture(GL_TEXTURE0 + Semantic.Sampler.DIFFUSE);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
         gl4.glActiveTexture(GL_TEXTURE0 + Semantic.Sampler.POSITION);
-        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.POSITION_OUTPUT.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.POSITION_OUTPUT]);
         gl4.glActiveTexture(GL_TEXTURE0 + Semantic.Sampler.TEXCOORD);
-        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.TEXCOORD_OUTPUT.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.TEXCOORD_OUTPUT]);
         gl4.glActiveTexture(GL_TEXTURE0 + Semantic.Sampler.COLOR);
-        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.COLOR_OUTPUT.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.COLOR_OUTPUT]);
 
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
 
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
 
@@ -419,11 +424,11 @@ public class Gl_430_program_compute_image extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteProgramPipelines(Program.MAX.ordinal(), pipelineName, 0);
-        gl4.glDeleteProgram(programName[Program.GRAPHICS.ordinal()]);
-        gl4.glDeleteProgram(programName[Program.COMPUTE.ordinal()]);
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteProgramPipelines(Program.MAX, pipelineName, 0);
+        gl4.glDeleteProgram(programName[Program.GRAPHICS]);
+        gl4.glDeleteProgram(programName[Program.COMPUTE]);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
 
         return true;

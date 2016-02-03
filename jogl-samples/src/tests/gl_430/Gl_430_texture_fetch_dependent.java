@@ -36,13 +36,14 @@ public class Gl_430_texture_fetch_dependent extends Test {
     private final String SHADERS_SOURCE = "texture-fetch-dependent";
     private final String SHADERS_ROOT = "src/data/gl_430";
 
-    private enum Texture {
-        DIFFUSE,
-        INDIRECTION,
-        MAX
+    private class Texture {
+
+        public static final int DIFFUSE = 0;
+        public static final int INDIRECTION = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = new int[Texture.MAX.ordinal()];
+    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = new int[Texture.MAX];
     private int programName;
 
     @Override
@@ -101,10 +102,10 @@ public class Gl_430_texture_fetch_dependent extends Test {
 
     private boolean initTexture(GL4 gl4) {
 
-        gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glGenTextures(Texture.MAX, textureName, 0);
 
         {
-            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE]);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_RED);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
@@ -131,7 +132,7 @@ public class Gl_430_texture_fetch_dependent extends Test {
         }
 
         {
-            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.INDIRECTION.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.INDIRECTION]);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_RED);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
@@ -179,9 +180,9 @@ public class Gl_430_texture_fetch_dependent extends Test {
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glBindVertexArray(vertexArrayName[0]);
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE]);
         gl4.glActiveTexture(GL_TEXTURE1);
-        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.INDIRECTION.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.INDIRECTION]);
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
         return true;
@@ -195,7 +196,7 @@ public class Gl_430_texture_fetch_dependent extends Test {
         gl4.glDeleteProgram(programName);
         gl4.glDeleteProgramPipelines(1, pipelineName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
 
         return true;
     }

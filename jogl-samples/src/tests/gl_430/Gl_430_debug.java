@@ -55,21 +55,23 @@ public class Gl_430_debug extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Program {
-        VERTEX,
-        FRAGMENT,
-        MAX
+    private class Program {
+
+        public static final int VERTEX = 0;
+        public static final int FRAGMENT = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MAX = 3;
     }
 
     private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = {0},
-            programName = new int[Program.MAX.ordinal()], bufferName = new int[Buffer.MAX.ordinal()];
+            programName = new int[Program.MAX], bufferName = new int[Buffer.MAX];
     private float[] projection = new float[16], model = new float[16];
 
     private boolean initProgram(GL4 gl4) {
@@ -90,12 +92,12 @@ public class Gl_430_debug extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Program.VERTEX.ordinal()] = shaderProgram.program();
+            programName[Program.VERTEX] = shaderProgram.program();
 
-            gl4.glObjectLabel(GL_PROGRAM, programName[Program.VERTEX.ordinal()], -1,
+            gl4.glObjectLabel(GL_PROGRAM, programName[Program.VERTEX], -1,
                     "Vertex Program object".getBytes(), 0);
 
-            gl4.glProgramParameteri(programName[Program.VERTEX.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            gl4.glProgramParameteri(programName[Program.VERTEX], GL_PROGRAM_SEPARABLE, GL_TRUE);
 
             shaderProgram.add(vertShaderCode);
 
@@ -104,12 +106,12 @@ public class Gl_430_debug extends Test {
             shaderProgram = new ShaderProgram();
 
             shaderProgram.init(gl4);
-            programName[Program.FRAGMENT.ordinal()] = shaderProgram.program();
+            programName[Program.FRAGMENT] = shaderProgram.program();
 
-            gl4.glObjectLabel(GL_PROGRAM, programName[Program.FRAGMENT.ordinal()], -1,
+            gl4.glObjectLabel(GL_PROGRAM, programName[Program.FRAGMENT], -1,
                     "Fragment Program object".getBytes(), 0);
 
-            gl4.glProgramParameteri(programName[Program.FRAGMENT.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            gl4.glProgramParameteri(programName[Program.FRAGMENT], GL_PROGRAM_SEPARABLE, GL_TRUE);
 
             shaderProgram.add(fragShaderCode);
 
@@ -118,8 +120,8 @@ public class Gl_430_debug extends Test {
 
         if (validated) {
 
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT, programName[Program.VERTEX.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAGMENT.ordinal()]);
+            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT, programName[Program.VERTEX]);
+            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAGMENT]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -129,21 +131,21 @@ public class Gl_430_debug extends Test {
 
         boolean validated = true;
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glObjectLabel(GL_BUFFER, bufferName[Buffer.ELEMENT.ordinal()], -1,
+        gl4.glObjectLabel(GL_BUFFER, bufferName[Buffer.ELEMENT], -1,
                 "Element Array Buffer object".getBytes(), 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glObjectLabel(GL_BUFFER, bufferName[Buffer.VERTEX.ordinal()], -1,
+        gl4.glObjectLabel(GL_BUFFER, bufferName[Buffer.VERTEX], -1,
                 "Array Buffer object".getBytes(), 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -153,10 +155,10 @@ public class Gl_430_debug extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
 
-        gl4.glObjectLabel(GL_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()], -1,
+        gl4.glObjectLabel(GL_BUFFER, bufferName[Buffer.TRANSFORM], -1,
                 "Uniform Buffer object".getBytes(), 0);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -222,7 +224,7 @@ public class Gl_430_debug extends Test {
         {
             gl4.glObjectLabel(GL_VERTEX_ARRAY, vertexArrayName[0], -1, "Vertex array object".getBytes(), 0);
 
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -230,7 +232,7 @@ public class Gl_430_debug extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 

@@ -51,13 +51,14 @@ public class Gl_430_draw_without_vertex_attrib extends Test {
         -1.0f, +1.0f, 0.0f, 0.0f,
         -1.0f, -1.0f, 0.0f, 1.0f};
 
-    private enum Buffer {
-        TRANSFORM,
-        VERTEX,
-        MAX
+    private class Buffer {
+
+        public static final int TRANSFORM = 0;
+        public static final int VERTEX = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = {0}, bufferName = new int[Buffer.MAX.ordinal()];
+    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = {0}, bufferName = new int[Buffer.MAX];
     private int programName;
     private float[] projection = new float[16], model = new float[16];
 
@@ -86,9 +87,9 @@ public class Gl_430_draw_without_vertex_attrib extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_SHADER_STORAGE_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_SHADER_STORAGE_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_SHADER_STORAGE_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -98,7 +99,7 @@ public class Gl_430_draw_without_vertex_attrib extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -190,7 +191,7 @@ public class Gl_430_draw_without_vertex_attrib extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, projection.length * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -211,9 +212,9 @@ public class Gl_430_draw_without_vertex_attrib extends Test {
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
 
         gl4.glBindProgramPipeline(pipelineName[0]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, bufferName[Buffer.VERTEX]);
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 6, 1, 0);
 
@@ -225,7 +226,7 @@ public class Gl_430_draw_without_vertex_attrib extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteProgram(programName);
         gl4.glDeleteProgramPipelines(1, pipelineName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);

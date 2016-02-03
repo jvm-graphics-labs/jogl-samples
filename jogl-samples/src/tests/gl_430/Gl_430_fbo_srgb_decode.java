@@ -57,38 +57,42 @@ public class Gl_430_fbo_srgb_decode extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Texture {
-        DIFFUSE_SRGB,
-        DIFFUSE_RGB,
-        COLORBUFFER,
-        RENDERBUFFER,
-        MAX
+    private class Texture {
+
+        public static final int DIFFUSE_SRGB = 0;
+        public static final int DIFFUSE_RGB = 1;
+        public static final int COLORBUFFER = 2;
+        public static final int RENDERBUFFER = 3;
+        public static final int MAX = 4;
     }
 
-    private enum Program {
-        TEXTURE,
-        SPLASH,
-        MAX
+    private class Program {
+
+        public static final int TEXTURE = 0;
+        public static final int SPLASH = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Shader {
-        VERT_TEXTURE,
-        FRAG_TEXTURE,
-        VERT_SPLASH,
-        FRAG_SPLASH,
-        MAX
+    private class Shader {
+
+        public static final int VERT_TEXTURE = 0;
+        public static final int FRAG_TEXTURE = 1;
+        public static final int VERT_SPLASH = 2;
+        public static final int FRAG_SPLASH = 3;
+        public static final int MAX = 4;
     }
 
-    private int[] framebufferName = {0}, programName = new int[Program.MAX.ordinal()],
-            vertexArrayName = new int[Program.MAX.ordinal()], bufferName = new int[Buffer.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()], uniformDiffuse = new int[Program.MAX.ordinal()];
+    private int[] framebufferName = {0}, programName = new int[Program.MAX],
+            vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
+            textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX];
     private int framebufferScale = 2, uniformTransform = -1;
     private float[] projection = new float[16];
 
@@ -122,22 +126,22 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
         boolean validated = true;
 
-        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX.ordinal()];
+        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
 
         // Create program
         if (validated) {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            shaderCodes[Shader.VERT_TEXTURE.ordinal()] = ShaderCode.create(gl4, GL_VERTEX_SHADER,
+            shaderCodes[Shader.VERT_TEXTURE] = ShaderCode.create(gl4, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "vert", null, true);
-            shaderCodes[Shader.FRAG_TEXTURE.ordinal()] = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
+            shaderCodes[Shader.FRAG_TEXTURE] = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Program.TEXTURE.ordinal()] = shaderProgram.program();
-            shaderProgram.add(shaderCodes[Shader.VERT_TEXTURE.ordinal()]);
-            shaderProgram.add(shaderCodes[Shader.FRAG_TEXTURE.ordinal()]);
+            programName[Program.TEXTURE] = shaderProgram.program();
+            shaderProgram.add(shaderCodes[Shader.VERT_TEXTURE]);
+            shaderProgram.add(shaderCodes[Shader.FRAG_TEXTURE]);
             shaderProgram.link(gl4, System.out);
         }
 
@@ -145,33 +149,33 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            shaderCodes[Shader.VERT_SPLASH.ordinal()] = ShaderCode.create(gl4, GL_VERTEX_SHADER,
+            shaderCodes[Shader.VERT_SPLASH] = ShaderCode.create(gl4, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "vert", null, true);
-            shaderCodes[Shader.FRAG_SPLASH.ordinal()] = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
+            shaderCodes[Shader.FRAG_SPLASH] = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Program.SPLASH.ordinal()] = shaderProgram.program();
-            shaderProgram.add(shaderCodes[Shader.VERT_SPLASH.ordinal()]);
-            shaderProgram.add(shaderCodes[Shader.FRAG_SPLASH.ordinal()]);
+            programName[Program.SPLASH] = shaderProgram.program();
+            shaderProgram.add(shaderCodes[Shader.VERT_SPLASH]);
+            shaderProgram.add(shaderCodes[Shader.FRAG_SPLASH]);
             shaderProgram.link(gl4, System.out);
         }
 
         if (validated) {
 
-            uniformTransform = gl4.glGetUniformBlockIndex(programName[Program.TEXTURE.ordinal()], "Transform");
-            uniformDiffuse[Program.TEXTURE.ordinal()]
-                    = gl4.glGetUniformLocation(programName[Program.TEXTURE.ordinal()], "diffuse");
-            uniformDiffuse[Program.SPLASH.ordinal()]
-                    = gl4.glGetUniformLocation(programName[Program.SPLASH.ordinal()], "diffuse");
+            uniformTransform = gl4.glGetUniformBlockIndex(programName[Program.TEXTURE], "Transform");
+            uniformDiffuse[Program.TEXTURE]
+                    = gl4.glGetUniformLocation(programName[Program.TEXTURE], "diffuse");
+            uniformDiffuse[Program.SPLASH]
+                    = gl4.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
 
-            gl4.glUseProgram(programName[Program.TEXTURE.ordinal()]);
-            gl4.glUniform1i(uniformDiffuse[Program.TEXTURE.ordinal()], 0);
-            gl4.glUniformBlockBinding(programName[Program.TEXTURE.ordinal()], uniformTransform,
+            gl4.glUseProgram(programName[Program.TEXTURE]);
+            gl4.glUniform1i(uniformDiffuse[Program.TEXTURE], 0);
+            gl4.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform,
                     Semantic.Uniform.TRANSFORM0);
 
-            gl4.glUseProgram(programName[Program.SPLASH.ordinal()]);
-            gl4.glUniform1i(uniformDiffuse[Program.SPLASH.ordinal()], 0);
+            gl4.glUseProgram(programName[Program.SPLASH]);
+            gl4.glUniform1i(uniformDiffuse[Program.SPLASH], 0);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -179,15 +183,15 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -197,7 +201,7 @@ public class Gl_430_fbo_srgb_decode extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -213,10 +217,10 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName, 0);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE_SRGB.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE_SRGB]);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 1);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_RED);
@@ -238,11 +242,11 @@ public class Gl_430_fbo_srgb_decode extends Test {
                         texture.data(level));
             }
 
-            gl4.glTextureView(textureName[Texture.DIFFUSE_RGB.ordinal()], GL_TEXTURE_2D_ARRAY,
-                    textureName[Texture.DIFFUSE_SRGB.ordinal()], GL_RGBA8, 0, texture.levels(), 0, 1);
+            gl4.glTextureView(textureName[Texture.DIFFUSE_RGB], GL_TEXTURE_2D_ARRAY,
+                    textureName[Texture.DIFFUSE_SRGB], GL_RGBA8, 0, texture.levels(), 0, 1);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -251,7 +255,7 @@ public class Gl_430_fbo_srgb_decode extends Test {
                     windowSize.y * framebufferScale);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RENDERBUFFER.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RENDERBUFFER]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl4.glTexStorage2D(GL_TEXTURE_2D, 1, GL_DEPTH_COMPONENT24, windowSize.x * framebufferScale,
@@ -267,10 +271,10 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[Program.TEXTURE.ordinal()]);
+        gl4.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
+        gl4.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -278,11 +282,11 @@ public class Gl_430_fbo_srgb_decode extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
-        gl4.glBindVertexArray(vertexArrayName[Program.SPLASH.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[Program.SPLASH]);
         gl4.glBindVertexArray(0);
 
         return true;
@@ -292,8 +296,8 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
         gl4.glGenFramebuffers(1, framebufferName, 0);
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER.ordinal()], 0);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.RENDERBUFFER.ordinal()], 0);
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.RENDERBUFFER], 0);
 
         if (!isFramebufferComplete(gl4, framebufferName[0])) {
             return false;
@@ -309,7 +313,7 @@ public class Gl_430_fbo_srgb_decode extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, projection.length * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -342,13 +346,13 @@ public class Gl_430_fbo_srgb_decode extends Test {
             // TextureName[texture::DIFFUSE] is a sRGB texture which sRGB conversion on fetch has been disabled
             // Hence in the shader, the value is stored as sRGB so we should not convert it to sRGB.
             gl4.glDisable(GL_FRAMEBUFFER_SRGB);
-            gl4.glUseProgram(programName[Program.TEXTURE.ordinal()]);
+            gl4.glUseProgram(programName[Program.TEXTURE]);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE_RGB.ordinal()]);
-            gl4.glBindVertexArray(vertexArrayName[Program.TEXTURE.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE_RGB]);
+            gl4.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
             gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0,
-                    bufferName[Buffer.TRANSFORM.ordinal()]);
+                    bufferName[Buffer.TRANSFORM]);
 
             gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 2, 0);
         }
@@ -360,11 +364,11 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
             gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-            gl4.glUseProgram(programName[Program.SPLASH.ordinal()]);
+            gl4.glUseProgram(programName[Program.SPLASH]);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindVertexArray(vertexArrayName[Program.SPLASH.ordinal()]);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+            gl4.glBindVertexArray(vertexArrayName[Program.SPLASH]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
 
             gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 1);
         }
@@ -378,12 +382,12 @@ public class Gl_430_fbo_srgb_decode extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glDeleteFramebuffers(1, framebufferName, 0);
-        gl4.glDeleteProgram(programName[Program.SPLASH.ordinal()]);
-        gl4.glDeleteProgram(programName[Program.TEXTURE.ordinal()]);
+        gl4.glDeleteProgram(programName[Program.SPLASH]);
+        gl4.glDeleteProgram(programName[Program.TEXTURE]);
 
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
-        gl4.glDeleteVertexArrays(Program.MAX.ordinal(), vertexArrayName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
+        gl4.glDeleteVertexArrays(Program.MAX, vertexArrayName, 0);
 
         return true;
     }

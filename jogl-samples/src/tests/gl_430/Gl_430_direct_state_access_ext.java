@@ -59,34 +59,38 @@ public class Gl_430_direct_state_access_ext extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Program {
-        VERTEX,
-        FRAGMENT,
-        MAX
+    private class Program {
+
+        public static final int VERTEX = 0;
+        public static final int FRAGMENT = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Framebuffer {
-        RENDER,
-        RESOLVE,
-        MAX
+    private class Framebuffer {
+
+        public static final int RENDER = 0;
+        public static final int RESOLVE = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Texture {
-        TEXTURE,
-        MULTISAMPLE,
-        COLORBUFFER,
-        MAX
+    private class Texture {
+
+        public static final int TEXTURE = 0;
+        public static final int MULTISAMPLE = 1;
+        public static final int COLORBUFFER = 2;
+        public static final int MAX = 3;
     }
 
-    private int[] vertexArrayName = {0}, pipelineName = {0}, samplerName = {0}, bufferName = new int[Buffer.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()], framebufferName = new int[Framebuffer.MAX.ordinal()];
+    private int[] vertexArrayName = {0}, pipelineName = {0}, samplerName = {0}, bufferName = new int[Buffer.MAX],
+            textureName = new int[Texture.MAX], framebufferName = new int[Framebuffer.MAX];
     private int programName, uniformBlockSize;
     private float[] projection = new float[16];
 
@@ -161,19 +165,19 @@ public class Gl_430_direct_state_access_ext extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
         /**
          * TODO switch to glCreateBuffers.
          */
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
-        gl4.glNamedBufferData(bufferName[Buffer.ELEMENT.ordinal()], elementSize, elementBuffer, GL_STATIC_DRAW);
+        gl4.glNamedBufferData(bufferName[Buffer.ELEMENT], elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
 
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
-        gl4.glNamedBufferData(bufferName[Buffer.VERTEX.ordinal()], vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        gl4.glNamedBufferData(bufferName[Buffer.VERTEX], vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
 
-        gl4.glNamedBufferData(bufferName[Buffer.TRANSFORM.ordinal()], uniformBlockSize, null, GL_DYNAMIC_DRAW);
+        gl4.glNamedBufferData(bufferName[Buffer.TRANSFORM], uniformBlockSize, null, GL_DYNAMIC_DRAW);
 
         return true;
     }
@@ -203,21 +207,21 @@ public class Gl_430_direct_state_access_ext extends Test {
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
             jgli.Gl.Swizzles swizzles = jgli.Gl.translate(texture.swizzles());
 
-            gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName, 0);
 
-            gl4.glTextureParameteri(textureName[Texture.TEXTURE.ordinal()], GL_TEXTURE_BASE_LEVEL, 0);
-            gl4.glTextureParameteri(textureName[Texture.TEXTURE.ordinal()], GL_TEXTURE_MAX_LEVEL, 0);
-            gl4.glTextureParameteri(textureName[Texture.TEXTURE.ordinal()], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-            gl4.glTextureParameteri(textureName[Texture.TEXTURE.ordinal()], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            gl4.glTextureParameteri(textureName[Texture.TEXTURE.ordinal()], GL_TEXTURE_SWIZZLE_R, swizzles.r.value);
-            gl4.glTextureParameteri(textureName[Texture.TEXTURE.ordinal()], GL_TEXTURE_SWIZZLE_G, swizzles.g.value);
-            gl4.glTextureParameteri(textureName[Texture.TEXTURE.ordinal()], GL_TEXTURE_SWIZZLE_B, swizzles.b.value);
-            gl4.glTextureParameteri(textureName[Texture.TEXTURE.ordinal()], GL_TEXTURE_SWIZZLE_A, swizzles.a.value);
+            gl4.glTextureParameteri(textureName[Texture.TEXTURE], GL_TEXTURE_BASE_LEVEL, 0);
+            gl4.glTextureParameteri(textureName[Texture.TEXTURE], GL_TEXTURE_MAX_LEVEL, 0);
+            gl4.glTextureParameteri(textureName[Texture.TEXTURE], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+            gl4.glTextureParameteri(textureName[Texture.TEXTURE], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+            gl4.glTextureParameteri(textureName[Texture.TEXTURE], GL_TEXTURE_SWIZZLE_R, swizzles.r.value);
+            gl4.glTextureParameteri(textureName[Texture.TEXTURE], GL_TEXTURE_SWIZZLE_G, swizzles.g.value);
+            gl4.glTextureParameteri(textureName[Texture.TEXTURE], GL_TEXTURE_SWIZZLE_B, swizzles.b.value);
+            gl4.glTextureParameteri(textureName[Texture.TEXTURE], GL_TEXTURE_SWIZZLE_A, swizzles.a.value);
 
-            gl4.glTextureStorage2D(textureName[Texture.TEXTURE.ordinal()], texture.levels(),
+            gl4.glTextureStorage2D(textureName[Texture.TEXTURE], texture.levels(),
                     format.internal.value, texture.dimensions(0)[0], texture.dimensions(0)[1]);
             for (int level = 0; level < texture.levels(); ++level) {
-                gl4.glTextureSubImage2D(textureName[Texture.TEXTURE.ordinal()],
+                gl4.glTextureSubImage2D(textureName[Texture.TEXTURE],
                         level,
                         0, 0,
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
@@ -225,14 +229,14 @@ public class Gl_430_direct_state_access_ext extends Test {
                         texture.data(level));
             }
 
-            gl4.glTextureParameteri(textureName[Texture.MULTISAMPLE.ordinal()], GL_TEXTURE_BASE_LEVEL, 0);
-            gl4.glTextureParameteri(textureName[Texture.MULTISAMPLE.ordinal()], GL_TEXTURE_MAX_LEVEL, 0);
-            gl4.glTextureStorage2DMultisample(textureName[Texture.MULTISAMPLE.ordinal()], 4,
+            gl4.glTextureParameteri(textureName[Texture.MULTISAMPLE], GL_TEXTURE_BASE_LEVEL, 0);
+            gl4.glTextureParameteri(textureName[Texture.MULTISAMPLE], GL_TEXTURE_MAX_LEVEL, 0);
+            gl4.glTextureStorage2DMultisample(textureName[Texture.MULTISAMPLE], 4,
                     GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, false);
 
-            gl4.glTextureParameteri(textureName[Texture.COLORBUFFER.ordinal()], GL_TEXTURE_BASE_LEVEL, 0);
-            gl4.glTextureParameteri(textureName[Texture.COLORBUFFER.ordinal()], GL_TEXTURE_MAX_LEVEL, 0);
-            gl4.glTextureStorage2D(textureName[Texture.COLORBUFFER.ordinal()], 1,
+            gl4.glTextureParameteri(textureName[Texture.COLORBUFFER], GL_TEXTURE_BASE_LEVEL, 0);
+            gl4.glTextureParameteri(textureName[Texture.COLORBUFFER], GL_TEXTURE_MAX_LEVEL, 0);
+            gl4.glTextureStorage2D(textureName[Texture.COLORBUFFER], 1,
                     GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
 
         } catch (IOException ex) {
@@ -243,17 +247,17 @@ public class Gl_430_direct_state_access_ext extends Test {
 
     private boolean initFramebuffer(GL4 gl4) {
 
-        gl4.glGenFramebuffers(Framebuffer.MAX.ordinal(), framebufferName, 0);
-        gl4.glNamedFramebufferTexture(framebufferName[Framebuffer.RENDER.ordinal()], GL_COLOR_ATTACHMENT0,
-                textureName[Texture.MULTISAMPLE.ordinal()], 0);
-        gl4.glNamedFramebufferTexture(framebufferName[Framebuffer.RESOLVE.ordinal()], GL_COLOR_ATTACHMENT0,
-                textureName[Texture.COLORBUFFER.ordinal()], 0);
+        gl4.glGenFramebuffers(Framebuffer.MAX, framebufferName, 0);
+        gl4.glNamedFramebufferTexture(framebufferName[Framebuffer.RENDER], GL_COLOR_ATTACHMENT0,
+                textureName[Texture.MULTISAMPLE], 0);
+        gl4.glNamedFramebufferTexture(framebufferName[Framebuffer.RESOLVE], GL_COLOR_ATTACHMENT0,
+                textureName[Texture.COLORBUFFER], 0);
 
-        if (gl4.glCheckNamedFramebufferStatus(framebufferName[Framebuffer.RENDER.ordinal()], GL_FRAMEBUFFER)
+        if (gl4.glCheckNamedFramebufferStatus(framebufferName[Framebuffer.RENDER], GL_FRAMEBUFFER)
                 != GL_FRAMEBUFFER_COMPLETE) {
             return false;
         }
-        if (gl4.glCheckNamedFramebufferStatus(framebufferName[Framebuffer.RESOLVE.ordinal()], GL_FRAMEBUFFER)
+        if (gl4.glCheckNamedFramebufferStatus(framebufferName[Framebuffer.RESOLVE], GL_FRAMEBUFFER)
                 != GL_FRAMEBUFFER_COMPLETE) {
             return false;
         }
@@ -269,7 +273,7 @@ public class Gl_430_direct_state_access_ext extends Test {
         gl4.glVertexArrayAttribFormat(vertexArrayName[0], Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Float.BYTES);
         // Setup the buffer source
         int bindingIndex = 0;
-        gl4.glVertexArrayVertexBuffer(vertexArrayName[0], bindingIndex, bufferName[Buffer.VERTEX.ordinal()],
+        gl4.glVertexArrayVertexBuffer(vertexArrayName[0], bindingIndex, bufferName[Buffer.VERTEX],
                 0 * Float.BYTES, 2 * 2 * Float.BYTES);
         // Link them up
         gl4.glVertexArrayAttribBinding(vertexArrayName[0], Semantic.Attr.POSITION, bindingIndex);

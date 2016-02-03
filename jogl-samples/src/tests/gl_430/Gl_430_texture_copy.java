@@ -53,20 +53,22 @@ public class Gl_430_texture_copy extends Test {
         -1.0f, +1.0f, 0.0f, 0.0f,
         -1.0f, -1.0f, 0.0f, 1.0f};
 
-    private enum Texture {
-        DIFFUSE,
-        COPY,
-        MAX
+    private class Texture {
+
+        public static final int DIFFUSE = 0;
+        public static final int COPY = 1;
+        public static final int MAX = 2;
     };
 
-    private enum Buffer {
-        VERTEX,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int TRANSFORM = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()];
+    private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX],
+            textureName = new int[Texture.MAX];
     private int programName;
 
     @Override
@@ -129,14 +131,14 @@ public class Gl_430_texture_copy extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, Mat4.SIZEOF, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -151,14 +153,14 @@ public class Gl_430_texture_copy extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName, 0);
 
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -180,7 +182,7 @@ public class Gl_430_texture_copy extends Test {
             }
 
             // Allocate texture storage of texture::COPY.
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COPY.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COPY]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -206,8 +208,8 @@ public class Gl_430_texture_copy extends Test {
             for (int level = 0; level < texture.levels(); ++level) {
 
                 gl4.glCopyImageSubData(
-                        textureName[Texture.DIFFUSE.ordinal()], GL_TEXTURE_2D, level, 0, 0, 0,
-                        textureName[Texture.COPY.ordinal()], GL_TEXTURE_2D, level, 0, 0, 0,
+                        textureName[Texture.DIFFUSE], GL_TEXTURE_2D, level, 0, 0, 0,
+                        textureName[Texture.COPY], GL_TEXTURE_2D, level, 0, 0, 0,
                         texture.dimensions(level)[0], texture.dimensions(level)[1], 1);
             }
 
@@ -224,7 +226,7 @@ public class Gl_430_texture_copy extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Vec2.SIZEOF, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Vec2.SIZEOF, Vec2.SIZEOF);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -247,7 +249,7 @@ public class Gl_430_texture_copy extends Test {
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
             Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -261,8 +263,8 @@ public class Gl_430_texture_copy extends Test {
 
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COPY.ordinal()]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COPY]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
         gl4.glBindVertexArray(vertexArrayName[0]);
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, vertexCount, 1, 0);
@@ -276,9 +278,9 @@ public class Gl_430_texture_copy extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glDeleteProgramPipelines(1, pipelineName, 0);
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteProgram(programName);
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
 
         return true;

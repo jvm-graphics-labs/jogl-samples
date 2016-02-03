@@ -41,33 +41,37 @@ public class Gl_430_fbo_invalidate extends Test {
     private Vec2i FRAMEBUFFER_SIZE = new Vec2i(80, 60);
     private float[] vertexData;
 
-    private enum Buffer {
-        VERTEX,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int TRANSFORM = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Texture {
-        MULTISAMPLE,
-        COLOR,
-        MAX
+    private class Texture {
+
+        public static final int MULTISAMPLE = 0;
+        public static final int COLOR = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Framebuffer {
-        MULTISAMPLE,
-        COLOR,
-        MAX
+    private class Framebuffer {
+
+        public static final int MULTISAMPLE = 0;
+        public static final int COLOR = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Pipeline {
-        MULTISAMPLE,
-        SPLASH,
-        MAX
+    private class Pipeline {
+
+        public static final int MULTISAMPLE = 0;
+        public static final int SPLASH = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] pipelineName = new int[Pipeline.MAX.ordinal()], programName = new int[Pipeline.MAX.ordinal()],
-            vertexArrayName = new int[Pipeline.MAX.ordinal()], framebufferName = new int[Framebuffer.MAX.ordinal()],
-            bufferName = new int[Buffer.MAX.ordinal()], textureName = new int[Texture.MAX.ordinal()];
+    private int[] pipelineName = new int[Pipeline.MAX], programName = new int[Pipeline.MAX],
+            vertexArrayName = new int[Pipeline.MAX], framebufferName = new int[Framebuffer.MAX],
+            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX];
     private float[] projection = new float[16], model = new float[16];
 
     @Override
@@ -115,8 +119,8 @@ public class Gl_430_fbo_invalidate extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_AA, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.MULTISAMPLE.ordinal()] = shaderProgram.program();
-            gl4.glProgramParameteri(programName[Pipeline.MULTISAMPLE.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.MULTISAMPLE] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.MULTISAMPLE], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -132,8 +136,8 @@ public class Gl_430_fbo_invalidate extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.SPLASH.ordinal()] = shaderProgram.program();
-            gl4.glProgramParameteri(programName[Pipeline.SPLASH.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.SPLASH] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.SPLASH], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -141,11 +145,11 @@ public class Gl_430_fbo_invalidate extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[Pipeline.MULTISAMPLE.ordinal()], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.MULTISAMPLE.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[Pipeline.SPLASH.ordinal()], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.SPLASH.ordinal()]);
+            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
+            gl4.glUseProgramStages(pipelineName[Pipeline.MULTISAMPLE], GL_VERTEX_SHADER_BIT
+                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.MULTISAMPLE]);
+            gl4.glUseProgramStages(pipelineName[Pipeline.SPLASH], GL_VERTEX_SHADER_BIT
+                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.SPLASH]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -162,9 +166,9 @@ public class Gl_430_fbo_invalidate extends Test {
             vertexData[i * 2 + 1] = (float) Math.cos(Math.toRadians(step * i));
         }
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexData.length * Float.BYTES, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -174,7 +178,7 @@ public class Gl_430_fbo_invalidate extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -183,11 +187,11 @@ public class Gl_430_fbo_invalidate extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(Pipeline.MAX.ordinal(), vertexArrayName, 0);
+        gl4.glGenVertexArrays(Pipeline.MAX, vertexArrayName, 0);
 
-        gl4.glBindVertexArray(vertexArrayName[Pipeline.MULTISAMPLE.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[Pipeline.MULTISAMPLE]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Float.BYTES, 0);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -195,7 +199,7 @@ public class Gl_430_fbo_invalidate extends Test {
         }
         gl4.glBindVertexArray(0);
 
-        gl4.glBindVertexArray(vertexArrayName[Pipeline.SPLASH.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[Pipeline.SPLASH]);
         gl4.glBindVertexArray(0);
 
         return true;
@@ -203,18 +207,18 @@ public class Gl_430_fbo_invalidate extends Test {
 
     private boolean initFramebuffer(GL4 gl4) {
 
-        gl4.glGenFramebuffers(Framebuffer.MAX.ordinal(), framebufferName, 0);
+        gl4.glGenFramebuffers(Framebuffer.MAX, framebufferName, 0);
 
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.MULTISAMPLE.ordinal()]);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.MULTISAMPLE.ordinal()], 0);
-        if (!isFramebufferComplete(gl4, framebufferName[Framebuffer.MULTISAMPLE.ordinal()])) {
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.MULTISAMPLE]);
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.MULTISAMPLE], 0);
+        if (!isFramebufferComplete(gl4, framebufferName[Framebuffer.MULTISAMPLE])) {
             return false;
         }
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.COLOR.ordinal()]);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLOR.ordinal()], 0);
-        if (!isFramebufferComplete(gl4, framebufferName[Framebuffer.COLOR.ordinal()])) {
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.COLOR]);
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLOR], 0);
+        if (!isFramebufferComplete(gl4, framebufferName[Framebuffer.COLOR])) {
             return false;
         }
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -224,10 +228,10 @@ public class Gl_430_fbo_invalidate extends Test {
 
     private boolean initTexture(GL4 gl4) {
 
-        gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glGenTextures(Texture.MAX, textureName, 0);
 
         {
-            gl4.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName[Texture.MULTISAMPLE.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName[Texture.MULTISAMPLE]);
             gl4.glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8, GL_RGBA8,
                     FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, true);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -236,7 +240,7 @@ public class Gl_430_fbo_invalidate extends Test {
         }
 
         {
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLOR.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLOR]);
             gl4.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, 0,
                     GL_RGBA, GL_UNSIGNED_BYTE, null);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -260,7 +264,7 @@ public class Gl_430_fbo_invalidate extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, projection.length * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -280,14 +284,14 @@ public class Gl_430_fbo_invalidate extends Test {
 
         //////////////////////////////
         // Render multisampled texture
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.MULTISAMPLE.ordinal()]);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.MULTISAMPLE]);
 
         gl4.glViewportIndexedf(0, 0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.MULTISAMPLE.ordinal()]);
-        gl4.glBindVertexArray(vertexArrayName[Pipeline.MULTISAMPLE.ordinal()]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindProgramPipeline(pipelineName[Pipeline.MULTISAMPLE]);
+        gl4.glBindVertexArray(vertexArrayName[Pipeline.MULTISAMPLE]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
 
         gl4.glEnable(GL_MULTISAMPLE);
         {
@@ -297,8 +301,8 @@ public class Gl_430_fbo_invalidate extends Test {
 
         //////////////////////////
         // Resolving multisampling
-        gl4.glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferName[Framebuffer.MULTISAMPLE.ordinal()]);
-        gl4.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferName[Framebuffer.COLOR.ordinal()]);
+        gl4.glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferName[Framebuffer.MULTISAMPLE]);
+        gl4.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferName[Framebuffer.COLOR]);
         gl4.glBlitFramebuffer(
                 0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
                 0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
@@ -316,9 +320,9 @@ public class Gl_430_fbo_invalidate extends Test {
         //glDisable(GL_MULTISAMPLE);
         gl4.glActiveTexture(GL_TEXTURE0);
         //glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, TextureName[texture::MULTISAMPLE]);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLOR.ordinal()]);
-        gl4.glBindVertexArray(vertexArrayName[Pipeline.SPLASH.ordinal()]);
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.SPLASH.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLOR]);
+        gl4.glBindVertexArray(vertexArrayName[Pipeline.SPLASH]);
+        gl4.glBindProgramPipeline(pipelineName[Pipeline.SPLASH]);
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 6, 1, 0);
 
@@ -330,12 +334,12 @@ public class Gl_430_fbo_invalidate extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Texture.MAX.ordinal(), textureName, 0);
-        gl4.glDeleteProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
-        gl4.glDeleteProgram(programName[Pipeline.MULTISAMPLE.ordinal()]);
-        gl4.glDeleteProgram(programName[Pipeline.SPLASH.ordinal()]);
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
-        gl4.glDeleteVertexArrays(Pipeline.MAX.ordinal(), vertexArrayName, 0);
+        gl4.glDeleteBuffers(Texture.MAX, textureName, 0);
+        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName, 0);
+        gl4.glDeleteProgram(programName[Pipeline.MULTISAMPLE]);
+        gl4.glDeleteProgram(programName[Pipeline.SPLASH]);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteVertexArrays(Pipeline.MAX, vertexArrayName, 0);
 
         return true;
     }

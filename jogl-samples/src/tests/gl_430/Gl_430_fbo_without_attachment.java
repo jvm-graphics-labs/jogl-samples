@@ -39,21 +39,23 @@ public class Gl_430_fbo_without_attachment extends Test {
 
     private int vertexCount = 4;
 
-    private enum Texture {
-        DIFFUSE,
-        COLORBUFFER,
-        MAX
+    private class Texture {
+
+        public static final int DIFFUSE = 0;
+        public static final int COLORBUFFER = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Pipeline {
-        RENDER,
-        SPLASH,
-        MAX
+    private class Pipeline {
+
+        public static final int RENDER = 0;
+        public static final int SPLASH = 1;
+        public static final int MAX = 2;
     }
 
     private int[] vertexArrayName = {0}, framebufferName = {0}, samplerName = {0},
-            pipelineName = new int[Pipeline.MAX.ordinal()], programName = new int[Pipeline.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()];
+            pipelineName = new int[Pipeline.MAX], programName = new int[Pipeline.MAX],
+            textureName = new int[Texture.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -97,8 +99,8 @@ public class Gl_430_fbo_without_attachment extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_RENDER, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.RENDER.ordinal()] = shaderProgram.program();
-            gl4.glProgramParameteri(programName[Pipeline.RENDER.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.RENDER] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.RENDER], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -114,8 +116,8 @@ public class Gl_430_fbo_without_attachment extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.SPLASH.ordinal()] = shaderProgram.program();
-            gl4.glProgramParameteri(programName[Pipeline.SPLASH.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.SPLASH] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.SPLASH], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -123,11 +125,11 @@ public class Gl_430_fbo_without_attachment extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[Pipeline.RENDER.ordinal()], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.RENDER.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[Pipeline.SPLASH.ordinal()], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.SPLASH.ordinal()]);
+            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
+            gl4.glUseProgramStages(pipelineName[Pipeline.RENDER], GL_VERTEX_SHADER_BIT
+                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.RENDER]);
+            gl4.glUseProgramStages(pipelineName[Pipeline.SPLASH], GL_VERTEX_SHADER_BIT
+                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.SPLASH]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -161,10 +163,10 @@ public class Gl_430_fbo_without_attachment extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName, 0);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, swizzles.r.value);
@@ -182,7 +184,7 @@ public class Gl_430_fbo_without_attachment extends Test {
                         texture.data(level));
             }
 
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl4.glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, windowSize.x, windowSize.y);
@@ -237,10 +239,10 @@ public class Gl_430_fbo_without_attachment extends Test {
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.RENDER.ordinal()]);
+        gl4.glBindProgramPipeline(pipelineName[Pipeline.RENDER]);
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
-        gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[Texture.COLORBUFFER.ordinal()], 0, false,
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+        gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[Texture.COLORBUFFER], 0, false,
                 0, GL_WRITE_ONLY, GL_RGBA8);
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
@@ -248,9 +250,9 @@ public class Gl_430_fbo_without_attachment extends Test {
         // Splash
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.SPLASH.ordinal()]);
+        gl4.glBindProgramPipeline(pipelineName[Pipeline.SPLASH]);
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
 
@@ -263,11 +265,11 @@ public class Gl_430_fbo_without_attachment extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glDeleteSamplers(1, samplerName, 0);
-        gl4.glDeleteProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
-        gl4.glDeleteProgram(programName[Pipeline.SPLASH.ordinal()]);
-        gl4.glDeleteProgram(programName[Pipeline.RENDER.ordinal()]);
+        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName, 0);
+        gl4.glDeleteProgram(programName[Pipeline.SPLASH]);
+        gl4.glDeleteProgram(programName[Pipeline.RENDER]);
         gl4.glDeleteFramebuffers(1, framebufferName, 0);
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
 
         return true;

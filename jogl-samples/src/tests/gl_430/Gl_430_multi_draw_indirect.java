@@ -81,25 +81,27 @@ public class Gl_430_multi_draw_indirect extends Test {
 
     private int indirectBufferCount = 3;
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        DRAW_ID,
-        TRANSFORM,
-        INDIRECT,
-        VERTEX_INDIRECTION,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int DRAW_ID = 2;
+        public static final int TRANSFORM = 3;
+        public static final int INDIRECT = 4;
+        public static final int VERTEX_INDIRECTION = 5;
+        public static final int MAX = 6;
     }
 
-    private enum Texture {
-        A,
-        B,
-        C,
-        MAX
+    private class Texture {
+
+        public static final int A = 0;
+        public static final int B = 1;
+        public static final int C = 2;
+        public static final int MAX = 3;
     }
 
-    private int[] vertexArrayName = {0}, pipelineName = {0}, bufferName = new int[Buffer.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()], drawOffset = new int[indirectBufferCount],
+    private int[] vertexArrayName = {0}, pipelineName = {0}, bufferName = new int[Buffer.MAX],
+            textureName = new int[Texture.MAX], drawOffset = new int[indirectBufferCount],
             drawCount = new int[indirectBufferCount];
     private int programName, uniformArrayStrideMat = 256, uniformArrayStrideInt = 256;
     private Vec4i[] viewport = new Vec4i[indirectBufferCount];
@@ -194,21 +196,21 @@ public class Gl_430_multi_draw_indirect extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.DRAW_ID.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.DRAW_ID]);
         IntBuffer drawIdBuffer = GLBuffers.newDirectIntBuffer(drawIdData);
         gl4.glBufferData(GL_ARRAY_BUFFER, drawSize, drawIdBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(drawIdBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
@@ -216,7 +218,7 @@ public class Gl_430_multi_draw_indirect extends Test {
 
         int[] vertexIndirection = {0, 1, 2};
         int paddingInt = Math.max(Integer.BYTES, uniformArrayStrideInt);
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.VERTEX_INDIRECTION.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.VERTEX_INDIRECTION]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, paddingInt * 3, null, GL_DYNAMIC_DRAW);
         IntBuffer paddingIntBuffer = GLBuffers.newDirectIntBuffer(1);
         paddingIntBuffer.put(vertexIndirection[0]).rewind();
@@ -229,7 +231,7 @@ public class Gl_430_multi_draw_indirect extends Test {
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         int paddingMat = Math.max(projection.length * Float.BYTES, uniformArrayStrideMat);
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, paddingMat * 3, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -248,7 +250,7 @@ public class Gl_430_multi_draw_indirect extends Test {
         drawOffset[1] = 1;
         drawOffset[2] = 3;
 
-        gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName[Buffer.INDIRECT.ordinal()]);
+        gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName[Buffer.INDIRECT]);
         IntBuffer commandsBuffer = GLBuffers.newDirectIntBuffer(5 * commands.length);
         for (DrawElementsIndirectCommand command : commands) {
             commandsBuffer.put(command.toIntArray());
@@ -266,11 +268,11 @@ public class Gl_430_multi_draw_indirect extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
 
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.DRAW_ID.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.DRAW_ID]);
             gl4.glVertexAttribIPointer(Semantic.Attr.DRAW_ID, 1, GL_UNSIGNED_INT, Integer.BYTES, 0);
             gl4.glVertexAttribDivisor(Semantic.Attr.DRAW_ID, 1);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -279,7 +281,7 @@ public class Gl_430_multi_draw_indirect extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
             gl4.glEnableVertexAttribArray(Semantic.Attr.DRAW_ID);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
@@ -295,9 +297,9 @@ public class Gl_430_multi_draw_indirect extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName, 0);
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.A.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.A]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_NONE);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_NONE);
@@ -319,7 +321,7 @@ public class Gl_430_multi_draw_indirect extends Test {
             }
 
             ///////////////////////////////////////////
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.B.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.B]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_NONE);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_NONE);
@@ -340,7 +342,7 @@ public class Gl_430_multi_draw_indirect extends Test {
             }
 
             ///////////////////////////////////////////
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.C.ordinal()]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.C]);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_NONE);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_NONE);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
@@ -404,7 +406,7 @@ public class Gl_430_multi_draw_indirect extends Test {
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
                     projection.length * Float.BYTES * 3, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -431,18 +433,18 @@ public class Gl_430_multi_draw_indirect extends Test {
         }
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.A.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.A]);
         gl4.glActiveTexture(GL_TEXTURE1);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.B.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.B]);
         gl4.glActiveTexture(GL_TEXTURE2);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.C.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.C]);
 
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.INDIRECTION, bufferName[Buffer.VERTEX_INDIRECTION.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.INDIRECTION, bufferName[Buffer.VERTEX_INDIRECTION]);
 
-        gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName[Buffer.INDIRECT.ordinal()]);
+        gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName[Buffer.INDIRECT]);
 
         validate(gl4);
 
@@ -453,7 +455,7 @@ public class Gl_430_multi_draw_indirect extends Test {
 //            IntBuffer buffer = GLBuffers.newDirectIntBuffer(new int[]{5 * Integer.BYTES * drawOffset[i]});
 //            buffer.put(5 * Integer.BYTES * drawOffset[i]).rewind();
 //            buffer.put(0).rewind();
-            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i], 
+            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i],
                     DrawElementsIndirectCommand.SIZEOF);
         }
 

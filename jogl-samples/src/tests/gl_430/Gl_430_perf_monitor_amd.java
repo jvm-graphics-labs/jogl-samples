@@ -46,30 +46,32 @@ public class Gl_430_perf_monitor_amd extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Texture {
-        DIFFUSE,
-        COLORBUFFER,
-        RENDERBUFFER,
-        MAX
+    private class Texture {
+
+        public static final int DIFFUSE = 0;
+        public static final int COLORBUFFER = 1;
+        public static final int RENDERBUFFER = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Pipeline {
-        TEXTURE,
-        SPLASH,
-        MAX
+    private class Pipeline {
+
+        public static final int TEXTURE = 0;
+        public static final int SPLASH = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] framebufferName = {0}, pipelineName = new int[Pipeline.MAX.ordinal()],
-            programName = new int[Pipeline.MAX.ordinal()], vertexArrayName = new int[Pipeline.MAX.ordinal()],
-            bufferName = new int[Buffer.MAX.ordinal()], texturename = new int[Texture.MAX.ordinal()];
-    
+    private int[] framebufferName = {0}, pipelineName = new int[Pipeline.MAX],
+            programName = new int[Pipeline.MAX], vertexArrayName = new int[Pipeline.MAX],
+            bufferName = new int[Buffer.MAX], texturename = new int[Texture.MAX];
 
     @Override
     protected boolean begin(GL gl) {

@@ -34,12 +34,13 @@ public class Gl_440_atomic_counter extends Test {
     private final String SHADERS_SOURCE = "atomic-counter";
     private final String SHADERS_ROOT = "src/data/gl_440";
 
-    private enum Buffer {
-        ATOMIC_COUNTER,
-        MAX
+    private class Buffer {
+
+        public static final int ATOMIC_COUNTER = 0;
+        public static final int MAX = 1;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX.ordinal()];
+    private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX];
     private int programName;
 
     @Override
@@ -114,9 +115,9 @@ public class Gl_440_atomic_counter extends Test {
         gl4.glGetIntegerv(GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS, maxFragmentAtomicCounterBuffers, 0);
         gl4.glGetIntegerv(GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS, maxCombinedAtomicCounterBuffers, 0);
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName[Buffer.ATOMIC_COUNTER.ordinal()]);
+        gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName[Buffer.ATOMIC_COUNTER]);
         gl4.glBufferStorage(GL_ATOMIC_COUNTER_BUFFER, Integer.BYTES, null, GL_MAP_WRITE_BIT);
         gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
 
@@ -139,7 +140,7 @@ public class Gl_440_atomic_counter extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName[Buffer.ATOMIC_COUNTER.ordinal()]);
+        gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName[Buffer.ATOMIC_COUNTER]);
         int[] data = {0};
         IntBuffer dataBuffer = GLBuffers.newDirectIntBuffer(data);
         gl4.glClearBufferSubData(GL_ATOMIC_COUNTER_BUFFER, GL_R8UI, 0, Integer.BYTES,
@@ -150,7 +151,7 @@ public class Gl_440_atomic_counter extends Test {
 
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, bufferName[Buffer.ATOMIC_COUNTER.ordinal()]);
+        gl4.glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, bufferName[Buffer.ATOMIC_COUNTER]);
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
 
@@ -162,7 +163,7 @@ public class Gl_440_atomic_counter extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteProgram(programName);
         gl4.glDeleteProgramPipelines(1, pipelineName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);

@@ -95,48 +95,51 @@ public class Gl_440_buffer_type extends Test {
         glm.packF2x11_1x10(new Vec3(0.0f, 1.0f, 0.0f)),
         glm.packF2x11_1x10(new Vec3(0.0f, 0.0f, 0.0f))};
 
-    private enum VertexFormat {
-        F32,
-        I8,
-        I32,
-        RGB10A2,
-        F16,
-        RG11B10F,
-        MAX
+    private class VertexFormat {
+
+        public static final int F32 = 0;
+        public static final int I8 = 1;
+        public static final int I32 = 2;
+        public static final int RGB10A2 = 3;
+        public static final int F16 = 4;
+        public static final int RG11B10F = 5;
+        public static final int MAX = 6;
     }
 
-    private enum Buffer {
-        VERTEX,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int TRANSFORM = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Viewport {
-        VIEWPORT0,
-        VIEWPORT1,
-        VIEWPORT2,
-        VIEWPORT3,
-        VIEWPORT4,
-        VIEWPORT5,
-        MAX
+    private class Viewport {
+
+        public static final int _0 = 0;
+        public static final int _1 = 1;
+        public static final int _2 = 2;
+        public static final int _3 = 3;
+        public static final int _4 = 4;
+        public static final int _5 = 5;
+        public static final int MAX = 6;
     }
 
     private class View {
 
         public Vec4 viewport;
-        public VertexFormat vertexFormat;
+        public int vertexFormat;
 
-        public View(Vec4 viewport, VertexFormat vertexFormat) {
+        public View(Vec4 viewport, int vertexFormat) {
             this.viewport = viewport;
             this.vertexFormat = vertexFormat;
         }
     }
 
-    private int[] pipelineName = {0}, bufferName = new int[Buffer.MAX.ordinal()],
-            vertexArrayName = new int[VertexFormat.MAX.ordinal()];
+    private int[] pipelineName = {0}, bufferName = new int[Buffer.MAX],
+            vertexArrayName = new int[VertexFormat.MAX];
     private int programName;
     private ByteBuffer uniformPointer;
-    private View[] viewport = new View[Viewport.MAX.ordinal()];
+    private View[] viewport = new View[Viewport.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -146,17 +149,17 @@ public class Gl_440_buffer_type extends Test {
 //        glm::vec2 ViewportSize = glm::vec2(this->getWindowSize()) * glm::vec2(0.33f, 0.50f);
         Vec2 viewportSize = new Vec2(windowSize.x * 0.33f, windowSize.y * 0.50f);
 
-        viewport[Viewport.VIEWPORT0.ordinal()] = new View(new Vec4(viewportSize.x * 0.0f, viewportSize.y * 0.0f,
+        viewport[Viewport._0] = new View(new Vec4(viewportSize.x * 0.0f, viewportSize.y * 0.0f,
                 viewportSize.x * 1.0f, viewportSize.y * 1.0f), VertexFormat.F16);
-        viewport[Viewport.VIEWPORT1.ordinal()] = new View(new Vec4(viewportSize.x * 1.0f, viewportSize.y * 0.0f,
+        viewport[Viewport._1] = new View(new Vec4(viewportSize.x * 1.0f, viewportSize.y * 0.0f,
                 viewportSize.x * 1.0f, viewportSize.y * 1.0f), VertexFormat.I32);
-        viewport[Viewport.VIEWPORT2.ordinal()] = new View(new Vec4(viewportSize.x * 2.0f, viewportSize.y * 0.0f,
+        viewport[Viewport._2] = new View(new Vec4(viewportSize.x * 2.0f, viewportSize.y * 0.0f,
                 viewportSize.x * 1.0f, viewportSize.y * 1.0f), VertexFormat.RGB10A2);
-        viewport[Viewport.VIEWPORT3.ordinal()] = new View(new Vec4(viewportSize.x * 0.0f, viewportSize.y * 1.0f,
+        viewport[Viewport._3] = new View(new Vec4(viewportSize.x * 0.0f, viewportSize.y * 1.0f,
                 viewportSize.x * 1.0f, viewportSize.y * 1.0f), VertexFormat.I8);
-        viewport[Viewport.VIEWPORT4.ordinal()] = new View(new Vec4(viewportSize.x * 1.0f, viewportSize.y * 1.0f,
+        viewport[Viewport._4] = new View(new Vec4(viewportSize.x * 1.0f, viewportSize.y * 1.0f,
                 viewportSize.x * 1.0f, viewportSize.y * 1.0f), VertexFormat.F32);
-        viewport[Viewport.VIEWPORT5.ordinal()] = new View(new Vec4(viewportSize.x * 2.0f, viewportSize.y * 1.0f,
+        viewport[Viewport._5] = new View(new Vec4(viewportSize.x * 2.0f, viewportSize.y * 1.0f,
                 viewportSize.x * 1.0f, viewportSize.y * 1.0f), VertexFormat.RG11B10F);
 
         boolean validated = true;
@@ -172,7 +175,7 @@ public class Gl_440_buffer_type extends Test {
             validated = initVertexArray(gl4);
         }
         if (validated) {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             uniformPointer = gl4.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -218,7 +221,7 @@ public class Gl_440_buffer_type extends Test {
     private boolean initBuffer(GL4 gl4) {
 
         // Generate a buffer object
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
         // Allocate and copy buffers memory
         byte[] data = new byte[positionSizeF32 + positionSizeI8 + positionSizeI32 + positionSizeRGB10A2
@@ -250,14 +253,14 @@ public class Gl_440_buffer_type extends Test {
 
         dataBuffer.rewind();
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         gl4.glBufferStorage(GL_ARRAY_BUFFER, data.length * Byte.BYTES, dataBuffer, 0);
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferStorage(GL_UNIFORM_BUFFER, uniformBlockSize, null,
                 GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -267,36 +270,36 @@ public class Gl_440_buffer_type extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(VertexFormat.MAX.ordinal(), vertexArrayName, 0);
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glGenVertexArrays(VertexFormat.MAX, vertexArrayName, 0);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
 
         int currentOffset = 0;
-        gl4.glBindVertexArray(vertexArrayName[VertexFormat.F32.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[VertexFormat.F32]);
         gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vec2.SIZEOF, currentOffset);
         gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
         currentOffset += positionSizeF32;
-        gl4.glBindVertexArray(vertexArrayName[VertexFormat.I8.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[VertexFormat.I8]);
         gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_BYTE, false, Vec2i8.SIZEOF, currentOffset);
         gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
         currentOffset += positionSizeI8;
-        gl4.glBindVertexArray(vertexArrayName[VertexFormat.I32.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[VertexFormat.I32]);
         gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_INT, false, Vec2i.SIZEOF, currentOffset);
         gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
         currentOffset += positionSizeI32;
-        gl4.glBindVertexArray(vertexArrayName[VertexFormat.RGB10A2.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[VertexFormat.RGB10A2]);
         gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_INT_2_10_10_10_REV, true, Integer.BYTES, currentOffset);
         gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
         currentOffset += positionSizeRGB10A2;
-        gl4.glBindVertexArray(vertexArrayName[VertexFormat.F16.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[VertexFormat.F16]);
         gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_HALF_FLOAT, false, Short.BYTES * 2, currentOffset);
         gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
         currentOffset += positionSizeF16;
-        gl4.glBindVertexArray(vertexArrayName[VertexFormat.RG11B10F.ordinal()]);
+        gl4.glBindVertexArray(vertexArrayName[VertexFormat.RG11B10F]);
         gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_UNSIGNED_INT_10F_11F_11F_REV, false, Integer.BYTES,
                 currentOffset);
         gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -324,9 +327,9 @@ public class Gl_440_buffer_type extends Test {
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
         gl4.glBindProgramPipeline(pipelineName[0]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
 
-        for (int index = 0; index < Viewport.MAX.ordinal(); ++index) {
+        for (int index = 0; index < Viewport.MAX; ++index) {
 
             gl4.glViewportIndexedf(0,
                     viewport[index].viewport.x,
@@ -334,7 +337,7 @@ public class Gl_440_buffer_type extends Test {
                     viewport[index].viewport.z,
                     viewport[index].viewport.w);
 
-            gl4.glBindVertexArray(vertexArrayName[viewport[index].vertexFormat.ordinal()]);
+            gl4.glBindVertexArray(vertexArrayName[viewport[index].vertexFormat]);
             gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
 

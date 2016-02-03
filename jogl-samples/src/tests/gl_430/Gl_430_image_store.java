@@ -33,14 +33,15 @@ public class Gl_430_image_store extends Test {
     private final String SHADERS_SOURCE_READ = "image-store-read";
     private final String SHADERS_ROOT = "src/data/gl_430";
 
-    private enum Pipeline {
-        READ,
-        SAVE,
-        MAX
+    private class Pipeline {
+
+        public static final int READ = 0;
+        public static final int SAVE = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, textureName = {0}, pipelineName = new int[Pipeline.MAX.ordinal()],
-            programName = new int[Pipeline.MAX.ordinal()];
+    private int[] vertexArrayName = {0}, textureName = {0}, pipelineName = new int[Pipeline.MAX],
+            programName = new int[Pipeline.MAX];
     private Vec2i imageSize = new Vec2i();
 
     @Override
@@ -81,8 +82,8 @@ public class Gl_430_image_store extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_READ, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.READ.ordinal()] = shaderProgram.program();
-            gl4.glProgramParameteri(programName[Pipeline.READ.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.READ] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.READ], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -98,8 +99,8 @@ public class Gl_430_image_store extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SAVE, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.SAVE.ordinal()] = shaderProgram.program();
-            gl4.glProgramParameteri(programName[Pipeline.SAVE.ordinal()], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.SAVE] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.SAVE], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -107,11 +108,11 @@ public class Gl_430_image_store extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[Pipeline.READ.ordinal()], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.READ.ordinal()]);
-            gl4.glUseProgramStages(pipelineName[Pipeline.SAVE.ordinal()], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.SAVE.ordinal()]);
+            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
+            gl4.glUseProgramStages(pipelineName[Pipeline.READ], GL_VERTEX_SHADER_BIT
+                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.READ]);
+            gl4.glUseProgramStages(pipelineName[Pipeline.SAVE], GL_VERTEX_SHADER_BIT
+                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.SAVE]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -157,7 +158,7 @@ public class Gl_430_image_store extends Test {
         {
             gl4.glDrawBuffer(GL_NONE);
 
-            gl4.glBindProgramPipeline(pipelineName[Pipeline.SAVE.ordinal()]);
+            gl4.glBindProgramPipeline(pipelineName[Pipeline.SAVE]);
             gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[0], 0,
                     false, 0, GL_WRITE_ONLY, GL_RGBA8);
             gl4.glBindVertexArray(vertexArrayName[0]);
@@ -168,7 +169,7 @@ public class Gl_430_image_store extends Test {
         {
             gl4.glDrawBuffer(GL_BACK);
 
-            gl4.glBindProgramPipeline(pipelineName[Pipeline.READ.ordinal()]);
+            gl4.glBindProgramPipeline(pipelineName[Pipeline.READ]);
             gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[0], 0,
                     false, 0, GL_READ_ONLY, GL_RGBA8);
             gl4.glBindVertexArray(vertexArrayName[0]);
@@ -185,9 +186,9 @@ public class Gl_430_image_store extends Test {
 
         gl4.glDeleteTextures(1, textureName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteProgram(programName[Pipeline.READ.ordinal()]);
-        gl4.glDeleteProgram(programName[Pipeline.SAVE.ordinal()]);
-        gl4.glDeleteProgramPipelines(Pipeline.MAX.ordinal(), pipelineName, 0);
+        gl4.glDeleteProgram(programName[Pipeline.READ]);
+        gl4.glDeleteProgram(programName[Pipeline.SAVE]);
+        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName, 0);
 
         return true;
     }

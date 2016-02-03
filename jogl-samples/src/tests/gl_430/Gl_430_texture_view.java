@@ -58,22 +58,24 @@ public class Gl_430_texture_view extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Texture {
-        TEXTURE,
-        VIEW_A,
-        VIEW_B,
-        MAX
+    private class Texture {
+
+        public static final int TEXTURE = 0;
+        public static final int VIEW_A = 1;
+        public static final int VIEW_B = 2;
+        public static final int MAX = 3;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()];
+    private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX],
+            textureName = new int[Texture.MAX];
     private int programName;
 
     @Override
@@ -142,15 +144,15 @@ public class Gl_430_texture_view extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -160,7 +162,7 @@ public class Gl_430_texture_view extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -178,9 +180,9 @@ public class Gl_430_texture_view extends Test {
 
                 gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-                gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+                gl4.glGenTextures(Texture.MAX, textureName, 0);
                 gl4.glActiveTexture(GL_TEXTURE0);
-                gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.TEXTURE.ordinal()]);
+                gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.TEXTURE]);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
@@ -205,10 +207,10 @@ public class Gl_430_texture_view extends Test {
 
             {
                 jgli.Gl.Format format = jgli.Gl.translate(texture.format());
-                gl4.glTextureView(textureName[Texture.VIEW_A.ordinal()], GL_TEXTURE_2D_ARRAY,
-                        textureName[Texture.TEXTURE.ordinal()], format.internal.value, 0, texture.levels(), 0, 1);
-                gl4.glTextureView(textureName[Texture.VIEW_B.ordinal()], GL_TEXTURE_2D_ARRAY,
-                        textureName[Texture.TEXTURE.ordinal()], format.internal.value, 0, 1, 0, 1);
+                gl4.glTextureView(textureName[Texture.VIEW_A], GL_TEXTURE_2D_ARRAY,
+                        textureName[Texture.TEXTURE], format.internal.value, 0, texture.levels(), 0, 1);
+                gl4.glTextureView(textureName[Texture.VIEW_B], GL_TEXTURE_2D_ARRAY,
+                        textureName[Texture.TEXTURE], format.internal.value, 0, 1, 0, 1);
             }
 
         } catch (IOException ex) {
@@ -222,7 +224,7 @@ public class Gl_430_texture_view extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Vec2.SIZEOF, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Vec2.SIZEOF, Vec2.SIZEOF);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -230,7 +232,7 @@ public class Gl_430_texture_view extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
@@ -243,7 +245,7 @@ public class Gl_430_texture_view extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -261,16 +263,16 @@ public class Gl_430_texture_view extends Test {
 
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
 
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x / 2.0f, windowSize.y);
         gl4.glViewportIndexedf(1, windowSize.x / 2.0f, 0, windowSize.x / 2.0f, windowSize.y);
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.VIEW_A.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.VIEW_A]);
 
         gl4.glActiveTexture(GL_TEXTURE1);
-        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.VIEW_B.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.VIEW_B]);
 
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 2, 0, 0);
 
@@ -284,8 +286,8 @@ public class Gl_430_texture_view extends Test {
 
         gl4.glDeleteProgramPipelines(1, pipelineName, 0);
         gl4.glDeleteProgram(programName);
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
 
         return true;

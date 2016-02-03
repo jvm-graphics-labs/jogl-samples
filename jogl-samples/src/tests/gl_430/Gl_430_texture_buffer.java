@@ -56,23 +56,25 @@ public class Gl_430_texture_buffer extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        DISPLACEMENT,
-        DIFFUSE,
-        TRANSFORM,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int DISPLACEMENT = 2;
+        public static final int DIFFUSE = 3;
+        public static final int TRANSFORM = 4;
+        public static final int MAX = 5;
     }
 
-    private enum Texture {
-        DISPLACEMENT,
-        DIFFUSE,
-        MAX
+    private class Texture {
+
+        public static final int DISPLACEMENT = 0;
+        public static final int DIFFUSE = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX.ordinal()],
-            textureName = new int[Texture.MAX.ordinal()];
+    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX],
+            textureName = new int[Texture.MAX];
     private int programName, uniformMvp;
     private final Mat4 projection = new Mat4(), model = new Mat4();
 
@@ -168,21 +170,21 @@ public class Gl_430_texture_buffer extends Test {
         int displacementMultiple = glm.ceilMultiple(displacementSize, textureBufferOffsetAlignment[0]);
         int diffuseMultiple = glm.ceilMultiple(diffuseSize, textureBufferOffsetAlignment[0]);
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DISPLACEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DISPLACEMENT]);
         gl4.glBufferData(GL_TEXTURE_BUFFER, textureBufferOffsetAlignment[0] + displacementMultiple, null, GL_STATIC_DRAW);
         FloatBuffer displacementBuffer = GLBuffers.newDirectFloatBuffer(displacement);
         gl4.glBufferSubData(GL_TEXTURE_BUFFER, textureBufferOffsetAlignment[0], displacementSize, displacementBuffer);
@@ -195,7 +197,7 @@ public class Gl_430_texture_buffer extends Test {
          */
         gl4.glBindBuffer(GL_TEXTURE_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DIFFUSE.ordinal()]);
+        gl4.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DIFFUSE]);
         gl4.glBufferData(GL_TEXTURE_BUFFER, textureBufferOffsetAlignment[0] + diffuseMultiple, null, GL_STATIC_DRAW);
         FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(diffuse);
         gl4.glBufferSubData(GL_TEXTURE_BUFFER, textureBufferOffsetAlignment[0], diffuseSize, diffuseBuffer);
@@ -206,7 +208,7 @@ public class Gl_430_texture_buffer extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(Mat4.SIZEOF, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -218,15 +220,15 @@ public class Gl_430_texture_buffer extends Test {
         int[] textureBufferOffsetAlignment = {0};
         gl4.glGetIntegerv(GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT, textureBufferOffsetAlignment, 0);
 
-        gl4.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl4.glGenTextures(Texture.MAX, textureName, 0);
 
-        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.DISPLACEMENT.ordinal()]);
-        gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGB32F, bufferName[Buffer.DISPLACEMENT.ordinal()],
+        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.DISPLACEMENT]);
+        gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGB32F, bufferName[Buffer.DISPLACEMENT],
                 textureBufferOffsetAlignment[0], Vec3.SIZEOF * 5);
         gl4.glBindTexture(GL_TEXTURE_BUFFER, 0);
 
-        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.DIFFUSE.ordinal()]);
-        gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGB32F, bufferName[Buffer.DIFFUSE.ordinal()],
+        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.DIFFUSE]);
+        gl4.glTexBufferRange(GL_TEXTURE_BUFFER, GL_RGB32F, bufferName[Buffer.DIFFUSE],
                 textureBufferOffsetAlignment[0], Vec3.SIZEOF * 5);
         gl4.glBindTexture(GL_TEXTURE_BUFFER, 0);
 
@@ -238,7 +240,7 @@ public class Gl_430_texture_buffer extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -254,7 +256,7 @@ public class Gl_430_texture_buffer extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -276,15 +278,15 @@ public class Gl_430_texture_buffer extends Test {
         gl4.glUseProgram(programName);
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.DISPLACEMENT.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.DISPLACEMENT]);
 
         gl4.glActiveTexture(GL_TEXTURE1);
-        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.DIFFUSE.ordinal()]);
+        gl4.glBindTexture(GL_TEXTURE_BUFFER, textureName[Texture.DIFFUSE]);
 
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
 
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 5, 0);
 
         return true;
@@ -295,8 +297,8 @@ public class Gl_430_texture_buffer extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
-        gl4.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
         gl4.glDeleteProgram(programName);
         gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
 
