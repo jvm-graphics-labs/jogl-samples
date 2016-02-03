@@ -253,11 +253,11 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         gl4.glBufferData(GL_UNIFORM_BUFFER, paddingInt * 3, null, GL_DYNAMIC_DRAW);
         IntBuffer paddingIntBuffer = GLBuffers.newDirectIntBuffer(1);
         paddingIntBuffer.put(vertexIndirection[0]).rewind();
-        gl4.glBufferSubData(GL_UNIFORM_BUFFER, paddingInt * 0, paddingInt, paddingIntBuffer);
+        gl4.glBufferSubData(GL_UNIFORM_BUFFER, paddingInt * 0, Integer.BYTES, paddingIntBuffer);
         paddingIntBuffer.put(vertexIndirection[1]).rewind();
-        gl4.glBufferSubData(GL_UNIFORM_BUFFER, paddingInt * 1, paddingInt, paddingIntBuffer);
+        gl4.glBufferSubData(GL_UNIFORM_BUFFER, paddingInt * 1, Integer.BYTES, paddingIntBuffer);
         paddingIntBuffer.put(vertexIndirection[2]).rewind();
-        gl4.glBufferSubData(GL_UNIFORM_BUFFER, paddingInt * 2, paddingInt, paddingIntBuffer);
+        gl4.glBufferSubData(GL_UNIFORM_BUFFER, paddingInt * 2, Integer.BYTES, paddingIntBuffer);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
@@ -284,6 +284,10 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         for (DrawElementsIndirectCommand command : commands) {
             commandsBuffer.put(command.toIntArray());
         }
+        /**
+         * Critical, I forgot once to rewing the buffer, the driver video crashed.
+         */
+        commandsBuffer.rewind();
         gl4.glBufferData(GL_DRAW_INDIRECT_BUFFER, DrawElementsIndirectCommand.SIZEOF * commands.length, commandsBuffer,
                 GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
@@ -432,7 +436,7 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF * indirectBufferCount,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / 3.0f / windowSize.y,
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, windowSize.x / 3.0f / windowSize.y,
                     0.1f, 100.0f);
             Mat4 view = viewMat4();
             Mat4 model = new Mat4(1.0f);
@@ -466,7 +470,8 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         for (int i = 0; i < indirectBufferCount; ++i) {
 
             gl4.glViewportIndexedfv(0, viewport[i].toFA_(), 0);
-            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i], DrawElementsIndirectCommand.SIZEOF);
+            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i], 
+                    DrawElementsIndirectCommand.SIZEOF);
         }
 
         return true;

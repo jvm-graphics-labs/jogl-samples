@@ -425,7 +425,7 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
 
         for (int i = 0; i < indirectBufferCount; ++i) {
             gl4.glViewportIndexedfv(0, viewport[i].toFA_(), 0);
-            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i],
+            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i], 
                     DrawElementsIndirectCommand.SIZEOF);
         }
 
