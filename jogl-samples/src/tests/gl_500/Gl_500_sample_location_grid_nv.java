@@ -49,7 +49,7 @@ public class Gl_500_sample_location_grid_nv extends Test {
         -1.0f, -1.0f,/**/ 0.0f, 1.0f,
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,
         +1.0f, +1.0f,/**/ 1.0f, 0.0f
-        - 1.0f, +1.0f,/**/ 0.0f, 0.0f};
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
