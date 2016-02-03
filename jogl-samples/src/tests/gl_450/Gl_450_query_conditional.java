@@ -120,6 +120,7 @@ public class Gl_450_query_conditional extends Test {
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
         }
+        
         if (validated) {
 
             gl4.glGenProgramPipelines(1, pipelineName, 0);

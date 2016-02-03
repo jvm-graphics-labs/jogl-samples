@@ -54,15 +54,16 @@ public class Gl_430_atomic_counter extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private enum Buffer {
-        VERTEX,
-        ELEMENT,
-        TRANSFORM,
-        ATOMIC_COUNTER,
-        MAX
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int ELEMENT = 1;
+        public static final int TRANSFORM = 2;
+        public static final int ATOMIC_COUNTER = 3;
+        public static final int MAX = 4;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX.ordinal()];
+    private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX];
     private int programName;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
@@ -137,25 +138,25 @@ public class Gl_430_atomic_counter extends Test {
         gl4.glGetIntegerv(GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS, maxFragmentAtomicCounterBuffers, 0);
         gl4.glGetIntegerv(GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS, maxCombinedAtomicCounterBuffers, 0);
 
-        gl4.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, mvp.length * Float.BYTES, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName[Buffer.ATOMIC_COUNTER.ordinal()]);
+        gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName[Buffer.ATOMIC_COUNTER]);
         gl4.glBufferData(GL_ATOMIC_COUNTER_BUFFER, Integer.BYTES, null, GL_DYNAMIC_COPY);
         gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
 
@@ -169,7 +170,7 @@ public class Gl_430_atomic_counter extends Test {
         gl4.glGenVertexArrays(1, vertexArrayName, 0);
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX.ordinal()]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -177,7 +178,7 @@ public class Gl_430_atomic_counter extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT.ordinal()]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         }
         gl4.glBindVertexArray(0);
 
@@ -195,7 +196,7 @@ public class Gl_430_atomic_counter extends Test {
         gl4.glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM.ordinal()]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, mvp.length * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -215,7 +216,7 @@ public class Gl_430_atomic_counter extends Test {
         }
 
         IntBuffer data = IntBuffer.wrap(new int[]{0});
-        gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName[Buffer.ATOMIC_COUNTER.ordinal()]);
+        gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName[Buffer.ATOMIC_COUNTER]);
         gl4.glClearBufferSubData(GL_ATOMIC_COUNTER_BUFFER, GL_R8UI, 0, Integer.BYTES, GL_RGBA, GL_UNSIGNED_INT, data);
 
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
@@ -223,8 +224,8 @@ public class Gl_430_atomic_counter extends Test {
 
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, bufferName[Buffer.ATOMIC_COUNTER.ordinal()]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM.ordinal()]);
+        gl4.glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, bufferName[Buffer.ATOMIC_COUNTER]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
 
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 5, 0, 0);
 
