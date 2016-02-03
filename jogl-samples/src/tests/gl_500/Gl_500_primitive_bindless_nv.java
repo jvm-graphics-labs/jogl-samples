@@ -5,11 +5,15 @@
  */
 package tests.gl_500;
 
+import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ALPHA;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
 import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.jogamp.opengl.GL.GL_TRUE;
 import static com.jogamp.opengl.GL.GL_UNPACK_ALIGNMENT;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
@@ -19,6 +23,7 @@ import static com.jogamp.opengl.GL2ES2.GL_RED;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
 import static com.jogamp.opengl.GL2ES3.GL_BLUE;
+import static com.jogamp.opengl.GL2ES3.GL_COLOR;
 import static com.jogamp.opengl.GL2ES3.GL_GREEN;
 import static com.jogamp.opengl.GL2ES3.GL_READ_ONLY;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
@@ -29,15 +34,21 @@ import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_G;
 import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_R;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static com.jogamp.opengl.GL2GL3.GL_BUFFER_GPU_ADDRESS_NV;
+import static com.jogamp.opengl.GL2GL3.GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV;
+import static com.jogamp.opengl.GL2GL3.GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
 import dev.Mat4;
+import dev.Vec2;
 import framework.BufferUtils;
 import framework.Profile;
+import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -82,6 +93,41 @@ public class Gl_500_primitive_bindless_nv extends Test {
     private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0}, pipelineName = {0}, textureName = {0};
     private int programName;
     private long[] address = {0};
+
+    @Override
+    protected boolean begin(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        boolean validated = true;
+        validated = validated && checkExtension(gl4, "GL_NV_shader_buffer_load");
+        validated = validated && checkExtension(gl4, "GL_NV_vertex_buffer_unified_memory");
+
+        /*for (int i = 0; i < 100 * 100; i++) {
+			glCreateBuffers(1, &BufferName[0]);
+			glNamedBufferData(BufferName[0], 512, nullptr, GL_STATIC_DRAW);
+
+			glBindBuffer(GL_ARRAY_BUFFER, BufferName[0]);
+			glGetBufferParameterui64vNV(GL_ARRAY_BUFFER, GL_BUFFER_GPU_ADDRESS_NV, &Address);
+			glGetBufferParameteriv(GL_ARRAY_BUFFER, GL_BUFFER_SIZE, &params);
+			glMakeBufferResidentNV(GL_ARRAY_BUFFER, GL_READ_ONLY);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}*/
+        if (validated) {
+            validated = initProgram(gl4);
+        }
+        if (validated) {
+            validated = initBuffer(gl4);
+        }
+        if (validated) {
+            validated = initVertexArray(gl4);
+        }
+        if (validated) {
+            validated = initTexture(gl4);
+        }
+
+        return validated;
+    }
 
     private boolean initProgram(GL4 gl4) {
 
@@ -137,7 +183,7 @@ public class Gl_500_primitive_bindless_nv extends Test {
     private boolean initTexture(GL4 gl4) {
 
         try {
-            jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + TEXTURE_DIFFUSE));
+            jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
@@ -168,19 +214,85 @@ public class Gl_500_primitive_bindless_nv extends Test {
         }
         return true;
     }
-    
-    private boolean initVertexArray(GL4 gl4)	{
-        
-		glCreateVertexArrays(1, &VertexArrayName);
-		glBindVertexArray(VertexArrayName);
-			glVertexAttribFormatNV(semantic::attr::POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(glf::vertex_v2fv2f));
-			glVertexAttribFormatNV(semantic::attr::TEXCOORD, 2, GL_FLOAT, GL_FALSE, sizeof(glf::vertex_v2fv2f));
 
-			glEnableClientState(GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV);
-			glEnableVertexAttribArray(semantic::attr::POSITION);
-			glEnableVertexAttribArray(semantic::attr::TEXCOORD);
-		glBindVertexArray(0);
+    private boolean initVertexArray(GL4 gl4) {
 
-		return true;
-	}
+        gl4.glCreateVertexArrays(1, vertexArrayName, 0);
+        gl4.glBindVertexArray(vertexArrayName[0]);
+        {
+            gl4.glVertexAttribFormatNV(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZEOF);
+            gl4.glVertexAttribFormatNV(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZEOF);
+
+            gl4.glEnableClientState(GL_VERTEX_ATTRIB_ARRAY_UNIFIED_NV);
+            gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
+            gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
+        }
+        gl4.glBindVertexArray(0);
+
+        return true;
+    }
+
+    @Override
+    protected boolean render(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        /*// Measure speed
+
+		double currentTime = glfwGetTime();
+
+		nbFrames++;
+
+		if (currentTime - lastTime >= 1.0) { // If last prinf() was more than 1 sec ago
+
+											 // printf and reset timer
+
+			printf("%f ms/frame\n", 1000.0 / double(nbFrames));
+
+			nbFrames = 0;
+
+			lastTime += 1.0;
+
+		}*/
+        {
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
+            Mat4 mvp = projection.mul(viewMat4()).mul(model);
+
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF, GL_MAP_WRITE_BIT);
+            pointer.asFloatBuffer().put(mvp.toFA_());
+            gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
+        }
+
+        gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x, windowSize.y}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+
+        gl4.glBindProgramPipeline(pipelineName[0]);
+        gl4.glBindTextureUnit(0, textureName[0]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindVertexArray(vertexArrayName[0]);
+
+        gl4.glBufferAddressRangeNV(GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, Semantic.Attr.POSITION, address[0], vertexSize);
+        gl4.glBufferAddressRangeNV(GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, Semantic.Attr.TEXCOORD, address[0] + Vec2.SIZEOF,
+                vertexSize - Vec2.SIZEOF);
+
+        gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, vertexCount, 1, 0);
+
+        return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteProgram(programName);
+        gl4.glDeleteTextures(1, textureName, 0);
+        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl4.glDeleteProgramPipelines(1, pipelineName, 0);
+
+        return true;
+    }
 }
