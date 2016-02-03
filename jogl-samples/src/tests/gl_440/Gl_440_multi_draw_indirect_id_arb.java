@@ -129,9 +129,9 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
             validated = initTexture(gl4);
         }
 
-        viewport[0] = new Vec4((float) windowSize.x / 3.0f * 0.0f, 0, (float) windowSize.x / 3, windowSize.y);
-        viewport[1] = new Vec4((float) windowSize.x / 3.0f * 1.0f, 0, (float) windowSize.x / 3, windowSize.y);
-        viewport[2] = new Vec4((float) windowSize.x / 3.0f * 2.0f, 0, (float) windowSize.x / 3, windowSize.y);
+        viewport[0] = new Vec4(windowSize.x / 3.0f * 0.0f, 0, (float) windowSize.x / 3, windowSize.y);
+        viewport[1] = new Vec4(windowSize.x / 3.0f * 1.0f, 0, (float) windowSize.x / 3, windowSize.y);
+        viewport[2] = new Vec4(windowSize.x / 3.0f * 2.0f, 0, (float) windowSize.x / 3, windowSize.y);
 
         gl4.glEnable(GL_DEPTH_TEST);
         gl4.glProvokingVertex(GL_FIRST_VERTEX_CONVENTION);
@@ -172,8 +172,7 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
             String stringName = new String(name).trim();
 
             if (stringName.equals("transform.MVP[0]")) {
-                int[] uniformIndices = {i};
-                gl4.glGetActiveUniformsiv(programName, 1, uniformIndices, 0, GL_UNIFORM_ARRAY_STRIDE, uniformArrayStride, 0);
+                gl4.glGetActiveUniformsiv(programName, 1, new int[]{i}, 0, GL_UNIFORM_ARRAY_STRIDE, uniformArrayStride, 0);
             }
         }
 
@@ -426,7 +425,7 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
 
         for (int i = 0; i < indirectBufferCount; ++i) {
             gl4.glViewportIndexedfv(0, viewport[i].toFA_(), 0);
-            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i], 
+            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i],
                     DrawElementsIndirectCommand.SIZEOF);
         }
 
