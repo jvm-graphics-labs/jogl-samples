@@ -6,8 +6,56 @@
 package tests.gl_500;
 
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL3ES3.*;
+import static com.jogamp.opengl.GL.GL_ALPHA;
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_DEPTH_TEST;
+import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
+import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_LINEAR;
+import static com.jogamp.opengl.GL.GL_LINEAR_MIPMAP_LINEAR;
+import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
+import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
+import static com.jogamp.opengl.GL.GL_NONE;
+import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TEXTURE0;
+import static com.jogamp.opengl.GL.GL_TEXTURE1;
+import static com.jogamp.opengl.GL.GL_TEXTURE2;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
+import static com.jogamp.opengl.GL.GL_TRUE;
+import static com.jogamp.opengl.GL.GL_UNPACK_ALIGNMENT;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_SHORT;
+import static com.jogamp.opengl.GL2ES2.GL_ACTIVE_UNIFORMS;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SEVERITY_LOW;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SOURCE_APPLICATION;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_TYPE_OTHER;
+import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
+import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER_BIT;
+import static com.jogamp.opengl.GL2ES2.GL_INFO_LOG_LENGTH;
+import static com.jogamp.opengl.GL2ES2.GL_PROGRAM_SEPARABLE;
+import static com.jogamp.opengl.GL2ES2.GL_RED;
+import static com.jogamp.opengl.GL2ES2.GL_VALIDATE_STATUS;
+import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
+import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
+import static com.jogamp.opengl.GL2ES3.GL_BLUE;
+import static com.jogamp.opengl.GL2ES3.GL_COLOR;
+import static com.jogamp.opengl.GL2ES3.GL_DEPTH;
+import static com.jogamp.opengl.GL2ES3.GL_FIRST_VERTEX_CONVENTION;
+import static com.jogamp.opengl.GL2ES3.GL_GREEN;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_A;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_B;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_G;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_R;
+import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_ARRAY_STRIDE;
+import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
+import static com.jogamp.opengl.GL3ES3.GL_DRAW_INDIRECT_BUFFER;
 import com.jogamp.opengl.GL4;
+import static com.jogamp.opengl.GL4.GL_PARAMETER_BUFFER_ARB;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
@@ -34,18 +82,18 @@ import jgli.Texture2d;
  *
  * @author GBarbieri
  */
-public class Gl_500_multi_draw_indirect_arb extends Test {
+public class Gl_500_multi_draw_indirect_count_arb extends Test {
 
     public static void main(String[] args) {
-        Gl_500_multi_draw_indirect_arb gl_500_multi_draw_indirect_arb = new Gl_500_multi_draw_indirect_arb();
+        Gl_500_multi_draw_indirect_count_arb gl_500_multi_draw_indirect_count_arb = new Gl_500_multi_draw_indirect_count_arb();
     }
 
-    public Gl_500_multi_draw_indirect_arb() {
-        super("gl-500-multi-draw-indirect-arb", Profile.CORE, 4, 5, new jglm.Vec2i(640, 480),
+    public Gl_500_multi_draw_indirect_count_arb() {
+        super("gl-500-multi-draw-indirect-count-arb", Profile.CORE, 4, 5, new jglm.Vec2i(640, 480),
                 new jglm.Vec2(-(float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
     }
 
-    private final String SHADERS_SOURCE = "multi-draw-indirect";
+    private final String SHADERS_SOURCE = "multi-draw-indirect-count";
     private final String SHADERS_ROOT = "src/data/gl_500";
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
@@ -65,11 +113,11 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,
         +1.0f, +1.0f,/**/ 1.0f, 0.0f,
         -1.0f, +1.0f,/**/ 0.0f, 0.0f,
-//        
+        //        
         -0.5f, -1.0f,/**/ 0.0f, 1.0f,
         +1.5f, -1.0f,/**/ 1.0f, 1.0f,
         +0.5f, +1.0f,/**/ 1.0f, 0.0f,
-//        
+        //        
         -0.5f, -1.0f,/**/ 0.0f, 1.0f,
         +0.5f, -1.0f,/**/ 1.0f, 1.0f,
         +1.5f, +1.0f,/**/ 1.0f, 0.0f,
@@ -88,6 +136,7 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         public static final int ELEMENT = 1;
         public static final int TRANSFORM = 2;
         public static final int INDIRECT = 3;
+        public static final int PARAMETER = 4;
         public static final int VERTEX_INDIRECTION = 4;
         public static final int MAX = 5;
     }
@@ -101,9 +150,9 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
     }
 
     private int[] bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX],
-            drawOffset = new int[indirectBufferCount], drawCount = new int[indirectBufferCount], vertexArrayName = {0},
+            drawOffset = new int[drawDataCount], drawCount = new int[drawDataCount], vertexArrayName = {0},
             pipelineName = {0}, uniformArrayStrideInt = {0};
-    private Vec4[] viewport = new Vec4[indirectBufferCount];
+    private Vec4[] viewport = new Vec4[drawDataCount];
     private int programName;
 
     @Override
@@ -112,7 +161,7 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_indirect_parameters");
+        validated = validated && checkExtension(gl4, "GL_ARB_shader_draw_parameters");
 
         if (validated) {
             validated = initProgram(gl4);
@@ -216,7 +265,7 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-        gl4.glBufferData(GL_UNIFORM_BUFFER, Mat4.SIZEOF * indirectBufferCount, null, GL_DYNAMIC_DRAW);
+        gl4.glBufferData(GL_UNIFORM_BUFFER, Mat4.SIZEOF * drawDataCount, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         DrawElementsIndirectCommand[] commands = new DrawElementsIndirectCommand[6];
@@ -247,6 +296,12 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
                 GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
         BufferUtils.destroyDirectBuffer(commandsBuffer);
+
+        gl4.glBindBuffer(GL_PARAMETER_BUFFER_ARB, bufferName[Buffer.PARAMETER]);
+        IntBuffer drawCountBuffer = GLBuffers.newDirectIntBuffer(drawCount);
+        gl4.glBufferData(GL_PARAMETER_BUFFER_ARB, drawCount.length * Integer.BYTES, drawCountBuffer, GL_DYNAMIC_DRAW);
+        BufferUtils.destroyDirectBuffer(drawCountBuffer);
+        gl4.glBindBuffer(GL_PARAMETER_BUFFER_ARB, 0);
 
         return true;
     }
@@ -388,7 +443,7 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF * indirectBufferCount,
+            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZEOF * drawDataCount,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, windowSize.x / 3.0f / windowSize.y,
@@ -419,14 +474,17 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.INDIRECTION, bufferName[Buffer.VERTEX_INDIRECTION]);
 
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName[Buffer.INDIRECT]);
+        gl4.glBindBuffer(GL_PARAMETER_BUFFER_ARB, bufferName[Buffer.PARAMETER]);
 
         validate(gl4);
 
-        for (int i = 0; i < indirectBufferCount; ++i) {
+        for (int i = 0; i < drawDataCount; ++i) {
 
             gl4.glViewportIndexedfv(0, viewport[i].toFA_(), 0);
-            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i], 
-                    DrawElementsIndirectCommand.SIZEOF);
+            gl4.glMultiDrawElementsIndirectCountARB(GL_TRIANGLES, GL_UNSIGNED_SHORT,
+                    DrawElementsIndirectCommand.SIZEOF * drawOffset[i], // Offset in the indirect draw buffer
+                    drawCount[i], // Offset in the paramter buffer
+                    4, DrawElementsIndirectCommand.SIZEOF);
         }
 
         return true;
