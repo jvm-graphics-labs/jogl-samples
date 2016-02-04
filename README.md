@@ -23,4 +23,4 @@ Samples divided per profiles:
 * [micro]
 
 
-Ps: Hello Triangle and Hello Texture were moved into a stand-alone [project](https://github.com/elect86/helloTriangle)
+Ps: Hello Triangle and Hello Texture have been moved into a stand-alone [project](https://github.com/elect86/helloTriangle)
