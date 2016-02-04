@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tests.gl_320.scissor;
+package tests.gl_320.test_scissor;
 
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
@@ -12,6 +12,8 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Glm;
 import framework.Profile;
 import framework.Semantic;
@@ -22,7 +24,9 @@ import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
+import dev.Vec2;
+import dev.Vec3;
+import dev.Vec4;
 
 /**
  *
@@ -35,7 +39,7 @@ public class Gl_320_test_scissor extends Test {
     }
 
     public Gl_320_test_scissor() {
-        super("gl-320-test-scissor", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-320-test-scissor", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "test-scissor";
@@ -62,8 +66,6 @@ public class Gl_320_test_scissor extends Test {
 
     private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0}, textureName = {0};
     private int programName, uniformTransform, uniformDiffuse;
-    private float[] projection = new float[16], view = new float[16], model = new float[16],
-            mvp = new float[16], mv = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -197,8 +199,8 @@ public class Gl_320_test_scissor extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        float[] minScissor = {10000.f, 10000.f, 10000.f};
-        float[] maxScissor = {-10000.f, -10000.f, -10000.f};
+        Vec3 minScissor = new Vec3(10000.f, 10000.f, 10000.f);
+        Vec3 maxScissor = new Vec3(-10000.f, -10000.f, -10000.f);
 
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
@@ -206,38 +208,33 @@ public class Gl_320_test_scissor extends Test {
                     GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-            view = view();
-            FloatUtil.makeIdentity(model);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+            Mat4 view = viewMat4();
+            Mat4 model = new Mat4(1.0f);
 
-            FloatUtil.multMatrix(projection, view, mvp);
-            FloatUtil.multMatrix(mvp, model);
-
-            pointer.asFloatBuffer().put(mvp).rewind();
+            pointer.asFloatBuffer().put(projection.mul_(view).mul(model).toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
 
-            FloatUtil.multMatrix(view, model, mv);
-
             for (int i = 0; i < vertexCount; ++i) {
 
-                float[] projected = Glm.project(
-                        new float[]{vertexData[i * 4 + 0], vertexData[i * 4 + 1], 0.0f},
-                        mv,
+                Vec3 projected = glm.project_(
+                        new Vec3(vertexData[i * 4 + 0], vertexData[i * 4 + 1], 0.0f),
+                        view.mul_(model),
                         projection,
-                        new float[]{0, 0, windowSize.x, windowSize.y});
+                        new Vec4(0, 0, windowSize.x, windowSize.y));
 
-                minScissor = Glm.min(minScissor, projected);
-                maxScissor = Glm.max(maxScissor, projected);
+                minScissor = glm.min_(minScissor, projected);
+                maxScissor = glm.max_(maxScissor, projected);
             }
         }
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-        gl3.glScissor((int) minScissor[0], (int) minScissor[1], (int) (maxScissor[0] - minScissor[0]),
-                (int) (maxScissor[1] - minScissor[1]));
+        gl3.glScissor((int) minScissor.x, (int) minScissor.y, (int) (maxScissor.x - minScissor.x),
+                (int) (maxScissor.y - minScissor.y));
         gl3.glEnable(GL_SCISSOR_TEST);
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
 

@@ -9,10 +9,12 @@ import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES1.GL_POINT_SPRITE;
 import com.jogamp.opengl.GL3;
 import static com.jogamp.opengl.GL3.*;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec2;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -21,7 +23,6 @@ import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
 
 /**
  *
@@ -34,7 +35,7 @@ public class Gl_320_primitive_sprite extends Test {
     }
 
     public Gl_320_primitive_sprite() {
-        super("gl-320-primitive-sprite", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-320-primitive-sprite", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "primitive-sprite";
@@ -51,8 +52,6 @@ public class Gl_320_primitive_sprite extends Test {
 
     private int[] vertexArrayName = {0}, bufferName = {0}, textureName = {0};
     private int programName, uniformMvp, uniformMv, uniformDiffuse;
-    private float[] projection = new float[16], view = new float[16], model = new float[16],
-            mvp = new float[16], mv = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -198,12 +197,11 @@ public class Gl_320_primitive_sprite extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-        view = view();
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view, mvp);
-        FloatUtil.multMatrix(mvp, model);
-        FloatUtil.multMatrix(view, model, mv);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+        Mat4 view = viewMat4();
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul_(view).mul(model);
+        Mat4 mv = view.mul(model);
 
         float[] depth = {1.0f};
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
@@ -221,8 +219,8 @@ public class Gl_320_primitive_sprite extends Test {
         gl3.glDisable(GL_SCISSOR_TEST);
 
         gl3.glUseProgram(programName);
-        gl3.glUniformMatrix4fv(uniformMv, 1, false, mv, 0);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl3.glUniformMatrix4fv(uniformMv, 1, false, mv.toFa_(), 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
         gl3.glUniform1i(uniformDiffuse, 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);

@@ -30,7 +30,7 @@ public class Gl_320_draw_image_space extends Test {
     }
 
     public Gl_320_draw_image_space() {
-        super("gl-320-draw-image-space", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-320-draw-image-space", Profile.CORE, 3, 2, new Vec2(Math.PI * 0.2f, Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "draw-image-space";

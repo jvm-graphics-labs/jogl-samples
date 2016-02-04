@@ -8,9 +8,10 @@ package tests.gl_320.primitive;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import static com.jogamp.opengl.GL3.*;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -36,8 +37,6 @@ public class Gl_320_primitive_point extends Test {
 
     private int vertexCount = 4096, programName, uniformMvp, uniformMv;
     private int[] vertexArrayName = {0}, bufferName = {0};
-    private float[] projection = new float[16], view = new float[16], model = new float[16],
-            mvp = new float[16], mv = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -117,14 +116,13 @@ public class Gl_320_primitive_point extends Test {
                 0, // Offset
                 vertexCount * 2 * 4 * Float.BYTES, // Size,
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT).asFloatBuffer();
-        
-        
+
         for (int i = 0; i < vertexCount; ++i) {
             //Data[i].Position = glm::vec4(glm::linearRand(glm::vec2(-1), glm::vec2(1)), glm::gaussRand(0.0f, 1.0f), 1);
             //Data[i].Position = glm::vec4(glm::linearRand(glm::vec2(-1), glm::vec2(1)), /*glm::gaussRand(0.0f, 1.0f)*/0, 1);
             //Data[i].Position = glm::vec4(glm::sphericalRand(1.0f), 1);
             data.put((float) random.nextGaussian()).put((float) random.nextGaussian()).put((float) random.nextGaussian());
-            data.put(new float[]{1,1,1,1,1});
+            data.put(new float[]{1, 1, 1, 1, 1});
             //Data[i].Position = glm::vec4(glm::circularRand(1.0f), 0, 1);
             //Data[i].Position = glm::vec4(glm::diskRand(1.0f), 0, 1);
             //Data[i].Position = glm::vec4(glm::ballRand(1.0f), 1);
@@ -162,12 +160,11 @@ public class Gl_320_primitive_point extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-        view = view();
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view, mvp);
-        FloatUtil.multMatrix(mvp, model);
-        FloatUtil.multMatrix(view, model, mv);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+        Mat4 view = viewMat4();
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(view).mul(model);
+        Mat4 mv = view.mul(model);
 
         float[] depth = {1.0f};
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
@@ -177,8 +174,8 @@ public class Gl_320_primitive_point extends Test {
         gl3.glDisable(GL_SCISSOR_TEST);
 
         gl3.glUseProgram(programName);
-        gl3.glUniformMatrix4fv(uniformMv, 1, false, mv, 0);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl3.glUniformMatrix4fv(uniformMv, 1, false, mv.toFa_(), 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glBindVertexArray(vertexArrayName[0]);
 

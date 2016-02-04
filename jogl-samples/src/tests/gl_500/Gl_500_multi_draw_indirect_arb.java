@@ -65,11 +65,11 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,
         +1.0f, +1.0f,/**/ 1.0f, 0.0f,
         -1.0f, +1.0f,/**/ 0.0f, 0.0f,
-//        
+        //        
         -0.5f, -1.0f,/**/ 0.0f, 1.0f,
         +1.5f, -1.0f,/**/ 1.0f, 1.0f,
         +0.5f, +1.0f,/**/ 1.0f, 0.0f,
-//        
+        //        
         -0.5f, -1.0f,/**/ 0.0f, 1.0f,
         +0.5f, -1.0f,/**/ 1.0f, 1.0f,
         +1.5f, +1.0f,/**/ 1.0f, 0.0f,
@@ -396,11 +396,11 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
             Mat4 view = viewMat4();
             Mat4 model = new Mat4(1.0f);
 
-            pointer.asFloatBuffer().put(projection.mul(view, new Mat4()).translate(0.0f, 0.0f, 0.5f).toFa_());
+            pointer.asFloatBuffer().put(projection.mul_(view).translate(0.0f, 0.0f, 0.5f).toFa_());
             pointer.position(Mat4.SIZE * 1);
-            pointer.asFloatBuffer().put(projection.mul(view, new Mat4()).translate(0.0f, 0.0f, 0.0f).toFa_());
+            pointer.asFloatBuffer().put(projection.mul_(view).translate(0.0f, 0.0f, 0.0f).toFa_());
             pointer.position(Mat4.SIZE * 2);
-            pointer.asFloatBuffer().put(projection.mul(view, new Mat4()).translate(0.0f, 0.0f, -0.5f).toFa_());
+            pointer.asFloatBuffer().put(projection.mul(view).translate(0.0f, 0.0f, -0.5f).toFa_());
             pointer.rewind();
 
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
@@ -425,7 +425,7 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         for (int i = 0; i < indirectBufferCount; ++i) {
 
             gl4.glViewportIndexedfv(0, viewport[i].toFA_(), 0);
-            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i], 
+            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i],
                     DrawElementsIndirectCommand.SIZEOF);
         }
 

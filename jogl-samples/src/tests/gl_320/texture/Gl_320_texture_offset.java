@@ -8,10 +8,11 @@ package tests.gl_320.texture;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -83,11 +84,9 @@ public class Gl_320_texture_offset extends Test {
     }
 
     private int[] vertexArrayName = {0}, textureName = {0}, bufferName = new int[Buffer.MAX],
-            programName = new int[Program.MAX], uniformMvp = new int[Program.MAX],
-            uniformDiffuse = new int[Program.MAX];
+            programName = new int[Program.MAX], uniformMvp = new int[Program.MAX], uniformDiffuse = new int[Program.MAX];
     private int uniformOffset;
     private Vec4i[] viewport = new Vec4i[Program.MAX];
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -234,10 +233,9 @@ public class Gl_320_texture_offset extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 2.0f / 3.0f, 0.1f, 1000.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 2.0f / 3.0f, 0.1f, 1000.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
@@ -252,7 +250,7 @@ public class Gl_320_texture_offset extends Test {
 
         for (int i = 0; i < Program.MAX; ++i) {
             gl3.glUseProgram(programName[i]);
-            gl3.glUniformMatrix4fv(uniformMvp[i], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[i], 1, false, mvp.toFa_(), 0);
             gl3.glUniform1i(uniformDiffuse[i], 0);
 
             gl3.glViewport(viewport[i].x, viewport[i].y, viewport[i].z, viewport[i].w);

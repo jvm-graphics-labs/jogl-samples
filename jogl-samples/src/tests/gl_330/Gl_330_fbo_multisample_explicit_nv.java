@@ -10,10 +10,11 @@ import com.jogamp.opengl.GL2;
 import static com.jogamp.opengl.GL2.GL_TEXTURE_RENDERBUFFER_NV;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -21,8 +22,9 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
-import jglm.Vec2i;
+import dev.Vec2;
+import dev.Vec2i;
+import dev.Vec3;
 
 /**
  *
@@ -35,7 +37,7 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
     }
 
     public Gl_330_fbo_multisample_explicit_nv() {
-        super("gl-330-fbo-multisample-explicit-nv", Profile.CORE, 3, 3, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-330-fbo-multisample-explicit-nv", Profile.CORE, 3, 3, new Vec2((float) Math.PI * 0.2f));
     }
 
     private final String VERT_SHADER_SOURCE = "multisample-explicit-texture-nv";
@@ -92,7 +94,6 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
     private int[] vertexArrayName = {0}, programName = new int[Program.MAX], bufferName = {0}, samplerName = {0},
             textureName = new int[Texture.MAX], renderbufferName = new int[Renderbuffer.MAX], framebufferName = {0},
             uniformMvp = new int[Program.MAX], uniformDiffuse = new int[Program.MAX];
-    private float[] perspective = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -287,16 +288,16 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
 
     private void renderFBO(GL3 gl3) {
 
-        FloatUtil.makePerspective(perspective, 0, true, (float) Math.PI * 0.25f, (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y, 0.1f, 100.0f);
-        FloatUtil.makeScale(model, true, 1, -1, 1);
-        FloatUtil.multMatrix(perspective, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y,
+                0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f).scale(new Vec3(1, -1, 1));
+        Mat4 mvp = perspective.mul(viewMat4()).mul(model);
 
         gl3.glEnable(GL_DEPTH_TEST);
 
         gl3.glUseProgram(programName[Program.THROUGH]);
         gl3.glUniform1i(uniformDiffuse[Program.THROUGH], 0);
-        gl3.glUniformMatrix4fv(uniformMvp[Program.THROUGH], 1, false, mvp, 0);
+        gl3.glUniformMatrix4fv(uniformMvp[Program.THROUGH], 1, false, mvp.toFa_(), 0);
 
         gl3.glViewport(0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
 
@@ -319,10 +320,9 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
 
     private void resolveMultisampling(GL3 gl3) {
 
-        FloatUtil.makePerspective(perspective, 0, true, (float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(perspective, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = perspective.mul(viewMat4()).mul(model);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -342,7 +342,7 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
             gl3.glScissor(1, 1, windowSize.x / 2 - 2, windowSize.y - 2);
             gl3.glUseProgram(programName[Program.RESOLVE_BOX]);
             gl3.glUniform1i(uniformDiffuse[Program.RESOLVE_BOX], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.RESOLVE_BOX], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.RESOLVE_BOX], 1, false, mvp.toFa_(), 0);
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 5);
         }
 
@@ -351,7 +351,7 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
             gl3.glScissor(windowSize.x / 2 + 1, 1, windowSize.x / 2 - 2, windowSize.y - 2);
             gl3.glUseProgram(programName[Program.RESOLVE_NEAR]);
             gl3.glUniform1i(uniformDiffuse[Program.RESOLVE_NEAR], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.RESOLVE_NEAR], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.RESOLVE_NEAR], 1, false, mvp.toFa_(), 0);
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 5);
         }
 

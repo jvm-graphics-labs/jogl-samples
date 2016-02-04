@@ -8,10 +8,11 @@ package tests.gl_330;
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL3;
 import static com.jogamp.opengl.GL3ES3.*;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Glm;
 import framework.Profile;
 import framework.Semantic;
@@ -96,7 +97,6 @@ public class Gl_330_buffer_type extends Test {
     private int programName, uniformMvp, uniformDiffuse;
     private int[] bufferName = new int[Buffer.MAX], vertexArrayName = new int[Buffer.MAX];
     private Vec4i[] viewport = new Vec4i[Buffer.MAX];
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -235,16 +235,15 @@ public class Gl_330_buffer_type extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
         gl3.glUseProgram(programName);
         gl3.glUniform4fv(uniformDiffuse, 1, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         for (int index = 0; index < Buffer.MAX; ++index) {
 

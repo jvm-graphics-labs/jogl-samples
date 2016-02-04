@@ -8,10 +8,11 @@ package tests.gl_320.primitive;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -58,7 +59,6 @@ public class Gl_320_primitive_front_face extends Test {
 
     private int programName, uniformMvp;
     private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0};
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -152,11 +152,9 @@ public class Gl_320_primitive_front_face extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         // Clear color buffer with black
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
@@ -164,7 +162,7 @@ public class Gl_320_primitive_front_face extends Test {
         // Bind program
         gl3.glUseProgram(programName);
         // Set the value of MVP uniform.
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         // Bind vertex array & draw 
         gl3.glBindVertexArray(vertexArrayName[0]);

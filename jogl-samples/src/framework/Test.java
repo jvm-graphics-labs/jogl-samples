@@ -257,7 +257,7 @@ public class Test implements GLEventListener, KeyListener {
                 .rotate(rotationCurrent.x, 0.f, 1.f, 0.f);
     }
 
-//    protected final float[] view() {
+//    protected final float[] viewZ() {
 //
 //        FloatUtil.makeTranslation(viewTranslate, true, 0, 0, -translationCurrent.y);
 //        FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec3);

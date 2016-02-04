@@ -12,6 +12,8 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Glm;
 import framework.Profile;
 import framework.Semantic;
@@ -19,7 +21,7 @@ import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import jglm.Vec2i;
+import dev.Vec2i;
 
 /**
  *
@@ -228,7 +230,6 @@ public class Gl_320_texture_float extends Test {
 
     private int[] vertexArrayName = {0}, textureName = {0}, bufferName = new int[Buffer.MAX];
     private int programName, uniformLayer;
-    private float[] ortho = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -254,9 +255,8 @@ public class Gl_320_texture_float extends Test {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-            FloatUtil.makeOrtho(ortho, 0, true, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
 
-            pointer.asFloatBuffer().put(ortho).rewind();
+            pointer.asFloatBuffer().put(glm.ortho_(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f).toFa_());
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }

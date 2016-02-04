@@ -8,10 +8,11 @@ package tests.gl_330;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -54,8 +55,7 @@ public class Gl_330_query_conditional extends Test {
 
     private int[] vertexArrayName = {0}, queryName = {0}, bufferName = new int[Buffer.MAX];
     private int programName, uniformMaterialOffset;
-    private float[] projection = new float[16], model = new float[16];
-    private boolean test = true;
+    private boolean toggle = true;
 
     @Override
     protected boolean begin(GL gl) {
@@ -194,16 +194,10 @@ public class Gl_330_query_conditional extends Test {
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, 16 * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-            FloatUtil.makeIdentity(model);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
 
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model);
-
-            for (float f : projection) {
-                pointer.putFloat(f);
-            }
-            pointer.rewind();
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
@@ -227,7 +221,7 @@ public class Gl_330_query_conditional extends Test {
         // Beginning of the samples count query
         gl3.glBeginQuery(GL_ANY_SAMPLES_PASSED, queryName[0]);
         {
-            if (test) {
+            if (toggle) {
                 // To test the condional rendering, comment this line, the next draw call won't happen.
                 gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
             }
@@ -252,7 +246,7 @@ public class Gl_330_query_conditional extends Test {
         }
         gl3.glEndConditionalRender();
 
-        test = !test;
+        toggle = !toggle;
 
         return true;
     }

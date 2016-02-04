@@ -39,7 +39,7 @@ public class Gl_320_fbo_depth extends Test {
     }
 
     public Gl_320_fbo_depth() {
-        super("Gl-320-fbo-depth", Profile.CORE, 3, 2, new Vec2(0.0f, (float) -Math.PI * 0.48f));
+        super("Gl-320-fbo-depth", Profile.CORE, 3, 2, new Vec2(0.0f, -Math.PI * 0.48f));
     }
 
     private final String SHADERS_SOURCE_TEXTURE = "texture-2d";

@@ -330,9 +330,9 @@ public class Gl_320_fbo_depth_stencil extends Test {
 
             Mat4 projection = glm.perspective_((float)Math.PI * 0.25f,(float) windowSize.x / windowSize.y, 0.1f, 100.0f);
 
-            pointer.asFloatBuffer().put(projection.mul(viewMat4(), new Mat4()).scale(new Vec3(1.00f)).toFa_());
+            pointer.asFloatBuffer().put(projection.mul_(viewMat4()).scale(new Vec3(1.00f)).toFa_());
             pointer.position(uniformBufferOffsetAlignment[0]*1);
-            pointer.asFloatBuffer().put(projection.mul(viewMat4(), new Mat4()).scale(new Vec3(1.05f)).toFa_());
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).scale(new Vec3(1.05f)).toFa_());
             pointer.rewind();
 
             // Make sure the uniform buffer is uploaded

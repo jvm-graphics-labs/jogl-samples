@@ -184,9 +184,9 @@ public class Gl_320_draw_instanced extends Test {
             Mat4 modelA = new Mat4(1.0f).translate(new Vec3(-1.1f, 0.0f, 0.0f));
             Mat4 modelB = new Mat4(1.0f).translate(new Vec3(1.1f, 0.0f, 0.0f));
 
-            pointer.asFloatBuffer().put(projection.mul(viewMat4(), new Mat4()).mul(modelA).toFa_());
+            pointer.asFloatBuffer().put(projection.mul_(viewMat4()).mul(modelA).toFa_());
             pointer.position(Mat4.SIZE);
-            pointer.asFloatBuffer().put(projection.mul(viewMat4(), new Mat4()).mul(modelB).toFa_());
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(modelB).toFa_());
             pointer.rewind();
 
             // Make sure the uniform buffer is uploaded

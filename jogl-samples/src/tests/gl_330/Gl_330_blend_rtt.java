@@ -8,10 +8,11 @@ package tests.gl_330;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -83,11 +84,10 @@ public class Gl_330_blend_rtt extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] framebufferName = {0}, vertexArrayName = {0}, bufferName = {0},
-            texture2dName = new int[Texture.MAX], samplerName = {0};
+    private int[] framebufferName = {0}, vertexArrayName = {0}, bufferName = {0}, texture2dName = new int[Texture.MAX],
+            samplerName = {0};
     private int programNameSingle, uniformMvpSingle, uniformDiffuseSingle;
     private Vec4i[] viewport = new Vec4i[Texture.MAX];
-    private float[] projection = new float[16], view = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -329,13 +329,12 @@ public class Gl_330_blend_rtt extends Test {
         gl3.glUseProgram(programNameSingle);
 
         {
-            FloatUtil.makeOrtho(projection, 0, true, -2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
-            FloatUtil.makeIdentity(view);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view, mvp);
-            FloatUtil.multMatrix(mvp, model);
+            Mat4 projection = glm.ortho_(-2.0f, 2.0f, -1.5f, 1.5f, -1.0f, 1.0f);
+            Mat4 view = new Mat4(1.0f);
+            Mat4 model = new Mat4(0.2f);
+            Mat4 mvp = projection.mul(view).mul(model);
 
-            gl3.glUniformMatrix4fv(uniformMvpSingle, 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvpSingle, 1, false, mvp.toFa_(), 0);
             gl3.glUniform1i(uniformDiffuseSingle, 0);
         }
 

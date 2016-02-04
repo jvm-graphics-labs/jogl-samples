@@ -9,23 +9,24 @@ import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2.GL_COMPARE_R_TO_TEXTURE;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec2;
+import dev.Vec2i;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
-import jglm.Vec2i;
 
 /**
  *
@@ -38,7 +39,7 @@ public class Gl_320_fbo_shadow extends Test {
     }
 
     public Gl_320_fbo_shadow() {
-        super("Gl-320-fbo-shadow", Profile.CORE, 3, 2, new Vec2(0.0f, -(float) Math.PI * 0.3f));
+        super("Gl-320-fbo-shadow", Profile.CORE, 3, 2, new Vec2(0.0f, -Math.PI * 0.3f));
     }
 
     private final String SHADER_SOURCE_DEPTH = "fbo-shadow-depth";
@@ -116,11 +117,10 @@ public class Gl_320_fbo_shadow extends Test {
     }
 
     private int[] framebufferName = new int[Framebuffer.MAX], programName = new int[Program.MAX],
-            vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
-            textureName = new int[Texture.MAX], uniformTransform = new int[Program.MAX];
+            vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX],
+            uniformTransform = new int[Program.MAX];
     private int uniformShadow;
     private Vec2i shadowSize = new Vec2i(64, 64);
-    private float[] projection = new float[16], view = new float[16], model = new float[16], depthMvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -370,38 +370,32 @@ public class Gl_320_fbo_shadow extends Test {
                 GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES * 3,
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-        FloatBuffer poiBufferF = pointer.asFloatBuffer();
-
         // Update of the MVP matrix for the render pass
         {
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 10.0f);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model);
-
-            poiBufferF.put(projection);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 10.0f);
+            Mat4 model = new Mat4(1.0f);
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
         }
 
         // Update of the MVP matrix for the depth pass
         {
-            FloatUtil.makeOrtho(projection, 0, true, -1.0f, 1.0f, -1.0f, 1.0f, -4.0f, 8.0f);
-            FloatUtil.makeLookAt(view, 0, new float[]{0.5f, 1.0f, 2.0f}, 0, new float[3], 0,
-                    new float[]{0, 0, 1}, 0, model);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view, depthMvp);
-            FloatUtil.multMatrix(depthMvp, model);
+            Mat4 projection = glm.ortho_(-1.0f, 1.0f, -1.0f, 1.0f, -4.0f, 8.0f);
+            Mat4 view = glm.lookAt_(new Vec3(0.5, 1.0, 2.0), new Vec3(0), new Vec3(0, 0, 1));
+            Mat4 model = new Mat4(1.0f);
+            Mat4 depthMVP = projection.mul(view).mul(model);
+            pointer.position(Mat4.SIZE);
+            pointer.asFloatBuffer().put(depthMVP.toFa_());
 
-            poiBufferF.put(depthMvp);
+            Mat4 biasMatrix = new Mat4(
+                    0.5, 0.0, 0.0, 0.0,
+                    0.0, 0.5, 0.0, 0.0,
+                    0.0, 0.0, 0.5, 0.0,
+                    0.5, 0.5, 0.5, 1.0);
 
-            float[] biasMatrix = {
-                0.5f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.5f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.5f, 0.0f,
-                0.5f, 0.5f, 0.5f, 1.0f};
+            pointer.position(2 * Mat4.SIZE);
+            pointer.asFloatBuffer().put(biasMatrix.mul(depthMVP).toFa_());
 
-            FloatUtil.multMatrix(biasMatrix, depthMvp);
-
-            poiBufferF.put(biasMatrix).rewind();
+            pointer.rewind();
         }
 
         gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

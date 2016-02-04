@@ -8,10 +8,11 @@ package tests.gl_320.program;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -68,7 +69,6 @@ public class Gl_320_program_uniform extends Test {
 
     private int programName, uniformTransform, uniformDiffuse0, uniformDiffuse1;
     private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0};
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -185,12 +185,11 @@ public class Gl_320_program_uniform extends Test {
                     GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view(), mvp);
-            FloatUtil.multMatrix(mvp, model);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
+            Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
-            pointer.asFloatBuffer().put(mvp).rewind();
+            pointer.asFloatBuffer().put(mvp.toFa_());
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);

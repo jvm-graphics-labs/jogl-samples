@@ -199,9 +199,9 @@ public class Gl_450_query_conditional extends Test {
             Mat4 model1 = new Mat4(1.0f);
 
             pointer.position(uniformTransformOffset * 0);
-            pointer.asFloatBuffer().put(projection.mul(viewMat4(), new Mat4()).mul(model0).toFa_());
+            pointer.asFloatBuffer().put(projection.mul_(viewMat4()).mul(model0).toFa_());
             pointer.position(uniformTransformOffset * 1);
-            pointer.asFloatBuffer().put(projection.mul(viewMat4(), new Mat4()).mul(model1).toFa_());
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model1).toFa_());
 
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }

@@ -12,6 +12,9 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec3;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -86,9 +89,7 @@ public class Gl_320_texture_format extends Test {
     };
 
     private int[] vertexArrayName = {0}, programName = new int[Program.MAX], bufferName = {0},
-            textureName = new int[Texture.MAX], uniformMvp = new int[Program.MAX],
-            uniformDiffuse = new int[Program.MAX];
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
+            textureName = new int[Texture.MAX], uniformMvp = new int[Program.MAX], uniformDiffuse = new int[Program.MAX];
 
     private Vec4i[] viewport = new Vec4i[]{
         new Vec4i(0, 0, 320, 240),
@@ -233,10 +234,9 @@ public class Gl_320_texture_format extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-        FloatUtil.makeScale(model, true, 3.0f, 3.0f, 3.0f);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f).scale(new Vec3(3.0f));
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
@@ -250,7 +250,7 @@ public class Gl_320_texture_format extends Test {
 
             gl3.glUseProgram(programName[Program.UINT]);
             gl3.glUniform1i(uniformDiffuse[Program.UINT], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.UINT], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.UINT], 1, false, mvp.toFa_(), 0);
 
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA8UI]);
 
@@ -264,7 +264,7 @@ public class Gl_320_texture_format extends Test {
 
             gl3.glUseProgram(programName[Program.NORMALIZED]);
             gl3.glUniform1i(uniformDiffuse[Program.NORMALIZED], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.NORMALIZED], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.NORMALIZED], 1, false, mvp.toFa_(), 0);
 
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA16F]);
 
@@ -278,7 +278,7 @@ public class Gl_320_texture_format extends Test {
 
             gl3.glUseProgram(programName[Program.NORMALIZED]);
             gl3.glUniform1i(uniformDiffuse[Program.NORMALIZED], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.NORMALIZED], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.NORMALIZED], 1, false, mvp.toFa_(), 0);
 
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA8]);
 
@@ -292,7 +292,7 @@ public class Gl_320_texture_format extends Test {
 
             gl3.glUseProgram(programName[Program.NORMALIZED]);
             gl3.glUniform1i(uniformDiffuse[Program.NORMALIZED], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.NORMALIZED], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.NORMALIZED], 1, false, mvp.toFa_(), 0);
 
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA8_SNORM]);
 

@@ -10,14 +10,15 @@ import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL3;
 import static com.jogamp.opengl.GL3.GL_PROGRAM_POINT_SIZE;
 import static com.jogamp.opengl.GL3ES3.*;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec3;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
-import jglm.Vec3;
 
 /**
  *
@@ -38,8 +39,6 @@ public class Gl_320_primitive_point_quad extends Test {
 
     private int vertexCount, programName, uniformMvp, uniformMv, uniformCameraPosition;
     private int[] vertexArrayName = {0}, bufferName = {0};
-    private float[] projection = new float[16], view = new float[16], model = new float[16],
-            mvp = new float[16], mv = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -169,12 +168,12 @@ public class Gl_320_primitive_point_quad extends Test {
     protected boolean render(GL gl) {
 
         GL3 gl3 = (GL3) gl;
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-        view = view();
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view, mvp);
-        FloatUtil.multMatrix(mvp, model);
-        FloatUtil.multMatrix(view, model, mv);
+
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+        Mat4 view = viewMat4();
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(view).mul(model);
+        Mat4 mv = view.mul(model);
 
         float[] depth = {1.0f};
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
@@ -182,13 +181,13 @@ public class Gl_320_primitive_point_quad extends Test {
         gl3.glClearBufferfv(GL_DEPTH, 0, depth, 0);
 
         gl3.glDisable(GL_SCISSOR_TEST);
-        Vec3 cameraPosition = cameraPosition().negated();
+        Vec3 cameraPosition = cameraPosition().negate();
         //glm::vec3 CameraPosition(glm::vec4(glm::normalize(glm::vec3(1.0)), 1.0) * this->view());
 
         gl3.glUseProgram(programName);
-        gl3.glUniform3fv(uniformCameraPosition, 1, cameraPosition.toFloatArray(), 0);
-        gl3.glUniformMatrix4fv(uniformMv, 1, false, mv, 0);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl3.glUniform3fv(uniformCameraPosition, 1, cameraPosition.toFA_(), 0);
+        gl3.glUniformMatrix4fv(uniformMv, 1, false, mv.toFa_(), 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glBindVertexArray(vertexArrayName[0]);
 
