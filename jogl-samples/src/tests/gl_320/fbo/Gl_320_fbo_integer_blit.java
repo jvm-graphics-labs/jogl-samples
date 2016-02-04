@@ -8,10 +8,12 @@ package tests.gl_320.fbo;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -84,10 +86,9 @@ public class Gl_320_fbo_integer_blit extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] vertexArrayName = new int[1], bufferName = new int[1], textureName = new int[Texture.MAX],
+    private int[] vertexArrayName = {0}, bufferName = {0}, textureName = new int[Texture.MAX],
             framebufferName = new int[Framebuffer.MAX], programName = new int[Program.MAX],
             uniformMvp = new int[Program.MAX], uniformDiffuse = new int[Program.MAX];
-    private float[] projection = new float[16], view = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -290,16 +291,14 @@ public class Gl_320_fbo_integer_blit extends Test {
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RENDER]);
             gl3.glClearBufferuiv(GL_COLOR, 0, new int[]{0, 128, 255, 255}, 0);
 
-            FloatUtil.makeOrtho(projection, 0, true, -2.0f, 2.0f, 2.0f, -2.0f, 2.0f, -2.0f);
-            FloatUtil.makeIdentity(view);
-            FloatUtil.makeRotationAxis(model, 0, -0.3f, 0.f, 0.f, 1.f, tmpVec3);
-
-            FloatUtil.multMatrix(projection, view, mvp);
-            FloatUtil.multMatrix(mvp, model);
+            Mat4 projection = glm.ortho_(-2.0f, 2.0f, 2.0f, -2.0f, 2.0f, -2.0f);
+            Mat4 view = new Mat4(1.0f);
+            Mat4 model = new Mat4(1.0f).rotate(-0.3f, new Vec3(0.f, 0.f, 1.f));
+            Mat4 mvp = projection.mul(view).mul(model);
 
             gl3.glUseProgram(programName[Program.RENDER]);
             gl3.glUniform1i(uniformDiffuse[Program.RENDER], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.RENDER], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.RENDER], 1, false, mvp.toFa_(), 0);
 
             gl3.glActiveTexture(GL_TEXTURE0);
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
@@ -325,15 +324,13 @@ public class Gl_320_fbo_integer_blit extends Test {
 
         // Pass 2
         {
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view(), mvp);
-            FloatUtil.multMatrix(mvp, model);
+            Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
+            Mat4 mvp = perspective.mul(viewMat4()).mul(model);
 
             gl3.glUseProgram(programName[Program.SPLASH]);
             gl3.glUniform1i(uniformDiffuse[Program.SPLASH], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.SPLASH], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.SPLASH], 1, false, mvp.toFa_(), 0);
 
             gl3.glViewport(0, 0, windowSize.x, windowSize.y);
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);

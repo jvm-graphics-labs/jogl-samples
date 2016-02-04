@@ -206,7 +206,7 @@ public class Gl_300_test_alpha extends Test {
 
         gl3.glUseProgram(programName);
         gl3.glUniform1i(uniformDiffuse, 0);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA_(), 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
         gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[0]);

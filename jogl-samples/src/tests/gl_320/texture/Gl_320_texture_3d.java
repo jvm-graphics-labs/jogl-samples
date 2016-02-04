@@ -46,7 +46,7 @@ public class Gl_320_texture_3d extends Test {
         -1.0f, +1.0f, 0.0f, 0.0f,
         -1.0f, -1.0f, 0.0f, 1.0f};
 
-    private int[] vertexArrayName = new int[1], bufferName = new int[1], textureName = new int[1];
+    private int[] vertexArrayName = {0}, bufferName = {0}, textureName = {0};
     private int programName, uniformTextureMatrix, uniformDiffuse;
     private Vec3 orientation = new Vec3();
 

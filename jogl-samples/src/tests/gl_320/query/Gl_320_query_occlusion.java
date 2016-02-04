@@ -52,7 +52,7 @@ public class Gl_320_query_occlusion extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = new int[1], queryName = new int[1];
+    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0}, queryName = {0};
     private int programName;
     private float[] projection = new float[16], model = new float[16];
 

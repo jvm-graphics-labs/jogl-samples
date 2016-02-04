@@ -67,23 +67,15 @@ public class Gl_330_sampler_object extends Test {
         new Vertex(new float[]{-1.0f, +1.0f}, new float[]{0.0f, 0.0f}),
         new Vertex(new float[]{-1.0f, -1.0f}, new float[]{0.0f, 1.0f})};
 
-    private enum Viewport {
-        V00,
-        V10,
-        V11,
-        V01,
-        MAX
-    }
+    private class Type {
 
-    private enum Type {
-        VERT,
-        FRAG,
-        MAX
+        public static final int VERT = 0;
+        public static final int FRAG = 1;
+        public static final int MAX = 2;
     }
 
     private int[] vertexArrayName = {0}, bufferName = {0}, textureName = {0}, samplerAname = {0}, samplerBname = {0};
     private int programName, uniformMvp, uniformDiffuseA, uniformDiffuseB;
-    private Vec4i[] viewport = new Vec4i[Viewport.MAX.ordinal()];
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override

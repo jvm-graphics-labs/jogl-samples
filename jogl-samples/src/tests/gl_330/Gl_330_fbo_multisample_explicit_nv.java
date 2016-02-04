@@ -58,36 +58,40 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
         -4.0f * 0.3f, +3.0f * 0.3f, 0.0f, 0.0f,
         -4.0f * 0.3f, -3.0f * 0.3f, 0.0f, 1.0f};
 
-    private enum Program {
-        THROUGH,
-        RESOLVE_BOX,
-        RESOLVE_NEAR,
-        MAX
+    private class Program {
+
+        public static final int THROUGH = 0;
+        public static final int RESOLVE_BOX = 1;
+        public static final int RESOLVE_NEAR = 2;
+        public static final int MAX = 3;
     }
 
-    private enum Renderbuffer {
-        DEPTH,
-        COLOR,
-        MAX
+    private class Renderbuffer {
+
+        public static final int DEPTH = 0;
+        public static final int COLOR = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Texture {
-        DIFFUSE,
-        COLOR,
-        MAX
+    private class Texture {
+
+        public static final int DIFFUSE = 0;
+        public static final int COLOR = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Shader {
-        VERT,
-        FRAG_THROUGH,
-        FRAG_RESOLVE_BOX,
-        FRAG_RESOLVE_NEAR,
-        MAX
+    private class Shader {
+
+        public static final int VERT = 0;
+        public static final int FRAG_THROUGH = 1;
+        public static final int FRAG_RESOLVE_BOX = 2;
+        public static final int FRAG_RESOLVE_NEAR = 3;
+        public static final int MAX = 4;
     }
 
-    private int[] vertexArrayName = {0}, programName = new int[Program.MAX.ordinal()], bufferName = {0}, samplerName = {0},
-            textureName = new int[Texture.MAX.ordinal()], renderbufferName = new int[Renderbuffer.MAX.ordinal()], framebufferName = {0},
-            uniformMvp = new int[Program.MAX.ordinal()], uniformDiffuse = new int[Program.MAX.ordinal()];
+    private int[] vertexArrayName = {0}, programName = new int[Program.MAX], bufferName = {0}, samplerName = {0},
+            textureName = new int[Texture.MAX], renderbufferName = new int[Renderbuffer.MAX], framebufferName = {0},
+            uniformMvp = new int[Program.MAX], uniformDiffuse = new int[Program.MAX];
     private float[] perspective = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
@@ -145,21 +149,21 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
 
         boolean validated = true;
 
-        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX.ordinal()];
+        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
 
-        shaderCodes[Shader.VERT.ordinal()] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+        shaderCodes[Shader.VERT] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
                 this.getClass(), SHADERS_ROOT, null, VERT_SHADER_SOURCE, "vert", null, true);
-        for (int i = 0; i < Program.MAX.ordinal(); i++) {
-            shaderCodes[Shader.FRAG_THROUGH.ordinal() + i] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+        for (int i = 0; i < Program.MAX; i++) {
+            shaderCodes[Shader.FRAG_THROUGH + i] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
                     this.getClass(), SHADERS_ROOT, null, FRAG_SHADER_SOURCE[i], "frag", null, true);
         }
 
-        for (int i = 0; i < Program.MAX.ordinal(); i++) {
+        for (int i = 0; i < Program.MAX; i++) {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            shaderProgram.add(shaderCodes[Shader.VERT.ordinal()]);
-            shaderProgram.add(shaderCodes[Shader.FRAG_THROUGH.ordinal() + i]);
+            shaderProgram.add(shaderCodes[Shader.VERT]);
+            shaderProgram.add(shaderCodes[Shader.FRAG_THROUGH + i]);
 
             shaderProgram.init(gl3);
 
@@ -190,9 +194,9 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
-            gl3.glGenTextures(Texture.MAX.ordinal(), textureName, 0);
+            gl3.glGenTextures(Texture.MAX, textureName, 0);
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
             for (int level = 0; level < texture.levels(); ++level) {
                 gl3.glTexImage2D(GL_TEXTURE_2D, level,
                         format.internal.value,
@@ -203,8 +207,8 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
             }
             gl3.glBindTexture(GL_TEXTURE_2D, 0);
 
-            gl3.glBindTexture(GL_TEXTURE_RENDERBUFFER_NV, textureName[Texture.COLOR.ordinal()]);
-            ((GL2) gl3).glTexRenderbufferNV(GL_TEXTURE_RENDERBUFFER_NV, renderbufferName[Renderbuffer.COLOR.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_RENDERBUFFER_NV, textureName[Texture.COLOR]);
+            ((GL2) gl3).glTexRenderbufferNV(GL_TEXTURE_RENDERBUFFER_NV, renderbufferName[Renderbuffer.COLOR]);
             gl3.glBindTexture(GL_TEXTURE_RENDERBUFFER_NV, 0);
 
         } catch (IOException ex) {
@@ -215,10 +219,10 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
 
     private boolean initRenderbuffer(GL3 gl3) {
 
-        gl3.glGenRenderbuffers(Renderbuffer.MAX.ordinal(), renderbufferName, 0);
-        gl3.glBindRenderbuffer(GL_RENDERBUFFER, renderbufferName[Renderbuffer.COLOR.ordinal()]);
+        gl3.glGenRenderbuffers(Renderbuffer.MAX, renderbufferName, 0);
+        gl3.glBindRenderbuffer(GL_RENDERBUFFER, renderbufferName[Renderbuffer.COLOR]);
         gl3.glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
-        gl3.glBindRenderbuffer(GL_RENDERBUFFER, renderbufferName[Renderbuffer.DEPTH.ordinal()]);
+        gl3.glBindRenderbuffer(GL_RENDERBUFFER, renderbufferName[Renderbuffer.DEPTH]);
         gl3.glRenderbufferStorageMultisample(GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT24, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
         gl3.glBindRenderbuffer(GL_RENDERBUFFER, 0);
 
@@ -230,9 +234,9 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
         gl3.glGenFramebuffers(1, framebufferName, 0);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
         gl3.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER,
-                renderbufferName[Renderbuffer.COLOR.ordinal()]);
+                renderbufferName[Renderbuffer.COLOR]);
         gl3.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER,
-                renderbufferName[Renderbuffer.DEPTH.ordinal()]);
+                renderbufferName[Renderbuffer.DEPTH]);
         if (!isFramebufferComplete(gl3, framebufferName[0])) {
             return false;
         }
@@ -290,9 +294,9 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
 
         gl3.glEnable(GL_DEPTH_TEST);
 
-        gl3.glUseProgram(programName[Program.THROUGH.ordinal()]);
-        gl3.glUniform1i(uniformDiffuse[Program.THROUGH.ordinal()], 0);
-        gl3.glUniformMatrix4fv(uniformMvp[Program.THROUGH.ordinal()], 1, false, mvp, 0);
+        gl3.glUseProgram(programName[Program.THROUGH]);
+        gl3.glUniform1i(uniformDiffuse[Program.THROUGH], 0);
+        gl3.glUniformMatrix4fv(uniformMvp[Program.THROUGH], 1, false, mvp, 0);
 
         gl3.glViewport(0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
 
@@ -302,7 +306,7 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE.ordinal()]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
         gl3.glBindSampler(0, samplerName[0]);
         gl3.glBindVertexArray(vertexArrayName[0]);
 
@@ -326,7 +330,7 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_RENDERBUFFER_NV, textureName[Texture.COLOR.ordinal()]);
+        gl3.glBindTexture(GL_TEXTURE_RENDERBUFFER_NV, textureName[Texture.COLOR]);
         gl3.glBindSampler(0, samplerName[0]);
 
         gl3.glBindVertexArray(vertexArrayName[0]);
@@ -336,18 +340,18 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
         // Box
         {
             gl3.glScissor(1, 1, windowSize.x / 2 - 2, windowSize.y - 2);
-            gl3.glUseProgram(programName[Program.RESOLVE_BOX.ordinal()]);
-            gl3.glUniform1i(uniformDiffuse[Program.RESOLVE_BOX.ordinal()], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.RESOLVE_BOX.ordinal()], 1, false, mvp, 0);
+            gl3.glUseProgram(programName[Program.RESOLVE_BOX]);
+            gl3.glUniform1i(uniformDiffuse[Program.RESOLVE_BOX], 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.RESOLVE_BOX], 1, false, mvp, 0);
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 5);
         }
 
         // Near
         {
             gl3.glScissor(windowSize.x / 2 + 1, 1, windowSize.x / 2 - 2, windowSize.y - 2);
-            gl3.glUseProgram(programName[Program.RESOLVE_NEAR.ordinal()]);
-            gl3.glUniform1i(uniformDiffuse[Program.RESOLVE_NEAR.ordinal()], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.RESOLVE_NEAR.ordinal()], 1, false, mvp, 0);
+            gl3.glUseProgram(programName[Program.RESOLVE_NEAR]);
+            gl3.glUniform1i(uniformDiffuse[Program.RESOLVE_NEAR], 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.RESOLVE_NEAR], 1, false, mvp, 0);
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 5);
         }
 
@@ -360,12 +364,12 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
         GL3 gl3 = (GL3) gl;
 
         gl3.glDeleteBuffers(1, bufferName, 0);
-        for (int i = 0; i < Program.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Program.MAX; ++i) {
             gl3.glDeleteProgram(programName[i]);
         }
         gl3.glDeleteSamplers(1, samplerName, 0);
-        gl3.glDeleteTextures(Renderbuffer.MAX.ordinal(), renderbufferName, 0);
-        gl3.glDeleteTextures(Texture.MAX.ordinal(), textureName, 0);
+        gl3.glDeleteTextures(Renderbuffer.MAX, renderbufferName, 0);
+        gl3.glDeleteTextures(Texture.MAX, textureName, 0);
         gl3.glDeleteFramebuffers(1, framebufferName, 0);
         gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
 

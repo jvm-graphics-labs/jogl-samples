@@ -8,10 +8,12 @@ package tests.gl_320.fbo;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -74,12 +76,10 @@ public class Gl_320_fbo_rtt_texture_array extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] shaderName = new int[Shader.MAX], framebufferName = new int[1], bufferName = new int[1],
-            textureName = new int[1], vertexArrayName = new int[Program.MAX],
-            programName = new int[Program.MAX], uniformMvp = new int[Program.MAX];
+    private int[] shaderName = new int[Shader.MAX], framebufferName = {0}, bufferName = {0}, textureName = {0},
+            vertexArrayName = new int[Program.MAX], programName = new int[Program.MAX], uniformMvp = new int[Program.MAX];
     private int uniformLayer, uniformDiffuse;
     private Vec4i[] viewport = new Vec4i[Texture.MAX];
-    private float[] projection = new float[16], view = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -277,18 +277,17 @@ public class Gl_320_fbo_rtt_texture_array extends Test {
 
         // Pass 1
         {
-            FloatUtil.makeOrtho(projection, 0, true, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-            FloatUtil.makeTranslation(view, true, 0.0f, 0.0f, 0.0f);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view, mvp);
-            FloatUtil.multMatrix(mvp, model);
+            Mat4 projection = glm.ortho_(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+            Mat4 view = new Mat4(1.0f).translate(new Vec3(0.0f, 0.0f, 0.0f));
+            Mat4 model = new Mat4(1.0f);
+            Mat4 mvp = projection.mul(view).mul(model);
 
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
             gl3.glViewport(0, 0, windowSize.x * FRAMEBUFFER_SIZE, windowSize.y * FRAMEBUFFER_SIZE);
             gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
             gl3.glUseProgram(programName[Program.MULTIPLE]);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.MULTIPLE], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.MULTIPLE], 1, false, mvp.toFa_(), 0);
 
             gl3.glBindVertexArray(vertexArrayName[Program.MULTIPLE]);
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
@@ -296,18 +295,17 @@ public class Gl_320_fbo_rtt_texture_array extends Test {
 
         // Pass 2
         {
-            FloatUtil.makeOrtho(projection, 0, true, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
-            FloatUtil.makeIdentity(view);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view, mvp);
-            FloatUtil.multMatrix(mvp, model);
+            Mat4 projection = glm.ortho_(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
+            Mat4 view = new Mat4(1.0f);
+            Mat4 model = new Mat4(1.0f);
+            Mat4 mvp = projection.mul(view).mul(model);
 
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
             gl3.glViewport(0, 0, windowSize.x, windowSize.y);
             gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
             gl3.glUseProgram(programName[Program.SPLASH]);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.SPLASH], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.SPLASH], 1, false, mvp.toFa_(), 0);
             gl3.glUniform1i(uniformDiffuse, 0);
         }
 

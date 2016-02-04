@@ -263,7 +263,7 @@ public class Gl_430_texture_buffer extends Test {
             projection.perspectiveFov((float) Math.PI * 0.25f, windowSize.x, windowSize.y, 0.1f, 100.0f)
                     .mul(viewMat4()).mul(model.identity());
 
-            pointer.asFloatBuffer().put(projection.toFA(new float[16]));
+            pointer.asFloatBuffer().put(projection.toFa(new float[16]));
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);

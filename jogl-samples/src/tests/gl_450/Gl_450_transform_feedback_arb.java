@@ -232,7 +232,7 @@ public class Gl_450_transform_feedback_arb extends Test {
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
             Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
-            uniformPointer.asFloatBuffer().put(mvp.toFA_());
+            uniformPointer.asFloatBuffer().put(mvp.toFa_());
         }
 
         // Set the display viewport

@@ -9,10 +9,13 @@ import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2.GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec2;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -24,7 +27,6 @@ import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
 
 /**
  *
@@ -83,10 +85,8 @@ public class Gl_320_fbo_depth extends Test {
     }
 
     private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX],
-            framebufferName = new int[1];
+            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], framebufferName = {0};
     private int uniformTransform;
-    private float[] projection = new float[16], model = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -180,7 +180,7 @@ public class Gl_320_fbo_depth extends Test {
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int[] uniformBufferOffset = new int[1];
+        int[] uniformBufferOffset = {0};
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
 
@@ -289,13 +289,9 @@ public class Gl_320_fbo_depth extends Test {
                     GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.5f, 8.0f);
-            FloatUtil.makeScale(model, true, 5.0f, 5.0f, 5.0f);
-
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model);
-
-            pointer.asFloatBuffer().put(projection).rewind();
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.5f, 8.0f);
+            Mat4 model = new Mat4(1.0f).scale(new Vec3(5.0f));
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

@@ -11,7 +11,9 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
 import dev.Mat4;
+import dev.Vec2;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -19,7 +21,6 @@ import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import jglm.Vec2;
 
 /**
  *
@@ -79,9 +80,8 @@ public class Gl_320_draw_base_vertex extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = new int[1];
+    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0};
     private int programName, uniformTransform;
-    private final Mat4 projection = new Mat4(), model = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -159,7 +159,7 @@ public class Gl_320_draw_base_vertex extends Test {
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        int[] uniformBlockSize = new int[1];
+        int[] uniformBlockSize = {0};
         gl3.glGetActiveUniformBlockiv(programName, uniformTransform, GL_UNIFORM_BLOCK_DATA_SIZE, uniformBlockSize, 0);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize[0], null, GL_DYNAMIC_DRAW);
@@ -195,13 +195,13 @@ public class Gl_320_draw_base_vertex extends Test {
         GL3 gl3 = (GL3) gl;
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer transformBuffer = gl.glMapBufferRange(GL_UNIFORM_BUFFER,
+            ByteBuffer pointer = gl.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, 16 * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            projection.perspective((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f)
-                    .mul(viewMat4()).mul(model.identity());
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
 
-            transformBuffer.asFloatBuffer().put(projection.toFA(new float[16]));
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

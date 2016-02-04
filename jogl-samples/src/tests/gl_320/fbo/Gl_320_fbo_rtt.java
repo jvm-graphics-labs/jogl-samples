@@ -12,6 +12,9 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -77,13 +80,10 @@ public class Gl_320_fbo_rtt extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] framebufferName = new int[1], programName = new int[Program.MAX],
-            uniformMvp = new int[Program.MAX], uniformDiffuse = new int[Program.MAX],
-            vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
-            textureName = new int[Texture.MAX];
+    private int[] framebufferName = {0}, programName = new int[Program.MAX], uniformMvp = new int[Program.MAX],
+            uniformDiffuse = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
+            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX];
     private Vec4i[] viewport = new Vec4i[Texture.MAX];
-    private float[] projection = new float[16], viewTranslate = new float[16], view = new float[16],
-            model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -292,12 +292,11 @@ public class Gl_320_fbo_rtt extends Test {
         // Pass 1
         {
             // Compute the MVP (Model View Projection matrix)
-            FloatUtil.makeOrtho(projection, 0, true, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-            FloatUtil.makeTranslation(viewTranslate, true, 0.0f, 0.0f, 0.0f);
-            view = viewTranslate;
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view, mvp);
-            FloatUtil.multMatrix(mvp, model);
+            Mat4 projection = glm.ortho_(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+            Mat4 viewTranslate = new Mat4(1.0f).translate(new Vec3(0.0f, 0.0f, 0.0f));
+            Mat4 view = viewTranslate;
+            Mat4 model = new Mat4(1.0f);
+            Mat4 mvp = projection.mul(view).mul(model);
 
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
             gl3.glViewport(0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
@@ -305,7 +304,7 @@ public class Gl_320_fbo_rtt extends Test {
             gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
             gl3.glUseProgram(programName[Program.MULTIPLE]);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.MULTIPLE], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.MULTIPLE], 1, false, mvp.toFa_(), 0);
 
             gl3.glBindVertexArray(vertexArrayName[Program.MULTIPLE]);
             gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
@@ -313,18 +312,17 @@ public class Gl_320_fbo_rtt extends Test {
 
         // Pass 2
         {
-            FloatUtil.makeOrtho(projection, 0, true, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
-            FloatUtil.makeIdentity(view);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view, mvp);
-            FloatUtil.multMatrix(mvp, model);
+            Mat4 projection = glm.ortho_(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
+            Mat4 view = new Mat4(1.0f);
+            Mat4 model = new Mat4(1.0f);
+            Mat4 mvp = projection.mul(view).mul(model);
 
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
             gl3.glViewport(0, 0, windowSize.x, windowSize.y);
             gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
             gl3.glUseProgram(programName[Program.SINGLE]);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.SINGLE], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.SINGLE], 1, false, mvp.toFa_(), 0);
             gl3.glUniform1i(uniformDiffuse[Program.SINGLE], 0);
         }
 

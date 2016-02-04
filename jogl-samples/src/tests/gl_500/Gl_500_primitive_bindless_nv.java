@@ -232,7 +232,7 @@ public class Gl_500_primitive_bindless_nv extends Test {
 
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE, GL_MAP_WRITE_BIT);
-            pointer.asFloatBuffer().put(mvp.toFA_());
+            pointer.asFloatBuffer().put(mvp.toFa_());
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
 

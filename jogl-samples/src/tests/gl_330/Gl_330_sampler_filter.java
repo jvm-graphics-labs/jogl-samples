@@ -67,17 +67,18 @@ public class Gl_330_sampler_filter extends Test {
         new Vertex(new float[]{-1.0f, +1.0f}, new float[]{0.0f, 0.0f}),
         new Vertex(new float[]{-1.0f, -1.0f}, new float[]{0.0f, 1.0f})};
 
-    private enum Viewport {
-        V00,
-        V10,
-        V11,
-        V01,
-        MAX
+    private class Viewport {
+
+        public static final int V00 = 0;
+        public static final int V10 = 1;
+        public static final int V11 = 2;
+        public static final int V01 = 3;
+        public static final int MAX = 4;
     }
 
-    private int[] vertexArrayName = {0}, bufferName = {0}, texture2dName = {0}, samplerName = new int[Viewport.MAX.ordinal()];
+    private int[] vertexArrayName = {0}, bufferName = {0}, texture2dName = {0}, samplerName = new int[Viewport.MAX];
     private int programName, uniformMvp, uniformDiffuse;
-    private Vec4i[] viewport = new Vec4i[Viewport.MAX.ordinal()];
+    private Vec4i[] viewport = new Vec4i[Viewport.MAX];
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
@@ -85,11 +86,11 @@ public class Gl_330_sampler_filter extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        viewport[Viewport.V00.ordinal()] = new Vec4i(1, 1, windowSize.x / 2 - 1, windowSize.y / 2 - 1);
-        viewport[Viewport.V10.ordinal()] = new Vec4i(windowSize.x / 2 + 1, 1, windowSize.x / 2 - 1, windowSize.y / 2 - 1);
-        viewport[Viewport.V11.ordinal()] = new Vec4i(windowSize.x / 2 + 1, windowSize.y / 2 + 1,
+        viewport[Viewport.V00] = new Vec4i(1, 1, windowSize.x / 2 - 1, windowSize.y / 2 - 1);
+        viewport[Viewport.V10] = new Vec4i(windowSize.x / 2 + 1, 1, windowSize.x / 2 - 1, windowSize.y / 2 - 1);
+        viewport[Viewport.V11] = new Vec4i(windowSize.x / 2 + 1, windowSize.y / 2 + 1,
                 windowSize.x / 2 - 1, windowSize.y / 2 - 1);
-        viewport[Viewport.V01.ordinal()] = new Vec4i(1, windowSize.y / 2 + 1, windowSize.x / 2 - 1, windowSize.y / 2 - 1);
+        viewport[Viewport.V01] = new Vec4i(1, windowSize.y / 2 + 1, windowSize.x / 2 - 1, windowSize.y / 2 - 1);
 
         gl3.glEnable(GL_SCISSOR_TEST);
 
@@ -165,23 +166,23 @@ public class Gl_330_sampler_filter extends Test {
 
     private boolean initSampler(GL3 gl3) {
 
-        gl3.glGenSamplers(Viewport.MAX.ordinal(), samplerName, 0);
+        gl3.glGenSamplers(Viewport.MAX, samplerName, 0);
 
-        for (int i = 0; i < Viewport.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Viewport.MAX; ++i) {
             gl3.glSamplerParameteri(samplerName[i], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             gl3.glSamplerParameteri(samplerName[i], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
             gl3.glSamplerParameteri(samplerName[i], GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
         }
 
-        gl3.glSamplerParameteri(samplerName[Viewport.V00.ordinal()], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        gl3.glSamplerParameteri(samplerName[Viewport.V10.ordinal()], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        gl3.glSamplerParameteri(samplerName[Viewport.V11.ordinal()], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-        gl3.glSamplerParameteri(samplerName[Viewport.V01.ordinal()], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        gl3.glSamplerParameteri(samplerName[Viewport.V00], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gl3.glSamplerParameteri(samplerName[Viewport.V10], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        gl3.glSamplerParameteri(samplerName[Viewport.V11], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        gl3.glSamplerParameteri(samplerName[Viewport.V01], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
-        gl3.glSamplerParameteri(samplerName[Viewport.V00.ordinal()], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl3.glSamplerParameteri(samplerName[Viewport.V10.ordinal()], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        gl3.glSamplerParameteri(samplerName[Viewport.V11.ordinal()], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        gl3.glSamplerParameteri(samplerName[Viewport.V01.ordinal()], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        gl3.glSamplerParameteri(samplerName[Viewport.V00], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        gl3.glSamplerParameteri(samplerName[Viewport.V10], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        gl3.glSamplerParameteri(samplerName[Viewport.V11], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        gl3.glSamplerParameteri(samplerName[Viewport.V01], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
         return checkError(gl3, "initSampler");
     }
@@ -268,7 +269,7 @@ public class Gl_330_sampler_filter extends Test {
 
         gl3.glBindVertexArray(vertexArrayName[0]);
 
-        for (int index = 0; index < Viewport.MAX.ordinal(); ++index) {
+        for (int index = 0; index < Viewport.MAX; ++index) {
             gl3.glUniform1i(uniformDiffuse, index);
             gl3.glScissor(viewport[index].x, viewport[index].y, viewport[index].z, viewport[index].w);
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);

@@ -8,10 +8,12 @@ package tests.gl_320.fbo;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Caps;
 import framework.Profile;
@@ -87,11 +89,9 @@ public class Gl_320_fbo_multisample_integer extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] vertexArrayName = new int[1], bufferName = new int[1], shaderName = new int[Shader.MAX],
+    private int[] vertexArrayName = {0}, bufferName = {0}, shaderName = new int[Shader.MAX],
             textureName = new int[Texture.MAX], framebufferName = new int[Framebuffer.MAX],
-            programName = new int[Program.MAX], uniformMvp = new int[Program.MAX],
-            uniformDiffuse = new int[Program.MAX];
-    private float[] projection = new float[16], view = new float[16], model = new float[16], mvp = new float[16];
+            programName = new int[Program.MAX], uniformMvp = new int[Program.MAX], uniformDiffuse = new int[Program.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -202,10 +202,10 @@ public class Gl_320_fbo_multisample_integer extends Test {
     private boolean initTexture(GL3 gl3) {
 
         try {
-            int[] maxSampleMaskWords = new int[1];
-            int[] maxColorTextureSamples = new int[1];
-            int[] maxDepthTextureSamples = new int[1];
-            int[] maxIntegerSamples = new int[1];
+            int[] maxSampleMaskWords = {0};
+            int[] maxColorTextureSamples = {0};
+            int[] maxDepthTextureSamples = {0};
+            int[] maxIntegerSamples = {0};
 
             gl3.glGetIntegerv(GL_MAX_SAMPLE_MASK_WORDS, maxSampleMaskWords, 0);
             gl3.glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, maxColorTextureSamples, 0);
@@ -328,15 +328,14 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
     private void renderFBO(GL3 gl3, int framebuffer) {
 
-        FloatUtil.makeOrtho(projection, 0, true, -1.1f, 1.1f, 1.1f, -1.1f, 1.1f, -1.1f);
-        FloatUtil.makeIdentity(view);
-        FloatUtil.makeRotationAxis(model, 0, -0.3f, 0.f, 0.f, 1.f, new float[3]);
-        FloatUtil.multMatrix(projection, view, mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.ortho_(-1.1f, 1.1f, 1.1f, -1.1f, 1.1f, -1.1f);
+        Mat4 view = new Mat4(1.0f);
+        Mat4 model = new Mat4(1.0f).rotate(-0.3f, new Vec3(0.f, 0.f, 1.f));
+        Mat4 mvp = projection.mul(view).mul(model);
 
         gl3.glUseProgram(programName[Program.RENDER]);
         gl3.glUniform1i(uniformDiffuse[Program.RENDER], 0);
-        gl3.glUniformMatrix4fv(uniformMvp[Program.RENDER], 1, false, mvp, 0);
+        gl3.glUniformMatrix4fv(uniformMvp[Program.RENDER], 1, false, mvp.toFa_(), 0);
 
         gl3.glViewport(0, 0, windowSize.x / framebufferSize, windowSize.y / framebufferSize);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -353,15 +352,13 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
     private void renderFB(GL3 gl3, int textureName) {
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = perspective.mul(viewMat4()).mul(model);
 
         gl3.glUseProgram(programName[Program.SPLASH]);
         gl3.glUniform1i(uniformDiffuse[Program.SPLASH], 0);
-        gl3.glUniformMatrix4fv(uniformMvp[Program.SPLASH], 1, false, mvp, 0);
+        gl3.glUniformMatrix4fv(uniformMvp[Program.SPLASH], 1, false, mvp.toFa_(), 0);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);

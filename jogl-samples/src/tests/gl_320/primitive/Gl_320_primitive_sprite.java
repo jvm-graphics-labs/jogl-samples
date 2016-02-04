@@ -49,7 +49,7 @@ public class Gl_320_primitive_sprite extends Test {
         +1.0f, +1.0f, 0, 1, 0, 1,
         -1.0f, +1.0f, 0, 0, 1, 1};
 
-    private int[] vertexArrayName = new int[1], bufferName = new int[1], textureName = new int[1];
+    private int[] vertexArrayName = {0}, bufferName = {0}, textureName = {0};
     private int programName, uniformMvp, uniformMv, uniformDiffuse;
     private float[] projection = new float[16], view = new float[16], model = new float[16],
             mvp = new float[16], mv = new float[16];

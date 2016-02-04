@@ -54,19 +54,21 @@ public class Gl_330_draw_instanced_array extends Test {
         0.0f, 1.0f, 0.0f, 1.0f,
         0.0f, 0.0f, 1.0f, 1.0f};
 
-    private enum Shader {
-        VERT,
-        FRAG,
-        MAX
+    private class Shader {
+
+        public static final int VERT = 0;
+        public static final int FRAG = 1;
+        public static final int MAX = 2;
     }
 
-    private enum Buffer {
-        POSITION,
-        COLOR,
-        MAX
+    private class Buffer {
+
+        public static final int POSITION = 0;
+        public static final int COLOR = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] bufferName = new int[Buffer.MAX.ordinal()], vertexArrayName = {0};
+    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0};
     private int programName, uniformMvp;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
@@ -135,14 +137,14 @@ public class Gl_330_draw_instanced_array extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR]);
         FloatBuffer colorBuffer = GLBuffers.newDirectFloatBuffer(colorData);
         gl3.glBufferData(GL_ARRAY_BUFFER, colorSize, colorBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -155,11 +157,11 @@ public class Gl_330_draw_instanced_array extends Test {
         gl3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
             gl3.glVertexAttribDivisor(Semantic.Attr.POSITION, 0);
 
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR]);
             gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, 0, 0);
             gl3.glVertexAttribDivisor(Semantic.Attr.COLOR, 2);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -231,7 +231,7 @@ public class Gl_320_fbo_shadow extends Test {
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int[] uniformBufferOffset = new int[1];
+        int[] uniformBufferOffset = {0};
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(16 * Float.BYTES * 3, uniformBufferOffset[0]);
 

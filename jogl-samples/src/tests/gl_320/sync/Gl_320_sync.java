@@ -65,7 +65,7 @@ public class Gl_320_sync extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] bufferName = new int[Buffer.MAX], textureName = new int[1], vertexArrayName = new int[1];
+    private int[] bufferName = new int[Buffer.MAX], textureName = {0}, vertexArrayName = {0};
     private long syncName;
     private int programName, uniformTransform, uniformDiffuse;
     private float[] projection = new float[16], model = new float[16];

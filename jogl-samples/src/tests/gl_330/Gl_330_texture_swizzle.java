@@ -67,19 +67,20 @@ public class Gl_330_texture_swizzle extends Test {
         new Vertex(new float[]{-1.0f, +1.0f}, new float[]{0.0f, 0.0f}),
         new Vertex(new float[]{-1.0f, -1.0f}, new float[]{0.0f, 1.0f})};
 
-    private enum Viewport {
-        V00,
-        V10,
-        V11,
-        V01,
-        MAX
-    };
+    private class Viewport {
+
+        public static final int V00 = 0;
+        public static final int V10 = 1;
+        public static final int V11 = 2;
+        public static final int V01 = 3;
+        public static final int MAX = 4;
+    }
 
     private int[] vertexArrayName = {0}, bufferName = {0}, texture2dName = {0},
-            swizzleR = new int[Viewport.MAX.ordinal()], swizzleG = new int[Viewport.MAX.ordinal()],
-            swizzleB = new int[Viewport.MAX.ordinal()], swizzleA = new int[Viewport.MAX.ordinal()];
+            swizzleR = new int[Viewport.MAX], swizzleG = new int[Viewport.MAX],
+            swizzleB = new int[Viewport.MAX], swizzleA = new int[Viewport.MAX];
     private int programName, uniformMvp, uniformDiffuse;
-    private Vec4i[] viewport = new Vec4i[Viewport.MAX.ordinal()];
+    private Vec4i[] viewport = new Vec4i[Viewport.MAX];
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
@@ -87,11 +88,11 @@ public class Gl_330_texture_swizzle extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        viewport[Viewport.V00.ordinal()] = new Vec4i(0, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Viewport.V10.ordinal()] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Viewport.V11.ordinal()] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
+        viewport[Viewport.V00] = new Vec4i(0, 0, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Viewport.V10] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Viewport.V11] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
                 windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Viewport.V01.ordinal()] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Viewport.V01] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
 
         boolean validated = true;
 
@@ -181,25 +182,25 @@ public class Gl_330_texture_swizzle extends Test {
                         texture.data(level));
             }
 
-            swizzleR[Viewport.V00.ordinal()] = GL_RED;
-            swizzleG[Viewport.V00.ordinal()] = GL_GREEN;
-            swizzleB[Viewport.V00.ordinal()] = GL_BLUE;
-            swizzleA[Viewport.V00.ordinal()] = GL_ALPHA;
+            swizzleR[Viewport.V00] = GL_RED;
+            swizzleG[Viewport.V00] = GL_GREEN;
+            swizzleB[Viewport.V00] = GL_BLUE;
+            swizzleA[Viewport.V00] = GL_ALPHA;
 
-            swizzleR[Viewport.V10.ordinal()] = GL_BLUE;
-            swizzleG[Viewport.V10.ordinal()] = GL_GREEN;
-            swizzleB[Viewport.V10.ordinal()] = GL_RED;
-            swizzleA[Viewport.V10.ordinal()] = GL_ALPHA;
+            swizzleR[Viewport.V10] = GL_BLUE;
+            swizzleG[Viewport.V10] = GL_GREEN;
+            swizzleB[Viewport.V10] = GL_RED;
+            swizzleA[Viewport.V10] = GL_ALPHA;
 
-            swizzleR[Viewport.V11.ordinal()] = GL_ONE;
-            swizzleG[Viewport.V11.ordinal()] = GL_GREEN;
-            swizzleB[Viewport.V11.ordinal()] = GL_BLUE;
-            swizzleA[Viewport.V11.ordinal()] = GL_ALPHA;
+            swizzleR[Viewport.V11] = GL_ONE;
+            swizzleG[Viewport.V11] = GL_GREEN;
+            swizzleB[Viewport.V11] = GL_BLUE;
+            swizzleA[Viewport.V11] = GL_ALPHA;
 
-            swizzleR[Viewport.V01.ordinal()] = GL_ZERO;
-            swizzleG[Viewport.V01.ordinal()] = GL_GREEN;
-            swizzleB[Viewport.V01.ordinal()] = GL_BLUE;
-            swizzleA[Viewport.V01.ordinal()] = GL_ALPHA;
+            swizzleR[Viewport.V01] = GL_ZERO;
+            swizzleG[Viewport.V01] = GL_GREEN;
+            swizzleB[Viewport.V01] = GL_BLUE;
+            swizzleA[Viewport.V01] = GL_ALPHA;
 
             gl3.glActiveTexture(GL_TEXTURE0);
             gl3.glBindTexture(GL_TEXTURE_2D, 0);
@@ -249,7 +250,7 @@ public class Gl_330_texture_swizzle extends Test {
 
         gl3.glBindVertexArray(vertexArrayName[0]);
 
-        for (int index = 0; index < Viewport.MAX.ordinal(); ++index) {
+        for (int index = 0; index < Viewport.MAX; ++index) {
             gl3.glViewport(viewport[index].x, viewport[index].y, viewport[index].z, viewport[index].w);
 
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, swizzleR[index]);

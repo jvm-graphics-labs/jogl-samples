@@ -8,10 +8,14 @@ package tests.gl_320.fbo;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec2;
+import dev.Vec2i;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -21,8 +25,6 @@ import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
-import jglm.Vec2i;
 
 /**
  *
@@ -35,7 +37,7 @@ public class Gl_320_fbo_multisample extends Test {
     }
 
     public Gl_320_fbo_multisample() {
-        super("Gl-320-fbo-multisample", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("Gl-320-fbo-multisample", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "fbo-multisample";
@@ -77,11 +79,9 @@ public class Gl_320_fbo_multisample extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] textureName = new int[Texture.MAX], framebufferName = new int[Framebuffer.MAX],
-            vertexArrayName = new int[1], bufferName = new int[1], programName = new int[1];
+    private int[] textureName = new int[Texture.MAX], framebufferName = new int[Framebuffer.MAX], vertexArrayName = {0},
+            bufferName = {0}, programName = {0};
     private int uniformMvp, uniformDiffuse;
-    private float[] perspective = new float[16], model = new float[16], mvp = new float[16],
-            projection = new float[16], view = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -285,13 +285,13 @@ public class Gl_320_fbo_multisample extends Test {
     }
 
     private void renderFBO(GL3 gl3, int framebuffer) {
-        FloatUtil.makePerspective(perspective, 0, true, (float) Math.PI * 0.25f,
-                (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y, 0.1f, 100.0f);
-        FloatUtil.makeScale(model, true, 1.0f, 1.0f, 1.0f);
-        FloatUtil.multMatrix(perspective, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
 
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y,
+                0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f).scale(new Vec3(1.0f));
+        Mat4 mvp = perspective.mul(viewMat4()).mul(model);
+
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glViewport(0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -307,13 +307,12 @@ public class Gl_320_fbo_multisample extends Test {
 
     private void renderFB(GL3 gl3, int textureName) {
 
-        FloatUtil.makeOrtho(projection, 0, true, -1.1f, 1.1f, 1.1f, -1.1f, 0.0f, 10.0f);
-        FloatUtil.makeTranslation(view, true, 0.0f, 0.0f, -cameraDistance() * 0.1f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view, mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.ortho_(-1.1f, 1.1f, 1.1f, -1.1f, 0.0f, 10.0f);
+        Mat4 view = new Mat4(1.0f).translate(new Vec3(0.0f, 0.0f, -cameraDistance() * 0.1f));
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(view).mul(model);
 
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);

@@ -63,7 +63,7 @@ public class Gl_320_glsl_precision extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] vertexArrayName = new int[1], textureName = new int[1], bufferName = new int[Buffer.MAX];
+    private int[] vertexArrayName = {0}, textureName = {0}, bufferName = new int[Buffer.MAX];
     private int programName, uniformTransform, uniformDiffuse;
     private float[] projection = new float[16], model = new float[16];
 

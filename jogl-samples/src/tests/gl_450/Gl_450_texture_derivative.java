@@ -238,7 +238,7 @@ public class Gl_450_texture_derivative extends Test {
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
             Mat4 model = new Mat4(1.0f).scale(new Vec3(2.0f));
 
-            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFA_());
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
 
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }

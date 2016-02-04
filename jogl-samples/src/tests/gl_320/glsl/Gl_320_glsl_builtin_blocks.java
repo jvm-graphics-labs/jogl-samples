@@ -63,7 +63,7 @@ public class Gl_320_glsl_builtin_blocks extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = new int[1], textureName = new int[1];
+    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0}, textureName = {0};
     private int programName, uniformTransform, uniformDiffuse;
     private float[] projection = new float[16], model = new float[16];
 

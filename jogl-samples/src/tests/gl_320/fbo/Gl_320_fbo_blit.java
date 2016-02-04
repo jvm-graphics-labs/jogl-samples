@@ -8,10 +8,13 @@ package tests.gl_320.fbo;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec2i;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -21,7 +24,6 @@ import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2i;
 
 /**
  *
@@ -66,12 +68,10 @@ public class Gl_320_fbo_blit extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] textureName = new int[Texture.MAX],
-            framebufferName = new int[Framebuffer.MAX], vertexArrayName = new int[1],
-            bufferName = new int[1], colorRenderbufferName = new int[1];
+    private int[] textureName = new int[Texture.MAX], framebufferName = new int[Framebuffer.MAX], vertexArrayName = {0},
+            bufferName = {0}, colorRenderbufferName = {0};
     private int programName, uniformMvp, uniformDiffuse;
     private Vec2i FRAMEBUFFER_SIZE = new Vec2i(512, 512);
-    private float[] perspective = new float[16], model = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -286,13 +286,11 @@ public class Gl_320_fbo_blit extends Test {
 
     private void renderFBO(GL3 gl3) {
 
-        FloatUtil.makePerspective(perspective, 0, true, (float) Math.PI * 0.25f,
-                (float) FRAMEBUFFER_SIZE.y / FRAMEBUFFER_SIZE.x, 0.1f, 100.0f);
-        FloatUtil.makeScale(model, true, 1.0f, -1.0f, 1.0f);
-        FloatUtil.multMatrix(perspective, view());
-        FloatUtil.multMatrix(perspective, model);
+        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = perspective.mul(viewMat4()).mul(model);
 
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, perspective, 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
         gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
@@ -303,13 +301,12 @@ public class Gl_320_fbo_blit extends Test {
 
     private void renderFB(GL3 gl3) {
 
-        FloatUtil.makePerspective(perspective, 0, true, (float) Math.PI * 0.25f,
-                (float) FRAMEBUFFER_SIZE.y / FRAMEBUFFER_SIZE.x, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(perspective, view());
-        FloatUtil.multMatrix(perspective, model);
+        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) FRAMEBUFFER_SIZE.y / FRAMEBUFFER_SIZE.x,
+                0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f).scale(new Vec3(1.0f, -1.0f, 1.0f));
+        Mat4 mvp = perspective.mul(viewMat4()).mul(model);
 
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, perspective, 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
         gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);

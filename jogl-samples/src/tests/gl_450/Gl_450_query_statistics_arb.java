@@ -352,7 +352,7 @@ public class Gl_450_query_statistics_arb extends Test {
 
             Mat4 projection = glm.perspectiveFov_((float) Math.PI * 0.25f, windowSize.x, windowSize.y, 0.1f, 100.0f);
             Mat4 model = new Mat4(1.0f);
-            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFA_());
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);

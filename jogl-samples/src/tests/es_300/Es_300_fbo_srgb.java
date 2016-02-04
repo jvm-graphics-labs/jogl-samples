@@ -334,7 +334,7 @@ public class Es_300_fbo_srgb extends Test {
             //glm::mat4 Projection = glm::perspectiveFov(glm::pi<float>() * 0.25f, 640.f, 480.f, 0.1f, 100.0f);
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
 
-            pointer.asFloatBuffer().put(projection.mul(viewMat4()).toFA_());
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl3es3.glUnmapBuffer(GL_UNIFORM_BUFFER);

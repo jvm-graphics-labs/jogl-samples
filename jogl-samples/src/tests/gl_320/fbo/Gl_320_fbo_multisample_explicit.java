@@ -8,10 +8,14 @@ package tests.gl_320.fbo;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec2;
+import dev.Vec2i;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -21,8 +25,6 @@ import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
-import jglm.Vec2i;
 
 /**
  *
@@ -35,8 +37,7 @@ public class Gl_320_fbo_multisample_explicit extends Test {
     }
 
     public Gl_320_fbo_multisample_explicit() {
-        super("Gl-320-fbo-multisample-explicit", Profile.CORE, 3, 2,
-                new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("Gl-320-fbo-multisample-explicit", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f));
     }
 
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
@@ -47,7 +48,7 @@ public class Gl_320_fbo_multisample_explicit extends Test {
         "fbo-multisample-explicit-box",
         "fbo-multisample-explicit-near"};
 
-    private Vec2i framebufferSize = new Vec2i(160, 120);
+    private Vec2i FRAMEBUFFER_SIZE = new Vec2i(160, 120);
     private int vertexCount = 6;
     private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
     private float[] vertexData = new float[]{
@@ -85,12 +86,9 @@ public class Gl_320_fbo_multisample_explicit extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] vertexArrayName = new int[1], bufferName = new int[1], framebufferRenderName = new int[1],
-            framebufferResolveName = new int[1], programName = new int[Program.MAX],
-            textureName = new int[Texture.MAX], uniformMvp = new int[Program.MAX],
+    private int[] vertexArrayName = {0}, bufferName = {0}, framebufferRenderName = {0}, framebufferResolveName = {0},
+            programName = new int[Program.MAX], textureName = new int[Texture.MAX], uniformMvp = new int[Program.MAX],
             uniformDiffuse = new int[Program.MAX];
-    private float[] perspective = new float[16], model = new float[16], mvp = new float[16], viewflip = new float[16],
-            view = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -194,14 +192,14 @@ public class Gl_320_fbo_multisample_explicit extends Test {
 
             gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName[Texture.MULTISAMPLE_COLORBUFFER]);
             gl3.glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8,
-                    framebufferSize.x, framebufferSize.y, true);
+                    FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, true);
             gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName[Texture.MULTISAMPLE_DEPTHBUFFER]);
             gl3.glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_DEPTH_COMPONENT24,
-                    framebufferSize.x, framebufferSize.y, true);
+                    FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, true);
             gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
-            gl3.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, framebufferSize.x, framebufferSize.y, 0,
+            gl3.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, 0,
                     GL_RGBA, GL_UNSIGNED_BYTE, null);
             gl3.glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -279,19 +277,18 @@ public class Gl_320_fbo_multisample_explicit extends Test {
 
     private void renderFBO(GL3 gl3, int framebuffer) {
 
-        FloatUtil.makePerspective(perspective, 0, true, (float) Math.PI * 0.25f,
-                (float) framebufferSize.x / framebufferSize.y, 0.1f, 100.0f);
-        FloatUtil.makeScale(model, true, 1.0f, 1.0f, 1.0f);
-        FloatUtil.multMatrix(perspective, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y,
+                0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f).scale(new Vec3(1.0f));
+        Mat4 mvp = perspective.mul(viewMat4()).mul(model);
 
         gl3.glEnable(GL_DEPTH_TEST);
 
         gl3.glUseProgram(programName[Program.THROUGH]);
         gl3.glUniform1i(uniformDiffuse[Program.THROUGH], 0);
-        gl3.glUniformMatrix4fv(uniformMvp[Program.THROUGH], 1, false, mvp, 0);
+        gl3.glUniformMatrix4fv(uniformMvp[Program.THROUGH], 1, false, mvp.toFa_(), 0);
 
-        gl3.glViewport(0, 0, framebufferSize.x, framebufferSize.y);
+        gl3.glViewport(0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
 
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         float[] depth = new float[]{1.0f};
@@ -309,13 +306,11 @@ public class Gl_320_fbo_multisample_explicit extends Test {
 
     private void resolveMultisampling(GL3 gl3) {
 
-        FloatUtil.makeOrtho(perspective, 0, true, -1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 100.0f);
-        FloatUtil.makeScale(viewflip, true, 1.0f, -1.0f, 1.0f);
-        FloatUtil.makeTranslation(view, true, 0.0f, 0.0f, -cameraDistance() * 1.0f);
-        FloatUtil.multMatrix(view, viewflip);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(perspective, view, mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 perspective = glm.ortho_(-1.0f, 1.0f, -1.0f, 1.0f, 0.0f, 100.0f);
+        Mat4 viewFlip = new Mat4(1.0f).scale(new Vec3(1.0f, -1.0f, 1.0f));
+        Mat4 view = viewFlip.translate(new Vec3(0.0f, 0.0f, -cameraDistance() * 1.0f));
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = perspective.mul(view).mul(model);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -333,7 +328,7 @@ public class Gl_320_fbo_multisample_explicit extends Test {
 
             gl3.glUseProgram(programName[Program.RESOLVE_BOX]);
             gl3.glUniform1i(uniformDiffuse[Program.RESOLVE_BOX], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.RESOLVE_BOX], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.RESOLVE_BOX], 1, false, mvp.toFa_(), 0);
 
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 5);
         }
@@ -344,7 +339,7 @@ public class Gl_320_fbo_multisample_explicit extends Test {
 
             gl3.glUseProgram(programName[Program.RESOLVE_NEAR]);
             gl3.glUniform1i(uniformDiffuse[Program.RESOLVE_NEAR], 0);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.RESOLVE_NEAR], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.RESOLVE_NEAR], 1, false, mvp.toFa_(), 0);
 
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 5);
         }

@@ -54,7 +54,7 @@ public class Gl_320_glsl_cast_fail extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] vertexArrayName = new int[1], textureName = new int[1], bufferName = new int[Buffer.MAX];
+    private int[] vertexArrayName = {0}, textureName = {0}, bufferName = new int[Buffer.MAX];
     private int programName, uniformTransform, uniformDiffuse;
 
     @Override

@@ -66,7 +66,7 @@ public class Gl_320_glsl_discard extends Test {
         new Vertex(new float[]{-1.0f, +1.0f}, new float[]{0.0f, 0.0f}),
         new Vertex(new float[]{-1.0f, -1.0f}, new float[]{0.0f, 1.0f})};
 
-    private int[] vertexArrayName = new int[1], bufferName = new int[1], texture2dName = new int[1];
+    private int[] vertexArrayName = {0}, bufferName = {0}, texture2dName = {0};
     private int programName, uniformMvp, uniformDiffuse;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 

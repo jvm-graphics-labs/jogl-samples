@@ -272,7 +272,7 @@ public class Gl_500_buffer_sparse_arb extends Test {
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
             Mat4 mvp = projection.mul(viewMat4()).mul(new Mat4(1.0f));
 
-            uniformPointer.asFloatBuffer().put(mvp.toFA_());
+            uniformPointer.asFloatBuffer().put(mvp.toFa_());
         }
 
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);

@@ -77,23 +77,25 @@ public class Gl_330_buffer_type extends Test {
         -1, +1,
         -1, -1};
 
-    private enum Buffer {
-        RGB10A2,
-        F32,
-        I8,
-        I32,
-        MAX
+    private class Buffer {
+
+        public static final int RGB10A2 = 0;
+        public static final int F32 = 1;
+        public static final int I8 = 2;
+        public static final int I32 = 3;
+        public static final int MAX = 4;
     }
 
-    private enum Shader {
-        VERT,
-        FRAG,
-        MAX
+    private class Shader {
+
+        public static final int VERT = 0;
+        public static final int FRAG = 1;
+        public static final int MAX = 2;
     }
 
     private int programName, uniformMvp, uniformDiffuse;
-    private int[] bufferName = new int[Buffer.MAX.ordinal()], vertexArrayName = new int[Buffer.MAX.ordinal()];
-    private Vec4i[] viewport = new Vec4i[Buffer.MAX.ordinal()];
+    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = new int[Buffer.MAX];
+    private Vec4i[] viewport = new Vec4i[Buffer.MAX];
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
@@ -101,11 +103,11 @@ public class Gl_330_buffer_type extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        viewport[Buffer.RGB10A2.ordinal()] = new Vec4i(0, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Buffer.F32.ordinal()] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Buffer.I8.ordinal()] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
+        viewport[Buffer.RGB10A2] = new Vec4i(0, 0, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Buffer.F32] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Buffer.I8] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
                 windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Buffer.I32.ordinal()] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Buffer.I32] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
 
         boolean validated = true;
 
@@ -158,21 +160,21 @@ public class Gl_330_buffer_type extends Test {
     private boolean initBuffer(GL3 gl3) {
 
         // Generate a buffer object
-        gl3.glGenBuffers(Buffer.MAX.ordinal(), bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.F32.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.F32]);
         FloatBuffer positionF32Buffer = GLBuffers.newDirectFloatBuffer(positionDataF32);
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSizeF32, positionF32Buffer, GL_STATIC_DRAW);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.I8.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.I8]);
         ByteBuffer positionI8Buffer = GLBuffers.newDirectByteBuffer(positionDataI8);
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSizeI8, positionI8Buffer, GL_STATIC_DRAW);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.I32.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.I32]);
         IntBuffer positionI32Buffer = GLBuffers.newDirectIntBuffer(positionDataI32);
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSizeI32, positionI32Buffer, GL_STATIC_DRAW);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.RGB10A2.ordinal()]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.RGB10A2]);
         IntBuffer positionRGB10A2Buffer = GLBuffers.newDirectIntBuffer(positionDataRGB10A2);
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSizeRGB10A2, positionRGB10A2Buffer, GL_STATIC_DRAW);
 
@@ -183,11 +185,11 @@ public class Gl_330_buffer_type extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(Buffer.MAX.ordinal(), vertexArrayName, 0);
+        gl3.glGenVertexArrays(Buffer.MAX, vertexArrayName, 0);
 
-        gl3.glBindVertexArray(vertexArrayName[Buffer.F32.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Buffer.F32]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.F32.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.F32]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Float.BYTES, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -195,9 +197,9 @@ public class Gl_330_buffer_type extends Test {
         }
         gl3.glBindVertexArray(0);
 
-        gl3.glBindVertexArray(vertexArrayName[Buffer.I8.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Buffer.I8]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.I8.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.I8]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_BYTE, false, 2 * Byte.BYTES, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -205,9 +207,9 @@ public class Gl_330_buffer_type extends Test {
         }
         gl3.glBindVertexArray(0);
 
-        gl3.glBindVertexArray(vertexArrayName[Buffer.I32.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Buffer.I32]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.I32.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.I32]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_INT, false, 2 * Integer.BYTES, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -215,9 +217,9 @@ public class Gl_330_buffer_type extends Test {
         }
         gl3.glBindVertexArray(0);
 
-        gl3.glBindVertexArray(vertexArrayName[Buffer.RGB10A2.ordinal()]);
+        gl3.glBindVertexArray(vertexArrayName[Buffer.RGB10A2]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.RGB10A2.ordinal()]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.RGB10A2]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_INT_2_10_10_10_REV, true, Integer.BYTES, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -244,7 +246,7 @@ public class Gl_330_buffer_type extends Test {
         gl3.glUniform4fv(uniformDiffuse, 1, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
         gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
 
-        for (int index = 0; index < Buffer.MAX.ordinal(); ++index) {
+        for (int index = 0; index < Buffer.MAX; ++index) {
 
             gl3.glViewport(viewport[index].x, viewport[index].y, viewport[index].z, viewport[index].w);
 
@@ -260,8 +262,8 @@ public class Gl_330_buffer_type extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(Buffer.MAX.ordinal(), bufferName, 0);
-        gl3.glDeleteVertexArrays(Buffer.MAX.ordinal(), vertexArrayName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl3.glDeleteVertexArrays(Buffer.MAX, vertexArrayName, 0);
         gl3.glDeleteProgram(programName);
 
         return checkError(gl3, "end");

@@ -57,7 +57,7 @@ public class Gl_320_buffer_update extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = new int[1];
+    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0};
     private int programName, uniformTransform, uniformMaterial;
 
     @Override
@@ -163,7 +163,7 @@ public class Gl_320_buffer_update extends Test {
         gl3.glBindBuffer(GL_COPY_READ_BUFFER, 0);
         gl3.glBindBuffer(GL_COPY_WRITE_BUFFER, 0);
 
-        int[] uniformBlockSize = new int[1];
+        int[] uniformBlockSize = {0};
 
         {
             gl3.glGetActiveUniformBlockiv(
@@ -227,7 +227,7 @@ public class Gl_320_buffer_update extends Test {
             Mat4 model = new Mat4(1.0f);
             Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
-            transformBuffer.asFloatBuffer().put(mvp.toFA_());
+            transformBuffer.asFloatBuffer().put(mvp.toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

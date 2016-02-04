@@ -308,7 +308,7 @@ public class Gl_440_sampler_wrap extends Test {
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, aspect, 0.1f, 100.0f);
             Mat4 mvp = projection.mul(viewMat4()).mul(new Mat4(1.0f));
 
-            uniformPointer.asFloatBuffer().put(mvp.toFA_());
+            uniformPointer.asFloatBuffer().put(mvp.toFa_());
         }
 
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);

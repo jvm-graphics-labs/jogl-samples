@@ -33,7 +33,7 @@ public class Gl_320_primitive_point_clip extends Test {
     private final String SHADERS_SOURCE = "primitive-point-clip";
     private final String SHADERS_ROOT = "src/data/gl_320/primitive";
 
-    private int[] vertexArrayName = new int[1], bufferName = new int[1];
+    private int[] vertexArrayName = {0}, bufferName = {0};
     private int programName, uniformMvp, uniformMv, vertexCount;
     private float[] projection = new float[16], view = new float[16], model = new float[16],
             mvp = new float[16], mv = new float[16];

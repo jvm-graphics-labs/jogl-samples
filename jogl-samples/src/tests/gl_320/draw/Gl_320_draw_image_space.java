@@ -10,6 +10,7 @@ import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Vec2;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -17,7 +18,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
 
 /**
  *
@@ -38,7 +38,7 @@ public class Gl_320_draw_image_space extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int programName;
-    private int[] vertexArrayName = new int[1], textureName = new int[1], bufferName = new int[1];
+    private int[] vertexArrayName = {0}, textureName = {0}, bufferName = {0};
 
     @Override
     protected boolean begin(GL gl) {

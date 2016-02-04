@@ -253,7 +253,7 @@ public class Gl_430_texture_copy extends Test {
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            pointer.asFloatBuffer().put(mvp.toFA_());
+            pointer.asFloatBuffer().put(mvp.toFa_());
 
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }

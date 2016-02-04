@@ -164,7 +164,7 @@ public class Es_200_draw_elements extends Test {
         gl2es2.glUseProgram(programName);
 
         // Set the value of MVP uniform.
-        gl2es2.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA_(), 0);
+        gl2es2.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         {

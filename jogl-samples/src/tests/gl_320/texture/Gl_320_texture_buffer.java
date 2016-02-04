@@ -53,8 +53,8 @@ public class Gl_320_texture_buffer extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] vertexArrayName = new int[1], bufferName = new int[Buffer.MAX],
-            displacementTextureName = new int[1], diffuseTextureName = new int[1];
+    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX],
+            displacementTextureName = {0}, diffuseTextureName = {0};
     private int programName, uniformMvp, uniformDiffuse, uniformDisplacement;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 

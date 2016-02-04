@@ -66,7 +66,7 @@ public class Gl_320_program extends Test {
     }
 
     private int[] programName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
-            vertexArrayName = new int[1];
+            vertexArrayName = {0};
     private int uniformTransform, uniformMaterial;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 

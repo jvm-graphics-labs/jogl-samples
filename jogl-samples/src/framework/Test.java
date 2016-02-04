@@ -12,39 +12,10 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL.GL_FRAMEBUFFER;
-import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_COMPLETE;
-import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_INCOMPLETE_ATTACHMENT;
-import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT;
-import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_INCOMPLETE_MULTISAMPLE;
-import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_UNSUPPORTED;
-import static com.jogamp.opengl.GL.GL_INVALID_ENUM;
-import static com.jogamp.opengl.GL.GL_INVALID_FRAMEBUFFER_OPERATION;
-import static com.jogamp.opengl.GL.GL_INVALID_OPERATION;
-import static com.jogamp.opengl.GL.GL_INVALID_VALUE;
-import static com.jogamp.opengl.GL.GL_NO_ERROR;
-import static com.jogamp.opengl.GL.GL_OUT_OF_MEMORY;
-import static com.jogamp.opengl.GL.GL_TRUE;
-import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SEVERITY_LOW;
-import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SOURCE_APPLICATION;
-import static com.jogamp.opengl.GL2ES2.GL_DEBUG_TYPE_OTHER;
-import static com.jogamp.opengl.GL2ES2.GL_MAX_VERTEX_ATTRIBS;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_ENABLED;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_NORMALIZED;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_SIZE;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_STRIDE;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_ATTRIB_ARRAY_TYPE;
 import com.jogamp.opengl.GL2ES3;
-import static com.jogamp.opengl.GL2ES3.GL_FRAMEBUFFER_UNDEFINED;
-import static com.jogamp.opengl.GL2ES3.GL_VERTEX_ATTRIB_ARRAY_DIVISOR;
-import static com.jogamp.opengl.GL2ES3.GL_VERTEX_ATTRIB_ARRAY_INTEGER;
-import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_DRAW_BUFFER;
-import static com.jogamp.opengl.GL2GL3.GL_FRAMEBUFFER_INCOMPLETE_READ_BUFFER;
 import com.jogamp.opengl.GL3;
-import static com.jogamp.opengl.GL3.GL_FRAMEBUFFER_INCOMPLETE_LAYER_TARGETS;
 import com.jogamp.opengl.GL4;
-import static com.jogamp.opengl.GL4.GL_VERTEX_ATTRIB_ARRAY_LONG;
+import static com.jogamp.opengl.GL4.*;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLContext;
@@ -62,9 +33,9 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import javax.imageio.ImageIO;
-import jglm.Vec2;
-import jglm.Vec2i;
-import jglm.Vec3;
+import dev.Vec2;
+import dev.Vec2i;
+import dev.Vec3;
 
 /**
  *
@@ -286,15 +257,15 @@ public class Test implements GLEventListener, KeyListener {
                 .rotate(rotationCurrent.x, 0.f, 1.f, 0.f);
     }
 
-    protected final float[] view() {
-
-        FloatUtil.makeTranslation(viewTranslate, true, 0, 0, -translationCurrent.y);
-        FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec3);
-        FloatUtil.multMatrix(viewTranslate, viewRotateX, viewRotateX);
-        FloatUtil.makeRotationAxis(viewRotateY, 0, rotationCurrent.x, 0f, 1f, 0f, tmpVec3);
-        FloatUtil.multMatrix(viewRotateX, viewRotateY, view);
-        return view;
-    }
+//    protected final float[] view() {
+//
+//        FloatUtil.makeTranslation(viewTranslate, true, 0, 0, -translationCurrent.y);
+//        FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec3);
+//        FloatUtil.multMatrix(viewTranslate, viewRotateX, viewRotateX);
+//        FloatUtil.makeRotationAxis(viewRotateY, 0, rotationCurrent.x, 0f, 1f, 0f, tmpVec3);
+//        FloatUtil.multMatrix(viewRotateX, viewRotateY, view);
+//        return view;
+//    }
 
     private boolean checkGLVersion() {
 

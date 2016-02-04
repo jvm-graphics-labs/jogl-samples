@@ -9,10 +9,12 @@ import com.jogamp.common.nio.PointerBuffer;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec2;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -20,7 +22,6 @@ import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import jglm.Vec2;
 
 /**
  *
@@ -33,7 +34,7 @@ public class Gl_320_draw_multiple extends Test {
     }
 
     public Gl_320_draw_multiple() {
-        super("gl-320-draw-multiple", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-320-draw-multiple", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "draw-multiple";
@@ -70,8 +71,7 @@ public class Gl_320_draw_multiple extends Test {
     };
 
     private int programName, uniformTransform;
-    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = new int[1];
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
+    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0};
 
     @Override
     protected boolean begin(GL gl) {
@@ -139,7 +139,7 @@ public class Gl_320_draw_multiple extends Test {
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        int[] uniformBlockSize = new int[1];
+        int[] uniformBlockSize = {0};
         gl3.glGetActiveUniformBlockiv(programName, uniformTransform, GL_UNIFORM_BLOCK_DATA_SIZE, uniformBlockSize, 0);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize[0], null, GL_DYNAMIC_DRAW);
@@ -170,17 +170,15 @@ public class Gl_320_draw_multiple extends Test {
 
         GL3 gl3 = (GL3) gl;
 
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view(), mvp);
-            FloatUtil.multMatrix(mvp, model);
-
-            pointer.asFloatBuffer().put(mvp).rewind();
+            pointer.asFloatBuffer().put(mvp.toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

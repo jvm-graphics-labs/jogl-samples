@@ -204,7 +204,7 @@ public class Es_300_draw_elements extends Test {
         gl3es3.glUseProgram(programName);
 
         // Set the value of MVP uniform.
-        gl3es3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA_(), 0);
+        gl3es3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3es3.glBindVertexArray(vertexArrayName[0]);
 

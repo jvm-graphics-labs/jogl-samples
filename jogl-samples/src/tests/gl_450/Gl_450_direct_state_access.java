@@ -404,11 +404,11 @@ public class Gl_450_direct_state_access extends Test {
         {
             Mat4 projectionA = glm.perspective_((float) Math.PI * 0.25f,
                     (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y, 0.1f, 100.0f).scale(new Vec3(1, -1, 1));
-            uniformPointer.asFloatBuffer().put(projectionA.mul(viewMat4()).mul(new Mat4(1)).toFA_());
+            uniformPointer.asFloatBuffer().put(projectionA.mul(viewMat4()).mul(new Mat4(1)).toFa_());
 
             Mat4 projectionB = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
             uniformPointer.position(uniformBlockSize);
-            uniformPointer.asFloatBuffer().put(projectionB.mul(viewMat4()).scale(new Vec3(2), new Mat4(1)).toFA_());
+            uniformPointer.asFloatBuffer().put(projectionB.mul(viewMat4()).scale(new Vec3(2), new Mat4(1)).toFa_());
             uniformPointer.rewind();
         }
 

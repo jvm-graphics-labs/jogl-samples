@@ -43,13 +43,14 @@ public class Gl_330_query_counter extends Test {
         -1.0f, 1.0f,
         -1.0f, -1.0f};
 
-    private enum Query {
-        BEGIN,
-        END,
-        MAX
+    private class Query {
+
+        public static final int BEGIN = 0;
+        public static final int END = 1;
+        public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, bufferName = {0}, queryName = new int[Query.MAX.ordinal()];
+    private int[] vertexArrayName = {0}, bufferName = {0}, queryName = new int[Query.MAX];
     private int programName, uniformMvp;
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
@@ -168,7 +169,7 @@ public class Gl_330_query_counter extends Test {
         FloatUtil.multMatrix(projection, view(), mvp);
         FloatUtil.multMatrix(mvp, model);
 
-        gl3.glQueryCounter(queryName[Query.BEGIN.ordinal()], GL_TIMESTAMP);
+        gl3.glQueryCounter(queryName[Query.BEGIN], GL_TIMESTAMP);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
 
@@ -180,18 +181,18 @@ public class Gl_330_query_counter extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         gl3.glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
-        gl3.glQueryCounter(queryName[Query.END.ordinal()], GL_TIMESTAMP);
+        gl3.glQueryCounter(queryName[Query.END], GL_TIMESTAMP);
 
         int[] availableBegin = {GL_FALSE};
-        gl3.glGetQueryObjectiv(queryName[Query.BEGIN.ordinal()], GL_QUERY_RESULT_AVAILABLE, availableBegin, 0);
+        gl3.glGetQueryObjectiv(queryName[Query.BEGIN], GL_QUERY_RESULT_AVAILABLE, availableBegin, 0);
 
         int[] availableEnd = {GL_FALSE};
-        gl3.glGetQueryObjectiv(queryName[Query.END.ordinal()], GL_QUERY_RESULT_AVAILABLE, availableEnd, 0);
-        
+        gl3.glGetQueryObjectiv(queryName[Query.END], GL_QUERY_RESULT_AVAILABLE, availableEnd, 0);
+
         // The OpenGL implementations will wait for the query if it's not available
         long[] timeBegin = {0}, timeEnd = {0};
-        gl3.glGetQueryObjecti64v(queryName[Query.BEGIN.ordinal()], GL_QUERY_RESULT, timeBegin, 0);
-        gl3.glGetQueryObjecti64v(queryName[Query.END.ordinal()], GL_QUERY_RESULT, timeEnd, 0);
+        gl3.glGetQueryObjecti64v(queryName[Query.BEGIN], GL_QUERY_RESULT, timeBegin, 0);
+        gl3.glGetQueryObjecti64v(queryName[Query.END], GL_QUERY_RESULT, timeEnd, 0);
 
         //glGetInteger64v(GL_TIMESTAMP, &TimeBegin);
         //glGetInteger64v(GL_TIMESTAMP, &TimeEnd);

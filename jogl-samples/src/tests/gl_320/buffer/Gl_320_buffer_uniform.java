@@ -283,8 +283,8 @@ public class Gl_320_buffer_uniform extends Test {
             Mat3 normal = new Mat3(mv.invTransp3(new Mat4()));
 
             transform.asFloatBuffer()
-                    .put(p.toFA_())
-                    .put(mv.toFA_())
+                    .put(p.toFa_())
+                    .put(mv.toFa_())
                     .put(normal.toFA_());
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

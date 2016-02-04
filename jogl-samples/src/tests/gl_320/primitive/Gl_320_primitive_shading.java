@@ -72,7 +72,7 @@ public class Gl_320_primitive_shading extends Test {
     }
 
     private int programName;
-    private int[] vertexArrayName = new int[1], bufferName = new int[Buffer.MAX], queryName = new int[1];
+    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX], queryName = {0};
     private float[] projection = new float[16], model = new float[16];
 
     @Override

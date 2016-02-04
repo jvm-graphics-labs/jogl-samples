@@ -6,26 +6,63 @@
 package tests.gl_500;
 
 import com.jogamp.opengl.GL;
+import static com.jogamp.opengl.GL.GL_ALPHA;
 import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
 import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_LINEAR;
+import static com.jogamp.opengl.GL.GL_LINEAR_MIPMAP_NEAREST;
+import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
+import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
+import static com.jogamp.opengl.GL.GL_RGBA;
+import static com.jogamp.opengl.GL.GL_RGBA32F;
+import static com.jogamp.opengl.GL.GL_RGBA8;
 import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
+import static com.jogamp.opengl.GL.GL_TEXTURE0;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.jogamp.opengl.GL.GL_TRUE;
+import static com.jogamp.opengl.GL.GL_UNPACK_ALIGNMENT;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_BYTE;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_SHORT;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER_BIT;
 import static com.jogamp.opengl.GL2ES2.GL_PROGRAM_SEPARABLE;
+import static com.jogamp.opengl.GL2ES2.GL_RED;
+import static com.jogamp.opengl.GL2ES2.GL_TEXTURE_3D;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
+import static com.jogamp.opengl.GL2ES3.GL_BLUE;
+import static com.jogamp.opengl.GL2ES3.GL_COLOR;
+import static com.jogamp.opengl.GL2ES3.GL_GREEN;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_2D_ARRAY;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_A;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_B;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_G;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_R;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT;
+import static com.jogamp.opengl.GL2GL3.GL_TEXTURE_SPARSE_ARB;
+import static com.jogamp.opengl.GL2GL3.GL_VIRTUAL_PAGE_SIZE_X_ARB;
+import static com.jogamp.opengl.GL2GL3.GL_VIRTUAL_PAGE_SIZE_Y_ARB;
+import static com.jogamp.opengl.GL2GL3.GL_VIRTUAL_PAGE_SIZE_Z_ARB;
 import static com.jogamp.opengl.GL3ES3.GL_SHADER_STORAGE_BUFFER;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
 import dev.Mat4;
+import dev.Vec2;
+import dev.Vec3i;
+import dev.Vec4u8;
 import framework.BufferUtils;
 import framework.Profile;
+import framework.Semantic;
 import framework.Test;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
@@ -79,38 +116,19 @@ public class Gl_500_texture_sparse_arb extends Test {
 
         boolean validated = checkExtension(gl4, "GL_ARB_sparse_texture");
 
-        /*
-		glm::vec2 const WindowSize(this->getWindowSize());
-		glm::vec2 const WindowRange = WindowSize * 3.f;
+        if (validated) {
+            validated = initProgram(gl4);
+        }
+        if (validated) {
+            validated = initBuffer(gl4);
+        }
+        if (validated) {
+            validated = initVertexArray(gl4);
+        }
+        if (validated) {
+            validated = initTexture(gl4);
+        }
 
-		this->Viewports.resize(1000);
-		for (std::size_t i = 0; i < this->Viewports.size(); ++i)
-		{
-			glm::vec2 const ViewportPos(i % 17u, i % 13u);
-			glm::vec2 const ViewportSize(i % 11u);
-			this->Viewports[i] = glm::vec4(ViewportPos / glm::vec2(17, 13) * WindowRange - WindowSize, ViewportSize / glm::vec2(11));
-		}
-         */
-//		glm::vec2 WindowSize(this->getWindowSize());
-//		this->Viewports.resize(1000);
-//		for (std::size_t i = 0; i < this->Viewports.size(); ++i)
-//		{
-//			this->Viewports[i] = glm::vec4(
-//				glm::linearRand(-WindowSize.x, WindowSize.x * 2.0f), 
-//				glm::linearRand(-WindowSize.y, WindowSize.y * 2.0f),
-//				WindowSize * glm::linearRand(0.0f, 1.0f));
-//		}
-//
-//		if(Validated)
-//			Validated = initProgram();
-//		if(Validated)
-//			Validated = initBuffer();
-//		if(Validated)
-//			Validated = initVertexArray();
-//		if(Validated)
-//			Validated = initTexture();
-//		if(Validated)
-//			Validated = initFramebuffer();
         return validated;
     }
 
@@ -175,76 +193,139 @@ public class Gl_500_texture_sparse_arb extends Test {
 
         return true;
     }
-    
-    private boolean initTexture(GL4 gl4)	{
-        
-//		gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-//
-//		int size=16384;
-//		std::size_t const Levels = gli::levels(size);
-//		std::size_t const MaxLevels = 4;
-//
-//		gl4.glGenTextures(1, &TextureName);
-//		gl4.glActiveTexture(GL_TEXTURE0);
-//		gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, TextureName);
-//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_RED);
-//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
-//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
-//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
-//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
-//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, MaxLevels - 1);
-//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-//		gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SPARSE_ARB, GL_TRUE);
-//		gl4.glTexStorage3D(GL_TEXTURE_2D_ARRAY, static_cast<GLsizei>(gli::levels(size)), GL_RGBA8, GLsizei(size), GLsizei(size), 1);
-//
-//		glm::ivec3 PageSize;
-//		gl4.glGetInternalformativ(GL_TEXTURE_2D_ARRAY, GL_RGBA8, GL_VIRTUAL_PAGE_SIZE_X_ARB, 1, &PageSize.x);
-//		gl4.glGetInternalformativ(GL_TEXTURE_2D_ARRAY, GL_RGBA8, GL_VIRTUAL_PAGE_SIZE_Y_ARB, 1, &PageSize.y);
-//		gl4.glGetInternalformativ(GL_TEXTURE_2D_ARRAY, GL_RGBA8, GL_VIRTUAL_PAGE_SIZE_Z_ARB, 1, &PageSize.z);
-//
-//		std::vector<glm::u8vec4> Page;
-//		Page.resize(static_cast<std::size_t>(PageSize.x * PageSize.y * PageSize.z));
-//
-//		GLint Page3DSizeX(0);
-//		GLint Page3DSizeY(0);
-//		GLint Page3DSizeZ(0);
-//		gl4.glGetInternalformativ(GL_TEXTURE_3D, GL_RGBA32F, GL_VIRTUAL_PAGE_SIZE_X_ARB, 1, &Page3DSizeX);
-//		gl4.glGetInternalformativ(GL_TEXTURE_3D, GL_RGBA32F, GL_VIRTUAL_PAGE_SIZE_Y_ARB, 1, &Page3DSizeY);
-//		gl4.glGetInternalformativ(GL_TEXTURE_3D, GL_RGBA32F, GL_VIRTUAL_PAGE_SIZE_Z_ARB, 1, &Page3DSizeZ);
-//
-//		for(std::size_t Level = 0; Level < MaxLevels; ++Level)
-//		{
-//			GLsizei LevelSize = (size >> Level);
-//			GLsizei TileCountY = LevelSize / PageSize.y;
-//			GLsizei TileCountX = LevelSize / PageSize.x;
-//
-//			for(GLsizei j = 0; j < TileCountY; ++j)
-//			for(GLsizei i = 0; i < TileCountX; ++i)
-//			{
-//				if(glm::abs(glm::length(glm::vec2(i, j) / glm::vec2(TileCountX, TileCountY) * 2.0f - 1.0f)) > 1.0f)
-//					continue;
-//
-//				std::fill(Page.begin(), Page.end(), glm::u8vec4(
-//					static_cast<unsigned char>(float(i) / float(LevelSize / PageSize.x) * 255),
-//					static_cast<unsigned char>(float(j) / float(LevelSize / PageSize.y) * 255),
-//					static_cast<unsigned char>(float(Level) / float(MaxLevels) * 255), 255));
-//
-//		gl4.		glTexPageCommitmentARB(GL_TEXTURE_2D_ARRAY, static_cast<GLint>(Level),
-//					static_cast<GLsizei>(PageSize.x) * i, static_cast<GLsizei>(PageSize.y) * j, 0,
-//					static_cast<GLsizei>(PageSize.x), static_cast<GLsizei>(PageSize.y), 1,
-//					GL_TRUE);
-//
-//		gl4.		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, static_cast<GLint>(Level),
-//					static_cast<GLsizei>(PageSize.x) * i, static_cast<GLsizei>(PageSize.y) * j, 0,
-//					static_cast<GLsizei>(PageSize.x), static_cast<GLsizei>(PageSize.y), 1,
-//					GL_RGBA, GL_UNSIGNED_BYTE,
-//					&Page[0][0]);
-//			}
-//		}
-//
-//		gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-		return true;
-	}
+    private boolean initTexture(GL4 gl4) {
+
+        gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+        int size = 16384;
+        // TODO, implement jgli levels (int i)
+        int levels = jgli.Util.levels(new int[]{size});
+        int maxLevels = 4;
+
+        gl4.glGenTextures(1, textureName, 0);
+        gl4.glActiveTexture(GL_TEXTURE0);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[0]);
+        gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_RED);
+        gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
+        gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
+        gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
+        gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
+        gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, maxLevels - 1);
+        gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SPARSE_ARB, GL_TRUE);
+        gl4.glTexStorage3D(GL_TEXTURE_2D_ARRAY, levels, GL_RGBA8, size, size, 1);
+
+        Vec3i pageSize = new Vec3i();
+        int[] params = {0};
+        gl4.glGetInternalformativ(GL_TEXTURE_2D_ARRAY, GL_RGBA8, GL_VIRTUAL_PAGE_SIZE_X_ARB, 1, params, 0);
+        pageSize.x = params[0];
+        gl4.glGetInternalformativ(GL_TEXTURE_2D_ARRAY, GL_RGBA8, GL_VIRTUAL_PAGE_SIZE_Y_ARB, 1, params, 0);
+        pageSize.y = params[0];
+        gl4.glGetInternalformativ(GL_TEXTURE_2D_ARRAY, GL_RGBA8, GL_VIRTUAL_PAGE_SIZE_Z_ARB, 1, params, 0);
+        pageSize.z = params[0];
+
+        Vec4u8[] page = new Vec4u8[pageSize.x * pageSize.y * pageSize.z];
+
+        int[] page3DSizeX = {0};
+        int[] page3DSizeY = {0};
+        int[] page3DSizeZ = {0};
+        gl4.glGetInternalformativ(GL_TEXTURE_3D, GL_RGBA32F, GL_VIRTUAL_PAGE_SIZE_X_ARB, 1, page3DSizeX, 0);
+        gl4.glGetInternalformativ(GL_TEXTURE_3D, GL_RGBA32F, GL_VIRTUAL_PAGE_SIZE_Y_ARB, 1, page3DSizeY, 0);
+        gl4.glGetInternalformativ(GL_TEXTURE_3D, GL_RGBA32F, GL_VIRTUAL_PAGE_SIZE_Z_ARB, 1, page3DSizeZ, 0);
+
+        for (int level = 0; level < maxLevels; ++level) {
+
+            int levelSize = (size >> level);
+            int tileCountY = levelSize / pageSize.y;
+            int tileCountX = levelSize / pageSize.x;
+
+            for (int j = 0; j < tileCountY; ++j) {
+
+                for (int i = 0; i < tileCountX; ++i) {
+
+                    if (new Vec2(i, j).div(new Vec2(tileCountX, tileCountY)).mul(2.0f).sub(1.0f).length() > 1.0f) {
+                        continue;
+                    }
+
+                    for (int v = 0; v < page.length; v++) {
+
+                        page[v] = new Vec4u8(
+                                (byte) ((float) i / (levelSize / pageSize.x) * 255),
+                                (byte) ((float) j / (levelSize / pageSize.y) * 255),
+                                (byte) ((float) level / maxLevels * 255), (byte) 255);
+                    }
+                    gl4.glTexPageCommitmentARB(GL_TEXTURE_2D_ARRAY, level,
+                            pageSize.x * i, pageSize.y * j, 0,
+                            pageSize.x, pageSize.y, 1,
+                            true);
+
+                    ByteBuffer pageBuffer = GLBuffers.newDirectByteBuffer(pageSize.x * pageSize.y * pageSize.y);
+
+                    for (Vec4u8 v : page) {
+                        pageBuffer.put(v.toBA_());
+                    }
+                    pageBuffer.rewind();
+
+                    gl4.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, level,
+                            pageSize.x * i, pageSize.y * j, 0,
+                            pageSize.x, pageSize.y, 1,
+                            GL_RGBA, GL_UNSIGNED_BYTE,
+                            pageBuffer);
+                    
+                    BufferUtils.destroyDirectBuffer(pageBuffer);
+                }
+            }
+        }
+
+        gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+        return true;
+    }
+
+    private boolean initVertexArray(GL4 gl4) {
+
+        gl4.glGenVertexArrays(1, vertexArrayName, 0);
+        gl4.glBindVertexArray(vertexArrayName[0]);
+        {
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+        }
+        gl4.glBindVertexArray(0);
+
+        return true;
+    }
+
+    @Override
+    protected boolean render(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        {
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            ByteBuffer pointer = gl4.glMapBufferRange(
+                    GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
+                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.001f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
+
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
+
+            gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
+        }
+
+        gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
+        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+
+        gl4.glBindProgramPipeline(pipelineName[0]);
+        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glBindTextures(Semantic.Sampler.DIFFUSE, 1, textureName, 0);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBufferBase(GL_SHADER_STORAGE_BUFFER, Semantic.Storage.VERTEX, bufferName[Buffer.VERTEX]);
+
+        gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
+
+        return true;
+    }
 }

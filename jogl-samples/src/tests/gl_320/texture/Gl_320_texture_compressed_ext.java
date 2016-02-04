@@ -86,7 +86,7 @@ public class Gl_320_texture_compressed_ext extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] shaderName = new int[Shader.MAX], vertexArrayName = new int[1], bufferName = new int[1],
+    private int[] shaderName = new int[Shader.MAX], vertexArrayName = {0}, bufferName = {0},
             textureName = new int[Texture.MAX];
     private int programName, uniformMvp, uniformDiffuse;
     private Vec4i[] viewport = new Vec4i[Texture.MAX];

@@ -67,24 +67,26 @@ public class Gl_330_blend_rtt extends Test {
         new Vertex(new float[]{-1.0f, +1.0f}, new float[]{0.0f, 0.0f}),
         new Vertex(new float[]{-1.0f, -1.0f}, new float[]{0.0f, 1.0f})};
 
-    private enum Texture {
-        RGB8,
-        R,
-        G,
-        B,
-        MAX
+    private class Texture {
+
+        public static final int RGB8 = 0;
+        public static final int R = 1;
+        public static final int G = 2;
+        public static final int B = 3;
+        public static final int MAX = 4;
     };
 
-    private enum Shader {
-        VERT,
-        FRAG,
-        MAX
+    private class Shader {
+
+        public static final int VERT = 0;
+        public static final int FRAG = 1;
+        public static final int MAX = 2;
     }
 
     private int[] framebufferName = {0}, vertexArrayName = {0}, bufferName = {0},
-            texture2dName = new int[Texture.MAX.ordinal()], samplerName = {0};
+            texture2dName = new int[Texture.MAX], samplerName = {0};
     private int programNameSingle, uniformMvpSingle, uniformDiffuseSingle;
-    private Vec4i[] viewport = new Vec4i[Texture.MAX.ordinal()];
+    private Vec4i[] viewport = new Vec4i[Texture.MAX];
     private float[] projection = new float[16], view = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
@@ -92,11 +94,11 @@ public class Gl_330_blend_rtt extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        viewport[Texture.RGB8.ordinal()] = new Vec4i(0, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.R.ordinal()] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.G.ordinal()] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
+        viewport[Texture.RGB8] = new Vec4i(0, 0, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.R] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.G] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
                 windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.B.ordinal()] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.B] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
 
         boolean validated = true;
 
@@ -129,19 +131,19 @@ public class Gl_330_blend_rtt extends Test {
 
         boolean validated = true;
 
-        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX.ordinal()];
+        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
 
-        shaderCodes[Shader.VERT.ordinal()] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
+        shaderCodes[Shader.VERT] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
                 this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-        shaderCodes[Shader.FRAG.ordinal()] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
+        shaderCodes[Shader.FRAG] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
                 this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
         if (validated) {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            shaderProgram.add(shaderCodes[Shader.VERT.ordinal()]);
-            shaderProgram.add(shaderCodes[Shader.FRAG.ordinal()]);
+            shaderProgram.add(shaderCodes[Shader.VERT]);
+            shaderProgram.add(shaderCodes[Shader.FRAG]);
 
             shaderProgram.init(gl3);
 
@@ -200,9 +202,9 @@ public class Gl_330_blend_rtt extends Test {
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glGenTextures(Texture.MAX.ordinal(), texture2dName, 0);
+            gl3.glGenTextures(Texture.MAX, texture2dName, 0);
 
-            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[Texture.RGB8.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[Texture.RGB8]);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             gl3.glTexImage2D(GL_TEXTURE_2D, 0,
@@ -212,25 +214,25 @@ public class Gl_330_blend_rtt extends Test {
                     format.external.value, format.type.value,
                     texture.data());
 
-            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[Texture.R.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[Texture.R]);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_ZERO);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_ZERO);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ZERO);
 
-            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[Texture.G.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[Texture.G]);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_ZERO);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_RED);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_ZERO);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ZERO);
 
-            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[Texture.B.ordinal()]);
+            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[Texture.B]);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_ZERO);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_ZERO);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ZERO);
 
-            for (int i = Texture.R.ordinal(); i <= Texture.B.ordinal(); ++i) {
+            for (int i = Texture.R; i <= Texture.B; ++i) {
                 gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[i]);
                 gl3.glTexImage2D(GL_TEXTURE_2D, 0,
                         GL_R8,
@@ -251,8 +253,8 @@ public class Gl_330_blend_rtt extends Test {
         gl3.glGenFramebuffers(1, framebufferName, 0);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
 
-        for (int i = Texture.R.ordinal(); i <= Texture.B.ordinal(); ++i) {
-            gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + (i - Texture.R.ordinal()), texture2dName[i], 0);
+        for (int i = Texture.R; i <= Texture.B; ++i) {
+            gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + (i - Texture.R), texture2dName[i], 0);
         }
 
         int[] drawBuffers = new int[3];
@@ -337,7 +339,7 @@ public class Gl_330_blend_rtt extends Test {
             gl3.glUniform1i(uniformDiffuseSingle, 0);
         }
 
-        for (int i = 0; i < Texture.MAX.ordinal(); ++i) {
+        for (int i = 0; i < Texture.MAX; ++i) {
             gl3.glViewport(viewport[i].x, viewport[i].y, viewport[i].z, viewport[i].w);
 
             gl3.glActiveTexture(GL_TEXTURE0);
@@ -358,7 +360,7 @@ public class Gl_330_blend_rtt extends Test {
 
         gl3.glDeleteBuffers(1, bufferName, 0);
         gl3.glDeleteProgram(programNameSingle);
-        gl3.glDeleteTextures(Texture.MAX.ordinal(), texture2dName, 0);
+        gl3.glDeleteTextures(Texture.MAX, texture2dName, 0);
         gl3.glDeleteFramebuffers(1, framebufferName, 0);
         gl3.glDeleteSamplers(1, samplerName, 0);
 

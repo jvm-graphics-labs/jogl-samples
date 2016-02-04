@@ -71,9 +71,9 @@ public class Gl_320_buffer_uniform_shared extends Test {
     }
 
     private final ShaderCode[] shaderName = new ShaderCode[Shader.MAX];
-    private final int[] bufferName = new int[Buffer.MAX];
+    private final int[] bufferName = new int[Buffer.MAX], uniformBlockSizeTransform = {0}, 
+            uniformBlockSizeMaterial = {0}, vertexArrayName = {0};
     private int programName, uniformMaterial, uniformTransform;
-    private int[] uniformBlockSizeTransform, uniformBlockSizeMaterial, vertexArrayName;
 
     @Override
     protected boolean begin(GL gl) {
@@ -129,10 +129,8 @@ public class Gl_320_buffer_uniform_shared extends Test {
 
         gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        int[] uniformBufferOffset = new int[1];
+        int[] uniformBufferOffset = {0};
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-
-        uniformBlockSizeTransform = new int[1];
 
         gl3.glGetActiveUniformBlockiv(
                 programName,
@@ -141,8 +139,6 @@ public class Gl_320_buffer_uniform_shared extends Test {
                 uniformBlockSizeTransform, 0);
         uniformBlockSizeTransform[0]
                 = ((uniformBlockSizeTransform[0] / uniformBufferOffset[0] + 1) * uniformBufferOffset[0]);
-
-        uniformBlockSizeMaterial = new int[1];
 
         gl3.glGetActiveUniformBlockiv(
                 programName,
@@ -154,7 +150,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
                 = ((uniformBlockSizeMaterial[0] / uniformBufferOffset[0] + 1) * uniformBufferOffset[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.UNIFORM]);
-        gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSizeTransform[0] + uniformBlockSizeMaterial[0], null, 
+        gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSizeTransform[0] + uniformBlockSizeMaterial[0], null,
                 GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -174,7 +170,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
     }
 
     private boolean initVertexArray(GL3 gl3) {
-        
+
         gl3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
@@ -207,7 +203,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
                     uniformBlockSizeTransform[0] + Vec4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            pointer.asFloatBuffer().put(mvp.toFA_());
+            pointer.asFloatBuffer().put(mvp.toFa_());
             pointer.position(uniformBlockSizeTransform[0]);
             pointer.asFloatBuffer().put(diffuse);
             pointer.rewind();

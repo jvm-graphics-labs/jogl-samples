@@ -9,10 +9,11 @@ import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
 import static com.jogamp.opengl.GL3ES3.GL_GEOMETRY_SHADER;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -80,12 +81,10 @@ public class Gl_320_fbo_layered extends Test {
         public static final int MAX = 5;
     }
 
-    private int[] framebufferName = new int[1], vertexArrayName = new int[Program.MAX],
-            programName = new int[Program.MAX], uniformMvp = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], textureColorbufferName = new int[1];
+    private int[] framebufferName = {0}, vertexArrayName = new int[Program.MAX], programName = new int[Program.MAX],
+            uniformMvp = new int[Program.MAX], bufferName = new int[Buffer.MAX], textureColorbufferName = {0};
     private int uniformDiffuse, uniformLayer;
     private Vec4i[] viewport = new Vec4i[4];
-    private float[] projection = new float[16], view = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -279,12 +278,10 @@ public class Gl_320_fbo_layered extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        FloatUtil.makeOrtho(projection, 0, true, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f);
-        FloatUtil.makeIdentity(view);
-        FloatUtil.makeIdentity(model);
-
-        FloatUtil.multMatrix(projection, view, mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.ortho_(-1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f);
+        Mat4 view = new Mat4(1.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(view).mul(model);
 
         // Pass 1
         {
@@ -292,7 +289,7 @@ public class Gl_320_fbo_layered extends Test {
             gl3.glViewport(0, 0, framebufferSize.x, framebufferSize.y);
 
             gl3.glUseProgram(programName[Program.LAYERING]);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.LAYERING], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.LAYERING], 1, false, mvp.toFa_(), 0);
 
             gl3.glBindVertexArray(vertexArrayName[Program.LAYERING]);
             gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
@@ -304,7 +301,7 @@ public class Gl_320_fbo_layered extends Test {
             gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
             gl3.glUseProgram(programName[Program.SPLASH]);
-            gl3.glUniformMatrix4fv(uniformMvp[Program.SPLASH], 1, false, mvp, 0);
+            gl3.glUniformMatrix4fv(uniformMvp[Program.SPLASH], 1, false, mvp.toFa_(), 0);
             gl3.glUniform1i(uniformDiffuse, 0);
 
             gl3.glActiveTexture(GL_TEXTURE0);

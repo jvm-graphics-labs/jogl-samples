@@ -397,12 +397,12 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
             Mat4 model = new Mat4(1.0f);
 
             pointer.position(padding * 0);
-            pointer.asFloatBuffer().put(projection.mul(view).translate(new Mat4(1.0f), new Vec3(0.0f, 0.0f, 0.5f)).toFA_());
+            pointer.asFloatBuffer().put(projection.mul(view).translate(new Mat4(1.0f), new Vec3(0.0f, 0.0f, 0.5f)).toFa_());
             // now projection contains projection * view
             pointer.position(padding * 1);
-            pointer.asFloatBuffer().put(projection.translate(new Mat4(1.0f), new Vec3(0.0f, 0.0f, 0.0f)).toFA_());
+            pointer.asFloatBuffer().put(projection.translate(new Mat4(1.0f), new Vec3(0.0f, 0.0f, 0.0f)).toFa_());
             pointer.position(padding * 2);
-            pointer.asFloatBuffer().put(projection.translate(new Mat4(1.0f), new Vec3(0.0f, 0.0f, -0.5f)).toFA_());
+            pointer.asFloatBuffer().put(projection.translate(new Mat4(1.0f), new Vec3(0.0f, 0.0f, -0.5f)).toFa_());
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
 

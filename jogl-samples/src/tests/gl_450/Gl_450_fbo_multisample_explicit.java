@@ -287,7 +287,7 @@ public class Gl_450_fbo_multisample_explicit extends Test {
             Mat4 model = new Mat4(1.0f).scale(new Vec3(0.3f));
             Mat4 mvp = perspective.mul(viewMat4()).mul(model);
             uniformPointer.position(uniformBlockSize * 0);
-            uniformPointer.asFloatBuffer().put(mvp.toFA_());
+            uniformPointer.asFloatBuffer().put(mvp.toFa_());
         }
 
         {
@@ -297,7 +297,7 @@ public class Gl_450_fbo_multisample_explicit extends Test {
             Mat4 model = new Mat4(1.0f);
             Mat4 mvp = perspective.mul(view).mul(model);
             uniformPointer.position(uniformBlockSize * 1);
-            uniformPointer.asFloatBuffer().put(mvp.toFA_());
+            uniformPointer.asFloatBuffer().put(mvp.toFa_());
         }
         uniformPointer.rewind();
 

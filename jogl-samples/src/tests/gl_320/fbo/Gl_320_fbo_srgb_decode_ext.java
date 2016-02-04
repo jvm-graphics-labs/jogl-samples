@@ -92,7 +92,7 @@ public class Gl_320_fbo_srgb_decode_ext extends Test {
     private int framebufferScale = 2, uniformTransform;
     private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
             bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX],
-            uniformDiffuse = new int[Program.MAX], framebufferName = new int[1];
+            uniformDiffuse = new int[Program.MAX], framebufferName = {0};
     private float[] projection = new float[16];
 
     @Override

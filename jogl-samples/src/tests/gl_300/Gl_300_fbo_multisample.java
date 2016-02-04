@@ -255,7 +255,7 @@ public class Gl_300_fbo_multisample extends Test {
                 0.1f, 100.0f);
         Mat4 model = new Mat4(1.0f);
         Mat4 mvp = perspective.mul(viewMat4()).mul(model);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA_(), 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glViewport(0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
 
@@ -273,7 +273,7 @@ public class Gl_300_fbo_multisample extends Test {
         Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
         Mat4 model = new Mat4(1.0f);
         Mat4 mvp = perspective.mul(viewMat4()).mul(model);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFA_(), 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
         gl3.glBindTexture(GL_TEXTURE_2D, texture2dName);

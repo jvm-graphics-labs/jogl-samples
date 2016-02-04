@@ -67,7 +67,7 @@ public class Gl_320_program_uniform extends Test {
     }
 
     private int programName, uniformTransform, uniformDiffuse0, uniformDiffuse1;
-    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = new int[1];
+    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0};
     private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override

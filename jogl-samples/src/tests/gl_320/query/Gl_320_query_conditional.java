@@ -53,7 +53,7 @@ public class Gl_320_query_conditional extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] vertexArrayName = new int[1], queryName = new int[1], bufferName = new int[Buffer.MAX];
+    private int[] vertexArrayName = {0}, queryName = {0}, bufferName = new int[Buffer.MAX];
     private int programName, uniformMaterialOffset;
     private float[] projection = new float[16], model = new float[16];
     private boolean test = true;
