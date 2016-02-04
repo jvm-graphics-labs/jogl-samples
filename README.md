@@ -1,6 +1,6 @@
 # jogl-samples
 
-The Java OpenGL Samples Pack (called unsurprisingly jogl-samples  :scream: ) is a port of the [OpenGL Samples Pack](http://www.g-truc.net/project-0026.html), a collection of [OpenGL](http://www.opengl.org/) samples based on the OpenGL "core profile" specifications.
+The Java OpenGL Samples Pack (called unsurprisingly jogl-samples  :scream: ) is the java port of the [OpenGL Samples Pack](http://www.g-truc.net/project-0026.html), a collection of [OpenGL](http://www.opengl.org/) samples based on the OpenGL "core profile" specifications.
 
 The project aims to promote the new OpenGL features making easier version transitions for OpenGL programmers with a complementary documentation for the OpenGL specification. Despite the fact that the OpenGL Samples Pack provides as simple (and dumb) as possible samples, it's not a tutorial for beginner but a project for programmers already familiar with OpenGL. The OpenGL Samples Pack is also a good OpenGL drivers feature test.
 
