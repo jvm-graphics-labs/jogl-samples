@@ -72,10 +72,8 @@ public class Gl_430_texture_buffer extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX],
-            textureName = new int[Texture.MAX];
+    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX];
     private int programName, uniformMvp;
-    private final Mat4 projection = new Mat4(), model = new Mat4();
 
     @Override
     protected boolean begin(GL gl) {
@@ -259,10 +257,10 @@ public class Gl_430_texture_buffer extends Test {
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            projection.perspectiveFov((float) Math.PI * 0.25f, windowSize.x, windowSize.y, 0.1f, 100.0f)
-                    .mul(viewMat4()).mul(model.identity());
+            Mat4 projection = glm.perspectiveFov_((float) Math.PI * 0.25f, windowSize.x, windowSize.y, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
 
-            pointer.asFloatBuffer().put(projection.toFa(new float[16]));
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model.identity()).toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);

@@ -8,10 +8,13 @@ package tests.gl_430;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat3;
+import dev.Mat4;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -71,60 +74,68 @@ public class Gl_430_buffer_uniform extends Test {
 
     private class Material {
 
-        // vec3
-        public float[] ambient;
+        public Vec3 ambient;
         private final float padding1 = 0.0f;
-        // vec3
-        public float[] diffuse;
+        public Vec3 diffuse;
         private final float padding2 = 0.0f;
-        // vec3
-        public float[] specular;
+        public Vec3 specular;
         public float shininess;
 
-        public Material(float[] ambient, float[] diffuse, float[] specular, float shininess) {
+        public Material(Vec3 ambient, Vec3 diffuse, Vec3 specular, float shininess) {
             this.ambient = ambient;
             this.diffuse = diffuse;
             this.specular = specular;
             this.shininess = shininess;
         }
 
-        public static final int SIZE_OF = (3 + 1 + 3 + 1 + 3 + 1) * Float.BYTES;
+        public static final int SIZE = (Vec3.SIZE + 1 * Float.BYTES) * 3;
 
-        public float[] toFloatArray() {
-            return new float[]{ambient[0], ambient[1], ambient[2], padding1,
-                diffuse[0], diffuse[1], diffuse[2], padding2,
-                specular[0], specular[1], specular[2], shininess};
+        public float[] toFa_() {
+            return new float[]{ambient.x, ambient.y, ambient.z, padding1,
+                diffuse.x, diffuse.y, diffuse.z, padding2,
+                specular.x, specular.y, specular.z, shininess};
         }
     };
 
     private class Light {
 
-        // vec3
-        public float[] position;
+        public Vec3 position;
 
-        public Light(float[] position) {
+        public Light(Vec3 position) {
             this.position = position;
         }
 
-        public static final int SIZE_OF = 3 * Float.BYTES;
+        public static final int SIZE = Vec3.SIZE;
+
+        public float[] toFa_() {
+            return position.toFA_();
+        }
     };
 
     private class Transform {
 
-        // mat4
-        public float[] p;
-        // mat4
-        public float[] mv;
-        // mat3
-        public float[] normal;
+        public Mat4 p;
+        public Mat4 mv;
+        public Mat3 normal;
 
-        public static final int SIZE_OF = (16 + 16 + 9) * Float.BYTES;
+        public static final int SIZE = 2 * Mat4.SIZE + Mat3.SIZE;
+
+        public Transform() {
+        }
+
+        public float[] toFa_() {
+            return new float[]{
+                p.m00, p.m01, p.m02, p.m03, p.m10, p.m11, p.m12, p.m13,
+                p.m20, p.m21, p.m22, p.m23, p.m30, p.m31, p.m32, p.m33,
+                mv.m00, mv.m01, mv.m02, mv.m03, mv.m10, mv.m11, mv.m12, mv.m13,
+                mv.m20, mv.m21, mv.m22, mv.m23, mv.m30, mv.m31, mv.m32, mv.m33,
+                normal.m00, normal.m01, normal.m02, normal.m10, normal.m11, normal.m12,
+                normal.m20, normal.m21, normal.m22,};
+        }
     };
 
     private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX];
     private int programName, uniformPerDraw, uniformPerPass, uniformPerScene;
-    private float[] projection = new float[16], view = new float[16], model = new float[16],
-            mv = new float[16], normal = new float[9];
 
     @Override
     protected boolean begin(GL gl) {
@@ -442,27 +453,27 @@ public class Gl_430_buffer_uniform extends Test {
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_DRAW]);
-            gl4.glBufferData(GL_UNIFORM_BUFFER, Transform.SIZE_OF, null, GL_DYNAMIC_DRAW);
+            gl4.glBufferData(GL_UNIFORM_BUFFER, Transform.SIZE, null, GL_DYNAMIC_DRAW);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
         {
-            Light light = new Light(new float[]{0.0f, 0.0f, 100.f});
+            Light light = new Light(new Vec3(0.0f, 0.0f, 100.f));
 
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_PASS]);
-            FloatBuffer lightBuffer = GLBuffers.newDirectFloatBuffer(light.position);
-            gl4.glBufferData(GL_UNIFORM_BUFFER, Light.SIZE_OF, lightBuffer, GL_STATIC_DRAW);
+            FloatBuffer lightBuffer = GLBuffers.newDirectFloatBuffer(light.toFa_());
+            gl4.glBufferData(GL_UNIFORM_BUFFER, Light.SIZE, lightBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(lightBuffer);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
         {
-            Material material = new Material(new float[]{0.7f, 0.0f, 0.0f}, new float[]{0.0f, 0.5f, 0.0f},
-                    new float[]{0.0f, 0.0f, 0.5f}, 128.0f);
+            Material material = new Material(new Vec3(0.7f, 0.0f, 0.0f), new Vec3(0.0f, 0.5f, 0.0f),
+                    new Vec3(0.0f, 0.0f, 0.5f), 128.0f);
 
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_SCENE]);
-            FloatBuffer materialBuffer = GLBuffers.newDirectFloatBuffer(material.toFloatArray());
-            gl4.glBufferData(GL_UNIFORM_BUFFER, Material.SIZE_OF, materialBuffer, GL_STATIC_DRAW);
+            FloatBuffer materialBuffer = GLBuffers.newDirectFloatBuffer(material.toFa_());
+            gl4.glBufferData(GL_UNIFORM_BUFFER, Material.SIZE, materialBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(materialBuffer);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
@@ -478,34 +489,18 @@ public class Gl_430_buffer_uniform extends Test {
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_DRAW]);
             ByteBuffer transform = gl4.glMapBufferRange(GL_UNIFORM_BUFFER,
-                    0, Transform.SIZE_OF, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+                    0, Transform.SIZE, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-            view = view();
-            FloatUtil.makeRotationAxis(model, 0, -(float) Math.PI * 0.5f, 0.0f, 0.0f, 1.0f, tmpVec3);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+            Mat4 view = viewMat4();
+            Mat4 model = new Mat4(1.0f).rotate(-(float) Math.PI * 0.5f, new Vec3(0.0f, 0.0f, 1.0f));
 
-            FloatUtil.multMatrix(view, model, mv);
+            Transform t = new Transform();
+            t.mv = view.mul(model);
+            t.p = projection;
+            t.normal = new Mat3(t.mv.invTransp3_());
 
-            for (float f : projection) {
-                transform.putFloat(f);
-            }
-
-            for (float f : mv) {
-                transform.putFloat(f);
-            }
-
-            FloatUtil.invertMatrix(mv, model);
-            FloatUtil.transposeMatrix(model, view);
-
-            for (int i = 0; i < 3; i++) {
-                for (int j = 0; j < 3; j++) {
-                    normal[i * 3 + j] = view[i * 4 + j];
-                }
-            }
-            for (float f : normal) {
-                transform.putFloat(f);
-            }
-            transform.rewind();
+            transform.asFloatBuffer().put(t.toFa_());
 
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);

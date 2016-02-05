@@ -8,10 +8,11 @@ package tests.gl_430;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL3ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -86,7 +87,6 @@ public class Gl_430_program_compute extends Test {
 
     private int[] textureName = {0}, vertexArrayName = {0}, pipelineName = new int[Program.MAX],
             programName = new int[Program.MAX], bufferName = new int[Buffer.MAX];
-    private float[] projection = new float[16], model = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -202,7 +202,7 @@ public class Gl_430_program_compute extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -268,16 +268,12 @@ public class Gl_430_program_compute extends Test {
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, projection.length * Float.BYTES,
+            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model);
-
-            pointer.asFloatBuffer().put(projection).rewind();
+            Mat4 projection = glm.perspectiveFov_((float) Math.PI * 0.25f, windowSize.x, windowSize.y, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);

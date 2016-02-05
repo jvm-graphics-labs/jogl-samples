@@ -73,8 +73,8 @@ public class Gl_430_texture_storage extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = {0},
-            programName = new int[Program.MAX], bufferName = new int[Buffer.MAX];
+    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = {0}, programName = new int[Program.MAX], 
+            bufferName = new int[Buffer.MAX];
 
     @Override
     protected boolean begin(GL gl) {

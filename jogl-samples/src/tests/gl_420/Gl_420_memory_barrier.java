@@ -60,9 +60,8 @@ public class Gl_420_memory_barrier extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, framebufferName = {0}, samplerName = {0},
-            pipelineName = new int[Pipeline.MAX], programName = new int[Program.MAX],
-            textureName = new int[Texture.MAX];
+    private int[] vertexArrayName = {0}, framebufferName = {0}, samplerName = {0}, pipelineName = new int[Pipeline.MAX],
+            programName = new int[Program.MAX], textureName = new int[Texture.MAX];
     private Vec2i frameBufferSize = new Vec2i();
     private int frameIndex = 0;
 

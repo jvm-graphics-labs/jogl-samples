@@ -13,7 +13,7 @@ import com.jogamp.opengl.util.glsl.ShaderProgram;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
-import jglm.Vec2i;
+import dev.Vec2i;
 
 /**
  *
@@ -42,7 +42,6 @@ public class Gl_430_image_store extends Test {
 
     private int[] vertexArrayName = {0}, textureName = {0}, pipelineName = new int[Pipeline.MAX],
             programName = new int[Pipeline.MAX];
-    private Vec2i imageSize = new Vec2i();
 
     @Override
     protected boolean begin(GL gl) {

@@ -333,7 +333,7 @@ public class Gl_440_fbo_without_attachment extends Test {
 
         // Render
         FloatBuffer clearBuffer = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 0.5f, 0.0f, 1.0f});
-        gl4.glClearTexImage(textureName[Texture.COLORBUFFER], 0, GL_RGBA, GL_FLOAT, clearBuffer.rewind());
+        gl4.glClearTexImage(textureName[Texture.COLORBUFFER], 0, GL_RGBA, GL_FLOAT, clearBuffer);
         BufferUtils.destroyDirectBuffer(clearBuffer);
 
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x * supersampling, windowSize.y * supersampling);

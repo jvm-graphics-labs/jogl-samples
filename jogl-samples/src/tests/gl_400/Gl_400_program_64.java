@@ -157,7 +157,7 @@ public class Gl_400_program_64 extends Test {
 
         Mat4d projection = glm.perspective_(Math.PI * 0.25, (double) windowSize.x / windowSize.y, 0.1, 100.0);
         Mat4d model = new Mat4d(1.0);
-        Mat4d view = new Mat4d().set(viewMat4());
+        Mat4d view = new Mat4d(viewMat4());
         Mat4d mvp = projection.mul(view).mul(model);
 
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);

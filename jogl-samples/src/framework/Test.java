@@ -21,7 +21,6 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
 import dev.Mat4;
@@ -255,16 +254,6 @@ public class Test implements GLEventListener, KeyListener {
         return viewMat4.identity().translate(0.0f, 0.0f, -translationCurrent.y)
                 .rotate(rotationCurrent.y, 1.f, 0.f, 0.f)
                 .rotate(rotationCurrent.x, 0.f, 1.f, 0.f);
-    }
-
-    protected final float[] view() {
-
-        FloatUtil.makeTranslation(viewTranslate, true, 0, 0, -translationCurrent.y);
-        FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec3);
-        FloatUtil.multMatrix(viewTranslate, viewRotateX, viewRotateX);
-        FloatUtil.makeRotationAxis(viewRotateY, 0, rotationCurrent.x, 0f, 1f, 0f, tmpVec3);
-        FloatUtil.multMatrix(viewRotateX, viewRotateY, view);
-        return view;
     }
 
     private boolean checkGLVersion() {

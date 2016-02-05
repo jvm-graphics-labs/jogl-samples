@@ -8,10 +8,12 @@ package tests.gl_420;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -84,10 +86,8 @@ public class Gl_420_sampler_fetch extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX],
-            pipelineName = new int[Program.MAX], programName = new int[Program.MAX],
-            textureName = new int[Texture.MAX], framebufferName = {0};
-    private float[] projection = new float[16], model = new float[16];
+    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX], pipelineName = new int[Program.MAX],
+            programName = new int[Program.MAX], textureName = new int[Texture.MAX], framebufferName = {0};
 
     @Override
     protected boolean begin(GL gl) {
@@ -184,7 +184,7 @@ public class Gl_420_sampler_fetch extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-        gl4.glBufferData(GL_UNIFORM_BUFFER, projection.length * Float.BYTES, null, GL_DYNAMIC_DRAW);
+        gl4.glBufferData(GL_UNIFORM_BUFFER, Mat4.SIZE, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         return true;
@@ -276,20 +276,13 @@ public class Gl_420_sampler_fetch extends Test {
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER,
-                    0, projection.length * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
+                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    windowSize.x * 0.5f / windowSize.y, 0.1f, 1000.0f);
-            FloatUtil.makeScale(model, true, 4.f, 4.f, 4.f);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, windowSize.x * 0.5f / windowSize.y, 0.1f, 1000.0f);
+            Mat4 model = new Mat4(1.0f);
 
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model);
-
-            for (float f : projection) {
-                pointer.putFloat(f);
-            }
-            pointer.rewind();
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model.scale(new Vec3(4.f))).toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);

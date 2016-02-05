@@ -8,10 +8,11 @@ package tests.gl_420;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL3ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -19,6 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import dev.Vec2;
+import dev.Vec3;
 
 /**
  *
@@ -64,7 +66,6 @@ public class Gl_420_buffer_uniform extends Test {
 
     private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX];
     private int programName, uniformInstance;
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -190,7 +191,7 @@ public class Gl_420_buffer_uniform extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        int bufferSize = 16 * Float.BYTES * 2;
+        int bufferSize = Mat4.SIZE * 2;
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
@@ -198,26 +199,22 @@ public class Gl_420_buffer_uniform extends Test {
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, bufferSize, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
 
             {
-                FloatUtil.makeRotationAxis(model, 0, (float) Math.PI * 0.25f, 0.f, 1.f, 0.f, tmpVec3);
-                FloatUtil.multMatrix(projection, view(), mvp);
-                FloatUtil.multMatrix(mvp, model);
+                Mat4 model = new Mat4(1.0f).rotate((float) Math.PI * 0.25f, new Vec3(0.f, 1.f, 0.f));
+                Mat4 mvp = projection.mul_(viewMat4()).mul(model);
 
-                for (float f : mvp) {
-                    pointer.putFloat(f);
-                }
+                pointer.asFloatBuffer().put(mvp.toFa_());
             }
             {
-                FloatUtil.makeRotationAxis(model, 0, (float) (Math.PI * 0.50f + Math.PI * 0.25f), 0.f, 1.f, 0.f, tmpVec3);
-                FloatUtil.multMatrix(projection, view(), mvp);
-                FloatUtil.multMatrix(mvp, model);
-
-                for (float f : mvp) {
-                    pointer.putFloat(f);
-                }
+                Mat4 model = new Mat4(1.0f).rotate((float) (Math.PI * 0.50f + Math.PI * 0.25f), new Vec3(0.f, 1.f, 0.f));
+                Mat4 mvp = projection.mul(viewMat4()).mul(model);
+                
+                pointer.position(Mat4.SIZE);
+                pointer.asFloatBuffer().put(mvp.toFa_());
             }
+            pointer.rewind();
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);

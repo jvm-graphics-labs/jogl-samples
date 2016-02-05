@@ -11,6 +11,7 @@ import static com.jogamp.opengl.GLES2.GL_VERTEX_ARRAY;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Mat4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -70,9 +71,8 @@ public class Gl_430_debug extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = {0},
-            programName = new int[Program.MAX], bufferName = new int[Buffer.MAX];
-    private float[] projection = new float[16], model = new float[16];
+    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = {0}, programName = new int[Program.MAX], 
+            bufferName = new int[Buffer.MAX];
 
     private boolean initProgram(GL4 gl4) {
 
@@ -153,7 +153,7 @@ public class Gl_430_debug extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glObjectLabel(GL_BUFFER, bufferName[Buffer.TRANSFORM], -1,
                 "Uniform Buffer object".getBytes(), 0);

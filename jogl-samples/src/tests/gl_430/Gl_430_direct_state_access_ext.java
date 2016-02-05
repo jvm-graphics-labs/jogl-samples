@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Mat4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -91,7 +92,6 @@ public class Gl_430_direct_state_access_ext extends Test {
     private int[] vertexArrayName = {0}, pipelineName = {0}, samplerName = {0}, bufferName = new int[Buffer.MAX],
             textureName = new int[Texture.MAX], framebufferName = new int[Framebuffer.MAX];
     private int programName, uniformBlockSize;
-    private float[] projection = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -162,7 +162,7 @@ public class Gl_430_direct_state_access_ext extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
+        uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
         /**

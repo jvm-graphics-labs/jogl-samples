@@ -68,9 +68,8 @@ public class Gl_430_perf_monitor_amd extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] framebufferName = {0}, pipelineName = new int[Pipeline.MAX],
-            programName = new int[Pipeline.MAX], vertexArrayName = new int[Pipeline.MAX],
-            bufferName = new int[Buffer.MAX], texturename = new int[Texture.MAX];
+    private int[] framebufferName = {0}, pipelineName = new int[Pipeline.MAX], programName = new int[Pipeline.MAX],
+            vertexArrayName = new int[Pipeline.MAX], bufferName = new int[Buffer.MAX], texturename = new int[Texture.MAX];
 
     @Override
     protected boolean begin(GL gl) {

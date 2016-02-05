@@ -8,10 +8,11 @@ package tests.gl_430;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL3ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.BufferUtils;
 import framework.DrawElementsIndirectCommand;
 import framework.Profile;
@@ -27,6 +28,7 @@ import java.util.logging.Logger;
 import jgli.Texture2d;
 import dev.Vec2;
 import dev.Vec2i;
+import dev.Vec3;
 import jglm.Vec4i;
 
 /**
@@ -40,7 +42,7 @@ public class Gl_430_multi_draw_indirect extends Test {
     }
 
     public Gl_430_multi_draw_indirect() {
-        super("gl-430-multi-draw-indirect", Profile.CORE, 4, 3, new Vec2i(640, 480), 
+        super("gl-430-multi-draw-indirect", Profile.CORE, 4, 3, new Vec2i(640, 480),
                 new Vec2(-Math.PI * 0.2f, Math.PI * 0.2f));
     }
 
@@ -105,7 +107,6 @@ public class Gl_430_multi_draw_indirect extends Test {
             drawCount = new int[indirectBufferCount], uniformArrayStrideMat = {256}, uniformArrayStrideInt = {256};
     private int programName;
     private Vec4i[] viewport = new Vec4i[indirectBufferCount];
-    private float[] projection = new float[16], model = new float[16], view = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -227,7 +228,7 @@ public class Gl_430_multi_draw_indirect extends Test {
         BufferUtils.destroyDirectBuffer(paddingIntBuffer);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        int paddingMat = Math.max(projection.length * Float.BYTES, uniformArrayStrideMat[0]);
+        int paddingMat = Math.max(Mat4.SIZE, uniformArrayStrideMat[0]);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, paddingMat * 3, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -404,27 +405,19 @@ public class Gl_430_multi_draw_indirect extends Test {
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
-                    projection.length * Float.BYTES * 3, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE * 3,
+                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    windowSize.x / 3.0f / windowSize.y, 0.1f, 100.0f);
-            view = view();
-            FloatUtil.makeIdentity(model);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, windowSize.x / 3.0f / windowSize.y, 0.1f, 100.0f);
+            Mat4 view = viewMat4();
 
-            FloatUtil.multMatrix(projection, view);
-
-            FloatUtil.makeTranslation(model, true, 0.0f, 0.0f, 0.5f);
-            FloatUtil.multMatrix(projection, model, model);
-            FloatBuffer pointerF = pointer.asFloatBuffer().put(model);
-
-            FloatUtil.makeTranslation(model, true, 0.0f, 0.0f, 0.0f);
-            FloatUtil.multMatrix(projection, model, model);
-            pointerF.put(model);
-
-            FloatUtil.makeTranslation(model, true, 0.0f, 0.0f, -0.5f);
-            FloatUtil.multMatrix(projection, model, model);
-            pointerF.put(model).rewind();
+            pointer.position(Mat4.SIZE * 0);
+            pointer.asFloatBuffer().put(projection.mul_(view).translate(new Vec3(0.0f, 0.0f, +0.5f)).toFa_());
+            pointer.position(Mat4.SIZE * 1);
+            pointer.asFloatBuffer().put(projection.mul_(view).translate(new Vec3(0.0f, 0.0f, +0.0f)).toFa_());
+            pointer.position(Mat4.SIZE * 2);
+            pointer.asFloatBuffer().put(projection.mul_(view).translate(new Vec3(0.0f, 0.0f, -0.5f)).toFa_());
+            pointer.rewind();
 
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }

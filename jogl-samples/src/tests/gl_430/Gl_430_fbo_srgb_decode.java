@@ -8,10 +8,11 @@ package tests.gl_430;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -90,11 +91,9 @@ public class Gl_430_fbo_srgb_decode extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] framebufferName = {0}, programName = new int[Program.MAX],
-            vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
-            textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX];
+    private int[] framebufferName = {0}, programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
+            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX];
     private int framebufferScale = 2, uniformTransform = -1;
-    private float[] projection = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -199,7 +198,7 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(projection.length * Float.BYTES, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -314,16 +313,12 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, projection.length * Float.BYTES,
+            ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            //glm::mat4 Projection = glm::perspectiveFov(glm::pi<float>() * 0.25f, 640.f, 480.f, 0.1f, 100.0f);
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
 
-            FloatUtil.multMatrix(projection, view());
-
-            pointer.asFloatBuffer().put(projection).rewind();
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);

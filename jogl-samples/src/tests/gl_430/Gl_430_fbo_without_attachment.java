@@ -53,9 +53,8 @@ public class Gl_430_fbo_without_attachment extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, framebufferName = {0}, samplerName = {0},
-            pipelineName = new int[Pipeline.MAX], programName = new int[Pipeline.MAX],
-            textureName = new int[Texture.MAX];
+    private int[] vertexArrayName = {0}, framebufferName = {0}, samplerName = {0}, pipelineName = new int[Pipeline.MAX],
+            programName = new int[Pipeline.MAX], textureName = new int[Texture.MAX];
 
     @Override
     protected boolean begin(GL gl) {

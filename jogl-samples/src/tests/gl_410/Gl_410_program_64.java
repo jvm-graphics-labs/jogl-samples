@@ -8,8 +8,9 @@ package tests.gl_410;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
+import core.glm;
+import dev.Mat4d;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -66,11 +67,9 @@ public class Gl_410_program_64 extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, programName = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], vertexArrayName = {0};
+    private int[] pipelineName = {0}, programName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
+            vertexArrayName = {0};
     private int uniformMvp, uniformDiffuse;
-    private float[] projection = new float[16], view = new float[16], model = new float[16];
-    private double[] mvp = new double[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -180,18 +179,12 @@ public class Gl_410_program_64 extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-        view = view();
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view);
-        FloatUtil.multMatrix(projection, model);
+        Mat4d projection = glm.perspective_((float) Math.PI * 0.25, (float) windowSize.x / windowSize.y, 0.1, 100.0);
+        Mat4d view = new Mat4d(viewMat4());
+        Mat4d model = new Mat4d(1.0f);
+        Mat4d mvp = projection.mul(view).mul(model);
 
-        for (int i = 0; i < projection.length; i++) {
-            mvp[i] = projection[i];
-        }
-
-        gl4.glProgramUniformMatrix4dv(programName[Program.VERT], uniformMvp, 1, false, mvp, 0);
+        gl4.glProgramUniformMatrix4dv(programName[Program.VERT], uniformMvp, 1, false, mvp.toDa_(), 0);
         gl4.glProgramUniform4dv(programName[Program.FRAG], uniformDiffuse, 1,
                 new double[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 

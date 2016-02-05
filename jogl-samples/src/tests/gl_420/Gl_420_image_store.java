@@ -52,7 +52,7 @@ public class Gl_420_image_store extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, textureName = {0}, programName = new int[Program.MAX],
+    private int[] vertexArrayName = {0}, textureName = {0}, programName = new int[Program.MAX], 
             pipelineName = new int[Pipeline.MAX];
     private Vec2 imageSize = new Vec2();
 

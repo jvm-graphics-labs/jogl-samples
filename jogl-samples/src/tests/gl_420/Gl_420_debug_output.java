@@ -8,10 +8,11 @@ package tests.gl_420;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.GlDebugOutput;
 import framework.Profile;
 import framework.Semantic;
@@ -19,7 +20,7 @@ import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import jglm.Vec2;
+import dev.Vec2;
 
 /**
  *
@@ -36,7 +37,7 @@ public class Gl_420_debug_output extends Test {
          * It's mandatory to enable glDebugOutput before GLContext creation!
          * Here through the boolean true.
          */
-        super("gl-420-debug-output", Profile.CORE, 4, 2, new Vec2(0.25f, 0.25f), true);
+        super("gl-420-debug-output", Profile.CORE, 4, 2, new Vec2(0.25f), true);
     }
 
     private final String SHADERS_SOURCE = "debug-output";
@@ -68,7 +69,6 @@ public class Gl_420_debug_output extends Test {
 
     private int[] bufferName = new int[Buffer.MAX], pipelineName = {0}, vertexArrayName = {0};
     private int programName;
-    private float[] projection = new float[16], model = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -272,15 +272,9 @@ public class Gl_420_debug_output extends Test {
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, 16 * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model);
-
-            for (float f : projection) {
-                pointer.putFloat(f);
-            }
-            pointer.rewind();
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
 
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }

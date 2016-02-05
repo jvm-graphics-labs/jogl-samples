@@ -51,8 +51,21 @@ public class Gl_320_buffer_uniform extends Test {
         public Mat4 mv;
         public Mat3 normal;
 
-        public static final int SIZEOF = 2 * Mat4.SIZE + Mat3.SIZE;
-    }
+        public static final int SIZE = 2 * Mat4.SIZE + Mat3.SIZE;
+
+        public Transform() {
+        }
+
+        public float[] toFa_() {
+            return new float[]{
+                p.m00, p.m01, p.m02, p.m03, p.m10, p.m11, p.m12, p.m13,
+                p.m20, p.m21, p.m22, p.m23, p.m30, p.m31, p.m32, p.m33,
+                mv.m00, mv.m01, mv.m02, mv.m03, mv.m10, mv.m11, mv.m12, mv.m13,
+                mv.m20, mv.m21, mv.m22, mv.m23, mv.m30, mv.m31, mv.m32, mv.m33,
+                normal.m00, normal.m01, normal.m02, normal.m10, normal.m11, normal.m12,
+                normal.m20, normal.m21, normal.m22,};
+        }
+    };
 
     private class Light {
 
@@ -63,8 +76,8 @@ public class Gl_320_buffer_uniform extends Test {
             this.position = position;
         }
 
-        public float[] toFloatArray() {
-            return position.toFA(new float[3]);
+        public float[] toFa_() {
+            return position.toFA_();
         }
     }
 
@@ -111,8 +124,6 @@ public class Gl_320_buffer_uniform extends Test {
         0, 1, 2,
         2, 3, 0
     };
-    private int programName, uniformPerDraw, uniformPerPass, uniformPerScene;
-    private int[] vertexArrayName = {0}, bufferName = {0};
 
     private class Buffer {
 
@@ -131,6 +142,9 @@ public class Gl_320_buffer_uniform extends Test {
         public static final int PER_DRAW = 2;
         public static final int LIGHT = 3;
     }
+
+    private int programName, uniformPerDraw, uniformPerPass, uniformPerScene;
+    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -213,7 +227,7 @@ public class Gl_320_buffer_uniform extends Test {
 
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_DRAW]);
-            gl3.glBufferData(GL_UNIFORM_BUFFER, Transform.SIZEOF, null, GL_DYNAMIC_DRAW);
+            gl3.glBufferData(GL_UNIFORM_BUFFER, Transform.SIZE, null, GL_DYNAMIC_DRAW);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
@@ -221,7 +235,7 @@ public class Gl_320_buffer_uniform extends Test {
             Light light = new Light(new Vec3(0.0f, 0.0f, 100.f));
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_PASS]);
-            FloatBuffer lightBuffer = GLBuffers.newDirectFloatBuffer(light.toFloatArray());
+            FloatBuffer lightBuffer = GLBuffers.newDirectFloatBuffer(light.toFa_());
             gl3.glBufferData(GL_UNIFORM_BUFFER, Light.SIZEOF, lightBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(lightBuffer);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -246,12 +260,9 @@ public class Gl_320_buffer_uniform extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false,
-                    Vertex_v3fn3fc4f.SIZEOF, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false,
-                    Vertex_v3fn3fc4f.SIZEOF, Vec3.SIZE);
-            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false,
-                    Vertex_v3fn3fc4f.SIZEOF, 2 * Vec3.SIZE);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, Vertex_v3fn3fc4f.SIZEOF, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false, Vertex_v3fn3fc4f.SIZEOF, Vec3.SIZE);
+            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, Vertex_v3fn3fc4f.SIZEOF, 2 * Vec3.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -271,21 +282,19 @@ public class Gl_320_buffer_uniform extends Test {
         GL3 gl3 = (GL3) gl;
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_DRAW]);
-            ByteBuffer transform = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Transform.SIZEOF,
+            ByteBuffer transform = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Transform.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = new Mat4().perspective((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
             Mat4 view = viewMat4();
             Mat4 model = new Mat4(1.0f).rotate((float) -Math.PI * 0.5f, 0.0f, 0.0f, 1.0f);
 
-            Mat4 mv = view.mul(model);
-            Mat4 p = projection;
-            Mat3 normal = new Mat3(mv.invTransp3(new Mat4()));
+            Transform t = new Transform();
+            t.mv = view.mul(model);
+            t.p = projection;
+            t.normal = new Mat3(t.mv.invTransp3_());
 
-            transform.asFloatBuffer()
-                    .put(p.toFa_())
-                    .put(mv.toFa_())
-                    .put(normal.toFA_());
+            transform.asFloatBuffer().put(t.toFa_());
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);

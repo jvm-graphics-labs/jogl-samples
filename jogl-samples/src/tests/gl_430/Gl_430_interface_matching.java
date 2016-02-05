@@ -9,10 +9,11 @@ import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL3.*;
 import com.jogamp.opengl.GL4;
 import static com.jogamp.opengl.GL4.GL_VERTEX_ATTRIB_ARRAY_LONG;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -67,7 +68,6 @@ public class Gl_430_interface_matching extends Test {
 
     private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX],
             programName = new int[Program.MAX];
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -115,7 +115,7 @@ public class Gl_430_interface_matching extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(mvp.length * Float.BYTES, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -364,8 +364,7 @@ public class Gl_430_interface_matching extends Test {
                     return true;
                 }
             } else// if((VertexAttrib.Normalized == GL_TRUE) || (GL_VERTEX_ATTRIB_ARRAY_FLOAT == GL_TRUE))
-            {
-                if (!(vertexAttrib.type == GL_FLOAT
+             if (!(vertexAttrib.type == GL_FLOAT
                         || vertexAttrib.type == GL_FLOAT_VEC2
                         || vertexAttrib.type == GL_FLOAT_VEC3
                         || vertexAttrib.type == GL_FLOAT_VEC4
@@ -380,7 +379,6 @@ public class Gl_430_interface_matching extends Test {
                         || vertexAttrib.type == GL_FLOAT_MAT4x3)) {
                     return true;
                 } // It could be any vertex array attribute type
-            }
             System.out.println("glGetActiveAttrib(" + i + ", " + attribLocation + ", " + attribLength[0]
                     + ", " + attribSize[0] + ", " + attribType[0] + ", " + nameString + ")");
         }
@@ -398,15 +396,14 @@ public class Gl_430_interface_matching extends Test {
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, mvp.length * Float.BYTES,
+                    GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view(), mvp);
-            FloatUtil.multMatrix(mvp, model);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
+            Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
-            pointer.asFloatBuffer().put(mvp).rewind();
+            pointer.asFloatBuffer().put(mvp.toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);

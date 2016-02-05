@@ -9,7 +9,6 @@ import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2.GL_COMPARE_R_TO_TEXTURE;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;

@@ -8,10 +8,11 @@ package tests.gl_410;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -71,10 +72,9 @@ public class Gl_410_program_separate extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, separateProgramName = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], vertexArrayName = {0}, textureName = {0};
+    private int[] pipelineName = {0}, separateProgramName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
+            vertexArrayName = {0}, textureName = {0};
     private int separateUniformMvp, separateUniformDiffuse, unifiedProgramName, unifiedUniformMvp, unifiedUniformDiffuse;
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -262,11 +262,9 @@ public class Gl_410_program_separate extends Test {
         GL4 gl4 = (GL4) gl;
 
         // Compute the MVP (Model View Projection matrix)
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                windowSize.x * 0.5f / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, windowSize.x * 0.5f / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
 
@@ -276,8 +274,7 @@ public class Gl_410_program_separate extends Test {
 
         // Render with the separate programs
         gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x / 2, windowSize.y}, 0);
-        gl4.glProgramUniformMatrix4fv(separateProgramName[Program.VERTEX],
-                separateUniformMvp, 1, false, mvp, 0);
+        gl4.glProgramUniformMatrix4fv(separateProgramName[Program.VERTEX], separateUniformMvp, 1, false, mvp.toFa_(), 0);
         gl4.glProgramUniform1i(separateProgramName[Program.FRAGMENT], separateUniformDiffuse, 0);
         gl4.glBindProgramPipeline(pipelineName[0]);
         {
@@ -287,7 +284,7 @@ public class Gl_410_program_separate extends Test {
 
         // Render with the unified programs
         gl4.glViewportIndexedfv(0, new float[]{windowSize.x / 2, 0, windowSize.x / 2, windowSize.y}, 0);
-        gl4.glProgramUniformMatrix4fv(unifiedProgramName, unifiedUniformMvp, 1, false, mvp, 0);
+        gl4.glProgramUniformMatrix4fv(unifiedProgramName, unifiedUniformMvp, 1, false, mvp.toFa_(), 0);
         gl4.glProgramUniform1i(unifiedProgramName, unifiedUniformDiffuse, 0);
         gl4.glUseProgram(unifiedProgramName);
         {

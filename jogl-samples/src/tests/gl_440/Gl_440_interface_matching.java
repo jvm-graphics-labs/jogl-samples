@@ -266,7 +266,8 @@ public class Gl_440_interface_matching extends Test {
         for (Vertex_v2fc4d vertex : vertexData) {
             vertexBuffer.put(vertex.toBB_());
         }
-        gl4.glBufferStorage(GL_ARRAY_BUFFER, vertexSize, vertexBuffer.rewind(), 0);
+        vertexBuffer.rewind();
+        gl4.glBufferStorage(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, 0);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = {0};
