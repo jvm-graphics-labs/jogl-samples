@@ -37,7 +37,7 @@ public class Gl_320_fbo_multisample extends Test {
     }
 
     public Gl_320_fbo_multisample() {
-        super("Gl-320-fbo-multisample", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f));
+        super("Gl-320-fbo-multisample", Profile.CORE, 3, 2, new Vec2(Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "fbo-multisample";

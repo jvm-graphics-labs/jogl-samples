@@ -13,6 +13,8 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -22,7 +24,8 @@ import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
+import dev.Vec2;
+import dev.Vec3;
 import jglm.Vec2i;
 
 /**
@@ -105,12 +108,10 @@ public class Gl_400_fbo_shadow extends Test {
     }
 
     private int[] framebufferName = new int[Framebuffer.MAX], programName = new int[Program.MAX],
-            vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
-            textureName = new int[Texture.MAX], uniformTransform = new int[Program.MAX];
+            vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX],
+            uniformTransform = new int[Program.MAX];
     private int uniformShadow;
     private Vec2i shadowSize = new Vec2i(64, 64);
-    private float[] projection = new float[16], view = new float[16], model = new float[16],
-            depthMvp = new float[16], biasMatrix = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -366,40 +367,29 @@ public class Gl_400_fbo_shadow extends Test {
 
         // Update of the MVP matrix for the render pass
         {
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) windowSize.x / windowSize.y, 0.01f, 5.0f);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model);
-
-            for (float f : projection) {
-                pointer.putFloat(f);
-            }
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.01f, 5.0f);
+            Mat4 model = new Mat4(1.0f);
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
         }
 
         // Update of the MVP matrix for the depth pass
         {
-            FloatUtil.makeOrtho(projection, 0, true, -1.0f, 1.0f, -1.0f, 1.0f, -4.0f, 8.0f);
-            FloatUtil.makeLookAt(view, 0, new float[]{0.5f, 1.0f, 2.0f}, 0, new float[]{0, 0, 0}, 0,
-                    new float[]{0, 0, 1}, 0, model);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view, depthMvp);
-            FloatUtil.multMatrix(depthMvp, model);
-            for (float f : depthMvp) {
-                pointer.putFloat(f);
-            }
+            Mat4 projection = glm.ortho_(-1.0f, 1.0f, -1.0f, 1.0f, -4.0f, 8.0f);
+            Mat4 view = glm.lookAt_(new Vec3(0.5, 1.0, 2.0), new Vec3(0), new Vec3(0, 0, 1));
+            Mat4 model = new Mat4(1.0f);
+            Mat4 depthMVP = projection.mul(view).mul(model);
 
-            biasMatrix = new float[]{
-                0.5f, 0.0f, 0.0f, 0.0f,
-                0.0f, 0.5f, 0.0f, 0.0f,
-                0.0f, 0.0f, 0.5f, 0.0f,
-                0.5f, 0.5f, 0.5f, 1.0f};
+            pointer.position(Mat4.SIZE);
+            pointer.asFloatBuffer().put(depthMVP.toFa_());
 
-            FloatUtil.multMatrix(biasMatrix, depthMvp);
+            Mat4 biasMatrix = new Mat4(
+                    0.5f, 0.0f, 0.0f, 0.0f,
+                    0.0f, 0.5f, 0.0f, 0.0f,
+                    0.0f, 0.0f, 0.5f, 0.0f,
+                    0.5f, 0.5f, 0.5f, 1.0f);
 
-            for (float f : biasMatrix) {
-                pointer.putFloat(f);
-            }
+            pointer.position(Mat4.SIZE * 2);
+            pointer.asFloatBuffer().put(biasMatrix.toFa_());
         }
 
         pointer.rewind();

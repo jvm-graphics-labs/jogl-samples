@@ -37,7 +37,7 @@ public class Gl_320_fbo_multisample_explicit extends Test {
     }
 
     public Gl_320_fbo_multisample_explicit() {
-        super("Gl-320-fbo-multisample-explicit", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f));
+        super("Gl-320-fbo-multisample-explicit", Profile.CORE, 3, 2, new Vec2(Math.PI * 0.2f));
     }
 
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";

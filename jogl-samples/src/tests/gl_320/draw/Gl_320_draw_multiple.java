@@ -34,7 +34,7 @@ public class Gl_320_draw_multiple extends Test {
     }
 
     public Gl_320_draw_multiple() {
-        super("gl-320-draw-multiple", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f));
+        super("gl-320-draw-multiple", Profile.CORE, 3, 2, new Vec2(Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "draw-multiple";

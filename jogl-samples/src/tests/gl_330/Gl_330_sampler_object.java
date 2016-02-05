@@ -8,10 +8,12 @@ package tests.gl_330;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec3;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -20,7 +22,6 @@ import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec4i;
 
 /**
  *
@@ -76,7 +77,6 @@ public class Gl_330_sampler_object extends Test {
 
     private int[] vertexArrayName = {0}, bufferName = {0}, textureName = {0}, samplerAname = {0}, samplerBname = {0};
     private int programName, uniformMvp, uniformDiffuseA, uniformDiffuseB;
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -242,17 +242,16 @@ public class Gl_330_sampler_object extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 1000.0f);
-        FloatUtil.makeScale(model, true, 3.0f, 3.0f, 3.0f);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 1000.0f);
+        Mat4 model = new Mat4(1.0f).scale(new Vec3(3.0f));
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.5f, 1.0f, 1.0f}, 0);
 
         // Bind the program for use
         gl3.glUseProgram(programName);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
         gl3.glUniform1i(uniformDiffuseA, 0);
         gl3.glUniform1i(uniformDiffuseB, 1);
 

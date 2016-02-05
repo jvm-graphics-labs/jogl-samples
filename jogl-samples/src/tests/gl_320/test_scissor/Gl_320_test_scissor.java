@@ -39,7 +39,7 @@ public class Gl_320_test_scissor extends Test {
     }
 
     public Gl_320_test_scissor() {
-        super("gl-320-test-scissor", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f));
+        super("gl-320-test-scissor", Profile.CORE, 3, 2, new Vec2(Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "test-scissor";

@@ -8,10 +8,11 @@ package tests.gl_400;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -21,8 +22,9 @@ import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
-import jglm.Vec2i;
+import dev.Vec2;
+import dev.Vec2i;
+import dev.Vec3;
 
 /**
  *
@@ -35,7 +37,7 @@ public class Gl_400_fbo_multisample extends Test {
     }
 
     public Gl_400_fbo_multisample() {
-        super("gl-400-fbo-multisample", Profile.CORE, 4, 0, new Vec2((float) Math.PI * 0.1f, (float) Math.PI * 0.1f));
+        super("gl-400-fbo-multisample", Profile.CORE, 4, 0, new Vec2(Math.PI * 0.1f));
     }
 
     private final String SHADERS_SOURCE = "multisample";
@@ -69,7 +71,6 @@ public class Gl_400_fbo_multisample extends Test {
             multisampleTextureName = {0}, colorTextureName = {0}, samplerName = {0}, framebufferRenderName = {0},
             framebufferResolveName = {0};
     private int programName, uniformMvp, uniformDiffuse;
-    private float[] perspective = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -117,11 +118,12 @@ public class Gl_400_fbo_multisample extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl4);
+            
+            programName = shaderProgram.program();
 
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
 
-            programName = shaderProgram.program();
 
             shaderProgram.link(gl4, System.out);
         }
@@ -259,46 +261,46 @@ public class Gl_400_fbo_multisample extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-//        gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
-//
-//        gl4.glUseProgram(programName);
-//        gl4.glUniform1i(uniformDiffuse, 0);
-//
-//        // Pass 1, render the scene in a multisampled framebuffer
-//        gl4.glEnable(GL_MULTISAMPLE);
-//        gl4.glEnable(GL_SAMPLE_SHADING);
-//        gl4.glMinSampleShading(2.0f);
-//
-//        //glEnable(GL_SAMPLE_MASK);
-//        //glSampleMaski(0, 0xFF);
-//        renderFBO(gl4, framebufferRenderName[0]);
-//        gl4.glDisable(GL_MULTISAMPLE);
-//
-//        // Resolved multisampling
-//        gl4.glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferRenderName[0]);
-//        gl4.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferResolveName[0]);
-//        gl4.glBlitFramebuffer(
-//                0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
-//                0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
-//                GL_COLOR_BUFFER_BIT, GL_NEAREST);
-//        gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-//
-//        // Pass 2, render the colorbuffer from the multisampled framebuffer
-//        gl4.glViewport(0, 0, windowSize.x, windowSize.y);
-//        renderFB(gl4, colorTextureName[0]);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+
+        gl4.glUseProgram(programName);
+        gl4.glUniform1i(uniformDiffuse, 0);
+
+        // Pass 1, render the scene in a multisampled framebuffer
+        gl4.glEnable(GL_MULTISAMPLE);
+        gl4.glEnable(GL_SAMPLE_SHADING);
+        gl4.glMinSampleShading(2.0f);
+
+        //glEnable(GL_SAMPLE_MASK);
+        //glSampleMaski(0, 0xFF);
+        renderFBO(gl4, framebufferRenderName[0]);
+        gl4.glDisable(GL_MULTISAMPLE);
+
+        // Resolved multisampling
+        gl4.glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferRenderName[0]);
+        gl4.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferResolveName[0]);
+        gl4.glBlitFramebuffer(
+                0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
+                0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
+                GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+        // Pass 2, render the colorbuffer from the multisampled framebuffer
+        gl4.glViewport(0, 0, windowSize.x, windowSize.y);
+        renderFB(gl4, colorTextureName[0]);
+
         return true;
     }
 
     private void renderFBO(GL4 gl4, int framebuffer) {
 
-        FloatUtil.makePerspective(perspective, 0, true, (float) Math.PI * 0.25f,
-                (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y, 0.1f, 100.0f);
-        FloatUtil.makeScale(model, true, 1, -1, 1);
-        FloatUtil.multMatrix(perspective, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y,
+                0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f).scale(new Vec3(1, -1, 1));
+        Mat4 mvp = perspective.mul(viewMat4()).mul(model);
 
-        gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl4.glViewport(0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
@@ -313,12 +315,11 @@ public class Gl_400_fbo_multisample extends Test {
 
     private void renderFB(GL4 gl4, int texture2dName) {
 
-        FloatUtil.makePerspective(perspective, 0, true, (float) Math.PI * 0.25f, windowSize.x / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(perspective, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 perspective = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = perspective.mul(viewMat4()).mul(model);
 
-        gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl4.glActiveTexture(GL_TEXTURE0);
         gl4.glBindTexture(GL_TEXTURE_2D, texture2dName);

@@ -30,7 +30,7 @@ public class Gl_330_draw_instanced_array extends Test {
     }
 
     public Gl_330_draw_instanced_array() {
-        super("gl-330-draw-instanced-array", Profile.CORE, 3, 3, new Vec2((float) Math.PI * 0.2f));
+        super("gl-330-draw-instanced-array", Profile.CORE, 3, 3, new Vec2(Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "instanced-array";

@@ -8,10 +8,11 @@ package tests.gl_330;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL3;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -68,7 +69,6 @@ public class Gl_330_texture_rect extends Test {
 
     private int[] vertexArrayName = {0}, bufferName = {0}, textureRectName = {0};
     private int programName, uniformMvp, uniformDiffuse;
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -203,10 +203,9 @@ public class Gl_330_texture_rect extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        //glm::mat4 Projection = glm::perspective(glm::pi<float>() * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-        FloatUtil.makeOrtho(projection, 0, true, -1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, model, mvp);
+        Mat4 projection = glm.ortho_(-1.0f, 1.0f, -1.0f, 1.0f, 1.0f, -1.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(new Mat4(1.0f)).mul(model);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
@@ -214,7 +213,7 @@ public class Gl_330_texture_rect extends Test {
         // Bind the program for use
         gl3.glUseProgram(programName);
         gl3.glUniform1i(uniformDiffuse, 0);
-        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
         gl3.glBindTexture(GL_TEXTURE_RECTANGLE, textureRectName[0]);

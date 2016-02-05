@@ -8,10 +8,12 @@ package tests.gl_400;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec3;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -61,8 +63,6 @@ public class Gl_400_buffer_uniform_array extends Test {
 
     private int[] vertexArrayName = {0}, uniformBufferAlignment = {0}, bufferName = new int[Buffer.MAX];
     private int programName;
-    private float[] projection = new float[16], model0 = new float[16], model1 = new float[16],
-            mvp0 = new float[16], mvp1 = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -195,20 +195,14 @@ public class Gl_400_buffer_uniform_array extends Test {
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, uniformBufferRange, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-            FloatUtil.makeTranslation(model0, true, 1, 0, 0);
-            FloatUtil.makeTranslation(model1, true, -1, 0, 0);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+            Mat4 model0 = new Mat4(1.0f).translate(new Vec3(+1, 0, 0));
+            Mat4 model1 = new Mat4(1.0f).translate(new Vec3(-1, 0, 0));
 
-            FloatUtil.multMatrix(projection, view(), mvp0);
-            FloatUtil.multMatrix(mvp0, model0);
-            FloatUtil.multMatrix(projection, view(), mvp1);
-            FloatUtil.multMatrix(mvp1, model1);
-
-            for (int i = 0; i < 16; i++) {
-                pointer.putFloat(uniformBufferOffset * 0 + i * Float.BYTES, mvp0[i]);
-                pointer.putFloat(uniformBufferOffset * 1 + i * Float.BYTES, mvp1[i]);
-            }
-            pointer.rewind();
+            pointer.position(uniformBufferOffset * 0);
+            pointer.asFloatBuffer().put(projection.mul_(viewMat4()).mul(model0).toFa_());
+            pointer.position(uniformBufferOffset * 1);
+            pointer.asFloatBuffer().put(projection.mul_(viewMat4()).mul(model1).toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);

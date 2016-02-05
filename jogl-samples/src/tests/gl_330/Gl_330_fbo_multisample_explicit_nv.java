@@ -37,7 +37,7 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
     }
 
     public Gl_330_fbo_multisample_explicit_nv() {
-        super("gl-330-fbo-multisample-explicit-nv", Profile.CORE, 3, 3, new Vec2((float) Math.PI * 0.2f));
+        super("gl-330-fbo-multisample-explicit-nv", Profile.CORE, 3, 3, new Vec2(Math.PI * 0.2f));
     }
 
     private final String VERT_SHADER_SOURCE = "multisample-explicit-texture-nv";

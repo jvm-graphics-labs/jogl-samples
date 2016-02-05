@@ -9,10 +9,11 @@ import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2GL3.GL_TEXTURE_LOD_BIAS;
 import static com.jogamp.opengl.GL3ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -69,12 +70,10 @@ public class Gl_400_fbo_layered extends Test {
         public static final int MAX = 2;
     };
 
-    private int[] framebufferName = {0}, vertexArrayName = new int[Program.MAX],
-            programName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
-            textureColorbufferName = {0}, samplerName = {0};
+    private int[] framebufferName = {0}, vertexArrayName = new int[Program.MAX], programName = new int[Program.MAX],
+            bufferName = new int[Buffer.MAX], textureColorbufferName = {0}, samplerName = {0};
     private int uniformMvp, uniformDiffuse, uniformLayer;
     private Vec4i[] viewport = new Vec4i[4];
-    private float[] projection = new float[16], view = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -290,11 +289,10 @@ public class Gl_400_fbo_layered extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        FloatUtil.makeOrtho(projection, 0, true, -1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f);
-        FloatUtil.makeIdentity(view);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view, mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.ortho_(-1.0f, 1.0f, 1.0f, -1.0f, 1.0f, -1.0f);
+        Mat4 view = new Mat4(1.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(view).mul(model);
 
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
@@ -305,7 +303,7 @@ public class Gl_400_fbo_layered extends Test {
             gl4.glViewport(0, 0, windowSize.x / FRAMEBUFFER_SIZE, windowSize.y / FRAMEBUFFER_SIZE);
 
             gl4.glUseProgram(programName[Program.LAYERING]);
-            gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+            gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
             gl4.glBindVertexArray(vertexArrayName[Program.LAYERING]);
             gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);

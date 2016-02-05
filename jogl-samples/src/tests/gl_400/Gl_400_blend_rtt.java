@@ -8,10 +8,12 @@ package tests.gl_400;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec3;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -78,8 +80,6 @@ public class Gl_400_blend_rtt extends Test {
     private int[] framebufferName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX],
             textureName = new int[Texture.MAX], programName = new int[Program.MAX];
     private Vec4i[] viewport = new Vec4i[Texture.MAX];
-    private float[] projection = new float[16], viewTranslate = new float[16], view = new float[16],
-            model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -294,18 +294,17 @@ public class Gl_400_blend_rtt extends Test {
         GL4 gl4 = (GL4) gl;
 
         // Pass 1: Compute the MVP (Model View Projection matrix)
-        FloatUtil.makeOrtho(projection, 0, true, -1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
-        FloatUtil.makeTranslation(viewTranslate, true, 0.0f, 0.0f, 0.0f);
-        view = viewTranslate;
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view, mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.ortho_(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
+        Mat4 viewTranslate = new Mat4(1.0f).translate(new Vec3(0.0f, 0.0f, 0.0f));
+        Mat4 view = viewTranslate;
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(view).mul(model);
 
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
 
         gl4.glUseProgram(programName[Program.COLORBUFFERS]);
-        gl4.glUniformMatrix4fv(uniformMvpMultiple, 1, false, mvp, 0);
+        gl4.glUniformMatrix4fv(uniformMvpMultiple, 1, false, mvp.toFa_(), 0);
 
         gl4.glBindVertexArray(vertexArrayName[0]);
         gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
@@ -318,12 +317,11 @@ public class Gl_400_blend_rtt extends Test {
         gl4.glUniform1i(uniformDiffuseSingle, 0);
 
         {
-            FloatUtil.makeOrtho(projection, 0, true, -1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
-            FloatUtil.makeIdentity(view);
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view, mvp);
-            FloatUtil.multMatrix(mvp, model);
-            gl4.glUniformMatrix4fv(uniformMvpSingle, 1, false, mvp, 0);
+            projection.ortho(-1.0f, 1.0f, 1.0f, -1.0f, -1.0f, 1.0f);
+            view.identity();
+            model.identity();
+            mvp = projection.mul(view).mul(model);
+            gl4.glUniformMatrix4fv(uniformMvpSingle, 1, false, mvp.toFa_(), 0);
         }
 
         for (int i = 0; i < Texture.MAX; ++i) {

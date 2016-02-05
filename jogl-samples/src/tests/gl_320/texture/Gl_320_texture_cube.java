@@ -30,7 +30,7 @@ public class Gl_320_texture_cube extends Test {
     }
 
     public Gl_320_texture_cube() {
-        super("gl-320-texture-cube", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.1f));
+        super("gl-320-texture-cube", Profile.CORE, 3, 2, new Vec2(Math.PI * 0.1f));
     }
 
     private final String SHADERS_SOURCE = "texture-cube";

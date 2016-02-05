@@ -31,7 +31,7 @@ public class Gl_320_texture_buffer extends Test {
     }
 
     public Gl_320_texture_buffer() {
-        super("gl-320-texture-buffer", Profile.CORE, 3, 2, new Vec2((float) Math.PI * 0.2f));
+        super("gl-320-texture-buffer", Profile.CORE, 3, 2, new Vec2(Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "texture-buffer";
