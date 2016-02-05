@@ -1,12 +1,12 @@
 # jogl-samples
 
-The Java OpenGL Samples Pack (called unsurprisingly jogl-samples) is a port of the [OpenGL Samples Pack](http://www.g-truc.net/project-0026.html), a collection of [OpenGL](http://www.opengl.org/) samples based on the OpenGL "core profile" specifications.
+The Java OpenGL Samples Pack (called unsurprisingly jogl-samples  :scream: ) is the java port of the [OpenGL Samples Pack](http://www.g-truc.net/project-0026.html), a collection of [OpenGL](http://www.opengl.org/) samples based on the OpenGL "core profile" specifications.
 
 The project aims to promote the new OpenGL features making easier version transitions for OpenGL programmers with a complementary documentation for the OpenGL specification. Despite the fact that the OpenGL Samples Pack provides as simple (and dumb) as possible samples, it's not a tutorial for beginner but a project for programmers already familiar with OpenGL. The OpenGL Samples Pack is also a good OpenGL drivers feature test.
 
 These samples use [NEWT](http://jogamp.org/jogl/doc/NEWT-Overview.html) to create window and [jogl](http://jogamp.org/jogl/www/) of [Jogamp](http://jogamp.org/) as OpenGL wrapper, [jglm](https://github.com/elect86/Jglm) as math library and to replace OpenGL fixed pipeline functions and [jgli](https://github.com/elect86/jgli) to load images. 
 
-Samples divided per profiles:
+The over 230 samples illustrate almost all OpenGL features ranging from ES 2.0 up to the last GL extenstions, same of them usually also called AZDO (Almost Zero Driver Overhead) and they are divided per profiles:
 
 * [es-200](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/tests/es_200)
 * [es-300](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/tests/es_300)
@@ -23,4 +23,4 @@ Samples divided per profiles:
 * [micro]
 
 
-Ps: Hello Triangle and Hello Texture were moved into a stand-alone [project](https://github.com/elect86/helloTriangle)
+Ps: Hello Triangle and Hello Texture have been moved into a stand-alone [project](https://github.com/elect86/helloTriangle)
