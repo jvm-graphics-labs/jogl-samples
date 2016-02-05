@@ -19,7 +19,7 @@ import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import jgli.TextureCube;
-import jglm.Vec2;
+import dev.Vec2;
 
 /**
  *

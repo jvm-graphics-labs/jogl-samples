@@ -39,8 +39,7 @@ public class Gl_450_direct_state_access extends Test {
     }
 
     public Gl_450_direct_state_access() {
-        super("gl-450-direct-state-access", Profile.CORE, 4, 5, new jglm.Vec2i(640, 480),
-                new jglm.Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-450-direct-state-access", Profile.CORE, 4, 5, new Vec2i(640, 480), new Vec2(Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "direct-state-access";
@@ -390,7 +389,7 @@ public class Gl_450_direct_state_access extends Test {
         gl4.glEnableVertexArrayAttrib(vertexArrayName[0], Semantic.Attr.TEXCOORD);
 
         gl4.glVertexArrayElementBuffer(vertexArrayName[0], bufferName[Buffer.ELEMENT]);
-        gl4.glVertexArrayVertexBuffer(vertexArrayName[0], Semantic.Buffer.STATIC, bufferName[Buffer.VERTEX], 0, 
+        gl4.glVertexArrayVertexBuffer(vertexArrayName[0], Semantic.Buffer.STATIC, bufferName[Buffer.VERTEX], 0,
                 glf.Vertex_v2fv2f.SIZE);
 
         return true;
@@ -424,7 +423,7 @@ public class Gl_450_direct_state_access extends Test {
                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
 
         int[] maxColorAttachment = {GL_COLOR_ATTACHMENT0};
-        gl4.glInvalidateNamedFramebufferData(framebufferName[Framebuffer.RENDER], 1,  maxColorAttachment, 0);
+        gl4.glInvalidateNamedFramebufferData(framebufferName[Framebuffer.RENDER], 1, maxColorAttachment, 0);
 
         // Step 3, render the colorbuffer from the multisampled framebuffer
         renderFB(gl4);
@@ -454,20 +453,19 @@ public class Gl_450_direct_state_access extends Test {
 
         gl4.glDisable(GL_MULTISAMPLE);
     }
-    
-    private void renderFB(GL4 gl4)	{
-        
-	
+
+    private void renderFB(GL4 gl4) {
+
         gl4.glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
         gl4.glClearNamedFramebufferfv(0, GL_COLOR, 0, new float[]{0.0f, 0.5f, 1.0f, 1.0f}, 0);
 
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM], 
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM],
                 uniformBlockSize, uniformBlockSize);
         gl4.glBindTextureUnit(0, textureName[Texture.COLORBUFFER]);
         gl4.glBindVertexArray(vertexArrayName[0]);
 
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
-	}
+    }
 }

@@ -389,7 +389,7 @@ public class Gl_400_fbo_shadow extends Test {
                     0.5f, 0.5f, 0.5f, 1.0f);
 
             pointer.position(Mat4.SIZE * 2);
-            pointer.asFloatBuffer().put(biasMatrix.toFa_());
+            pointer.asFloatBuffer().put(biasMatrix.mul(depthMVP).toFa_());
         }
 
         pointer.rewind();

@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
-import jglm.Vec2;
+import dev.Vec2;
 
 /**
  *
@@ -33,8 +33,7 @@ public class Gl_430_atomic_counter extends Test {
     }
 
     public Gl_430_atomic_counter() {
-        super("gl-430-atomic-counter", Profile.CORE, 4, 3,
-                new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-430-atomic-counter", Profile.CORE, 4, 3, new Vec2(Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "atomic-counter";

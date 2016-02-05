@@ -8,10 +8,11 @@ package tests.gl_400;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL3ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -19,7 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import jgli.Texture2d;
-import jglm.Vec2;
+import dev.Vec2;
 import jglm.Vec2i;
 
 /**
@@ -33,7 +34,7 @@ public class Gl_400_texture_derivative extends Test {
     }
 
     public Gl_400_texture_derivative() {
-        super("gl-400-texture-derivative", Profile.CORE, 4, 0, new Vec2((float) Math.PI * 0.05f, -(float) Math.PI * 0.45f));
+        super("gl-400-texture-derivative", Profile.CORE, 4, 0, new Vec2(Math.PI * 0.05f, -Math.PI * 0.45f));
     }
 
     private final String SHADERS_SOURCE_TEXTURE = "texture-derivative2";
@@ -90,11 +91,9 @@ public class Gl_400_texture_derivative extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] framebufferName = {0}, programName = new int[Program.MAX],
-            vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
-            textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX];
+    private int[] framebufferName = {0}, programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
+            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX];
     private int uniformTransform, uniformUseGrad, uniformFramebufferSize;
-    private float[] projection = new float[16], model = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -345,16 +344,10 @@ public class Gl_400_texture_derivative extends Test {
                     GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-            FloatUtil.makeIdentity(model);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
 
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model);
-
-            for (float f : projection) {
-                pointer.putFloat(f);
-            }
-            pointer.rewind();
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);

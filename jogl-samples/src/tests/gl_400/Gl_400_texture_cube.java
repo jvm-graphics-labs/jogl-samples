@@ -8,10 +8,11 @@ package tests.gl_400;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -20,7 +21,8 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jglm.Vec2;
+import dev.Vec2;
+import dev.Vec3;
 
 /**
  *
@@ -33,7 +35,7 @@ public class Gl_400_texture_cube extends Test {
     }
 
     public Gl_400_texture_cube() {
-        super("gl-400-texture-cube", Profile.CORE, 4, 0, new Vec2((float) Math.PI * 0.1f, (float) Math.PI * 0.1f));
+        super("gl-400-texture-cube", Profile.CORE, 4, 0, new Vec2(Math.PI * 0.1f));
     }
 
     private final String SHADERS_SOURCE = "texture-cube";
@@ -60,17 +62,30 @@ public class Gl_400_texture_cube extends Test {
 
     private class Transform {
 
-        public float[] mvp;
-        public float[] mv;
-        public float[] camera;
+        public Mat4 mvp;
+        public Mat4 mv;
+        public Vec3 camera;
 
-        public static final int SIZEOF = (16 * 2 + 3) * Float.BYTES;
+        public static final int SIZEOF = 2 * Mat4.SIZE + Vec3.SIZE;
+
+        public Transform(Mat4 mvp, Mat4 mv, Vec3 camera) {
+            this.mvp = mvp;
+            this.mv = mv;
+            this.camera = camera;
+        }
+
+        public float[] toFa_() {
+            return new float[]{
+                mvp.m00, mvp.m01, mvp.m02, mvp.m03, mvp.m10, mvp.m11, mvp.m12, mvp.m13,
+                mvp.m20, mvp.m21, mvp.m22, mvp.m23, mvp.m30, mvp.m31, mvp.m32, mvp.m33,
+                mv.m00, mv.m01, mv.m02, mv.m03, mv.m10, mv.m11, mv.m12, mv.m13,
+                mv.m20, mv.m21, mv.m22, mv.m23, mv.m30, mv.m31, mv.m32, mv.m33,
+                camera.x, camera.y, camera.z};
+        }
     };
 
     private int programName;
     private int[] vertexArrayName = {0}, textureName = {0}, samplerName = {0}, bufferName = new int[Buffer.MAX];
-    private float[] projection = new float[16], view = new float[16], model = new float[16],
-            mvp = new float[16], mv = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -232,25 +247,15 @@ public class Gl_400_texture_cube extends Test {
                     GL_UNIFORM_BUFFER, 0, Transform.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) windowSize.x / windowSize.y, 0.1f, 1000.0f);
-            view = view();
-            FloatUtil.makeIdentity(model);
-            FloatUtil.multMatrix(projection, view, mvp);
-            FloatUtil.multMatrix(mvp, model);
-            FloatUtil.multMatrix(view, model, mv);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 1000.0f);
+            Mat4 view = viewMat4();
+            Mat4 model = new Mat4(1.0f);
+            Mat4 mvp = projection.mul(view).mul(model);
+            Mat4 mv = view.mul(model);
 
-            for (float f : mvp) {
-                pointer.putFloat(f);
-            }
-            for (float f : mv) {
-                pointer.putFloat(f);
-            }
-            pointer.putFloat(0.0f);
-            pointer.putFloat(0.0f);
-            pointer.putFloat(-cameraDistance());
+            Transform transform = new Transform(mvp, mv, new Vec3(0.0f, 0.0f, -cameraDistance()));
 
-            pointer.rewind();
+            pointer.asFloatBuffer().put(transform.toFa_());
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);

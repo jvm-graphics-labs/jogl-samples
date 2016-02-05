@@ -13,6 +13,8 @@ import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import core.glm;
 import dev.Mat4;
+import dev.Vec2;
+import dev.Vec2i;
 import dev.Vec3;
 import dev.Vec4;
 import framework.BufferUtils;
@@ -28,8 +30,6 @@ import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
-import jglm.Vec2i;
 
 /**
  *
@@ -42,8 +42,8 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
     }
 
     public Gl_440_multi_draw_indirect_id_arb() {
-        super("gl-440-multi-draw-indirect-id-arb", Profile.CORE, 4, 4, new Vec2i(640, 480),
-                new Vec2(-(float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-440-multi-draw-indirect-id-arb", Profile.CORE, 4, 4, new Vec2i(640, 480), 
+                new Vec2(-Math.PI * 0.2f, Math.PI * 0.2f));
     }
 
     private final String SAMPLE_SHADERS = "multi-draw-indirect-id";
@@ -425,7 +425,7 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
 
         for (int i = 0; i < indirectBufferCount; ++i) {
             gl4.glViewportIndexedfv(0, viewport[i].toFA_(), 0);
-            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i], 
+            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i],
                     DrawElementsIndirectCommand.SIZEOF);
         }
 

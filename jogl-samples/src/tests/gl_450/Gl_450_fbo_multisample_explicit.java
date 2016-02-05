@@ -37,8 +37,7 @@ public class Gl_450_fbo_multisample_explicit extends Test {
     }
 
     public Gl_450_fbo_multisample_explicit() {
-        super("gl-450-fbo-multisample-explicit", Profile.CORE, 4, 5,
-                new jglm.Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-450-fbo-multisample-explicit", Profile.CORE, 4, 5, new Vec2(Math.PI * 0.2f));
     }
 
     private final String VERT_SHADER_SOURCE = "fbo-multisample-explicit";

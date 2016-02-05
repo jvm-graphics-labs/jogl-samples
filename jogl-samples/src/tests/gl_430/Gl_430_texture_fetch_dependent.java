@@ -17,7 +17,7 @@ import framework.Profile;
 import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
-import jglm.Vec2i;
+import dev.Vec2i;
 
 /**
  *

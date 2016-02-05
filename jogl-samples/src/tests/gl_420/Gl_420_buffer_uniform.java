@@ -18,7 +18,7 @@ import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import jglm.Vec2;
+import dev.Vec2;
 
 /**
  *
@@ -31,7 +31,7 @@ public class Gl_420_buffer_uniform extends Test {
     }
 
     public Gl_420_buffer_uniform() {
-        super("gl-420-buffer-uniform", Profile.CORE, 4, 2, new Vec2((float) Math.PI * 0.3f, (float) Math.PI * 0.3f));
+        super("gl-420-buffer-uniform", Profile.CORE, 4, 2, new Vec2(Math.PI * 0.3f));
     }
 
     private final String SHADERS_SOURCE = "buffer-uniform";

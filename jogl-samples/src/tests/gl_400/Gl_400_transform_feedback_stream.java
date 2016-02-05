@@ -12,6 +12,8 @@ import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Test;
 import java.nio.FloatBuffer;
@@ -53,7 +55,6 @@ public class Gl_400_transform_feedback_stream extends Test {
     private int[] feedbackName = {0}, transformArrayBufferName = {0}, transformElementBufferName = {0},
             transformVertexArrayName = {0}, feedbackArrayBufferName = {0}, feedbackVertexArrayName = {0};
     private int transformProgramName, transformUniformMvp, feedbackProgramName;
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -210,11 +211,9 @@ public class Gl_400_transform_feedback_stream extends Test {
         GL4 gl4 = (GL4) gl;
 
         // Compute the MVP (Model View Projection matrix)
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         // Set the display viewport
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
@@ -227,7 +226,7 @@ public class Gl_400_transform_feedback_stream extends Test {
         gl4.glEnable(GL_RASTERIZER_DISCARD);
 
         gl4.glUseProgram(transformProgramName);
-        gl4.glUniformMatrix4fv(transformUniformMvp, 1, false, mvp, 0);
+        gl4.glUniformMatrix4fv(transformUniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl4.glBindVertexArray(transformVertexArrayName[0]);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, transformElementBufferName[0]);

@@ -39,7 +39,7 @@ public class Gl_450_texture_barrier extends Test {
     }
 
     public Gl_450_texture_barrier() {
-        super("gl-450-texture-barrier", Profile.CORE, 4, 5, new jglm.Vec2(0.0f, 0.0f));
+        super("gl-450-texture-barrier", Profile.CORE, 4, 5, new Vec2(0.0f));
     }
 
     private final String SHADERS_SOURCE_TEXTURE = "texture-barrier-blend";

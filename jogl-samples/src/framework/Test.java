@@ -257,15 +257,15 @@ public class Test implements GLEventListener, KeyListener {
                 .rotate(rotationCurrent.x, 0.f, 1.f, 0.f);
     }
 
-//    protected final float[] viewZ() {
-//
-//        FloatUtil.makeTranslation(viewTranslate, true, 0, 0, -translationCurrent.y);
-//        FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec3);
-//        FloatUtil.multMatrix(viewTranslate, viewRotateX, viewRotateX);
-//        FloatUtil.makeRotationAxis(viewRotateY, 0, rotationCurrent.x, 0f, 1f, 0f, tmpVec3);
-//        FloatUtil.multMatrix(viewRotateX, viewRotateY, view);
-//        return view;
-//    }
+    protected final float[] view() {
+
+        FloatUtil.makeTranslation(viewTranslate, true, 0, 0, -translationCurrent.y);
+        FloatUtil.makeRotationAxis(viewRotateX, 0, rotationCurrent.y, 1f, 0f, 0f, tmpVec3);
+        FloatUtil.multMatrix(viewTranslate, viewRotateX, viewRotateX);
+        FloatUtil.makeRotationAxis(viewRotateY, 0, rotationCurrent.x, 0f, 1f, 0f, tmpVec3);
+        FloatUtil.multMatrix(viewRotateX, viewRotateY, view);
+        return view;
+    }
 
     private boolean checkGLVersion() {
 

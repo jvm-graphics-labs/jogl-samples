@@ -8,10 +8,11 @@ package tests.gl_400;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -71,7 +72,6 @@ public class Gl_400_sampler_array_nv extends Test {
     private int[] vertexArrayName = {0}, samplerName = {0}, bufferName = new int[Buffer.MAX],
             textureName = new int[Texture.MAX];
     private int programName, uniformMvp, uniformDiffuseRGB, uniformDiffuseBGR;
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -247,17 +247,15 @@ public class Gl_400_sampler_array_nv extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                (float) windowSize.x / windowSize.y, 0.1f, 1000.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 1000.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
         gl4.glUseProgram(programName);
-        gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
         gl4.glUniform1i(uniformDiffuseRGB, 0);
         gl4.glUniform1i(uniformDiffuseBGR, 1);
 

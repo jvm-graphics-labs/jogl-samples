@@ -35,8 +35,7 @@ public class Gl_450_texture_derivative extends Test {
     }
 
     public Gl_450_texture_derivative() {
-        super("gl-450-texture-derivative", Profile.CORE, 4, 5,
-                new jglm.Vec2((float) Math.PI * 0.05f, -(float) Math.PI * 0.49f));
+        super("gl-450-texture-derivative", Profile.CORE, 4, 5, new Vec2(Math.PI * 0.05f, -Math.PI * 0.49f));
     }
 
     private final String SHADERS_SOURCE_X = "texture-derivative-x";

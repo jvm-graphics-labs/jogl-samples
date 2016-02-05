@@ -14,6 +14,7 @@ import com.jogamp.opengl.util.glsl.ShaderProgram;
 import core.glm;
 import dev.Mat4;
 import dev.Vec2;
+import dev.Vec2i;
 import dev.Vec4;
 import framework.BufferUtils;
 import framework.Caps;
@@ -41,8 +42,8 @@ public class Gl_500_multi_draw_indirect_count_arb extends Test {
     }
 
     public Gl_500_multi_draw_indirect_count_arb() {
-        super("gl-500-multi-draw-indirect-count-arb", Profile.CORE, 4, 5, new jglm.Vec2i(640, 480),
-                new jglm.Vec2(-(float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-500-multi-draw-indirect-count-arb", Profile.CORE, 4, 5, new Vec2i(640, 480),
+                new Vec2(-Math.PI * 0.2f, Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "multi-draw-indirect-count";

@@ -9,8 +9,8 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL4;
 import framework.Profile;
 import framework.Test;
-import jglm.Vec2;
-import jglm.Vec2i;
+import dev.Vec2;
+import dev.Vec2i;
 
 /**
  *
@@ -23,8 +23,7 @@ public class Gl_430_perf_monitor_amd extends Test {
     }
 
     public Gl_430_perf_monitor_amd() {
-        super("gl-430-perf-monitor-amd", Profile.CORE, 4, 3, new Vec2i(640, 480),
-                new Vec2(-(float) Math.PI * 0.2f, -(float) Math.PI * 0.2f));
+        super("gl-430-perf-monitor-amd", Profile.CORE, 4, 3, new Vec2i(640, 480), new Vec2(-Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE_TEXTURE = "fbo-texture-2d";

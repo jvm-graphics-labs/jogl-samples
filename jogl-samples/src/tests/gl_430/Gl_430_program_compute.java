@@ -23,8 +23,8 @@ import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
-import jglm.Vec2i;
+import dev.Vec2;
+import dev.Vec2i;
 
 /**
  *
@@ -37,8 +37,7 @@ public class Gl_430_program_compute extends Test {
     }
 
     public Gl_430_program_compute() {
-        super("gl-430-program-compute", Profile.CORE, 4, 3, new Vec2i(640, 480),
-                new Vec2(-(float) Math.PI * 0.2f, -(float) Math.PI * 0.2f));
+        super("gl-430-program-compute", Profile.CORE, 4, 3, new Vec2i(640, 480), new Vec2(-Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "program-compute";

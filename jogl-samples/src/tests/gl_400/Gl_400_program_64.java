@@ -8,10 +8,11 @@ package tests.gl_400;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4d;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -58,8 +59,6 @@ public class Gl_400_program_64 extends Test {
 
     private int programName, uniformMvp, uniformDiffuse;
     private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0};
-    private float[] projection = new float[16], model = new float[16], view = new float[16], mvpF = new float[16];
-    private double[] mvpD = new double[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -156,22 +155,16 @@ public class Gl_400_program_64 extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        view = view();
-        FloatUtil.multMatrix(projection, view, mvpF);
-        FloatUtil.multMatrix(mvpF, model);
-
-        for (int i = 0; i < mvpF.length; i++) {
-            mvpD[i] = mvpF[i];
-        }
+        Mat4d projection = glm.perspective_(Math.PI * 0.25, (double) windowSize.x / windowSize.y, 0.1, 100.0);
+        Mat4d model = new Mat4d(1.0);
+        Mat4d view = new Mat4d().set(viewMat4());
+        Mat4d mvp = projection.mul(view).mul(model);
 
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
 
         gl4.glUseProgram(programName);
-        gl4.glUniformMatrix4dv(uniformMvp, 1, false, mvpD, 0);
+        gl4.glUniformMatrix4dv(uniformMvp, 1, false, mvp.toDa_(), 0);
         gl4.glUniform4dv(uniformDiffuse, 1, new double[]{1.0, 0.5, 0.0, 1.0}, 0);
 
         gl4.glBindVertexArray(vertexArrayName[0]);

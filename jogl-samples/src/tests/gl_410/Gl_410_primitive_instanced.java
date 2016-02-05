@@ -8,16 +8,17 @@ package tests.gl_410;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL3ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
-import jglm.Vec2;
+import dev.Vec2;
 
 /**
  *
@@ -30,7 +31,7 @@ public class Gl_410_primitive_instanced extends Test {
     }
 
     public Gl_410_primitive_instanced() {
-        super("gl-410-primitive-instanced", Profile.CORE, 4, 1, new Vec2((float) Math.PI * 0.3f, (float) Math.PI * 0.3f));
+        super("gl-410-primitive-instanced", Profile.CORE, 4, 1, new Vec2(Math.PI * 0.3f));
     }
 
     private final String SHADERS_SOURCE = "primitive-instancing";
@@ -69,10 +70,9 @@ public class Gl_410_primitive_instanced extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, programName = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], vertexArrayName = {0};
+    private int[] pipelineName = {0}, programName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
+            vertexArrayName = {0};
     private int uniformMvp, uniformDiffuse;
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -201,14 +201,12 @@ public class Gl_410_primitive_instanced extends Test {
         GL4 gl4 = (GL4) gl;
 
         // Compute the MVP (Model View Projection matrix)
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         // Set the value of uniforms
-        gl4.glProgramUniformMatrix4fv(programName[Program.VERT], uniformMvp, 1, false, mvp, 0);
+        gl4.glProgramUniformMatrix4fv(programName[Program.VERT], uniformMvp, 1, false, mvp.toFa_(), 0);
         gl4.glProgramUniform4fv(programName[Program.FRAG],
                 uniformDiffuse, 1, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 

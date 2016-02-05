@@ -8,10 +8,11 @@ package tests.gl_400;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -22,7 +23,7 @@ import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
+import dev.Vec2;
 
 /**
  *
@@ -35,7 +36,7 @@ public class Gl_400_sampler_array extends Test {
     }
 
     public Gl_400_sampler_array() {
-        super("gl-400-sampler-array", Profile.CORE, 4, 0, new Vec2((float) Math.PI * 0.3f, (float) Math.PI * 0.3f));
+        super("gl-400-sampler-array", Profile.CORE, 4, 0, new Vec2(Math.PI * 0.3f));
     }
 
     private final String SHADERS_SOURCE = "sampler-array";
@@ -74,7 +75,6 @@ public class Gl_400_sampler_array extends Test {
     private int[] vertexArrayName = {0}, samplerName = {0}, bufferName = new int[Buffer.MAX],
             textureName = new int[Texture.MAX];
     private int programName, uniformDiffuseIndex;
-    private float[] projection = new float[16], model = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -273,17 +273,10 @@ public class Gl_400_sampler_array extends Test {
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
                     16 * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                    (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-            FloatUtil.makeIdentity(model);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+            Mat4 model = new Mat4(1.0f);
 
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model);
-
-            for (float f : projection) {
-                pointer.putFloat(f);
-            }
-            pointer.rewind();
+            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
 
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }

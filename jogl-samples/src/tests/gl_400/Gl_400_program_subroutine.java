@@ -8,10 +8,11 @@ package tests.gl_400;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -21,7 +22,7 @@ import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
+import dev.Vec2;
 
 /**
  *
@@ -70,11 +71,9 @@ public class Gl_400_program_subroutine extends Test {
         public static final int MAX = 2;
     }
 
-    private int programName, uniformMvp, uniformDiffuse, uniformRGB8, uniformDXT1,
-            uniformDisplacement;
-    private int[] bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX],
-            vertexArrayName = {0}, indexDXT1 = {0}, indexRGB8 = {0};
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
+    private int programName, uniformMvp, uniformDiffuse, uniformRGB8, uniformDXT1, uniformDisplacement;
+    private int[] bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], vertexArrayName = {0},
+            indexDXT1 = {0}, indexRGB8 = {0};
 
     private boolean initTest(GL4 gl4) {
 
@@ -258,11 +257,9 @@ public class Gl_400_program_subroutine extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
 
@@ -277,7 +274,7 @@ public class Gl_400_program_subroutine extends Test {
         gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DXT1]);
 
         gl4.glUseProgram(programName);
-        gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
         gl4.glUniform1i(uniformRGB8, 0);
         gl4.glUniform1i(uniformDXT1, 1);
 

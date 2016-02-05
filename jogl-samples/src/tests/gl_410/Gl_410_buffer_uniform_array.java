@@ -8,10 +8,12 @@ package tests.gl_410;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
+import dev.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
@@ -64,7 +66,6 @@ public class Gl_410_buffer_uniform_array extends Test {
 
     private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX], uniformBufferAlignment = {0};
     private int programName;
-    private float[] projection = new float[16], model0 = new float[16], model1 = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -178,7 +179,7 @@ public class Gl_410_buffer_uniform_array extends Test {
         BufferUtils.destroyDirectBuffer(instanceBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int uniformBufferSize = Math.max(uniformBufferAlignment[0], projection.length * Float.BYTES) * 2;
+        int uniformBufferSize = Math.max(uniformBufferAlignment[0], Mat4.SIZE) * 2;
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
@@ -204,7 +205,7 @@ public class Gl_410_buffer_uniform_array extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        int uniformBufferOffset = Math.max(uniformBufferAlignment[0], projection.length * Float.BYTES);
+        int uniformBufferOffset = Math.max(uniformBufferAlignment[0], Mat4.SIZE);
         int uniformBufferRange = uniformBufferOffset * 2;
 
         {
@@ -212,17 +213,14 @@ public class Gl_410_buffer_uniform_array extends Test {
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
                     uniformBufferRange, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-            FloatUtil.makeTranslation(model0, true, 1, 0, 0);
-            FloatUtil.makeTranslation(model1, true, -1, 0, 0);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+            Mat4 model0 = new Mat4(1.0f).translate(new Vec3(+1, 0, 0));
+            Mat4 model1 = new Mat4(1.0f).translate(new Vec3(-1, 0, 0));
 
-            FloatUtil.multMatrix(projection, view());
-            FloatUtil.multMatrix(projection, model0, model0);
-            FloatUtil.multMatrix(projection, model1, model1);
-            pointer.asFloatBuffer().put(model0).rewind();
-            for (int i = 0; i < model1.length; i++) {
-                pointer.putFloat(uniformBufferOffset + i * Float.BYTES, model1[i]);
-            }
+            pointer.position(uniformBufferOffset * 0);
+            pointer.asFloatBuffer().put(projection.mul_(viewMat4()).mul(model0).toFa_());
+            pointer.position(uniformBufferOffset * 1);
+            pointer.asFloatBuffer().put(projection.mul_(viewMat4()).mul(model1).toFa_());
             pointer.rewind();
 
             // Make sure the uniform buffer is uploaded
@@ -240,10 +238,9 @@ public class Gl_410_buffer_uniform_array extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
 
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
-        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM],
-                0, model0.length * Float.BYTES);
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM], 0, Mat4.SIZE);
         gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM1, bufferName[Buffer.TRANSFORM],
-                uniformBufferOffset, model1.length * Float.BYTES);
+                uniformBufferOffset, Mat4.SIZE);
 
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 1);

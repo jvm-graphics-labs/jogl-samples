@@ -22,7 +22,7 @@ import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
+import dev.Vec2;
 
 /**
  *
@@ -35,7 +35,7 @@ public class Gl_420_fbo extends Test {
     }
 
     public Gl_420_fbo() {
-        super("gl-420-fbo", Profile.CORE, 4, 2, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-420-fbo", Profile.CORE, 4, 2, new Vec2(Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE_TEXTURE = "fbo-texture-2d";

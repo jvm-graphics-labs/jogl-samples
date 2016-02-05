@@ -222,7 +222,7 @@ public class Gl_400_fbo_multisample extends Test {
         gl4.glGenTextures(1, colorTextureName, 0);
         gl4.glBindTexture(GL_TEXTURE_2D, colorTextureName[0]);
         gl4.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, 0);
+                GL_RGBA, GL_UNSIGNED_BYTE, null);
 
         gl4.glGenFramebuffers(1, framebufferResolveName, 0);
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferResolveName[0]);

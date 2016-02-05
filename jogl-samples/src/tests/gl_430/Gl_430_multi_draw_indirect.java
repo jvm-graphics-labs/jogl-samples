@@ -25,8 +25,8 @@ import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec2;
-import jglm.Vec2i;
+import dev.Vec2;
+import dev.Vec2i;
 import jglm.Vec4i;
 
 /**
@@ -40,8 +40,8 @@ public class Gl_430_multi_draw_indirect extends Test {
     }
 
     public Gl_430_multi_draw_indirect() {
-        super("gl-430-multi-draw-indirect", Profile.CORE, 4, 3, new Vec2i(640, 480),
-                new Vec2(-(float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-430-multi-draw-indirect", Profile.CORE, 4, 3, new Vec2i(640, 480), 
+                new Vec2(-Math.PI * 0.2f, Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "multi-draw-indirect";

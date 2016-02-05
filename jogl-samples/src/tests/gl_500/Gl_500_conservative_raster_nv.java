@@ -22,6 +22,7 @@ import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import dev.Mat4;
+import dev.Vec2;
 import dev.Vec4;
 import framework.Caps;
 import framework.Profile;
@@ -40,7 +41,7 @@ public class Gl_500_conservative_raster_nv extends Test {
     }
 
     public Gl_500_conservative_raster_nv() {
-        super("gl-500-conservative-raster-nv", Profile.CORE, 4, 5, new jglm.Vec2((float) Math.PI * 0.25f, (float) Math.PI * 0.25f));
+        super("gl-500-conservative-raster-nv", Profile.CORE, 4, 5, new Vec2(Math.PI * 0.25f));
     }
 
     private final String SHADERS_SOURCE_TEXTURE = "conservative-raster";

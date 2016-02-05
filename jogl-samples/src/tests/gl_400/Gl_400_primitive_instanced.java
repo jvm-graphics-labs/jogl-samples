@@ -8,16 +8,17 @@ package tests.gl_400;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL3ES3.*;
 import com.jogamp.opengl.GL4;
-import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import core.glm;
+import dev.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import jglm.Vec2;
+import dev.Vec2;
 
 /**
  *
@@ -30,7 +31,7 @@ public class Gl_400_primitive_instanced extends Test {
     }
 
     public Gl_400_primitive_instanced() {
-        super("gl-400-primitive-instanced", Profile.CORE, 4, 0, new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-400-primitive-instanced", Profile.CORE, 4, 0, new Vec2(Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE = "primitive-instancing";
@@ -59,7 +60,6 @@ public class Gl_400_primitive_instanced extends Test {
 
     private int programName, uniformMvp, uniformDiffuse;
     private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0};
-    private float[] projection = new float[16], model = new float[16], mvp = new float[16];
 
     @Override
     protected boolean begin(GL gl) {
@@ -158,11 +158,9 @@ public class Gl_400_primitive_instanced extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        FloatUtil.makePerspective(projection, 0, true, (float) Math.PI * 0.25f,
-                (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-        FloatUtil.makeIdentity(model);
-        FloatUtil.multMatrix(projection, view(), mvp);
-        FloatUtil.multMatrix(mvp, model);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
 
@@ -171,7 +169,7 @@ public class Gl_400_primitive_instanced extends Test {
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
         gl4.glUseProgram(programName);
-        gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp, 0);
+        gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
         gl4.glUniform4fv(uniformDiffuse, 1, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
         gl4.glBindVertexArray(vertexArrayName[0]);

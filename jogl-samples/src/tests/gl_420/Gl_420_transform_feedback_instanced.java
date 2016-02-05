@@ -18,7 +18,7 @@ import framework.Semantic;
 import framework.Test;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import jglm.Vec2;
+import dev.Vec2;
 
 /**
  *
@@ -31,8 +31,7 @@ public class Gl_420_transform_feedback_instanced extends Test {
     }
 
     public Gl_420_transform_feedback_instanced() {
-        super("gl-420-transform-feedback-instanced", Profile.CORE, 4, 2,
-                new Vec2((float) Math.PI * 0.2f, (float) Math.PI * 0.2f));
+        super("gl-420-transform-feedback-instanced", Profile.CORE, 4, 2, new Vec2(Math.PI * 0.2f));
     }
 
     private final String SHADERS_SOURCE_TRANSFORM = "transform-stream";

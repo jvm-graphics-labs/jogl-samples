@@ -35,8 +35,7 @@ public class Gl_430_direct_state_access_ext extends Test {
     }
 
     public Gl_430_direct_state_access_ext() {
-        super("gl-430-direct-state-access-ext", Profile.CORE, 4, 3, new Vec2i(640, 480),
-                new Vec2((float) Math.PI * 0.1f, (float) Math.PI * 0.1f));
+        super("gl-430-direct-state-access-ext", Profile.CORE, 4, 3, new Vec2i(640, 480), new Vec2(Math.PI * 0.1f));
     }
 
     private final String SHADERS_SOURCE = "direct-state-access";
