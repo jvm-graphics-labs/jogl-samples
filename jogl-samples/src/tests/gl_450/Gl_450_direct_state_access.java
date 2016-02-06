@@ -11,8 +11,8 @@ import static com.jogamp.opengl.GL4.*;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import core.glm;
-import dev.Mat4;
+import glm.glm;
+import glm.mat._4.Mat4;
 import dev.Vec2i;
 import framework.BufferUtils;
 import framework.Profile;
@@ -25,7 +25,7 @@ import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Target;
-import dev.Vec2;
+import glm.vec._2.Vec2;
 import dev.Vec3;
 
 /**

@@ -9,7 +9,7 @@ import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL4;
 import framework.Profile;
 import framework.Test;
-import dev.Vec2;
+import glm.vec._2.Vec2;
 import dev.Vec2i;
 
 /**

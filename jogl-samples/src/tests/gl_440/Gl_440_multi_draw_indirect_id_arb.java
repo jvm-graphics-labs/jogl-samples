@@ -11,9 +11,9 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import core.glm;
-import dev.Mat4;
-import dev.Vec2;
+import glm.glm;
+import glm.mat._4.Mat4;
+import glm.vec._2.Vec2;
 import dev.Vec2i;
 import dev.Vec3;
 import dev.Vec4;
@@ -60,7 +60,7 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
         0, 2, 3};
 
     private int vertexCount = 11;
-    private int vertexSize = vertexCount * 2 * dev.Vec2.SIZE;
+    private int vertexSize = vertexCount * 2 * Vec2.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ 0.0f, 1.0f,
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,

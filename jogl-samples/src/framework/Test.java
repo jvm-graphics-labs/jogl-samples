@@ -23,7 +23,7 @@ import com.jogamp.opengl.GLEventListener;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.Animator;
 import com.jogamp.opengl.util.GLBuffers;
-import dev.Mat4;
+import glm.mat._4.Mat4;
 import static framework.Profile.ES;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -32,7 +32,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import javax.imageio.ImageIO;
-import dev.Vec2;
+import glm.vec._2.Vec2;
 import dev.Vec2i;
 import dev.Vec3;
 

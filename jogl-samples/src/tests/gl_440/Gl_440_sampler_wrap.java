@@ -43,9 +43,9 @@ import static com.jogamp.opengl.GL4.GL_MIRROR_CLAMP_TO_EDGE;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import core.glm;
-import dev.Mat4;
-import dev.Vec2;
+import glm.glm;
+import glm.mat._4.Mat4;
+import glm.vec._2.Vec2;
 import dev.Vec4;
 import framework.BufferUtils;
 import framework.Profile;
@@ -78,7 +78,7 @@ public class Gl_440_sampler_wrap extends Test {
 
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * 2 * dev.Vec2.SIZE;
+    private int vertexSize = vertexCount * 2 * Vec2.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ -2.0f, +2.0f,
         +1.0f, -1.0f,/**/ +2.0f, +2.0f,

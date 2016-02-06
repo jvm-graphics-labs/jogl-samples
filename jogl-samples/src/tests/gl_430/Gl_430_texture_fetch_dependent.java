@@ -11,7 +11,7 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import core.glm;
+import glm.glm;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Test;

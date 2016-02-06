@@ -11,14 +11,14 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import core.glm;
-import dev.Mat4;
+import glm.glm;
+import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import dev.Vec2;
+import glm.vec._2.Vec2;
 
 /**
  *

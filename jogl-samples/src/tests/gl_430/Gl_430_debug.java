@@ -11,7 +11,7 @@ import static com.jogamp.opengl.GLES2.GL_VERTEX_ARRAY;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import dev.Mat4;
+import glm.mat._4.Mat4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;

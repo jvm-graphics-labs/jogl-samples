@@ -10,7 +10,7 @@ import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import dev.Vec2;
+import glm.vec._2.Vec2;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;

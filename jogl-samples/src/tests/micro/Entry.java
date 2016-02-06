@@ -5,7 +5,7 @@
  */
 package tests.micro;
 
-import dev.Vec2;
+import glm.vec._2.Vec2;
 import dev.Vec2i;
 
 /**
