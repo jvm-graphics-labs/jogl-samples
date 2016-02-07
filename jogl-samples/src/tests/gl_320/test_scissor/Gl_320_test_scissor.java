@@ -23,8 +23,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
 import glm.vec._2.Vec2;
-import dev.Vec3;
-import dev.Vec4;
+import glm.vec._3.Vec3;
+import glm.vec._4.Vec4;
 
 /**
  *
@@ -223,8 +223,8 @@ public class Gl_320_test_scissor extends Test {
                         projection,
                         new Vec4(0, 0, windowSize.x, windowSize.y));
 
-                minScissor = glm.min_(minScissor, projected);
-                maxScissor = glm.max_(maxScissor, projected);
+                minScissor.min(projected);
+                maxScissor.max(projected);
             }
         }
 

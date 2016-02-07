@@ -15,6 +15,7 @@ import framework.Glm;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._4.Vec4;
 import java.nio.FloatBuffer;
 import jglm.Vec3;
 
@@ -127,6 +128,7 @@ public class Gl_320_texture_3d extends Test {
                 for (int i = 0; i < size; ++i) {
                     data.put(i + j * size + k * size * size,
                             Glm.simplex(Glm.div(new float[]{i, j, k, 0.0f}, size / 8 - 1)));
+//                            new Vec4(i, j, k, 0.0f).div(size / 8 - 1).simplex_());
                 }
             }
         }

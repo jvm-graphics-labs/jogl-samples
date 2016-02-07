@@ -27,7 +27,7 @@ import java.util.logging.Logger;
 import jgli.Gl;
 import jgli.Load;
 import dev.Vec2i;
-import dev.Vec4;
+import glm.vec._4.Vec4;
 import glf.Vertex_v2fv2f;
 
 /**

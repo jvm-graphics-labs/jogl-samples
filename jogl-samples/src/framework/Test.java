@@ -34,7 +34,7 @@ import java.nio.ByteBuffer;
 import javax.imageio.ImageIO;
 import glm.vec._2.Vec2;
 import dev.Vec2i;
-import dev.Vec3;
+import glm.vec._3.Vec3;
 
 /**
  *

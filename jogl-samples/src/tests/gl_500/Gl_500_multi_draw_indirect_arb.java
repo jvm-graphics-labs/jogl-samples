@@ -15,7 +15,7 @@ import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._2.Vec2;
 import dev.Vec2i;
-import dev.Vec4;
+import glm.vec._4.Vec4;
 import framework.BufferUtils;
 import framework.Caps;
 import framework.DrawElementsIndirectCommand;

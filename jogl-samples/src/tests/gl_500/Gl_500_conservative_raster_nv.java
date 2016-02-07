@@ -23,7 +23,7 @@ import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import glm.mat._4.Mat4;
 import glm.vec._2.Vec2;
-import dev.Vec4;
+import glm.vec._4.Vec4;
 import framework.Caps;
 import framework.Profile;
 import framework.Test;

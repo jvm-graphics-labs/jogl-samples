@@ -21,7 +21,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import jgli.Texture2d;
 import glm.vec._2.Vec2;
-import dev.Vec3;
+import glm.vec._3.Vec3;
 
 /**
  *

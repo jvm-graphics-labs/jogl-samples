@@ -24,7 +24,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
 import glm.vec._2.Vec2;
-import dev.Vec3;
+import glm.vec._3.Vec3;
 import jglm.Vec2i;
 
 /**
