@@ -17,10 +17,12 @@ import com.jogamp.opengl.util.glsl.ShaderProgram;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.BufferUtils;
-import framework.Glm;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v4fc4f;
+import glm.vec._2.Vec2;
+import glm.vec._4.Vec4;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
@@ -43,27 +45,17 @@ public class Gl_320_fbo_blend_points extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/fbo";
 
     private int vertexCount = 8;
-    private int vertexSize = vertexCount * 2 * 4 * Float.BYTES;
+    private int vertexSize = vertexCount * glf.Vertex_v4fc4f.SIZE;
     private float scale = 0.2f;
-    private float[] vertexData = new float[vertexCount * 2 * 4];
-    private float[][] vertexV2f = {
-        {-1.0f, -1.0f},
-        {+1.0f, -1.0f},
-        {+1.0f, +1.0f},
-        {-1.0f, +1.0f},
-        {+1.0f, +0.0f},
-        {+0.0f, +1.0f},
-        {-1.0f, +0.0f},
-        {+0.0f, -1.0f}};
-    private float[][] vertexV4f = {
-        {1.0f, 0.5f, 0.0f, 1.0f},
-        {0.0f, 1.0f, 0.5f, 1.0f},
-        {0.5f, 0.0f, 1.0f, 1.0f},
-        {1.0f, 0.0f, 0.5f, 1.0f},
-        {0.5f, 1.0f, 0.0f, 1.0f},
-        {0.0f, 0.5f, 1.0f, 1.0f},
-        {0.4f, 0.6f, 0.5f, 1.0f},
-        {0.5f, 0.4f, 0.6f, 1.0f}};
+    private glf.Vertex_v4fc4f[] vertexData = new glf.Vertex_v4fc4f[]{
+        new Vertex_v4fc4f(new Vec4(new Vec2(-1.0f, -1.0f).normalize().mul(scale), 0.0f, 1.0f), new Vec4(1.0f, 0.5f, 0.0f, 1.0f)),
+        new Vertex_v4fc4f(new Vec4(new Vec2(+1.0f, -1.0f).normalize().mul(scale), 0.0f, 1.0f), new Vec4(0.0f, 1.0f, 0.5f, 1.0f)),
+        new Vertex_v4fc4f(new Vec4(new Vec2(+1.0f, +1.0f).normalize().mul(scale), 0.0f, 1.0f), new Vec4(0.5f, 0.0f, 1.0f, 1.0f)),
+        new Vertex_v4fc4f(new Vec4(new Vec2(-1.0f, +1.0f).normalize().mul(scale), 0.0f, 1.0f), new Vec4(1.0f, 0.0f, 0.5f, 1.0f)),
+        new Vertex_v4fc4f(new Vec4(new Vec2(+1.0f, +0.0f).normalize().mul(scale), 0.0f, 1.0f), new Vec4(0.5f, 1.0f, 0.0f, 1.0f)),
+        new Vertex_v4fc4f(new Vec4(new Vec2(+0.0f, +1.0f).normalize().mul(scale), 0.0f, 1.0f), new Vec4(0.0f, 0.5f, 1.0f, 1.0f)),
+        new Vertex_v4fc4f(new Vec4(new Vec2(-1.0f, +0.0f).normalize().mul(scale), 0.0f, 1.0f), new Vec4(0.4f, 0.6f, 0.5f, 1.0f)),
+        new Vertex_v4fc4f(new Vec4(new Vec2(+0.0f, -1.0f).normalize().mul(scale), 0.0f, 1.0f), new Vec4(0.5f, 0.4f, 0.6f, 1.0f))};
 
     private class Buffer {
 
@@ -106,7 +98,15 @@ public class Gl_320_fbo_blend_points extends Test {
         boolean validated = true;
 
         gl3.glEnable(GL_PROGRAM_POINT_SIZE);
-        gl3.glEnable(GL_POINT_SPRITE);
+        /**
+         * Strange, I remember I had to enable it to get it working, but if I do it now I get
+         *
+         * type Error
+         * severity High: dangerous undefined behavior
+         * source GL API
+         * msg GL_INVALID_ENUM error generated. Cannot enable <cap> in the current profile.
+         */
+//        gl3.glEnable(GL_POINT_SPRITE);
         gl3.glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
 
         float[] pointSizeProperties = new float[3];
@@ -201,16 +201,11 @@ public class Gl_320_fbo_blend_points extends Test {
         gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        for (int vertex = 0; vertex < vertexCount; vertex++) {
-            float[] normalized = Glm.normalize(vertexV2f[vertex]);
-            for (int i = 0; i < normalized.length; i++) {
-                vertexData[vertex * 2 * 4 + i] = normalized[i] * scale;
-                vertexData[vertex * 2 * 4 + 2 + i] = i;
-                vertexData[vertex * 2 * 4 + 4 + i] = vertexV4f[vertex][i];
-                vertexData[vertex * 2 * 4 + 4 + 2 + i] = vertexV4f[vertex][2 + i];
-            }
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexSize);
+        for (Vertex_v4fc4f vertex : vertexData) {
+            vertexBuffer.put(vertex.toFa_());
         }
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        vertexBuffer.rewind();
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);

@@ -19,6 +19,7 @@ import framework.Glm;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -48,12 +49,12 @@ public class Gl_320_fbo_depth_stencil extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgb_dxt1_unorm.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * 2 * Vec2.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -94,9 +95,8 @@ public class Gl_320_fbo_depth_stencil extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX], 
-            framebufferName = {0};
+    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX], framebufferName = {0},
+            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX];
     private int framebufferScale = 2, uniformTransform;
 
     @Override
@@ -281,8 +281,8 @@ public class Gl_320_fbo_depth_stencil extends Test {
         gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Vec2.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Vec2.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -303,8 +303,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
         gl3.glGenFramebuffers(1, framebufferName, 0);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
         gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT,
-                textureName[Texture.RENDERBUFFER], 0);
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, textureName[Texture.RENDERBUFFER], 0);
 
         if (!isFramebufferComplete(gl3, framebufferName[0])) {
             return false;
@@ -328,10 +327,10 @@ public class Gl_320_fbo_depth_stencil extends Test {
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, uniformBufferOffsetAlignment[0] * 2,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            Mat4 projection = glm.perspective_((float)Math.PI * 0.25f,(float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
 
             pointer.asFloatBuffer().put(projection.mul_(viewMat4()).scale(new Vec3(1.00f)).toFa_());
-            pointer.position(uniformBufferOffsetAlignment[0]*1);
+            pointer.position(uniformBufferOffsetAlignment[0] * 1);
             pointer.asFloatBuffer().put(projection.mul(viewMat4()).scale(new Vec3(1.05f)).toFa_());
             pointer.rewind();
 

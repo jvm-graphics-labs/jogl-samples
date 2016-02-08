@@ -16,11 +16,13 @@ import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._2.Vec2;
 import dev.Vec2i;
+import dev.Vec4u8;
 import glm.vec._3.Vec3;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v3fv4u8;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
@@ -48,26 +50,16 @@ public class Gl_320_fbo_shadow extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgb_dxt1_unorm.dds";
 
     private int vertexCount = 8;
-    private int vertexSize = vertexCount * (3 * Float.BYTES + 4 * Byte.BYTES);
-    private float[] vertexV3fData = {
-        -1.0f, -1.0f, 0.0f,
-        +1.0f, -1.0f, 0.0f,
-        +1.0f, +1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f,
-        -0.1f, -0.1f, 0.2f,
-        +0.1f, -0.1f, 0.2f,
-        +0.1f, +0.1f, 0.2f,
-        -0.1f, +0.1f, 0.2f};
-    private byte[] vertexV4u8Data = {
-        (byte) 255, (byte) 127, (byte) 0, (byte) 255,
-        (byte) 255, (byte) 127, (byte) 0, (byte) 255,
-        (byte) 255, (byte) 127, (byte) 0, (byte) 255,
-        (byte) 255, (byte) 127, (byte) 0, (byte) 255,
-        (byte) 0, (byte) 127, (byte) 255, (byte) 255,
-        (byte) 0, (byte) 127, (byte) 255, (byte) 255,
-        (byte) 0, (byte) 127, (byte) 255, (byte) 255,
-        (byte) 0, (byte) 127, (byte) 255, (byte) 255};
-    private byte[] vertexData = new byte[vertexSize];
+    private int vertexSize = vertexCount * glf.Vertex_v3fv4u8.SIZE;
+    private glf.Vertex_v3fv4u8[] vertexData = {
+        new Vertex_v3fv4u8(new Vec3(-1.0f, -1.0f, 0.0f), new Vec4u8((byte) 255, (byte) 127, (byte) 0, (byte) 255)),
+        new Vertex_v3fv4u8(new Vec3(+1.0f, -1.0f, 0.0f), new Vec4u8((byte) 255, (byte) 127, (byte) 0, (byte) 255)),
+        new Vertex_v3fv4u8(new Vec3(+1.0f, +1.0f, 0.0f), new Vec4u8((byte) 255, (byte) 127, (byte) 0, (byte) 255)),
+        new Vertex_v3fv4u8(new Vec3(-1.0f, +1.0f, 0.0f), new Vec4u8((byte) 255, (byte) 127, (byte) 0, (byte) 255)),
+        new Vertex_v3fv4u8(new Vec3(-0.1f, -0.1f, 0.2f), new Vec4u8((byte) 0, (byte) 127, (byte) 255, (byte) 255)),
+        new Vertex_v3fv4u8(new Vec3(+0.1f, -0.1f, 0.2f), new Vec4u8((byte) 0, (byte) 127, (byte) 255, (byte) 255)),
+        new Vertex_v3fv4u8(new Vec3(+0.1f, +0.1f, 0.2f), new Vec4u8((byte) 0, (byte) 127, (byte) 255, (byte) 255)),
+        new Vertex_v3fv4u8(new Vec3(-0.1f, +0.1f, 0.2f), new Vec4u8((byte) 0, (byte) 127, (byte) 255, (byte) 255))};
 
     private int elementCount = 12;
     private int elementSize = elementCount * Short.BYTES;
@@ -85,26 +77,10 @@ public class Gl_320_fbo_shadow extends Test {
         public static final int MAX = 3;
     }
 
-    private class Texture {
-
-        public static final int DIFFUSE = 0;
-        public static final int COLORBUFFER = 1;
-        public static final int RENDERBUFFER = 2;
-        public static final int SHADOWMAP = 3;
-        public static final int MAX = 4;
-    }
-
     private class Program {
 
         public static final int DEPTH = 0;
         public static final int RENDER = 1;
-        public static final int MAX = 2;
-    }
-
-    private class Framebuffer {
-
-        public static final int FRAMEBUFFER = 0;
-        public static final int SHADOW = 1;
         public static final int MAX = 2;
     }
 
@@ -116,9 +92,8 @@ public class Gl_320_fbo_shadow extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] framebufferName = new int[Framebuffer.MAX], programName = new int[Program.MAX],
-            vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX],
-            uniformTransform = new int[Program.MAX];
+    private int[] framebufferName = {0}, programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
+            bufferName = new int[Buffer.MAX], textureName = {0}, uniformTransform = new int[Program.MAX];
     private int uniformShadow;
     private Vec2i shadowSize = new Vec2i(64, 64);
 
@@ -222,9 +197,8 @@ public class Gl_320_fbo_shadow extends Test {
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
-        for (int v = 0; v < vertexCount; v++) {
-            vertexBuffer.putFloat(vertexV3fData[v * 3 + 0]).putFloat(vertexV3fData[v * 3 + 1])
-                    .putFloat(vertexV3fData[v * 3 + 2]).put(vertexV4u8Data, v * 4, 4);
+        for (Vertex_v3fv4u8 vertex : vertexData) {
+            vertexBuffer.put(vertex.toBB_());
         }
         vertexBuffer.rewind();
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
@@ -246,68 +220,25 @@ public class Gl_320_fbo_shadow extends Test {
 
         boolean validated = true;
 
-        try {
+        gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
-            assert (!texture.empty());
+        gl3.glGenTextures(1, textureName, 0);
 
-            gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+        gl3.glActiveTexture(GL_TEXTURE0);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
+        gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
+        gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
+        gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
+        gl3.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, shadowSize.x, shadowSize.y, 0, GL_DEPTH_COMPONENT, 
+                GL_FLOAT, null);
 
-            gl3.glGenTextures(Texture.MAX, textureName, 0);
+        gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
-            gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-            for (int level = 0; level < texture.levels(); ++level) {
-                gl3.glCompressedTexImage2D(
-                        GL_TEXTURE_2D,
-                        level,
-                        GL_COMPRESSED_RGB_S3TC_DXT1_EXT,
-                        texture.dimensions(level)[0],
-                        texture.dimensions(level)[1],
-                        0,
-                        texture.size(level),
-                        texture.data(level));
-            }
-
-            gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-            gl3.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, windowSize.x, windowSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
-
-            gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RENDERBUFFER]);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-            gl3.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, windowSize.x, windowSize.y,
-                    0, GL_DEPTH_COMPONENT, GL_FLOAT, null);
-
-            gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.SHADOWMAP]);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_COMPARE_MODE, GL_COMPARE_R_TO_TEXTURE);
-            gl3.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, shadowSize.x, shadowSize.y,
-                    0, GL_DEPTH_COMPONENT, GL_FLOAT, null);
-
-            gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-
-            return validated;
-        } catch (IOException ex) {
-            Logger.getLogger(Gl_320_fbo_shadow.class.getName()).log(Level.SEVERE, null, ex);
-        }
         return validated;
     }
 
@@ -334,21 +265,12 @@ public class Gl_320_fbo_shadow extends Test {
 
     private boolean initFramebuffer(GL3 gl3) {
 
-        gl3.glGenFramebuffers(Framebuffer.MAX, framebufferName, 0);
-
-        int[] buffersRender = new int[]{GL_COLOR_ATTACHMENT0};
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.FRAMEBUFFER]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.RENDERBUFFER], 0);
-        gl3.glDrawBuffers(1, buffersRender, 0);
-        if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.FRAMEBUFFER])) {
-            return false;
-        }
-
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.SHADOW]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.SHADOWMAP], 0);
+        gl3.glGenFramebuffers(1, framebufferName, 0);
+        
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[0], 0);
         gl3.glDrawBuffer(GL_NONE);
-        if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.SHADOW])) {
+        if (!isFramebufferComplete(gl3, framebufferName[0])) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -415,7 +337,7 @@ public class Gl_320_fbo_shadow extends Test {
 
         gl3.glViewport(0, 0, shadowSize.x, shadowSize.y);
 
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.SHADOW]);
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
         float[] depth = {1.0f};
         gl3.glClearBufferfv(GL_DEPTH, 0, depth, 0);
 
@@ -455,7 +377,7 @@ public class Gl_320_fbo_shadow extends Test {
                 Semantic.Uniform.TRANSFORM0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.SHADOWMAP]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
 
         gl3.glBindVertexArray(vertexArrayName[Program.RENDER]);
         gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
@@ -474,9 +396,9 @@ public class Gl_320_fbo_shadow extends Test {
             gl3.glDeleteProgram(programName[i]);
         }
 
-        gl3.glDeleteFramebuffers(Framebuffer.MAX, framebufferName, 0);
+        gl3.glDeleteFramebuffers(1, framebufferName, 0);
         gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
-        gl3.glDeleteTextures(Texture.MAX, textureName, 0);
+        gl3.glDeleteTextures(1, textureName, 0);
         gl3.glDeleteVertexArrays(Program.MAX, vertexArrayName, 0);
 
         return checkError(gl3, "end");

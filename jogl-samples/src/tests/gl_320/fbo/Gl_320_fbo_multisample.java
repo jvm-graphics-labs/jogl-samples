@@ -48,14 +48,14 @@ public class Gl_320_fbo_multisample extends Test {
 
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     int vertexCount = 6;
-    int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    int vertexSize = vertexCount * 2 * Vec2.SIZE;
     float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f,
-        -1.0f, -1.0f, 0.0f, 1.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f,
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f};
 
     private class Texture {
 
@@ -80,8 +80,8 @@ public class Gl_320_fbo_multisample extends Test {
     }
 
     private int[] textureName = new int[Texture.MAX], framebufferName = new int[Framebuffer.MAX], vertexArrayName = {0},
-            bufferName = {0}, programName = {0};
-    private int uniformMvp, uniformDiffuse;
+            bufferName = {0};
+    private int programName, uniformMvp, uniformDiffuse;
 
     @Override
     protected boolean begin(GL gl) {
@@ -113,8 +113,6 @@ public class Gl_320_fbo_multisample extends Test {
 
         boolean validated = true;
 
-        ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
-
         if (validated) {
 
             ShaderCode vertexShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER,
@@ -128,19 +126,19 @@ public class Gl_320_fbo_multisample extends Test {
 
             program.init(gl3);
 
-            programName[0] = program.program();
+            programName = program.program();
 
-            gl3.glBindAttribLocation(programName[0], Semantic.Attr.POSITION, "position");
-            gl3.glBindAttribLocation(programName[0], Semantic.Attr.TEXCOORD, "texCoord");
-            gl3.glBindFragDataLocation(programName[0], Semantic.Frag.COLOR, "color");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.TEXCOORD, "texCoord");
+            gl3.glBindFragDataLocation(programName, Semantic.Frag.COLOR, "color");
 
             program.link(gl3, System.out);
         }
 
         if (validated) {
 
-            uniformMvp = gl3.glGetUniformLocation(programName[0], "mvp");
-            uniformDiffuse = gl3.glGetUniformLocation(programName[0], "diffuse");
+            uniformMvp = gl3.glGetUniformLocation(programName, "mvp");
+            uniformDiffuse = gl3.glGetUniformLocation(programName, "diffuse");
         }
         return validated & checkError(gl3, "initProgram");
     }
@@ -238,8 +236,8 @@ public class Gl_320_fbo_multisample extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Vec2.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Vec2.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -259,7 +257,7 @@ public class Gl_320_fbo_multisample extends Test {
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-        gl3.glUseProgram(programName[0]);
+        gl3.glUseProgram(programName);
         gl3.glUniform1i(uniformDiffuse, 0);
 
         // Pass 1
@@ -332,7 +330,7 @@ public class Gl_320_fbo_multisample extends Test {
         GL3 gl3 = (GL3) gl;
 
         gl3.glDeleteBuffers(1, bufferName, 0);
-        gl3.glDeleteProgram(programName[0]);
+        gl3.glDeleteProgram(programName);
         gl3.glDeleteTextures(Texture.MAX, textureName, 0);
         gl3.glDeleteFramebuffers(Framebuffer.MAX, framebufferName, 0);
         gl3.glDeleteVertexArrays(1, vertexArrayName, 0);

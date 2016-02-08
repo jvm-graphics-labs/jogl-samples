@@ -17,6 +17,7 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -45,12 +46,12 @@ public class Gl_320_fbo_blend extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * 2 * Vec2.SIZE;
     private float[] vertexData = {
-        -10.0f, -10.0f, 0.0f, 1.0f,
-        +10.0f, -10.0f, 1.0f, 1.0f,
-        +10.0f, +10.0f, 1.0f, 0.0f,
-        -10.0f, +10.0f, 0.0f, 0.0f};
+        -10.0f, -10.0f,/**/ 0.0f, 1.0f,
+        +10.0f, -10.0f,/**/ 1.0f, 1.0f,
+        +10.0f, +10.0f,/**/ 1.0f, 0.0f,
+        -10.0f, +10.0f,/**/ 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -89,9 +90,8 @@ public class Gl_320_fbo_blend extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] programName = new int[Program.MAX], uniformDiffuse = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], vertexArrayName = new int[Program.MAX],
-            framebufferName = {0};
+    private int[] programName = new int[Program.MAX], uniformDiffuse = new int[Program.MAX], framebufferName = {0},
+            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], vertexArrayName = new int[Program.MAX];
     private int uniformTransform, framebufferScale = 2;
 
     @Override

@@ -18,6 +18,7 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.nio.FloatBuffer;
 import jglm.Vec4i;
 
@@ -43,14 +44,14 @@ public class Gl_320_fbo_rtt_texture_array extends Test {
 
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * 2 * Vec2.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 0.0f,
-        +1.0f, -1.0f, 1.0f, 0.0f,
-        +1.0f, +1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 1.0f,
-        -1.0f, +1.0f, 0.0f, 1.0f,
-        -1.0f, -1.0f, 0.0f, 0.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 0.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 0.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 1.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 1.0f,
+        -1.0f, -1.0f,/**/ 0.0f, 0.0f};
 
     private class Texture {
 
@@ -86,12 +87,12 @@ public class Gl_320_fbo_rtt_texture_array extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        viewport[Texture.RED] = new Vec4i(windowSize.x >> 1, 0,
-                windowSize.x / FRAMEBUFFER_SIZE, windowSize.y / FRAMEBUFFER_SIZE);
-        viewport[Texture.GREEN] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
-                windowSize.x / FRAMEBUFFER_SIZE, windowSize.y / FRAMEBUFFER_SIZE);
-        viewport[Texture.BLUE] = new Vec4i(0, windowSize.y >> 1,
-                windowSize.x / FRAMEBUFFER_SIZE, windowSize.y / FRAMEBUFFER_SIZE);
+        viewport[Texture.RED] = new Vec4i(windowSize.x >> 1, 0, windowSize.x / FRAMEBUFFER_SIZE,
+                windowSize.y / FRAMEBUFFER_SIZE);
+        viewport[Texture.GREEN] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1, windowSize.x / FRAMEBUFFER_SIZE,
+                windowSize.y / FRAMEBUFFER_SIZE);
+        viewport[Texture.BLUE] = new Vec4i(0, windowSize.y >> 1, windowSize.x / FRAMEBUFFER_SIZE, 
+                windowSize.y / FRAMEBUFFER_SIZE);
 
         boolean validated = true;
 

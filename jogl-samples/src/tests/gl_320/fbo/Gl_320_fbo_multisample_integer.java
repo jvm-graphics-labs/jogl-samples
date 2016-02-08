@@ -19,6 +19,7 @@ import framework.Caps;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
@@ -49,14 +50,14 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * 2 * Vec2.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f,
-        -1.0f, -1.0f, 0.0f, 1.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f,
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f};
 
     private class Texture {
 
@@ -174,15 +175,11 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
         if (validated) {
 
-            uniformMvp[Program.RENDER]
-                    = gl3.glGetUniformLocation(programName[Program.RENDER], "mvp");
-            uniformDiffuse[Program.RENDER]
-                    = gl3.glGetUniformLocation(programName[Program.RENDER], "diffuse");
+            uniformMvp[Program.RENDER] = gl3.glGetUniformLocation(programName[Program.RENDER], "mvp");
+            uniformDiffuse[Program.RENDER] = gl3.glGetUniformLocation(programName[Program.RENDER], "diffuse");
 
-            uniformMvp[Program.SPLASH]
-                    = gl3.glGetUniformLocation(programName[Program.SPLASH], "mvp");
-            uniformDiffuse[Program.SPLASH]
-                    = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
+            uniformMvp[Program.SPLASH] = gl3.glGetUniformLocation(programName[Program.SPLASH], "mvp");
+            uniformDiffuse[Program.SPLASH] = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
         }
         return validated & checkError(gl3, "initProgram");
     }
@@ -259,16 +256,14 @@ public class Gl_320_fbo_multisample_integer extends Test {
         gl3.glGenFramebuffers(Framebuffer.MAX, framebufferName, 0);
 
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RENDER]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                textureName[Texture.MULTISAMPLE], 0);
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.MULTISAMPLE], 0);
         if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.RENDER])) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RESOLVE]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                textureName[Texture.COLORBUFFER], 0);
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
         if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.RESOLVE])) {
             return false;
         }
@@ -283,8 +278,8 @@ public class Gl_320_fbo_multisample_integer extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Vec2.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Vec2.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
