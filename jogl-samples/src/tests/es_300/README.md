@@ -1,6 +1,6 @@
 # Highlights
 
-### [es-300-draw-elements](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/es_300/Es_300_draw_elements.java)
+### [es-300-draw-elements](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/es_300/Es_300_draw_elements.java):
 
 - `glDrawElements`
 
