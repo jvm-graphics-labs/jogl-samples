@@ -91,7 +91,7 @@ public class Gl_320_fbo_srgb extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
+    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX], 
             bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX],
             framebufferName = {0};
     private int framebufferScale = 2, uniformTransform;

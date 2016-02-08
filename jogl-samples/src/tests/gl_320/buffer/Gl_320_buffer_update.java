@@ -104,6 +104,7 @@ public class Gl_320_buffer_update extends Test {
         }
         // Get variables locations
         if (validated) {
+            
             uniformTransform = gl3.glGetUniformBlockIndex(programName, "Transform");
             uniformMaterial = gl3.glGetUniformBlockIndex(programName, "Material");
 
@@ -116,6 +117,7 @@ public class Gl_320_buffer_update extends Test {
 
     // Buffer update using glMapBufferRange
     private boolean initBuffer(GL3 gl3) {
+        
         // Generate a buffer object
         gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 

@@ -71,8 +71,8 @@ public class Gl_320_buffer_uniform_shared extends Test {
     }
 
     private final ShaderCode[] shaderName = new ShaderCode[Shader.MAX];
-    private final int[] bufferName = new int[Buffer.MAX], uniformBlockSizeTransform = {0}, 
-            uniformBlockSizeMaterial = {0}, vertexArrayName = {0};
+    private final int[] bufferName = new int[Buffer.MAX], uniformBlockSizeTransform = {0}, uniformBlockSizeMaterial = {0},
+            vertexArrayName = {0};
     private int programName, uniformMaterial, uniformTransform;
 
     @Override
@@ -137,6 +137,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
                 uniformTransform,
                 GL_UNIFORM_BLOCK_DATA_SIZE,
                 uniformBlockSizeTransform, 0);
+
         uniformBlockSizeTransform[0]
                 = ((uniformBlockSizeTransform[0] / uniformBufferOffset[0] + 1) * uniformBufferOffset[0]);
 
@@ -221,8 +222,8 @@ public class Gl_320_buffer_uniform_shared extends Test {
         gl3.glUniformBlockBinding(programName, uniformMaterial, Semantic.Uniform.MATERIAL);
 
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
-        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0,
-                bufferName[Buffer.UNIFORM], 0, uniformBlockSizeTransform[0]);
+        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.UNIFORM],
+                0, uniformBlockSizeTransform[0]);
         // Attach the buffer to UBO binding point semantic::uniform::MATERIAL 
         gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.UNIFORM],
                 uniformBlockSizeTransform[0], uniformBlockSizeMaterial[0]);

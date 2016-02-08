@@ -2,18 +2,18 @@
 
 layout(std140) uniform;
 
-const float Luminance[2] = float[2](1.0, 0.5);
+const float luminance[2] = float[2](1.0, 0.5);
 
-in block
+in Block
 {
-	flat int Index;
-	vec4 Color;
-} In;
+    flat int index;
+    vec4 color;
+} inBlock;
 
-out vec4 Color;
+out vec4 color;
 
 void main()
 {
-        vec4 temp = + vec4(0.1);
-	Color = In.Color * Luminance[In.Index] + temp;
+    vec4 temp = + vec4(0.1);
+    color = inBlock.color * luminance[inBlock.index] + temp;
 }

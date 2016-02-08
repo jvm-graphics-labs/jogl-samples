@@ -6,6 +6,7 @@
 package tests.es_300;
 
 import com.jogamp.opengl.GL;
+import static com.jogamp.opengl.GL.GL_FRAMEBUFFER_SRGB;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL3ES3;
 import com.jogamp.opengl.util.GLBuffers;
@@ -237,7 +238,8 @@ public class Es_300_fbo_srgb extends Test {
             for (int level = 0; level < texture.levels(); ++level) {
 
                 gl3es3.glTexImage2D(GL_TEXTURE_2D, level,
-                        format.internal.value,
+//                        format.internal.value,
+                        GL_SRGB8_ALPHA8,
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         0,
                         format.external.value, format.type.value,
@@ -251,8 +253,8 @@ public class Es_300_fbo_srgb extends Test {
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
             gl3es3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             gl3es3.glTexStorage2D(GL_TEXTURE_2D, 1,
-                    //                    GL_SRGB8_ALPHA8,
-                    GL_RGBA8,
+//                    GL_SRGB8_ALPHA8,
+                                        GL_RGBA8,
                     windowSize.x * framebufferScale, windowSize.y * framebufferScale);
 
             gl3es3.glActiveTexture(GL_TEXTURE0);
@@ -342,6 +344,10 @@ public class Es_300_fbo_srgb extends Test {
 
         // Render a textured quad to a sRGB framebuffer object.
         {
+        
+            
+//            gl3es3.glEnable(GL_FRAMEBUFFER_SRGB);
+            
             gl3es3.glViewport(0, 0, windowSize.x * framebufferScale, windowSize.y * framebufferScale);
             gl3es3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
 
@@ -365,6 +371,8 @@ public class Es_300_fbo_srgb extends Test {
 
             gl3es3.glViewport(0, 0, windowSize.x, windowSize.y);
             gl3es3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
+            
+//            gl3es3.glDisable(GL_FRAMEBUFFER_SRGB);
 
             gl3es3.glUseProgram(programName[Program.SPLASH]);
 

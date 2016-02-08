@@ -17,6 +17,7 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -39,7 +40,7 @@ public class Gl_320_draw_range_elements extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/draw";
 
     private int vertexCount = 8;
-    private int vertexSize = vertexCount * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * Vec2.SIZE;
     private float[] vertexData = {
         -0.4f, -0.6f,
         +0.5f, -0.4f,

@@ -47,12 +47,12 @@ public class Gl_320_caps extends Test {
         long combinedVertUniformCount = caps.limits.MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS;
         long combinedGeomUniformCount = caps.limits.MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS;
         long combinedFragUniformCount = caps.limits.MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS;
-        long vertUniformCount = (long) caps.limits.MAX_VERTEX_UNIFORM_BLOCKS
-                * (long) caps.limits.MAX_UNIFORM_BLOCK_SIZE / 4 + (long) caps.limits.MAX_VERTEX_UNIFORM_COMPONENTS;
-        long geomUniformCount = (long) caps.limits.MAX_GEOMETRY_UNIFORM_BLOCKS
-                * (long) caps.limits.MAX_UNIFORM_BLOCK_SIZE / 4 + (long) caps.limits.MAX_GEOMETRY_UNIFORM_COMPONENTS;
-        long fragUniformCount = (long) caps.limits.MAX_FRAGMENT_UNIFORM_BLOCKS
-                * (long) caps.limits.MAX_UNIFORM_BLOCK_SIZE / 4 + (long) caps.limits.MAX_FRAGMENT_UNIFORM_COMPONENTS;
+        long vertUniformCount = caps.limits.MAX_VERTEX_UNIFORM_BLOCKS
+                * (long) caps.limits.MAX_UNIFORM_BLOCK_SIZE / 4 + caps.limits.MAX_VERTEX_UNIFORM_COMPONENTS;
+        long geomUniformCount = caps.limits.MAX_GEOMETRY_UNIFORM_BLOCKS
+                * (long) caps.limits.MAX_UNIFORM_BLOCK_SIZE / 4 + caps.limits.MAX_GEOMETRY_UNIFORM_COMPONENTS;
+        long fragUniformCount = caps.limits.MAX_FRAGMENT_UNIFORM_BLOCKS
+                * (long) caps.limits.MAX_UNIFORM_BLOCK_SIZE / 4 + caps.limits.MAX_FRAGMENT_UNIFORM_COMPONENTS;
 
         validated = validated && combinedVertUniformCount <= vertUniformCount;
         validated = validated && combinedGeomUniformCount <= geomUniformCount;

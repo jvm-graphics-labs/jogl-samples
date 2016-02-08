@@ -127,11 +127,12 @@ public class Gl_320_texture_3d extends Test {
             for (int j = 0; j < size; ++j) {
                 for (int i = 0; i < size; ++i) {
                     data.put(i + j * size + k * size * size,
-                            Glm.simplex(Glm.div(new float[]{i, j, k, 0.0f}, size / 8 - 1)));
-//                            new Vec4(i, j, k, 0.0f).div(size / 8 - 1).simplex_());
+                            //                            Glm.simplex(Glm.div(new float[]{i, j, k, 0.0f}, size / 8 - 1)));
+                            new Vec4(i, j, k, 0.0f).div(size / 8 - 1).simplex_());
                 }
             }
         }
+        data.rewind();
 
         gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 

@@ -2,23 +2,23 @@
 
 layout(std140) uniform;
 
-uniform transform
+uniform Transform
 {
-	mat4 MVP;
-} Transform;
+    mat4 mvp;
+} transform;
 
-in vec3 Position;
-in vec4 Color;
+in vec3 position;
+in vec4 color;
 
-out block
+out Block
 {
-	flat int Index;
-	vec4 Color;
-} Out;
+    flat int index;
+    vec4 color;
+} outBlock;
 
 void main()
 {
-	gl_Position = Transform.MVP * vec4(Position, 1.0);
-	Out.Color = Color;
-	Out.Index = gl_VertexID / 4;
+    gl_Position = transform.mvp * vec4(position, 1.0);
+    outBlock.color = color;
+    outBlock.index = gl_VertexID / 4;
 }

@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Vec4u8;
 import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._2.Vec2;
@@ -18,6 +19,7 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._3.Vec3;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -47,7 +49,7 @@ public class Gl_320_draw_base_vertex extends Test {
     };
 
     private int vertexCount = 8;
-    private int positionSize = vertexCount * 3 * Float.BYTES;
+    private int positionSize = vertexCount * Vec3.SIZE;
     private float[] positionData = new float[]{
         -1.0f, -1.0f, +0.5f,
         +1.0f, -1.0f, +0.5f,
@@ -59,7 +61,7 @@ public class Gl_320_draw_base_vertex extends Test {
         -1.5f, +1.0f, -0.5f
     };
 
-    private int colorSize = vertexCount * 4 * Byte.BYTES;
+    private int colorSize = vertexCount * Vec4u8.SIZE;
     private byte[] colorData = new byte[]{
         (byte) 255, (byte) 0, (byte) 0, (byte) 255,
         (byte) 255, (byte) 255, 0, (byte) 255,
@@ -123,16 +125,16 @@ public class Gl_320_draw_base_vertex extends Test {
 
             programName = program.program();
 
-            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "Position");
-            gl3.glBindAttribLocation(programName, Semantic.Attr.COLOR, "Color");
-            gl3.glBindFragDataLocation(programName, Semantic.Frag.COLOR, "Color");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.POSITION, "position");
+            gl3.glBindAttribLocation(programName, Semantic.Attr.COLOR, "color");
+            gl3.glBindFragDataLocation(programName, Semantic.Frag.COLOR, "color");
 
             program.link(gl3, System.out);
         }
         // Get variables locations
         if (validated) {
 
-            uniformTransform = gl3.glGetUniformBlockIndex(programName, "transform");
+            uniformTransform = gl3.glGetUniformBlockIndex(programName, "Transform");
             gl3.glUniformBlockBinding(programName, uniformTransform, Semantic.Uniform.TRANSFORM0);
         }
 

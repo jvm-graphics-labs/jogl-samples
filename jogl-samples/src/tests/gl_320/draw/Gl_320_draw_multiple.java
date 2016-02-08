@@ -19,6 +19,7 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._3.Vec3;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -40,16 +41,16 @@ public class Gl_320_draw_multiple extends Test {
     private final String SHADERS_SOURCE = "draw-multiple";
     private final String SHADERS_ROOT = "src/data/gl_320/draw";
 
-    private int ElementCount = 6;
-    private int ElementSize = ElementCount * Integer.BYTES;
-    private int[] ElementData = new int[]{
+    private int elementCount = 6;
+    private int elementSize = elementCount * Integer.BYTES;
+    private int[] elementData = new int[]{
         0, 1, 2,
         0, 2, 3
     };
 
-    private int VertexCount = 8;
-    private int PositionSize = VertexCount * 3 * Float.BYTES;
-    private float[] PositionData = new float[]{
+    private int vertexCount = 8;
+    private int positionSize = vertexCount * Vec3.SIZE;
+    private float[] positionData = new float[]{
         -1.0f, -1.0f, +0.5f,
         +1.0f, -1.0f, +0.5f,
         +1.0f, +1.0f, +0.5f,
@@ -59,7 +60,7 @@ public class Gl_320_draw_multiple extends Test {
         +1.5f, +1.0f, -0.5f,
         -1.5f, +1.0f, -0.5f};
 
-    private IntBuffer count = GLBuffers.newDirectIntBuffer(new int[]{ElementCount, ElementCount});
+    private IntBuffer count = GLBuffers.newDirectIntBuffer(new int[]{elementCount, elementCount});
     private IntBuffer baseVertex = GLBuffers.newDirectIntBuffer(new int[]{0, 4});
 
     private class Buffer {
@@ -128,14 +129,14 @@ public class Gl_320_draw_multiple extends Test {
         gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(PositionData);
-        gl3.glBufferData(GL_ARRAY_BUFFER, PositionSize, positionBuffer, GL_STATIC_DRAW);
+        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(positionBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
-        IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(ElementData);
-        gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, ElementSize, elementBuffer, GL_STATIC_DRAW);
+        IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
+        gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
