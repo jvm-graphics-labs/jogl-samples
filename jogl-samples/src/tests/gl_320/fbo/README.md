@@ -65,3 +65,7 @@ So disabled
 
 * render to a `GL_MAX_INTEGER_SAMPLES`-multisample integer color fbo, blit to an integer fbo and then resolve to screen
 
+### [gl-320-fbo_rtt](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/fbo/Gl_320_fbo_rtt.java) :
+
+* attach three textures to an fbo and render a different color component (r,g,b) to each of them. Then loop rendering each of them to a corner on screen
+
