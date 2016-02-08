@@ -56,3 +56,12 @@ So disabled
 ### [gl-320-fbo_multisample](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/fbo/Gl_320_fbo_multisample.java) :
 
 * render to multisample fbo, blit to another fbo and render this content to screen
+
+### [gl-320-fbo_multisample_explicit](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/fbo/Gl_320_fbo_multisample_explicit.java) :
+
+* render to 4-multisample (color & depth) fbo and resolve to screen by using just the first sample for the right half part of the screen and the average of all 4 samples for the left half part.
+
+### [gl-320-fbo_multisample_integer](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/fbo/Gl_320_fbo_multisample_integer.java) :
+
+* render to a `GL_MAX_INTEGER_SAMPLES`-multisample integer color fbo, blit to an integer fbo and then resolve to screen
+
