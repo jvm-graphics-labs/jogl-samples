@@ -9,3 +9,8 @@
 * one unique uniform buffer holding transform and material
 * `GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT` and `glBindBufferRange`
 
+### [gl-320-buffer-update](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/buffer/Gl_320_buffer_update.java) :
+
+* how to copy data from an array buffer to another one, `glBindBuffer` and `glCopyBufferSubData`
+* how to get uniform block data size, `glGetActiveUniformBlockiv`
+
