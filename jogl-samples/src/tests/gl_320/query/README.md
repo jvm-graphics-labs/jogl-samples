@@ -8,4 +8,4 @@
 
 ### [gl-320-query-occlusion](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/query/Gl_320_query_occlusion.java) :
 
-* `GL_SAMPLES_PASSED` query to get the number of samples (fragments) passed, 84100 means 290x290
+* `GL_SAMPLES_PASSED` query to get the number of samples (fragments) passed, 84100 means 290x290 pixels
