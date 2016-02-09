@@ -13,3 +13,5 @@
 ### [gl-320-transform-feedback-separated](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/transform_feedback/Gl_320_transform_feedback_separated.java) :
 
 * same but with separated outputs (position input -> position and color separated)
+
+Note: `glGetQueryObjectuiv` (to query the primitive number) may stall the graphics pipeline waiting for the OpenGL commands to be completed, use `glDrawTransformFeedback` instead, this does not require any number
