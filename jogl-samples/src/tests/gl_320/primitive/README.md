@@ -21,6 +21,11 @@
 
 * render points as quad with geometry shader
 
+### [gl-320-primitive-shading](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/primitive/Gl_320_primitive_shading.java) :
+
+* primitive shading with geometry shader
+
+
 ### [gl-320-primitive-sprite](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/primitive/Gl_320_primitive_sprite.java) :
 
 * render textured sprites (points)
