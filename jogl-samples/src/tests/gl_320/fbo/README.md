@@ -12,7 +12,7 @@
 
 * same with points blending
 
-I remember I had to `glEnable(GL_POINT_SPRITE)` to get it working, but if I do it now I get 
+When I set compatibility profile I remember I had to `glEnable(GL_POINT_SPRITE)` to get it working, but now that I use core profile that call is not legal, because otherwise it will fire the following exception
 
 ```
 GlDebugOutput.messageSent(): GLDebugEvent[ id 0x500
@@ -23,7 +23,7 @@ GlDebugOutput.messageSent(): GLDebugEvent[ id 0x500
 	when 1454941896197
 	source 4.5 (Core profile, arb, debug, compat[ES2, ES3, ES31, ES32], FBO, hardware) - 4.5.0 NVIDIA 361.43 - hash 0x1edbaa29]
 ```
-So disabled
+So disable it in core, use it only in compatibility
 
 ### [gl-320-fbo_blit](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/fbo/Gl_320_fbo_blit.java) :
 
