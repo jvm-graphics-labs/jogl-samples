@@ -358,7 +358,7 @@ public class Gl_320_fbo_srgb extends Test {
             gl3.glViewport(0, 0, windowSize.x * framebufferScale, windowSize.y * framebufferScale);
 
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
-            // Explicitly convert linear pixel color to sRGB color space, as FramebufferName is a sRGB FBO
+            // Explicitly convert linear pixel color to sRGB color space, as FramebufferName is an sRGB FBO
             // Shader execution is done with linear color to get correct linear algebra working.
             gl3.glEnable(GL_FRAMEBUFFER_SRGB);
 
@@ -383,7 +383,8 @@ public class Gl_320_fbo_srgb extends Test {
             gl3.glViewport(0, 0, windowSize.x, windowSize.y);
 
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            // glDisable(GL_FRAMEBUFFER_SRGB); // Uncomment to avoid the extra linear to sRGB conversion and hence get correct display
+            // Uncomment to avoid the extra linear to sRGB conversion and hence get correct display
+            gl3.glDisable(GL_FRAMEBUFFER_SRGB); 
 
             gl3.glUseProgram(programName[Program.SPLASH]);
 
