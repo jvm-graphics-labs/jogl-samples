@@ -79,5 +79,5 @@ So disable it in core, use it only in compatibility
 
 ### [gl-320-fbo-srgb-decode-ext](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/fbo/Gl_320_fbo_srgb_decode_ext.java) :
 
-* the automatic conversion from sRGB to linear space color in texture has been disabled, `gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SRGB_DECODE_EXT, GL_SKIP_DECODE_EXT);`, therefore the shader will fetch and store sRGB values and we do not need any `GL_FRAMEBUFFER_SRGB`
+* the automatic conversion from sRGB to linear space color in texture has been disabled, `gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SRGB_DECODE_EXT, GL_SKIP_DECODE_EXT);`, therefore the shader will fetch and store sRGB values and we do not need any `GL_FRAMEBUFFER_SRGB` enabling or disabling
 
