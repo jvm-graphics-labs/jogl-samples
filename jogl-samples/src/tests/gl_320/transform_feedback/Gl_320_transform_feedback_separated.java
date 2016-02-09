@@ -40,7 +40,7 @@ public class Gl_320_transform_feedback_separated extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/transform_feedback";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 4 * Float.BYTES;
+    private int positionSize = vertexCount * Vec4.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 0.0f, 1.0f,
@@ -225,7 +225,7 @@ public class Gl_320_transform_feedback_separated extends Test {
         gl3.glBufferData(GL_ARRAY_BUFFER, Vec4.SIZE * vertexCount, null, GL_STATIC_DRAW);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR]);
-        gl3.glBufferData(GL_ARRAY_BUFFER, Vec4.SIZE * Float.BYTES * vertexCount, null, GL_STATIC_DRAW);
+        gl3.glBufferData(GL_ARRAY_BUFFER, Vec4.SIZE * vertexCount, null, GL_STATIC_DRAW);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 

@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
@@ -18,6 +19,7 @@ import framework.Semantic;
 import framework.Test;
 import java.nio.FloatBuffer;
 import glm.vec._2.Vec2;
+import glm.vec._4.Vec4;
 
 /**
  *
@@ -37,7 +39,7 @@ public class Gl_330_draw_instanced_array extends Test {
     private final String SHADERS_ROOT = "src/data/gl_330";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -47,20 +49,13 @@ public class Gl_330_draw_instanced_array extends Test {
         -1.0f, -1.0f};
 
     private int instanceCount = 5;
-    private int colorSize = vertexCount * 4 * Float.BYTES;
+    private int colorSize = vertexCount * Vec4.SIZE;
     private float[] colorData = {
         1.0f, 0.0f, 0.0f, 1.0f,
         1.0f, 0.5f, 0.0f, 1.0f,
         1.0f, 1.0f, 0.0f, 1.0f,
         0.0f, 1.0f, 0.0f, 1.0f,
         0.0f, 0.0f, 1.0f, 1.0f};
-
-    private class Shader {
-
-        public static final int VERT = 0;
-        public static final int FRAG = 1;
-        public static final int MAX = 2;
-    }
 
     private class Buffer {
 
@@ -142,11 +137,13 @@ public class Gl_330_draw_instanced_array extends Test {
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR]);
         FloatBuffer colorBuffer = GLBuffers.newDirectFloatBuffer(colorData);
         gl3.glBufferData(GL_ARRAY_BUFFER, colorSize, colorBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(colorBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return checkError(gl3, "initBuffer");

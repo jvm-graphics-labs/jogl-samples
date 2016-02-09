@@ -17,6 +17,7 @@ import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
@@ -38,7 +39,7 @@ public class Gl_320_query_occlusion extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/query";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,

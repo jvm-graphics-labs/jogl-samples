@@ -24,7 +24,9 @@ import java.util.logging.Logger;
 import jgli.Texture2d;
 import glm.vec._2.Vec2;
 import dev.Vec2i;
+import glf.Vertex_v2fv2f;
 import glm.vec._3.Vec3;
+import java.nio.ByteBuffer;
 
 /**
  *
@@ -51,14 +53,14 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
 
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
-    private float[] vertexData = {
-        -4.0f * 0.3f, -3.0f * 0.3f, 0.0f, 1.0f,
-        +4.0f * 0.3f, -3.0f * 0.3f, 1.0f, 1.0f,
-        +4.0f * 0.3f, +3.0f * 0.3f, 1.0f, 0.0f,
-        +4.0f * 0.3f, +3.0f * 0.3f, 1.0f, 0.0f,
-        -4.0f * 0.3f, +3.0f * 0.3f, 0.0f, 0.0f,
-        -4.0f * 0.3f, -3.0f * 0.3f, 0.0f, 1.0f};
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
+    private Vertex_v2fv2f[] vertexData = {
+        new Vertex_v2fv2f(new Vec2(-4.0f, -3.0f).mul(0.3f), new Vec2(0.0f, 1.0f)),
+        new Vertex_v2fv2f(new Vec2(+4.0f, -3.0f).mul(0.3f), new Vec2(1.0f, 1.0f)),
+        new Vertex_v2fv2f(new Vec2(+4.0f, +3.0f).mul(0.3f), new Vec2(1.0f, 0.0f)),
+        new Vertex_v2fv2f(new Vec2(+4.0f, +3.0f).mul(0.3f), new Vec2(1.0f, 0.0f)),
+        new Vertex_v2fv2f(new Vec2(-4.0f, +3.0f).mul(0.3f), new Vec2(0.0f, 0.0f)),
+        new Vertex_v2fv2f(new Vec2(-4.0f, -3.0f).mul(0.3f), new Vec2(0.0f, 1.0f))};
 
     private class Program {
 
@@ -183,7 +185,11 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
 
         gl3.glGenBuffers(1, bufferName, 0);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-        gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, GLBuffers.newDirectFloatBuffer(vertexData), GL_STATIC_DRAW);
+        ByteBuffer vertexBuffer=GLBuffers.newDirectByteBuffer(vertexSize);
+        for (int i = 0; i < vertexCount; i++) {
+            vertexData[i].toBb(vertexBuffer, i);
+        }
+        gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return checkError(gl3, "initBuffer");
