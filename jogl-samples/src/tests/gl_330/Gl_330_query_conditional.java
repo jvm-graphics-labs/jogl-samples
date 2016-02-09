@@ -136,7 +136,7 @@ public class Gl_330_query_conditional extends Test {
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, GLBuffers.newDirectFloatBuffer(positionData), GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int uniformTransformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
+        int uniformTransformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformTransformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -192,7 +192,7 @@ public class Gl_330_query_conditional extends Test {
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER,
-                    0, 16 * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+                    0, Mat4.SIZE, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
             Mat4 model = new Mat4(1.0f);
@@ -213,7 +213,7 @@ public class Gl_330_query_conditional extends Test {
         gl3.glUseProgram(programName);
         gl3.glBindVertexArray(vertexArrayName[0]);
 
-        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL], 0, 16 * Float.BYTES);
+        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL], 0, Mat4.SIZE);
 
         // The first orange quad is not written in the framebuffer.
         gl3.glColorMaski(0, false, false, false, false);

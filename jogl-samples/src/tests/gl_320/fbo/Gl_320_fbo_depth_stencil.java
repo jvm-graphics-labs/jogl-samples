@@ -49,7 +49,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgb_dxt1_unorm.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * Vec2.SIZE;
+    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ 0.0f, 1.0f,
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,
@@ -206,7 +206,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
 
         int[] uniformBufferOffsetAlignment = {0};
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffsetAlignment, 0);
-        uniformBufferOffsetAlignment[0] = Glm.ceilMultiple(16 * Float.BYTES, uniformBufferOffsetAlignment[0]);
+        uniformBufferOffsetAlignment[0] = Glm.ceilMultiple(Mat4.SIZE, uniformBufferOffsetAlignment[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBufferOffsetAlignment[0] * 2, null, GL_DYNAMIC_DRAW);
@@ -281,8 +281,8 @@ public class Gl_320_fbo_depth_stencil extends Test {
         gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Vec2.SIZE, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Vec2.SIZE, Vec2.SIZE);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -321,7 +321,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
         int[] uniformBufferOffsetAlignment = {0};
         {
             gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffsetAlignment, 0);
-            uniformBufferOffsetAlignment[0] = Glm.ceilMultiple(16 * Float.BYTES, uniformBufferOffsetAlignment[0]);
+            uniformBufferOffsetAlignment[0] = Glm.ceilMultiple(Mat4.SIZE, uniformBufferOffsetAlignment[0]);
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, uniformBufferOffsetAlignment[0] * 2,

@@ -99,7 +99,7 @@ public class Gl_320_draw_without_vertex_attrib extends Test {
 
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
 
-        int uniformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[0]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -125,7 +125,7 @@ public class Gl_320_draw_without_vertex_attrib extends Test {
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[0]);
             ByteBuffer pointer = gl3.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
+                    GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);

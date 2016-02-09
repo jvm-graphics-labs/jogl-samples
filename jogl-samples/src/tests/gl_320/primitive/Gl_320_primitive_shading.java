@@ -11,11 +11,14 @@ import static com.jogamp.opengl.GL3ES3.*;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Vec4u8;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fc4ub;
+import glm.vec._2.Vec2;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -38,17 +41,12 @@ public class Gl_320_primitive_shading extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/primitive";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * (2 * Float.BYTES + 4 * Byte.BYTES);
-    private float[] vertexV2fData = {
-        -1.0f, -1.0f,
-        +1.0f, -1.0f,
-        +1.0f, +1.0f,
-        -1.0f, +1.0f};
-    private byte[] vertexV4ubData = {
-        (byte) 255, (byte) 0, (byte) 0, (byte) 255,
-        (byte) 255, (byte) 255, (byte) 255, (byte) 255,
-        (byte) 0, (byte) 255, (byte) 0, (byte) 255,
-        (byte) 0, (byte) 0, (byte) 255, (byte) 255};
+    private int vertexSize = vertexCount * Vertex_v2fc4ub.SIZE;
+    private Vertex_v2fc4ub[] vertexData = {
+        new Vertex_v2fc4ub(new Vec2(-1.0f, -1.0f), new Vec4u8(255, 0, 0, 255)),
+        new Vertex_v2fc4ub(new Vec2(+1.0f, -1.0f), new Vec4u8(255, 255, 255, 255)),
+        new Vertex_v2fc4ub(new Vec2(+1.0f, +1.0f), new Vec4u8(0, 255, 0, 255)),
+        new Vertex_v2fc4ub(new Vec2(-1.0f, +1.0f), new Vec4u8(0, 0, 255, 255))};
 
     private int colorCount = 3;
     private int colorSize = colorCount * 4 * Float.BYTES;
@@ -129,10 +127,10 @@ public class Gl_320_primitive_shading extends Test {
         if (validated) {
 
             gl3.glUseProgram(programName);
-            gl3.glUniformBlockBinding(programName,
-                    gl3.glGetUniformBlockIndex(programName, "Transform"), Semantic.Uniform.TRANSFORM0);
-            gl3.glUniformBlockBinding(programName,
-                    gl3.glGetUniformBlockIndex(programName, "Constant"), Semantic.Uniform.CONSTANT);
+            gl3.glUniformBlockBinding(programName, gl3.glGetUniformBlockIndex(programName, "Transform"),
+                    Semantic.Uniform.TRANSFORM0);
+            gl3.glUniformBlockBinding(programName, gl3.glGetUniformBlockIndex(programName, "Constant"),
+                    Semantic.Uniform.CONSTANT);
             gl3.glUseProgram(0);
         }
 
@@ -145,9 +143,8 @@ public class Gl_320_primitive_shading extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Float.BYTES + 4 * Byte.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_UNSIGNED_BYTE, true,
-                    2 * Float.BYTES + 4 * Byte.BYTES, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fc4ub.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_UNSIGNED_BYTE, true, Vertex_v2fc4ub.SIZE, Vec2.SIZE);
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl3.glEnableVertexAttribArray(Semantic.Attr.COLOR);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -171,8 +168,7 @@ public class Gl_320_primitive_shading extends Test {
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
         for (int i = 0; i < vertexCount; i++) {
-            vertexBuffer.putFloat(vertexV2fData[i * 2 + 0]).putFloat(vertexV2fData[i * 2 + 1]);
-            vertexBuffer.put(vertexV4ubData, i * 4, 4);
+            vertexData[i].toBb(vertexBuffer, i);
         }
         vertexBuffer.rewind();
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
@@ -180,7 +176,7 @@ public class Gl_320_primitive_shading extends Test {
 
         int[] uniformBufferOffset = {0};
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -214,7 +210,7 @@ public class Gl_320_primitive_shading extends Test {
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
+                    GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);

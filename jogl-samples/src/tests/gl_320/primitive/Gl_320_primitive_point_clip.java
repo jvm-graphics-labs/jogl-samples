@@ -15,6 +15,7 @@ import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._4.Vec4;
 import java.nio.ByteBuffer;
 
 /**
@@ -109,11 +110,11 @@ public class Gl_320_primitive_point_clip extends Test {
         vertexCount = 5;
 
         // Reserve buffer memory but don't copy the values
-        gl3.glBufferData(GL_ARRAY_BUFFER, 2 * 4 * Float.BYTES * vertexCount, null, GL_STATIC_DRAW);
+        gl3.glBufferData(GL_ARRAY_BUFFER, glf.Vertex_v4fc4f.SIZE * vertexCount, null, GL_STATIC_DRAW);
 
         ByteBuffer data = gl3.glMapBufferRange(GL_ARRAY_BUFFER,
                 0, // Offset
-                2 * 4 * Float.BYTES * vertexCount, // Size,
+                glf.Vertex_v4fc4f.SIZE * vertexCount, // Size,
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
         float[] floatArray = {
@@ -144,8 +145,8 @@ public class Gl_320_primitive_point_clip extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 2 * 4 * Float.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, 2 * 4 * Float.BYTES, 4 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, glf.Vertex_v4fc4f.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, glf.Vertex_v4fc4f.SIZE, Vec4.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);

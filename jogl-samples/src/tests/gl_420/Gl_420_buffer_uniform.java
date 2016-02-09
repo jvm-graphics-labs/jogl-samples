@@ -170,7 +170,7 @@ public class Gl_420_buffer_uniform extends Test {
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            gl4.glBufferData(GL_UNIFORM_BUFFER, 16 * Float.BYTES * instances, null, GL_DYNAMIC_DRAW);
+            gl4.glBufferData(GL_UNIFORM_BUFFER, Mat4.SIZE * instances, null, GL_DYNAMIC_DRAW);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
@@ -227,7 +227,7 @@ public class Gl_420_buffer_uniform extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0,
-                bufferName[Buffer.TRANSFORM], 0, 16 * Float.BYTES * 2);
+                bufferName[Buffer.TRANSFORM], 0, Mat4.SIZE * 2);
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL]);
 
         for (int i = 0; i < 2; ++i) {

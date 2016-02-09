@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package tests.gl_320.transform;
+package tests.gl_320.transform_feedback;
 
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
@@ -11,31 +11,33 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._4.Vec4;
 import java.nio.FloatBuffer;
 
 /**
  *
  * @author GBarbieri
  */
-public class Gl_320_transform_feedback_interleaved extends Test {
+public class Gl_320_transform_feedback_separated extends Test {
 
     public static void main(String[] args) {
-        Gl_320_transform_feedback_interleaved gl_320_transform_feedback_interleaved
-                = new Gl_320_transform_feedback_interleaved();
+        Gl_320_transform_feedback_separated gl_320_transform_feedback_separated
+                = new Gl_320_transform_feedback_separated();
     }
 
-    public Gl_320_transform_feedback_interleaved() {
-        super("gl-320-transform-feedback-interleaved", Profile.CORE, 3, 2);
+    public Gl_320_transform_feedback_separated() {
+        super("gl-320-transform-feedback-separated", Profile.CORE, 3, 2);
     }
 
     private final String SHADERS_SOURCE_TRANSFORM = "transform-feedback-transform";
     private final String SHADERS_SOURCE_FEEDBACK = "transform-feedback-feedback";
-    private final String SHADERS_ROOT = "src/data/gl_320/transform";
+    private final String SHADERS_ROOT = "src/data/gl_320/transform_feedback";
 
     private int vertexCount = 6;
     private int positionSize = vertexCount * 4 * Float.BYTES;
@@ -54,6 +56,14 @@ public class Gl_320_transform_feedback_interleaved extends Test {
         public static final int MAX = 2;
     }
 
+    private class Buffer {
+
+        public static final int VERTEX = 0;
+        public static final int POSITION = 1;
+        public static final int COLOR = 2;
+        public static final int MAX = 3;
+    }
+
     private class Shader {
 
         public static final int VERT_TRANSFORM = 0;
@@ -62,9 +72,15 @@ public class Gl_320_transform_feedback_interleaved extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
-            bufferName = new int[Program.MAX], queryName = {0};
-    private int transformUniformMvp;
+    private class feedbackOutput {
+
+        public static final int POSITION = 0;
+        public static final int COLOR = 1;
+    }
+
+    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = new int[Program.MAX],
+            programName = new int[Program.MAX], queryName = {0};
+    private int uniformMvp;
 
     @Override
     protected boolean begin(GL gl) {
@@ -115,8 +131,7 @@ public class Gl_320_transform_feedback_interleaved extends Test {
             gl3.glBindAttribLocation(programName[Program.TRANSFORM], Semantic.Attr.POSITION, "position");
 
             String[] strings = {"gl_Position", "Block.color"};
-            gl3.glTransformFeedbackVaryings(programName[Program.TRANSFORM],
-                    2, strings, GL_INTERLEAVED_ATTRIBS);
+            gl3.glTransformFeedbackVaryings(programName[Program.TRANSFORM], 2, strings, GL_SEPARATE_ATTRIBS);
 
             shaderProgram.link(gl3, System.out);
 
@@ -139,35 +154,8 @@ public class Gl_320_transform_feedback_interleaved extends Test {
         // Get variables locations
         if (validated) {
 
-            transformUniformMvp = gl3.glGetUniformLocation(programName[Program.TRANSFORM], "mvp");
-
-            int[] activeUniforms = {0};
-            gl3.glGetProgramiv(programName[Program.TRANSFORM], GL_ACTIVE_UNIFORMS, activeUniforms, 0);
-
-            byte[] name = new byte[64];
-            int[] length = {0};
-            int[] size = {0};
-            int[] type = {0};
-
-            for (int i = 0; i < activeUniforms[0]; i++) {
-
-                gl3.glGetActiveUniform(
-                        programName[Program.TRANSFORM],
-                        i,
-                        name.length,
-                        length, 0,
-                        size, 0,
-                        type, 0,
-                        name, 0);
-
-                int location = gl3.glGetUniformLocation(programName[Program.TRANSFORM], new String(name));
-
-                if (transformUniformMvp == location) {
-
-                    validated = validated && (size[0] == 1) && (type[0] == GL_FLOAT_VEC4);
-                    validated = validated && (transformUniformMvp > 0);
-                }
-            }
+            uniformMvp = gl3.glGetUniformLocation(programName[Program.TRANSFORM], "mvp");
+            validated = validated && (uniformMvp >= 0);
         }
 
         // Create program
@@ -199,7 +187,7 @@ public class Gl_320_transform_feedback_interleaved extends Test {
         // Build a vertex array object
         gl3.glBindVertexArray(vertexArrayName[Program.TRANSFORM]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Program.TRANSFORM]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 0, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -210,9 +198,10 @@ public class Gl_320_transform_feedback_interleaved extends Test {
         // Build a vertex array object
         gl3.glBindVertexArray(vertexArrayName[Program.FEEDBACK]);
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Program.FEEDBACK]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 2 * 4 * Float.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, 2 * 4 * Float.BYTES, 4 * Float.BYTES);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION]);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 0, 0);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR]);
+            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, 0, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -225,16 +214,19 @@ public class Gl_320_transform_feedback_interleaved extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        // Generate a buffer object
-        gl3.glGenBuffers(Program.MAX, bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Program.TRANSFORM]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Program.FEEDBACK]);
-        gl3.glBufferData(GL_ARRAY_BUFFER, 2 * 4 * Float.BYTES * vertexCount, null, GL_STATIC_COPY);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION]);
+        gl3.glBufferData(GL_ARRAY_BUFFER, Vec4.SIZE * vertexCount, null, GL_STATIC_DRAW);
+
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR]);
+        gl3.glBufferData(GL_ARRAY_BUFFER, Vec4.SIZE * Float.BYTES * vertexCount, null, GL_STATIC_DRAW);
+
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return checkError(gl3, "initBuffer");
@@ -264,37 +256,44 @@ public class Gl_320_transform_feedback_interleaved extends Test {
         // Set the display viewport
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
 
-        // Clear color buffer
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+        // Clear color buffer with black
+        gl3.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        gl3.glClear(GL_COLOR_BUFFER_BIT);
 
         // First draw, capture the attributes
-        // Disable rasterisation, vertices processing only!
-        gl3.glEnable(GL_RASTERIZER_DISCARD);
-
-        gl3.glUseProgram(programName[Program.TRANSFORM]);
-        gl3.glUniformMatrix4fv(transformUniformMvp, 1, false, mvp.toFa_(), 0);
-
-        gl3.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, bufferName[Program.FEEDBACK]);
-        gl3.glBindVertexArray(vertexArrayName[Program.TRANSFORM]);
-
-        gl3.glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryName[0]);
-        gl3.glBeginTransformFeedback(GL_TRIANGLES);
         {
-            gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
-        }
-        gl3.glEndTransformFeedback();
-        gl3.glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+            // Disable rasterisation, vertices processing only!
+            gl3.glEnable(GL_RASTERIZER_DISCARD);
 
-        gl3.glDisable(GL_RASTERIZER_DISCARD);
+            gl3.glUseProgram(programName[Program.TRANSFORM]);
+            gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
+
+            gl3.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, feedbackOutput.POSITION, bufferName[Buffer.POSITION]);
+            gl3.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, feedbackOutput.COLOR, bufferName[Buffer.COLOR]);
+
+            gl3.glBindVertexArray(vertexArrayName[Program.TRANSFORM]);
+
+            gl3.glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, queryName[0]);
+            gl3.glBeginTransformFeedback(GL_TRIANGLES);
+            {
+                gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
+            }
+            gl3.glEndTransformFeedback();
+            gl3.glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+
+            gl3.glDisable(GL_RASTERIZER_DISCARD);
+        }
 
         // Second draw, reuse the captured attributes
-        gl3.glUseProgram(programName[Program.FEEDBACK]);
+        {
+            gl3.glUseProgram(programName[Program.FEEDBACK]);
 
-        int[] primitivesWritten = {0};
-        gl3.glGetQueryObjectuiv(queryName[0], GL_QUERY_RESULT, primitivesWritten, 0);
+            int[] primitivesWritten = {0};
+            gl3.glGetQueryObjectuiv(queryName[0], GL_QUERY_RESULT, primitivesWritten, 0);
 
-        gl3.glBindVertexArray(vertexArrayName[Program.FEEDBACK]);
-        gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, primitivesWritten[0] * 3, 1);
+            gl3.glBindVertexArray(vertexArrayName[Program.FEEDBACK]);
+            gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, primitivesWritten[0] * 3, 1);
+        }
 
         return true;
     }

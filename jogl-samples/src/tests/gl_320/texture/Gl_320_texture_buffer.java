@@ -37,7 +37,7 @@ public class Gl_320_texture_buffer extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/texture";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -157,7 +157,7 @@ public class Gl_320_texture_buffer extends Test {
         gl3.glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, maxTextureBufferSize, 0);
 
         gl3.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DIFFUSE]);
-        gl3.glBufferData(GL_TEXTURE_BUFFER, 500000, null, GL_STATIC_DRAW);
+        gl3.glBufferData(GL_TEXTURE_BUFFER, Math.min(500_000, maxTextureBufferSize[0]), null, GL_STATIC_DRAW);
         //glBufferData(GL_TEXTURE_BUFFER, sizeof(Diffuse), Diffuse, GL_STATIC_DRAW);
         gl3.glBufferSubData(GL_TEXTURE_BUFFER, 0, diffuse.length * Byte.BYTES, GLBuffers.newDirectByteBuffer(diffuse));
         gl3.glBindBuffer(GL_TEXTURE_BUFFER, 0);

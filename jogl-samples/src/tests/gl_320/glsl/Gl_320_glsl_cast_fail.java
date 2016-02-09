@@ -25,37 +25,13 @@ public class Gl_320_glsl_cast_fail extends Test {
     }
 
     public Gl_320_glsl_cast_fail() {
-        super("gl-320-glsl-cast-fail", Profile.CORE, 3, 2);
+        super("gl-320-glsl-cast-fail", Profile.CORE, 3, 2, Success.GENERATE_ERROR);
     }
 
     private final String SHADERS_SOURCE = "glsl-cast-fail";
     private final String SHADERS_ROOT = "src/data/gl_320/glsl";
-    private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
-    private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
-    private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f};
-
-    private int elementCount = 6;
-    private int elementSize = elementCount * Short.BYTES;
-    private short[] elementData = {
-        0, 1, 2,
-        2, 3, 0};
-
-    private class Buffer {
-
-        public static final int VERTEX = 0;
-        public static final int ELEMENT = 1;
-        public static final int TRANSFORM = 2;
-        public static final int MAX = 3;
-    }
-
-    private int[] vertexArrayName = {0}, textureName = {0}, bufferName = new int[Buffer.MAX];
-    private int programName, uniformTransform, uniformDiffuse;
+    private int programName;
 
     @Override
     protected boolean begin(GL gl) {

@@ -51,31 +51,36 @@ public class Test implements GLEventListener, KeyListener {
     private final Vec2 translationOrigin, translationCurrent, rotationOrigin, rotationCurrent;
     private boolean glDebug;
     protected final String TEXTURE_ROOT = "/data";
+    private Success success;
 
     public Test(String title, Profile profile, int major, int minor, Vec2 orientation, boolean glDebug) {
-        this(title, profile, major, minor, new Vec2i(640, 480), orientation, new Vec2(0, 4), glDebug);
+        this(title, profile, major, minor, new Vec2i(640, 480), orientation, new Vec2(0, 4), glDebug, Success.RUN_ONLY);
     }
 
     public Test(String title, Profile profile, int major, int minor, Vec2 orientation) {
-        this(title, profile, major, minor, new Vec2i(640, 480), orientation, new Vec2(0, 4), true);
+        this(title, profile, major, minor, new Vec2i(640, 480), orientation, new Vec2(0, 4), false, Success.RUN_ONLY);
     }
 
     public Test(String title, Profile profile, int major, int minor, Vec2i windowSize) {
-        this(title, profile, major, minor, windowSize, new Vec2(), new Vec2(0, 4), true);
+        this(title, profile, major, minor, windowSize, new Vec2(), new Vec2(0, 4), false, Success.RUN_ONLY);
     }
 
     public Test(String title, Profile profile, int major, int minor, Vec2i windowSize, Vec2 orientation) {
-        this(title, profile, major, minor, windowSize, orientation, new Vec2(0, 4), true);
+        this(title, profile, major, minor, windowSize, orientation, new Vec2(0, 4), false, Success.RUN_ONLY);
+    }
+
+    public Test(String title, Profile profile, int major, int minor, Success success) {
+        this(title, profile, major, minor, new Vec2i(640, 480), new Vec2(), new Vec2(0, 4), false, success);
     }
 
     public Test(String title, Profile profile, int major, int minor) {
-        this(title, profile, major, minor, new Vec2i(640, 480), new Vec2(), new Vec2(0, 4), true);
+        this(title, profile, major, minor, new Vec2i(640, 480), new Vec2(), new Vec2(0, 4), false, Success.RUN_ONLY);
     }
 
     public Test(String title, Profile profile,
             int major, int minor,
             Vec2i windowSize, Vec2 orientation, Vec2 position,
-            boolean glDebug) {
+            boolean glDebug, Success success) {
 
         this.profile = profile;
         this.major = major;
@@ -86,6 +91,7 @@ public class Test implements GLEventListener, KeyListener {
         this.rotationOrigin = orientation;
         this.rotationCurrent = orientation;
         this.glDebug = glDebug;
+        this.success = success;
 
         initGL(title);
     }
@@ -97,9 +103,9 @@ public class Test implements GLEventListener, KeyListener {
         GLProfile glProfile = getGlProfile();
         GLCapabilities glCapabilities = new GLCapabilities(glProfile);
         glWindow = GLWindow.create(screen, glCapabilities);
-        if (glDebug) {
-            glWindow.setContextCreationFlags(GLContext.CTX_OPTION_DEBUG);
-        }
+//        if (glDebug) {
+        glWindow.setContextCreationFlags(GLContext.CTX_OPTION_DEBUG);
+//        }
 
         assert glWindow != null;
 
@@ -112,9 +118,9 @@ public class Test implements GLEventListener, KeyListener {
         glWindow.setSize(windowSize.x, windowSize.y);
         glWindow.setVisible(true);
         glWindow.addGLEventListener(this);
-        if (glDebug) {
+//        if (glDebug) {
             glWindow.getContext().addGLDebugListener(new GlDebugOutput());
-        }
+//        }
         glWindow.addKeyListener(this);
 
         animator = new Animator();
@@ -131,8 +137,8 @@ public class Test implements GLEventListener, KeyListener {
         GL gl = getGl(drawable);
 
         assert checkGLVersion();
-
-        assert begin(gl);
+        
+        assert begin(gl) == (success != Success.GENERATE_ERROR);
     }
 
     private GLProfile getGlProfile() {
@@ -299,7 +305,6 @@ public class Test implements GLEventListener, KeyListener {
                     break;
             }
             System.out.println("OpenGL Error(" + errorString + "): " + title);
-            throw new Error();
         }
         return error == GL_NO_ERROR;
     }
@@ -472,5 +477,11 @@ public class Test implements GLEventListener, KeyListener {
         } catch (IOException ex) {
             //  Logger.getLogger(EC_DepthPeeling.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    public enum Success {
+        RUN_ONLY,
+        GENERATE_ERROR,
+        MATCH_TEMPLATE
     }
 }

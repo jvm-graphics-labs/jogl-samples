@@ -14,11 +14,11 @@ import com.jogamp.opengl.util.glsl.ShaderProgram;
 import glm.mat._3.Mat3;
 import glm.mat._4.Mat4;
 import glm.vec._3.Vec3;
-import glm.vec._4.Vec4;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v3fn3fc4f;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -39,11 +39,6 @@ public class Gl_320_buffer_uniform extends Test {
 
     private final String SHADERS_SOURCE = "buffer-uniform";
     private final String SHADERS_ROOT = "src/data/gl_320/buffer";
-
-    private class Vertex_v3fn3fc4f {
-
-        public static final int SIZEOF = 2 * Vec3.SIZE + Vec4.SIZE;
-    }
 
     private class Transform {
 
@@ -111,7 +106,7 @@ public class Gl_320_buffer_uniform extends Test {
     }
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * Vertex_v3fn3fc4f.SIZEOF;
+    private int vertexSize = vertexCount * Vertex_v3fn3fc4f.SIZE;
     private float[] vertexData = new float[]{
         -1.0f, -1.0f, 0.0f,/**/ 0.0f, 0.0f, 1.0f,/**/ 1.0f, 0.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 0.0f,/**/ 0.0f, 0.0f, 1.0f,/**/ 0.0f, 1.0f, 0.0f, 1.0f,
@@ -261,9 +256,9 @@ public class Gl_320_buffer_uniform extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, Vertex_v3fn3fc4f.SIZEOF, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false, Vertex_v3fn3fc4f.SIZEOF, Vec3.SIZE);
-            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, Vertex_v3fn3fc4f.SIZEOF, 2 * Vec3.SIZE);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, Vertex_v3fn3fc4f.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false, Vertex_v3fn3fc4f.SIZE, Vec3.SIZE);
+            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, Vertex_v3fn3fc4f.SIZE, 2 * Vec3.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);

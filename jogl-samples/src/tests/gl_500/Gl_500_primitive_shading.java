@@ -48,10 +48,10 @@ public class Gl_500_primitive_shading extends Test {
     private int vertexCount = 6;
     private int vertexSize = vertexCount * glf.Vertex_v2fc4ub.SIZE;
     private Vertex_v2fc4ub[] vertexData = {
-        new Vertex_v2fc4ub(new Vec2(-1.0f, -1.0f), new Vec4u8((byte) 255, (byte) 0, (byte) 0, (byte) 255)),
-        new Vertex_v2fc4ub(new Vec2(+1.0f, -1.0f), new Vec4u8((byte) 255, (byte) 255, (byte) 255, (byte) 255)),
-        new Vertex_v2fc4ub(new Vec2(+1.0f, +1.0f), new Vec4u8((byte) 0, (byte) 255, (byte) 0, (byte) 255)),
-        new Vertex_v2fc4ub(new Vec2(-1.0f, +1.0f), new Vec4u8((byte) 0, (byte) 0, (byte) 255, (byte) 255))};
+        new Vertex_v2fc4ub(new Vec2(-1.0f, -1.0f), new Vec4u8(255, 0, 0, 255)),
+        new Vertex_v2fc4ub(new Vec2(+1.0f, -1.0f), new Vec4u8(255, 255, 255, 255)),
+        new Vertex_v2fc4ub(new Vec2(+1.0f, +1.0f), new Vec4u8(0, 255, 0, 255)),
+        new Vertex_v2fc4ub(new Vec2(-1.0f, +1.0f), new Vec4u8(0, 0, 255, 255))};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -124,9 +124,9 @@ public class Gl_500_primitive_shading extends Test {
 
         return true;
     }
-    
-    private boolean initBuffer(GL4 gl4)	{
-        
+
+    private boolean initBuffer(GL4 gl4) {
+
 //		int[] uniformBufferOffset={0};
 //		gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset,0);
 //		int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
@@ -135,7 +135,6 @@ public class Gl_500_primitive_shading extends Test {
 //		gl4.glNamedBufferStorage(bufferName[Buffer.TRANSFORM], uniformBlockSize, nullptr, GL_MAP_WRITE_BIT);
 //		gl4.glNamedBufferStorage(BufferName[buffer::ELEMENT], ElementSize, ElementData, 0);
 //		gl4.glNamedBufferStorage(BufferName[buffer::VERTEX], VertexSize, VertexData, 0);
-
-		return true;
-	}
+        return true;
+    }
 }

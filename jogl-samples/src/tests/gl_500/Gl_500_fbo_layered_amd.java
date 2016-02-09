@@ -10,7 +10,6 @@ import com.jogamp.opengl.GL4;
 import dev.Vec2i;
 import framework.Profile;
 import framework.Test;
-import tests.gl_450.Gl_450_direct_state_access;
 
 /**
  *

@@ -43,10 +43,10 @@ public class Gl_400_primitive_smooth_shading extends Test {
     private int vertexCount = 4;
     private int vertexSize = vertexCount * glf.Vertex_v2fc4ub.SIZE;
     private glf.Vertex_v2fc4ub[] vertexData = {
-        new glf.Vertex_v2fc4ub(new Vec2(-1.0f, -1.0f), new Vec4u8((byte) 255, (byte) 0, (byte) 0, (byte) 255)),
-        new glf.Vertex_v2fc4ub(new Vec2(1.0f, -1.0f), new Vec4u8((byte) 255, (byte) 255, (byte) 255, (byte) 255)),
-        new glf.Vertex_v2fc4ub(new Vec2(1.0f, 1.0f), new Vec4u8((byte) 0, (byte) 255, (byte) 0, (byte) 255)),
-        new glf.Vertex_v2fc4ub(new Vec2(-1.0f, 1.0f), new Vec4u8((byte) 0, (byte) 0, (byte) 255, (byte) 255))};
+        new glf.Vertex_v2fc4ub(new Vec2(-1.0f, -1.0f), new Vec4u8(255, 0, 0, 255)),
+        new glf.Vertex_v2fc4ub(new Vec2(1.0f, -1.0f), new Vec4u8(255, 255, 255, 255)),
+        new glf.Vertex_v2fc4ub(new Vec2(1.0f, 1.0f), new Vec4u8(0, 255, 0, 255)),
+        new glf.Vertex_v2fc4ub(new Vec2(-1.0f, 1.0f), new Vec4u8(0, 0, 255, 255))};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;

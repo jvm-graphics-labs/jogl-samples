@@ -19,5 +19,5 @@ void main()
 {
     outBlock.color = color;
     gl_Position = mvp * position;
-    gl_PointSize = 16.f / -(mv * position).z;
+    gl_PointSize = 4.f / -(mv * position).z;
 }

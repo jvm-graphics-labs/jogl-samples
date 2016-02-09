@@ -160,7 +160,7 @@ public class Gl_400_buffer_uniform_array extends Test {
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int UniformBufferSize = Math.max(uniformBufferAlignment[0], 16 * Float.BYTES) * 2;
+        int UniformBufferSize = Math.max(uniformBufferAlignment[0], Mat4.SIZE) * 2;
 
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
@@ -187,7 +187,7 @@ public class Gl_400_buffer_uniform_array extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        int uniformBufferOffset = Math.max(uniformBufferAlignment[0], 16 * Float.BYTES);
+        int uniformBufferOffset = Math.max(uniformBufferAlignment[0], Mat4.SIZE);
         int uniformBufferRange = uniformBufferOffset * 2;
 
         {
@@ -216,9 +216,9 @@ public class Gl_400_buffer_uniform_array extends Test {
 
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
         gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0,
-                bufferName[Buffer.TRANSFORM], 0, 16 * Float.BYTES);
+                bufferName[Buffer.TRANSFORM], 0, Mat4.SIZE);
         gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM1,
-                bufferName[Buffer.TRANSFORM], uniformBufferOffset, 16 * Float.BYTES);
+                bufferName[Buffer.TRANSFORM], uniformBufferOffset, Mat4.SIZE);
 
         // Attach the buffer to UBO binding point semantic::uniform::MATERIAL
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL]);

@@ -19,6 +19,8 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
+import glm.vec._4.Vec4;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
@@ -40,7 +42,7 @@ public class Gl_320_draw_instanced extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/draw";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = new float[]{
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -139,16 +141,16 @@ public class Gl_320_draw_instanced extends Test {
         int[] uniformBufferOffset = new int[]{0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
 
-        int uniformTransformBlockSize = Math.max(16 * 2 * Float.BYTES, uniformBufferOffset[0]);
+        int uniformTransformBlockSize = Math.max(2 * Mat4.SIZE, uniformBufferOffset[0]);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformTransformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        int uniformMaterialBlockSize = Math.max(4 * 2 * Float.BYTES, uniformBufferOffset[0]);
+        int uniformMaterialBlockSize = Math.max(2 * Vec4.SIZE, uniformBufferOffset[0]);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformMaterialBlockSize, null, GL_STATIC_DRAW);
 
-        ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, 4 * 2 * Float.BYTES,
+        ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, 2 * Vec4.SIZE,
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
         pointer.asFloatBuffer().put(new float[]{1.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 1.0f}).rewind();
 
@@ -177,7 +179,7 @@ public class Gl_320_draw_instanced extends Test {
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, 16 * 2 * Float.BYTES,
+                    GL_UNIFORM_BUFFER, 0, 2 * Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);

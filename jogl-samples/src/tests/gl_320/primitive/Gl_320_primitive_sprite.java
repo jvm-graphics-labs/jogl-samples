@@ -12,6 +12,7 @@ import static com.jogamp.opengl.GL3.*;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._2.Vec2;
@@ -43,7 +44,7 @@ public class Gl_320_primitive_sprite extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * (2 + 4) * Float.BYTES;
+    private int vertexSize = vertexCount * glf.Vertex_v2fc4f.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f, 1, 0, 0, 1,
         +1.0f, -1.0f, 1, 1, 0, 1,
@@ -76,7 +77,6 @@ public class Gl_320_primitive_sprite extends Test {
         gl3.glEnable(GL_DEPTH_TEST);
         gl3.glDepthFunc(GL_LESS);
         gl3.glEnable(GL_PROGRAM_POINT_SIZE);
-        gl3.glEnable(GL_POINT_SPRITE);
         //glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_LOWER_LEFT);
         gl3.glPointParameteri(GL_POINT_SPRITE_COORD_ORIGIN, GL_UPPER_LEFT);
 
@@ -132,6 +132,7 @@ public class Gl_320_primitive_sprite extends Test {
         // Copy the vertex data in the buffer, in this sample for the whole range of data.
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferSubData(GL_ARRAY_BUFFER, 0, vertexSize, vertexBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         // Unbind the buffer
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -145,8 +146,8 @@ public class Gl_320_primitive_sprite extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, (2 + 4) * Float.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, (2 + 4) * Float.BYTES, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fc4f.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, glf.Vertex_v2fc4f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);

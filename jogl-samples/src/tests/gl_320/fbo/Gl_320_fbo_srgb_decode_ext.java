@@ -17,6 +17,8 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
+import glm.vec._4.Vec4;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -45,12 +47,12 @@ public class Gl_320_fbo_srgb_decode_ext extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -91,9 +93,8 @@ public class Gl_320_fbo_srgb_decode_ext extends Test {
     }
 
     private int framebufferScale = 2, uniformTransform;
-    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX],
-            framebufferName = {0};
+    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX], framebufferName = {0},
+            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -170,15 +171,12 @@ public class Gl_320_fbo_srgb_decode_ext extends Test {
         if (validated) {
 
             uniformTransform = gl3.glGetUniformBlockIndex(programName[Program.TEXTURE], "Transform");
-            uniformDiffuse[Program.TEXTURE]
-                    = gl3.glGetUniformLocation(programName[Program.TEXTURE], "diffuse");
-            uniformDiffuse[Program.SPLASH]
-                    = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
+            uniformDiffuse[Program.TEXTURE] = gl3.glGetUniformLocation(programName[Program.TEXTURE], "diffuse");
+            uniformDiffuse[Program.SPLASH] = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
 
             gl3.glUseProgram(programName[Program.TEXTURE]);
             gl3.glUniform1i(uniformDiffuse[Program.TEXTURE], 0);
-            gl3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform,
-                    Semantic.Uniform.TRANSFORM0);
+            gl3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform, Semantic.Uniform.TRANSFORM0);
 
             gl3.glUseProgram(programName[Program.SPLASH]);
             gl3.glUniform1i(uniformDiffuse[Program.SPLASH], 0);
@@ -205,7 +203,7 @@ public class Gl_320_fbo_srgb_decode_ext extends Test {
 
         int[] uniformBufferOffset = {0};
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(2 * Float.BYTES, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -235,7 +233,7 @@ public class Gl_320_fbo_srgb_decode_ext extends Test {
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SRGB_DECODE_EXT, GL_DECODE_EXT);
+            gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SRGB_DECODE_EXT, GL_SKIP_DECODE_EXT);
 
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
             for (int level = 0; level < texture.levels(); ++level) {
@@ -277,8 +275,8 @@ public class Gl_320_fbo_srgb_decode_ext extends Test {
         gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -317,7 +315,7 @@ public class Gl_320_fbo_srgb_decode_ext extends Test {
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER,
-                    0, 16 * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+                    0, Mat4.SIZE, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
 
@@ -335,11 +333,10 @@ public class Gl_320_fbo_srgb_decode_ext extends Test {
 
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
 
-            // Convert linear clear color to sRGB color space, FramebufferName is a sRGB FBO
-            gl3.glEnable(GL_FRAMEBUFFER_SRGB);
             float[] depth = {1.0f};
             gl3.glClearBufferfv(GL_DEPTH, 0, depth, 0);
-            gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+            Vec4 clearColorSRGB = new Vec4(1.0f, 0.5f, 0.0f, 1.0f).convertLinearToSRGB();
+            gl3.glClearBufferfv(GL_COLOR, 0, clearColorSRGB.toFA_(), 0);
 
             // TextureName[texture::DIFFUSE] is a sRGB texture which sRGB conversion on fetch has been disabled
             // Hence in the shader, the value is stored as sRGB so we should not convert it to sRGB.
@@ -359,7 +356,6 @@ public class Gl_320_fbo_srgb_decode_ext extends Test {
             gl3.glViewport(0, 0, windowSize.x, windowSize.y);
 
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-            gl3.glDisable(GL_FRAMEBUFFER_SRGB);
 
             gl3.glUseProgram(programName[Program.SPLASH]);
 

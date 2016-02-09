@@ -11,11 +11,14 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fv2f;
+import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -41,32 +44,16 @@ public class Gl_320_texture_pixel_store extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/texture";
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
-    public static class Vertex {
-
-        public float[] position;
-        public float[] texCoord;
-        public static final int SIZEOF = 2 * 2 * Float.BYTES;
-
-        public Vertex(float[] position, float[] texCoord) {
-            this.position = position;
-            this.texCoord = texCoord;
-        }
-
-        public float[] toFloatArray() {
-            return new float[]{position[0], position[1], texCoord[0], texCoord[1]};
-        }
-    }
-
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * Vertex.SIZEOF;
-    private Vertex[] vertexData = {
-        new Vertex(new float[]{-1.0f, -1.0f}, new float[]{0.0f, 1.0f}),
-        new Vertex(new float[]{+1.0f, -1.0f}, new float[]{1.0f, 1.0f}),
-        new Vertex(new float[]{+1.0f, +1.0f}, new float[]{1.0f, 0.0f}),
-        new Vertex(new float[]{+1.0f, +1.0f}, new float[]{1.0f, 0.0f}),
-        new Vertex(new float[]{-1.0f, +1.0f}, new float[]{0.0f, 0.0f}),
-        new Vertex(new float[]{-1.0f, -1.0f}, new float[]{0.0f, 1.0f})};
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
+    private float[] vertexData = {
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f,
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f};
 
     private class Buffer {
 
@@ -140,12 +127,9 @@ public class Gl_320_texture_pixel_store extends Test {
         gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexCount * 4);
-        for (Vertex vertex : vertexData) {
-            vertexBuffer.put(vertex.toFloatArray());
-        }
-        vertexBuffer.rewind();
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = {0};
@@ -154,7 +138,7 @@ public class Gl_320_texture_pixel_store extends Test {
                 GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT,
                 uniformBufferOffset, 0);
 
-        int uniformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -207,8 +191,8 @@ public class Gl_320_texture_pixel_store extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex.SIZEOF, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex.SIZEOF, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -227,7 +211,7 @@ public class Gl_320_texture_pixel_store extends Test {
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
+                    GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);

@@ -6,27 +6,27 @@ layout(std140, column_major) uniform;
 
 #define COUNT 4
 
-uniform transform
+uniform Transform
 {
-	mat4 MVP;
-} Transform;
+    mat4 mvp;
+} transform;
 
-in vec2 Position;
-in vec2 Texcoord;
+in vec2 position;
+in vec2 texCoord;
 
-out block
+out Block
 {
-	vec2 Texcoord;
-	vec4 Lumimance[COUNT];
-} Out;
+    vec2 texCoord;
+    vec4 lumimance[COUNT];
+} outBlock;
 
 void main()
 {
-	lowp int Count = lowp int(COUNT); // This shader is invalid, lowp is not part of the type hence of the cast
+    lowp int count = lowp int(COUNT); // This shader is invalid, lowp is not part of the type hence of the cast
 
-	for(lowp int i = 0; i < Count; ++i)
-		Out.Lumimance[i] = vec4(1.0) / vec4(COUNT);
+    for(lowp int i = 0; i < count; ++i)
+        outBlock.lumimance[i] = vec4(1.0) / vec4(COUNT);
 
-	Out.Texcoord = Texcoord;
-	gl_Position = Transform.MVP * vec4(Position, 0.0, 1.0);
+    outBlock.texCoord = texCoord;
+    gl_Position = transform.mvp * vec4(position, 0.0, 1.0);
 }

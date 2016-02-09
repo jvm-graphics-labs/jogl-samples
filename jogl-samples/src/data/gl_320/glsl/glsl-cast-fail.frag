@@ -6,23 +6,23 @@ layout(std140, column_major) uniform;
 
 #define COUNT 4
 
-uniform sampler2D Diffuse;
+uniform sampler2D diffuse;
 
-in block
+in Block
 {
-	vec2 Texcoord;
-	vec4 Lumimance[COUNT];
-} In;
+    vec2 texCoord;
+    vec4 lumimance[COUNT];
+} inBlock;
 
-out vec4 Color;
+out vec4 color;
 
 void main()
 {
-	highp uint First = uint(0);
-	vec4 Luminance = vec4(0.0);
+    highp uint first = uint(0);
+    vec4 luminance = vec4(0.0);
 
-	for(uint i = First; i < uint(COUNT); ++i)
-		Luminance += In.Lumimance[i];
+    for(uint i = first; i < uint(COUNT); ++i)
+        luminance += inBlock.lumimance[i];
 
-	Color = texture(Diffuse, In.Texcoord) * Luminance;
+    color = texture(diffuse, inBlock.texCoord) * luminance;
 }

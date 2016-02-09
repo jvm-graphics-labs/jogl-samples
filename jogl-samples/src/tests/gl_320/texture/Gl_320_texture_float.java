@@ -20,6 +20,9 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import dev.Vec2i;
+import framework.BufferUtils;
+import glm.mat._4.Mat4;
+import glm.vec._2.Vec2;
 
 /**
  *
@@ -39,7 +42,7 @@ public class Gl_320_texture_float extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/texture";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZE;
     float scale = 0.8f;
     private float[] vertexData = {
         -scale, -scale, 0.0f, 1.0f,
@@ -77,7 +80,7 @@ public class Gl_320_texture_float extends Test {
             7, 5, 0, 6, 1, 2, 0, 3,
             7, 2, 4, 1, 7, 3, 4, 3,
             4, 3, 5, 1, 5, 2, 3, 6,
-            7, 2, 2, 2, 5, 5, 6, 6,},
+            7, 2, 2, 2, 5, 5, 6, 6},
         {
             0, 2, 3, 4, 1, 6, 5, 7,
             5, 4, 0, 5, 3, 7, 2, 1,
@@ -86,7 +89,7 @@ public class Gl_320_texture_float extends Test {
             3, 6, 7, 0, 2, 1, 4, 5,
             2, 0, 5, 1, 4, 3, 7, 6,
             4, 1, 2, 7, 6, 5, 0, 3,
-            7, 3, 6, 5, 0, 2, 1, 4,},
+            7, 3, 6, 5, 0, 2, 1, 4},
         {
             2, 3, 4, 5, 7, 2, 7, 5,
             6, 7, 1, 3, 6, 6, 2, 0,
@@ -95,7 +98,7 @@ public class Gl_320_texture_float extends Test {
             7, 0, 4, 3, 2, 2, 5, 1,
             0, 1, 4, 5, 3, 5, 4, 1,
             0, 0, 5, 5, 0, 4, 1, 1,
-            2, 2, 7, 5, 4, 1, 1, 4,},
+            2, 2, 7, 5, 4, 1, 1, 4},
         {
             0, 7, 6, 7, 3, 6, 7, 3,
             2, 6, 3, 6, 1, 3, 6, 1,
@@ -104,7 +107,7 @@ public class Gl_320_texture_float extends Test {
             2, 6, 3, 6, 1, 3, 6, 1,
             3, 5, 4, 5, 0, 4, 5, 0,
             2, 6, 3, 6, 1, 3, 6, 1,
-            6, 1, 5, 1, 4, 5, 1, 4,}
+            6, 1, 5, 1, 4, 5, 1, 4}
     };
 
     private int[][] set2 = {
@@ -116,7 +119,7 @@ public class Gl_320_texture_float extends Test {
             7, 5, 7, 7, 0, 1, 4, 7,
             0, 7, 6, 7, 2, 3, 4, 6,
             3, 1, 3, 1, 0, 5, 3, 1,
-            3, 1, 1, 0, 5, 5, 5, 3,},
+            3, 1, 1, 0, 5, 5, 5, 3},
         {
             7, 3, 6, 0, 5, 4, 1, 2,
             4, 5, 2, 1, 7, 3, 6, 0,
@@ -125,8 +128,7 @@ public class Gl_320_texture_float extends Test {
             0, 7, 3, 6, 4, 5, 2, 1,
             5, 1, 4, 2, 3, 6, 0, 7,
             6, 2, 0, 3, 1, 7, 5, 4,
-            1, 4, 5, 7, 0, 2, 3, 6
-        },
+            1, 4, 5, 7, 0, 2, 3, 6},
         {
             2, 3, 4, 5, 7, 2, 7, 5,
             6, 7, 1, 3, 6, 6, 2, 0,
@@ -135,7 +137,7 @@ public class Gl_320_texture_float extends Test {
             7, 0, 4, 3, 2, 2, 5, 1,
             0, 1, 4, 5, 3, 5, 4, 1,
             0, 0, 5, 5, 0, 4, 1, 1,
-            2, 2, 7, 5, 4, 1, 1, 4,},
+            2, 2, 7, 5, 4, 1, 1, 4},
         {
             0, 7, 6, 7, 3, 6, 7, 3,
             2, 6, 3, 6, 1, 3, 6, 1,
@@ -144,8 +146,7 @@ public class Gl_320_texture_float extends Test {
             2, 6, 3, 6, 1, 3, 6, 1,
             3, 5, 4, 5, 0, 4, 5, 0,
             2, 6, 3, 6, 1, 3, 6, 1,
-            6, 1, 5, 1, 4, 5, 1, 4,}
-    };
+            6, 1, 5, 1, 4, 5, 1, 4}};
 
     private int[][] set3 = {
         {
@@ -156,7 +157,7 @@ public class Gl_320_texture_float extends Test {
             1, 7, 6, 1, 0, 6, 2, 3,
             2, 7, 1, 4, 5, 0, 4, 5,
             6, 6, 3, 3, 4, 5, 5, 4,
-            1, 6, 4, 4, 3, 4, 3, 3,},
+            1, 6, 4, 4, 3, 4, 3, 3},
         {
             6, 0, 7, 3, 2, 4, 5, 1,
             4, 1, 2, 5, 0, 7, 3, 6,
@@ -165,8 +166,7 @@ public class Gl_320_texture_float extends Test {
             0, 5, 1, 7, 6, 2, 4, 3,
             1, 2, 3, 4, 5, 6, 7, 0,
             5, 4, 6, 2, 3, 0, 1, 7,
-            3, 6, 0, 1, 7, 5, 2, 4
-        },
+            3, 6, 0, 1, 7, 5, 2, 4},
         {
             2, 3, 4, 5, 7, 2, 7, 5,
             6, 7, 1, 3, 6, 6, 2, 0,
@@ -175,7 +175,7 @@ public class Gl_320_texture_float extends Test {
             7, 0, 4, 3, 2, 2, 5, 1,
             0, 1, 4, 5, 3, 5, 4, 1,
             0, 0, 5, 5, 0, 4, 1, 1,
-            2, 2, 7, 5, 4, 1, 1, 4,},
+            2, 2, 7, 5, 4, 1, 1, 4},
         {
             0, 7, 6, 7, 3, 6, 7, 3,
             2, 6, 3, 6, 1, 3, 6, 1,
@@ -184,8 +184,7 @@ public class Gl_320_texture_float extends Test {
             2, 6, 3, 6, 1, 3, 6, 1,
             3, 5, 4, 5, 0, 4, 5, 0,
             2, 6, 3, 6, 1, 3, 6, 1,
-            6, 1, 5, 1, 4, 5, 1, 4,}
-    };
+            6, 1, 5, 1, 4, 5, 1, 4}};
 
     private int[][] set4 = {
         {
@@ -196,7 +195,7 @@ public class Gl_320_texture_float extends Test {
             4, 3, 6, 6, 5, 3, 6, 0,
             3, 2, 2, 1, 6, 0, 1, 2,
             2, 4, 6, 4, 1, 7, 6, 3,
-            2, 5, 7, 6, 2, 5, 6, 1,},
+            2, 5, 7, 6, 2, 5, 6, 1},
         {
             6, 7, 2, 3, 1, 5, 0, 4,
             4, 3, 0, 5, 7, 6, 1, 2,
@@ -205,7 +204,7 @@ public class Gl_320_texture_float extends Test {
             3, 4, 6, 2, 5, 0, 7, 1,
             7, 0, 5, 1, 4, 3, 2, 6,
             2, 6, 4, 7, 0, 1, 5, 3,
-            5, 1, 3, 0, 6, 2, 4, 7,},
+            5, 1, 3, 0, 6, 2, 4, 7},
         {
             2, 3, 4, 5, 7, 2, 7, 5,
             6, 7, 1, 3, 6, 6, 2, 0,
@@ -214,7 +213,7 @@ public class Gl_320_texture_float extends Test {
             7, 0, 4, 3, 2, 2, 5, 1,
             0, 1, 4, 5, 3, 5, 4, 1,
             0, 0, 5, 5, 0, 4, 1, 1,
-            2, 2, 7, 5, 4, 1, 1, 4,},
+            2, 2, 7, 5, 4, 1, 1, 4},
         {
             0, 7, 6, 7, 3, 6, 7, 3,
             2, 6, 3, 6, 1, 3, 6, 1,
@@ -223,8 +222,7 @@ public class Gl_320_texture_float extends Test {
             2, 6, 3, 6, 1, 3, 6, 1,
             3, 5, 4, 5, 0, 4, 5, 0,
             2, 6, 3, 6, 1, 3, 6, 1,
-            6, 1, 5, 1, 4, 5, 1, 4,}
-    };
+            6, 1, 5, 1, 4, 5, 1, 4}};
 
     private int[] vertexArrayName = {0}, textureName = {0}, bufferName = new int[Buffer.MAX];
     private int programName, uniformLayer;
@@ -251,7 +249,7 @@ public class Gl_320_texture_float extends Test {
 
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
+            ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             pointer.asFloatBuffer().put(glm.ortho_(-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f).toFa_());
@@ -317,16 +315,18 @@ public class Gl_320_texture_float extends Test {
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = {0};
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -477,101 +477,119 @@ public class Gl_320_texture_float extends Test {
         gl3.glTexImage3D(GL_TEXTURE_2D_ARRAY, 0, GL_RGB8, size, size, 16, 0, GL_RGB, GL_UNSIGNED_BYTE, null);
 
         byte[][] c = color;
+        ByteBuffer dataBuffer = GLBuffers.newDirectByteBuffer(3 * 8 * 8);
         // Instance 3
         {
             byte[] data1 = buildColorChart(c, set1[0]);
+            dataBuffer.put(data1).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 0,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data1));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             byte[] data2 = buildColorChart(c, set1[1]);
+            dataBuffer.put(data2).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 1,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data2));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             byte[] data3 = buildColorChart(c, set1[2]);
+            dataBuffer.put(data3).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 2,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data3));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             byte[] data4 = buildColorChart(c, set1[3]);
+            dataBuffer.put(data4).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 3,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data4));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
         }
 
         // Instance 4
         {
             byte[] data1 = buildColorChart(c, set2[0]);
+            dataBuffer.put(data1).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 4,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data1));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             byte[] data2 = buildColorChart(c, set2[1]);
+            dataBuffer.put(data2).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 5,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data2));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             byte[] data3 = buildColorChart(c, set2[2]);
+            dataBuffer.put(data3).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 6,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data3));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             byte[] data4 = buildColorChart(c, set2[3]);
+            dataBuffer.put(data4).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 7,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data4));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
         }
 
         // Instance 5
         {
             byte[] data1 = buildColorChart(c, set3[0]);
+            dataBuffer.put(data1).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 8,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data1));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             byte[] data2 = buildColorChart(c, set3[1]);
+            dataBuffer.put(data2).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 9,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data2));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             byte[] data3 = buildColorChart(c, set3[2]);
+            dataBuffer.put(data3).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 10,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data3));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             byte[] data4 = buildColorChart(c, set3[3]);
+            dataBuffer.put(data4).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 11,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data4));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
         }
 
         // Instance 6
         {
             byte[] data1 = buildColorChart(c, set4[0]);
+            dataBuffer.put(data1).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 12,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data1));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             byte[] data2 = buildColorChart(c, set4[1]);
+            dataBuffer.put(data2).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 13,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data2));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             byte[] data3 = buildColorChart(c, set4[2]);
+            dataBuffer.put(data3).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 14,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data3));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
             byte[] data4 = buildColorChart(c, set4[3]);
+            dataBuffer.put(data4).rewind();
             gl3.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0,
                     0, 0, 15,
                     size, size, 1,
-                    GL_RGB, GL_UNSIGNED_BYTE, GLBuffers.newDirectByteBuffer(data4));
+                    GL_RGB, GL_UNSIGNED_BYTE, dataBuffer);
         }
+        BufferUtils.destroyDirectBuffer(dataBuffer);
         gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
         return checkError(gl3, "initTexture");
@@ -604,8 +622,8 @@ public class Gl_320_texture_float extends Test {
         gl3.glGenVertexArrays(1, vertexArrayName, 0);
         gl3.glBindVertexArray(vertexArrayName[0]);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-        gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+        gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, 0);
+        gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, Vec2.SIZE);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);

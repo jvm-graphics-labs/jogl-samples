@@ -227,7 +227,7 @@ public class Gl_400_fbo_shadow extends Test {
 
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
 
-        int uniformBlockSize = Math.max(16 * Float.BYTES * 3, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE * 3, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -361,7 +361,7 @@ public class Gl_400_fbo_shadow extends Test {
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         ByteBuffer pointer = gl4.glMapBufferRange(
-                GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES * 3,
+                GL_UNIFORM_BUFFER, 0, Mat4.SIZE * 3,
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
         // Update of the MVP matrix for the render pass

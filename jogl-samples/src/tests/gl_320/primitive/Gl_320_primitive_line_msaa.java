@@ -11,12 +11,15 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Glm;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fv2f;
+import glm.vec._2.Vec2;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
@@ -154,15 +157,12 @@ public class Gl_320_primitive_line_msaa extends Test {
         if (validated) {
 
             uniformTransform = gl3.glGetUniformBlockIndex(programName[Program.TEXTURE], "Transform");
-            uniformDiffuse[Program.TEXTURE]
-                    = gl3.glGetUniformLocation(programName[Program.TEXTURE], "diffuse");
-            uniformDiffuse[Program.SPLASH]
-                    = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
+            uniformDiffuse[Program.TEXTURE] = gl3.glGetUniformLocation(programName[Program.TEXTURE], "diffuse");
+            uniformDiffuse[Program.SPLASH] = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
 
             gl3.glUseProgram(programName[Program.TEXTURE]);
             gl3.glUniform1i(uniformDiffuse[Program.TEXTURE], 0);
-            gl3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform,
-                    Semantic.Uniform.TRANSFORM0);
+            gl3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform, Semantic.Uniform.TRANSFORM0);
 
             gl3.glUseProgram(programName[Program.SPLASH]);
             gl3.glUniform1i(uniformDiffuse[Program.SPLASH], 0);
@@ -177,7 +177,7 @@ public class Gl_320_primitive_line_msaa extends Test {
 
         float[] data = new float[2 * 36];
         for (int i = 0; i < 36; ++i) {
-            float angle = (float) Math.PI * 2.0f * (float) i / (data.length / 2);
+            float angle = (float) Math.PI * 2.0f * i / (data.length / 2);
             data[i * 2 + 0] = Glm.normalize(new float[]{(float) Math.sin(angle), (float) Math.cos(angle)})[0];
             data[i * 2 + 1] = Glm.normalize(new float[]{(float) Math.sin(angle), (float) Math.cos(angle)})[1];
         }
@@ -186,11 +186,12 @@ public class Gl_320_primitive_line_msaa extends Test {
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(data);
         gl3.glBufferData(GL_ARRAY_BUFFER, data.length * Float.BYTES, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = {0};
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -230,8 +231,8 @@ public class Gl_320_primitive_line_msaa extends Test {
         gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -274,7 +275,7 @@ public class Gl_320_primitive_line_msaa extends Test {
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, 16 * Float.BYTES,
+                    GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);

@@ -18,6 +18,8 @@ import framework.Glm;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
+import glm.vec._4.Vec4;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -46,12 +48,12 @@ public class Gl_320_fbo_srgb extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -91,7 +93,7 @@ public class Gl_320_fbo_srgb extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX], 
+    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
             bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX],
             framebufferName = {0};
     private int framebufferScale = 2, uniformTransform;
@@ -216,7 +218,7 @@ public class Gl_320_fbo_srgb extends Test {
 
         int[] uniformBufferOffset = {0};
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(16 * Float.BYTES, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -254,8 +256,8 @@ public class Gl_320_fbo_srgb extends Test {
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-            float[] data = Glm.convertLinearToSRGB(new float[]{0.0f, 0.5f, 1.0f, 1.0f});
-            FloatBuffer dataBuffer = GLBuffers.newDirectFloatBuffer(data);
+            Vec4 data_ = new Vec4(0.0f, 0.5f, 1.0f, 1.0f).convertLinearToSRGB();
+            FloatBuffer dataBuffer = GLBuffers.newDirectFloatBuffer(data_.toFA_());
             gl3.glTexImage2D(GL_TEXTURE_2D, 0,
                     GL_SRGB8_ALPHA8,
                     1, 1, 0,
@@ -293,8 +295,8 @@ public class Gl_320_fbo_srgb extends Test {
         gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -340,7 +342,7 @@ public class Gl_320_fbo_srgb extends Test {
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER,
-                    0, 16 * Float.BYTES, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+                    0, Mat4.SIZE, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
 
@@ -384,7 +386,7 @@ public class Gl_320_fbo_srgb extends Test {
 
             gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
             // Uncomment to avoid the extra linear to sRGB conversion and hence get correct display
-            gl3.glDisable(GL_FRAMEBUFFER_SRGB); 
+            gl3.glDisable(GL_FRAMEBUFFER_SRGB);
 
             gl3.glUseProgram(programName[Program.SPLASH]);
 
