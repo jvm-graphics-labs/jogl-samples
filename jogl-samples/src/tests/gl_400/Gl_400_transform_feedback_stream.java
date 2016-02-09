@@ -59,7 +59,7 @@ public class Gl_400_transform_feedback_stream extends Test {
     protected boolean begin(GL gl) {
 
         GL4 gl4 = (GL4) gl;
-
+        
         boolean validated = true;
 
         if (validated) {

@@ -86,7 +86,7 @@ public class Gl_320_transform_feedback_separated extends Test {
     protected boolean begin(GL gl) {
 
         GL3 gl3 = (GL3) gl;
-
+        
         boolean validated = true;
 
         if (validated) {

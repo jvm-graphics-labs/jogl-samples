@@ -17,6 +17,8 @@ import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
+import glm.vec._4.Vec4;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
@@ -38,7 +40,7 @@ public class Gl_320_query_conditional extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/query";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -155,7 +157,7 @@ public class Gl_320_query_conditional extends Test {
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformTransformBlockSize, null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        uniformMaterialOffset = Math.max(4 * Float.BYTES, uniformBufferOffset[0]);
+        uniformMaterialOffset = Math.max(Vec4.SIZE, uniformBufferOffset[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformMaterialOffset * 2, null, GL_STATIC_DRAW);
