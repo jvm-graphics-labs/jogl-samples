@@ -28,6 +28,6 @@ Model -> World -> Camera/View -> Clip -> NDC -> Window/Image space (i.e. coordin
 * draw only a specific range of elements within an array.
 * `glDrawElementsInstancedBaseVertex`
 
-### [gl-320-draw-without-vertex_attrib](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/draw/Gl_320_draw_without_vertex_attrib.java) :
+### [gl-320-draw-without-vertex-attrib](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/draw/Gl_320_draw_without_vertex_attrib.java) :
 
 * draw without any vertex attribute. The vertex positions will are hardcoded inside the vertex shader and accesses via `gl_VertexID`
