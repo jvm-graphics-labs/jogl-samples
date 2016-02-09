@@ -1,5 +1,5 @@
 # Highlights
 
-### [gl-320-fbo](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/fbo/Gl_320_fbo.java) :
+### [gl-320-glsl-builtin-blocks](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/glsl/Gl_320_glsl_builtin_blocks.java) :
 
-* set up a framebuffer object, render to it and then blit to the default framebuffer
+* glsl built-in `gl_PerVertex` block
