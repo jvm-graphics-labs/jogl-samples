@@ -2,7 +2,8 @@
 
 ### [gl-330-blend-index](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_330/Gl_330_blend_index.java) :
 
-* indexed blending
+* [dual source blending](https://www.opengl.org/wiki/Blending#Dual_Source_Blending)
+* load a diffuse texture and enables blending in order to get the output of the fragment shader on the index 1
 
 ### [gl-330-blend-rtt](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_330/Gl_330_blend_rtt.java) :
 
