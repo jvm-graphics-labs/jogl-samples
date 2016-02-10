@@ -70,3 +70,15 @@
 ### [gl-330-sampler-object](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_330/Gl_330_sampler_object.java) :
 
 * renders the upper left corner of a texture with `GL_TEXTURE_MIN_FILTER`/`GL_TEXTURE_MAG_FILTER` to `GL_NEAREST_MIPMAP_NEAREST`/`GL_NEAREST` and the lower right with `GL_LINEAR_MIPMAP_LINEAR`/`GL_LINEAR`
+
+### [gl-330-sampler-wrap](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_330/Gl_330_sampler_wrap.java) :
+
+* renders a texture with four different wrap s/t
+* `GL_MIRRORED_REPEAT`
+* `GL_CLAMP_TO_BORDER`
+* `GL_REPEAT`
+* `GL_CLAMP_TO_EDGE`
+
+### [gl-330-texture-integer-rgb10a2ui](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_330/Gl_330_texture_integer_rgb10a2ui.java) : not working
+
+
