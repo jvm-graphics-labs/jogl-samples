@@ -16,6 +16,7 @@ import glm.mat._4.Mat4d;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 
@@ -43,7 +44,7 @@ public class Gl_400_program_64 extends Test {
         0, 2, 3};
 
     private int vertexCount = 4;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -140,7 +141,7 @@ public class Gl_400_program_64 extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.F32]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Float.BYTES, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vec2.SIZE, 0);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);

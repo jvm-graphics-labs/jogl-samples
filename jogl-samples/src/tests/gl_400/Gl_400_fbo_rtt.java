@@ -56,8 +56,7 @@ public class Gl_400_fbo_rtt extends Test {
         Vec2i framebufferSize = new Vec2i(windowSize.x / FRAMEBUFFER_FACTOR, windowSize.y / FRAMEBUFFER_FACTOR);
 
         viewport[Texture.R] = new Vec4(windowSize.x >> 1, 0, framebufferSize.x, framebufferSize.y);
-        viewport[Texture.G] = new Vec4(windowSize.x >> 1, windowSize.y >> 1,
-                framebufferSize.x, framebufferSize.y);
+        viewport[Texture.G] = new Vec4(windowSize.x >> 1, windowSize.y >> 1, framebufferSize.x, framebufferSize.y);
         viewport[Texture.B] = new Vec4(0, windowSize.y >> 1, framebufferSize.x, framebufferSize.y);
 
         boolean validated = true;

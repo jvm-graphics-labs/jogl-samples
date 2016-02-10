@@ -11,12 +11,14 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._3.Vec3;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
@@ -41,39 +43,16 @@ public class Gl_330_sampler_object extends Test {
     private final String SHADERS_ROOT = "src/data/gl_330";
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
-    public static class Vertex {
-
-        public float[] position;
-        public float[] texCoord;
-        public static final int SIZEOF = 2 * 2 * Float.BYTES;
-
-        public Vertex(float[] position, float[] texCoord) {
-            this.position = position;
-            this.texCoord = texCoord;
-        }
-
-        public float[] toFloatArray() {
-            return new float[]{position[0], position[1], texCoord[0], texCoord[1]};
-        }
-    }
-
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * Vertex.SIZEOF;
-    private Vertex[] vertexData = {
-        new Vertex(new float[]{-1.0f, -1.0f}, new float[]{0.0f, 1.0f}),
-        new Vertex(new float[]{+1.0f, -1.0f}, new float[]{1.0f, 1.0f}),
-        new Vertex(new float[]{+1.0f, +1.0f}, new float[]{1.0f, 0.0f}),
-        new Vertex(new float[]{+1.0f, +1.0f}, new float[]{1.0f, 0.0f}),
-        new Vertex(new float[]{-1.0f, +1.0f}, new float[]{0.0f, 0.0f}),
-        new Vertex(new float[]{-1.0f, -1.0f}, new float[]{0.0f, 1.0f})};
-
-    private class Type {
-
-        public static final int VERT = 0;
-        public static final int FRAG = 1;
-        public static final int MAX = 2;
-    }
+    private int vertexSize = vertexCount * 2 * Vec2.SIZE;
+    private float[] vertexData = {
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f,
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f};
 
     private int[] vertexArrayName = {0}, bufferName = {0}, textureName = {0}, samplerAname = {0}, samplerBname = {0};
     private int programName, uniformMvp, uniformDiffuseA, uniformDiffuseB;
@@ -143,12 +122,9 @@ public class Gl_330_sampler_object extends Test {
         gl3.glGenBuffers(1, bufferName, 0);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexCount * 4);
-        for (Vertex vertex : vertexData) {
-            vertexBuffer.put(vertex.toFloatArray());
-        }
-        vertexBuffer.rewind();
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return true;
@@ -225,8 +201,8 @@ public class Gl_330_sampler_object extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex.SIZEOF, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex.SIZEOF, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Vec2.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Vec2.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);

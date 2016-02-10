@@ -11,11 +11,13 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -43,13 +45,20 @@ public class Gl_400_draw_indirect extends Test {
         0, 2, 3};
 
     private int vertexCount = 4;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,
         +1.0f, +1.0f,
         -1.0f, +1.0f};
 
+    /**
+     * We don't use the class in /framework because from GL 4.2 the last field
+     * can be different from zero.
+     * The baseInstance​ member of the DrawElementsIndirectCommand​ structure is defined only if the GL version is 4.2
+     * or greater. For versions of the GL less than 4.2, this parameter is present but is reserved and should be set
+     * to zero. On earlier versions of the GL, behavior is undefined if it is non-zero.
+     */
     private class DrawElementsIndirectCommand {
 
         public int count;
@@ -59,22 +68,37 @@ public class Gl_400_draw_indirect extends Test {
         public int reservedMustBeZero;
 
         public DrawElementsIndirectCommand(int count, int primCount, int firstIndex, int baseVertex, int reservedMustBeZero) {
+            // Specifies the number of elements to be rendered.
             this.count = count;
+            // Specifies the number of instances of the indexed geometry that should be drawn.
             this.primCount = primCount;
+            /**
+             * Specifies a byte offset (cast to a pointer type) into the buffer bound to GL_ELEMENT_ARRAY_BUFFER
+             * to start reading indices from.
+             */
             this.firstIndex = firstIndex;
+            /**
+             * Specifies a constant that should be added to each element of indices​ when chosing elements
+             * from the enabled vertex arrays.
+             */
             this.baseVertex = baseVertex;
+            /**
+             * Specifies the base instance for use in fetching instanced vertex attributes.
+             */
             this.reservedMustBeZero = reservedMustBeZero;
         }
 
         public final int SIZEOF = 5 * Integer.BYTES;
 
-        public int[] toIntArray() {
+        public int[] toIa_() {
             return new int[]{count, primCount, firstIndex, baseVertex, reservedMustBeZero};
         }
     };
 
     private int[] vertexArrayName = {0}, arrayBufferName = {0}, indirectBufferName = {0}, elementBufferName = {0};
     private int programName, uniformMvp, uniformDiffuse;
+    private DrawElementsIndirectCommand command;
+    private boolean useIndirect = false;
 
     @Override
     protected boolean begin(GL gl) {
@@ -133,12 +157,13 @@ public class Gl_400_draw_indirect extends Test {
 
     private boolean initIndirectBuffer(GL4 gl4) {
 
-        DrawElementsIndirectCommand command = new DrawElementsIndirectCommand(elementCount, 1, 0, 0, 0);
+        command = new DrawElementsIndirectCommand(elementCount, 1, 0, 0, 0);
 
         gl4.glGenBuffers(1, indirectBufferName, 0);
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBufferName[0]);
-        IntBuffer commandBuffer = GLBuffers.newDirectIntBuffer(command.toIntArray());
+        IntBuffer commandBuffer = GLBuffers.newDirectIntBuffer(command.toIa_());
         gl4.glBufferData(GL_DRAW_INDIRECT_BUFFER, command.SIZEOF, commandBuffer, GL_STATIC_READ);
+        BufferUtils.destroyDirectBuffer(commandBuffer);
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
         return checkError(gl4, "initIndirectBuffer");
@@ -150,12 +175,14 @@ public class Gl_400_draw_indirect extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glGenBuffers(1, elementBufferName, 0);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferName[0]);
         IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         return checkError(gl4, "initArrayBuffer");
@@ -200,7 +227,21 @@ public class Gl_400_draw_indirect extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBufferName[0]);
 
-        gl4.glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, 0);
+        if (useIndirect) {
+            gl4.glDrawElementsIndirect(
+                    GL_TRIANGLES,
+                    GL_UNSIGNED_INT,
+                    0);
+        } else {
+            gl4.glDrawElementsInstancedBaseVertexBaseInstance(
+                    GL_TRIANGLES,
+                    command.count,
+                    GL_UNSIGNED_INT,
+                    command.firstIndex,
+                    command.primCount,
+                    command.baseVertex,
+                    command.reservedMustBeZero);
+        }
 
         return true;
     }

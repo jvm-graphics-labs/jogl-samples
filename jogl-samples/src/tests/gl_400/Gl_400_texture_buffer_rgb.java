@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
@@ -38,7 +39,7 @@ public class Gl_400_texture_buffer_rgb extends Test {
     private final String SHADERS_ROOT = "src/data/gl_400";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * Vec2.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -147,11 +148,13 @@ public class Gl_400_texture_buffer_rgb extends Test {
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         float[] displacement = {
@@ -162,8 +165,9 @@ public class Gl_400_texture_buffer_rgb extends Test {
             +0.1f, -0.3f, +1.0f};
 
         gl4.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DISPLACEMENT]);
-        gl4.glBufferData(GL_TEXTURE_BUFFER, displacement.length * Float.BYTES,
-                GLBuffers.newDirectFloatBuffer(displacement), GL_STATIC_DRAW);
+        FloatBuffer displacementBuffer = GLBuffers.newDirectFloatBuffer(displacement);
+        gl4.glBufferData(GL_TEXTURE_BUFFER, displacement.length * Float.BYTES, displacementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(displacementBuffer);
         gl4.glBindBuffer(GL_TEXTURE_BUFFER, 0);
 
         float[] diffuse = {
@@ -174,8 +178,9 @@ public class Gl_400_texture_buffer_rgb extends Test {
             0.0f, 0.0f, 1.0f};
 
         gl4.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DIFFUSE]);
-        gl4.glBufferData(GL_TEXTURE_BUFFER, diffuse.length * Float.BYTES,
-                GLBuffers.newDirectFloatBuffer(diffuse), GL_STATIC_DRAW);
+        FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(diffuse);
+        gl4.glBufferData(GL_TEXTURE_BUFFER, diffuse.length * Float.BYTES, diffuseBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(diffuseBuffer);
         gl4.glBindBuffer(GL_TEXTURE_BUFFER, 0);
 
         return checkError(gl4, "initBuffer");

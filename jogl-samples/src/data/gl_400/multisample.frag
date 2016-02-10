@@ -6,18 +6,18 @@ precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-uniform sampler2D Diffuse;
+uniform sampler2D diffuse;
 
-in vert
+in Vert
 {
-	//vec2 Texcoord;
-	sample vec2 Texcoord;
-} Vert;
+    vec2 texCoord;
+    //sample vec2 texCoord;
+} vert;
 
-layout(location = FRAG_COLOR, index = 0) out vec4 Color;
+layout(location = FRAG_COLOR, index = 0) out vec4 color;
 
 void main()
 {
-	//Color = texture(Diffuse, interpolateAtSample(Vert.Texcoord, gl_SampleID));
-	Color = texture(Diffuse, Vert.Texcoord);
+    color = texture(diffuse, interpolateAtSample(vert.texCoord, gl_SampleID));
+    //color = texture(diffuse, vert.texCoord);
 }

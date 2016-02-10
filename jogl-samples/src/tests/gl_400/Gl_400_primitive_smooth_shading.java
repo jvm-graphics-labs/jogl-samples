@@ -176,10 +176,8 @@ public class Gl_400_primitive_smooth_shading extends Test {
         gl4.glGenBuffers(1, arrayBufferName, 0);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
         ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
-        for (int vertex = 0; vertex < vertexCount; vertex++) {
-            vertexBuffer.putFloat(vertexData[vertex].position.x).putFloat(vertexData[vertex].position.y);
-            vertexBuffer.put(vertexData[vertex].color.x).put(vertexData[vertex].color.y)
-                    .put(vertexData[vertex].color.z).put(vertexData[vertex].color.w);
+        for (int i = 0; i < vertexCount; i++) {
+            vertexData[i].toBb(vertexBuffer, i);
         }
         vertexBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);

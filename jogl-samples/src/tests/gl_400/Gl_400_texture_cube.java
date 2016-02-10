@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
@@ -44,7 +45,7 @@ public class Gl_400_texture_cube extends Test {
 
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * Vec2.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -159,6 +160,7 @@ public class Gl_400_texture_cube extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = {0};
@@ -226,7 +228,7 @@ public class Gl_400_texture_cube extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Float.BYTES, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vec2.SIZE, 0);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);

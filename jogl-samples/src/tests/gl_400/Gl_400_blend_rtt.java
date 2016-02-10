@@ -11,12 +11,15 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._3.Vec3;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fv2f;
+import glm.vec._2.Vec2;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import jglm.Vec4i;
@@ -40,12 +43,12 @@ public class Gl_400_blend_rtt extends Test {
     private final String SHADERS_ROOT = "src/data/gl_400";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 0.0f,
-        +1.0f, -1.0f, 1.0f, 0.0f,
-        +1.0f, +1.0f, 1.0f, 1.0f,
-        -1.0f, +1.0f, 0.0f, 1.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 0.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 0.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 1.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 1.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -87,8 +90,7 @@ public class Gl_400_blend_rtt extends Test {
         GL4 gl4 = (GL4) gl;
 
         viewport[Texture.R] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.G] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
-                windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.G] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
         viewport[Texture.B] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
 
         boolean validated = true;
@@ -178,11 +180,13 @@ public class Gl_400_blend_rtt extends Test {
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return true;
@@ -246,8 +250,8 @@ public class Gl_400_blend_rtt extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -325,6 +329,7 @@ public class Gl_400_blend_rtt extends Test {
         }
 
         for (int i = 0; i < Texture.MAX; ++i) {
+            
             gl4.glViewport(viewport[i].x, viewport[i].y, viewport[i].z, viewport[i].w);
 
             gl4.glActiveTexture(GL_TEXTURE0);

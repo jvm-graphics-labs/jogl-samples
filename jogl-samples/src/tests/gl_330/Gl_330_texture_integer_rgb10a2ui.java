@@ -8,18 +8,23 @@ package tests.gl_330;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.FloatBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import jgli.Gl;
 import jgli.Texture2d;
 
 /**
@@ -45,12 +50,12 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
     private int vertexCount = 6;
     private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f,
-        -1.0f, -1.0f, 0.0f, 1.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f,
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f};
 
     private int[] bufferName = {0}, textureName = {0}, vertexArrayName = {0};
     private int programName, uniformMvp, uniformDiffuse;
@@ -118,6 +123,7 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return true;
@@ -134,7 +140,6 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             gl3.glGenTextures(1, textureName, 0);
-
             // Default unpack alignment of 4 is ok, we have 32 bit per pixel.
             gl3.glActiveTexture(GL_TEXTURE0);
             gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
@@ -144,11 +149,15 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
             gl3.glTexImage2D(GL_TEXTURE_2D, 0,
-                    format.internal.value,
+//                    format.internal.value,
+                    Gl.InternalFormat.INTERNAL_RGB10A2_USCALED_GTC.value,
                     texture.dimensions(0)[0], texture.dimensions(0)[1],
                     0,
-                    format.external.value, format.type.value,
-                    texture.data());
+//                    format.external.value,
+                    Gl.ExternalFormat.EXTERNAL_RGBA_INTEGER.value,
+//                                        format.type.value,
+                    GL_UNSIGNED_INT_10_10_10_2,
+                    texture.data(0));
 
         } catch (IOException ex) {
             Logger.getLogger(Gl_330_texture_integer_rgb10a2ui.class.getName()).log(Level.SEVERE, null, ex);
@@ -162,8 +171,8 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
         gl3.glBindVertexArray(vertexArrayName[0]);
         {
             gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Vec2.SIZE, 0);
+            gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Vec2.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);

@@ -11,11 +11,14 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
+import java.nio.FloatBuffer;
 
 /**
  *
@@ -35,13 +38,13 @@ public class Gl_330_query_counter extends Test {
     private final String SHADERS_ROOT = "src/data/gl_330";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,
-        +1.0f, 1.0f,
-        +1.0f, 1.0f,
-        -1.0f, 1.0f,
+        +1.0f, +1.0f,
+        +1.0f, +1.0f,
+        -1.0f, +1.0f,
         -1.0f, -1.0f};
 
     private class Query {
@@ -135,7 +138,9 @@ public class Gl_330_query_counter extends Test {
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
 
         // Reserve buffer memory but and copy the values
-        gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, GLBuffers.newDirectFloatBuffer(positionData), GL_STATIC_DRAW);
+        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
 
         // Unbind the buffer
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -195,7 +200,8 @@ public class Gl_330_query_counter extends Test {
 
         //glGetInteger64v(GL_TIMESTAMP, &TimeBegin);
         //glGetInteger64v(GL_TIMESTAMP, &TimeEnd);
-        System.out.println(availableBegin[0] + ", " + availableEnd[0] + " / Time stamp: " + (timeEnd[0] - timeBegin[0]) / 1_000_000f + " ms");
+        System.out.println(availableBegin[0] + ", " + availableEnd[0] + " / Time stamp: " 
+                + (timeEnd[0] - timeBegin[0]) / 1_000_000f + " ms");
 
         return (timeEnd[0] - timeBegin[0]) > 0;
     }

@@ -12,11 +12,14 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fc4f;
+import glm.vec._2.Vec2;
 import java.nio.FloatBuffer;
 
 /**
@@ -37,12 +40,12 @@ public class Gl_400_program_varying_structs extends Test {
     private final String SHADERS_ROOT = "src/data/gl_400";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * (2 + 4) * Float.BYTES;
+    private int vertexSize = vertexCount * Vertex_v2fc4f.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        +1.0f, +1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f, 1.0f, 1.0f};
+        -1.0f, -1.0f,/**/ 1.0f, 0.0f, 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f, 0.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 0.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f, 1.0f, 1.0f};
 
     private int programName, uniformMvp;
     private int[] arrayBufferName = {0}, vertexArrayName = {0};
@@ -117,8 +120,8 @@ public class Gl_400_program_varying_structs extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, (2 + 4) * Float.BYTES, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, (2 + 4) * Float.BYTES, 2 * Float.BYTES);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fc4f.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, Vertex_v2fc4f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -135,6 +138,7 @@ public class Gl_400_program_varying_structs extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return checkError(gl4, "initArrayBuffer");

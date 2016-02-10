@@ -17,14 +17,16 @@ import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
-import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
 import glm.vec._2.Vec2;
 import dev.Vec2i;
+import framework.BufferUtils;
+import glf.Vertex_v2fv2f;
 import glm.vec._3.Vec3;
+import java.nio.ByteBuffer;
 
 /**
  *
@@ -47,12 +49,12 @@ public class Gl_400_fbo_multisample extends Test {
     private final Vec2i FRAMEBUFFER_SIZE = new Vec2i(80, 60);
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
-    private float[] vertexData = {
-        -2.0f * 0.8f, -1.5f * 0.8f, 0.0f, 0.0f,
-        +2.0f * 0.8f, -1.5f * 0.8f, 1.0f, 0.0f,
-        +2.0f * 0.8f, +1.5f * 0.8f, 1.0f, 1.0f,
-        -2.0f * 0.8f, +1.5f * 0.8f, 0.0f, 1.0f};
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
+    private Vertex_v2fv2f[] vertexData = {
+        new Vertex_v2fv2f(new Vec2(-2.0f, -1.5f).mul(0.8f), new Vec2(0.0f, 0.0f)),
+        new Vertex_v2fv2f(new Vec2(+2.0f, -1.5f).mul(0.8f), new Vec2(1.0f, 0.0f)),
+        new Vertex_v2fv2f(new Vec2(+2.0f, +1.5f).mul(0.8f), new Vec2(1.0f, 1.0f)),
+        new Vertex_v2fv2f(new Vec2(-2.0f, +1.5f).mul(0.8f), new Vec2(0.0f, 1.0f))};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -118,20 +120,19 @@ public class Gl_400_fbo_multisample extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl4);
-            
+
             programName = shaderProgram.program();
 
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
-
 
             shaderProgram.link(gl4, System.out);
         }
 
         if (validated) {
 
-            uniformMvp = gl4.glGetUniformLocation(programName, "MVP");
-            uniformDiffuse = gl4.glGetUniformLocation(programName, "Diffuse");
+            uniformMvp = gl4.glGetUniformLocation(programName, "mvp");
+            uniformDiffuse = gl4.glGetUniformLocation(programName, "diffuse");
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -144,11 +145,17 @@ public class Gl_400_fbo_multisample extends Test {
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
+        for (int i = 0; i < vertexCount; i++) {
+            vertexData[i].toBb(vertexBuffer, i);
+        }
+        vertexBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return true;
@@ -207,8 +214,7 @@ public class Gl_400_fbo_multisample extends Test {
         gl4.glGenTextures(1, multisampleTextureName, 0);
         gl4.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, multisampleTextureName[0]);
         // The second parameter is the number of samples.
-        gl4.glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA,
-                FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, false);
+        gl4.glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, false);
 
         gl4.glGenFramebuffers(1, framebufferRenderName, 0);
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferRenderName[0]);
@@ -221,8 +227,8 @@ public class Gl_400_fbo_multisample extends Test {
 
         gl4.glGenTextures(1, colorTextureName, 0);
         gl4.glBindTexture(GL_TEXTURE_2D, colorTextureName[0]);
-        gl4.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, 0,
-                GL_RGBA, GL_UNSIGNED_BYTE, null);
+        gl4.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, 0, GL_RGBA, 
+                GL_UNSIGNED_BYTE, null);
 
         gl4.glGenFramebuffers(1, framebufferResolveName, 0);
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferResolveName[0]);
@@ -242,8 +248,8 @@ public class Gl_400_fbo_multisample extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -272,6 +278,8 @@ public class Gl_400_fbo_multisample extends Test {
         gl4.glEnable(GL_SAMPLE_SHADING);
         gl4.glMinSampleShading(2.0f);
 
+        float[] min = {0};
+        gl4.glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, min, 0);
         //glEnable(GL_SAMPLE_MASK);
         //glSampleMaski(0, 0xFF);
         renderFBO(gl4, framebufferRenderName[0]);
@@ -326,5 +334,23 @@ public class Gl_400_fbo_multisample extends Test {
 
         gl4.glBindVertexArray(vertexArrayName[0]);
         gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteProgram(programName);
+        gl4.glDeleteTextures(1, texture2dName, 0);
+        gl4.glDeleteTextures(1, colorTextureName, 0);
+        gl4.glDeleteTextures(1, multisampleTextureName, 0);
+        gl4.glDeleteFramebuffers(1, framebufferRenderName, 0);
+        gl4.glDeleteFramebuffers(1, framebufferResolveName, 0);
+        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl4.glDeleteSamplers(1, samplerName, 0);
+
+        return true;
     }
 }

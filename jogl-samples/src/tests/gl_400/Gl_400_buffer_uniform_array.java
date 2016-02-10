@@ -11,12 +11,14 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._3.Vec3;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
@@ -39,12 +41,12 @@ public class Gl_400_buffer_uniform_array extends Test {
     private final String SHADERS_ROOT = "src/data/gl_400";
 
     private int vertexCount = 4;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
-    private float[] positionData = {
-        -1.0f * 0.8f, -1.0f * 0.8f,
-        +1.0f * 0.8f, -1.0f * 0.8f,
-        +1.0f * 0.8f, +1.0f * 0.8f,
-        -1.0f * 0.8f, +1.0f * 0.8f};
+    private int positionSize = vertexCount * Vec2.SIZE;
+    private Vec2[] positionData = {
+        new Vec2(-1.0f, -1.0f).mul(0.8f),
+        new Vec2(+1.0f, -1.0f).mul(0.8f),
+        new Vec2(+1.0f, +1.0f).mul(0.8f),
+        new Vec2(-1.0f, +1.0f).mul(0.8f)};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -153,11 +155,17 @@ public class Gl_400_buffer_uniform_array extends Test {
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionSize);
+        for (Vec2 vec2 : positionData) {
+            positionBuffer.put(vec2.toFa_());
+        }
+        positionBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int UniformBufferSize = Math.max(uniformBufferAlignment[0], Mat4.SIZE) * 2;
@@ -176,6 +184,7 @@ public class Gl_400_buffer_uniform_array extends Test {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
             FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(diffuse);
             gl4.glBufferData(GL_UNIFORM_BUFFER, diffuse.length * Float.BYTES, diffuseBuffer, GL_STATIC_DRAW);
+            BufferUtils.destroyDirectBuffer(diffuseBuffer);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
@@ -215,10 +224,9 @@ public class Gl_400_buffer_uniform_array extends Test {
         gl4.glUseProgram(programName);
 
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
-        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0,
-                bufferName[Buffer.TRANSFORM], 0, Mat4.SIZE);
-        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM1,
-                bufferName[Buffer.TRANSFORM], uniformBufferOffset, Mat4.SIZE);
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM], 0, Mat4.SIZE);
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM1, bufferName[Buffer.TRANSFORM], 
+                uniformBufferOffset, Mat4.SIZE);
 
         // Attach the buffer to UBO binding point semantic::uniform::MATERIAL
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL]);

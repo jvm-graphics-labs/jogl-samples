@@ -11,12 +11,16 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
+import glm.vec._4.Vec4;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 /**
  *
@@ -36,13 +40,13 @@ public class Gl_330_query_conditional extends Test {
     private final String SHADERS_ROOT = "src/data/gl_330";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,
-        +1.0f, 1.0f,
-        +1.0f, 1.0f,
-        -1.0f, 1.0f,
+        +1.0f, +1.0f,
+        +1.0f, +1.0f,
+        -1.0f, +1.0f,
         -1.0f, -1.0f};
 
     private class Buffer {
@@ -118,8 +122,10 @@ public class Gl_330_query_conditional extends Test {
         // Get variables locations
         if (validated) {
 
-            gl3.glUniformBlockBinding(programName, gl3.glGetUniformBlockIndex(programName, "Transform"), Semantic.Uniform.TRANSFORM0);
-            gl3.glUniformBlockBinding(programName, gl3.glGetUniformBlockIndex(programName, "Material"), Semantic.Uniform.MATERIAL);
+            gl3.glUniformBlockBinding(programName, gl3.glGetUniformBlockIndex(programName, "Transform"),
+                    Semantic.Uniform.TRANSFORM0);
+            gl3.glUniformBlockBinding(programName, gl3.glGetUniformBlockIndex(programName, "Material"),
+                    Semantic.Uniform.MATERIAL);
         }
 
         return validated & checkError(gl3, "initProgram");
@@ -133,7 +139,9 @@ public class Gl_330_query_conditional extends Test {
         gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, GLBuffers.newDirectFloatBuffer(positionData), GL_STATIC_DRAW);
+        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int uniformTransformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
@@ -142,7 +150,7 @@ public class Gl_330_query_conditional extends Test {
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformTransformBlockSize, null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        uniformMaterialOffset = Math.max(4 * Float.BYTES, uniformBufferOffset[0]);
+        uniformMaterialOffset = Math.max(Vec4.SIZE, uniformBufferOffset[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformMaterialOffset * 2, null, GL_STATIC_DRAW);
@@ -150,15 +158,9 @@ public class Gl_330_query_conditional extends Test {
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, uniformMaterialOffset * 2,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            pointer.putFloat(0.0f);
-            pointer.putFloat(0.5f);
-            pointer.putFloat(1.0f);
-            pointer.putFloat(1.0f);
+            pointer.asFloatBuffer().put(new float[]{0.0f, 0.5f, 1.0f, 1.0f});
             pointer.position(uniformMaterialOffset);
-            pointer.putFloat(1.0f);
-            pointer.putFloat(0.5f);
-            pointer.putFloat(0.0f);
-            pointer.putFloat(1.0f);
+            pointer.asFloatBuffer().put(new float[]{1.0f, 0.5f, 0.0f, 1.0f});
             pointer.rewind();
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);

@@ -8,18 +8,18 @@ precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-uniform mat4 MVP;
+uniform mat4 mvp;
 
-layout(location = POSITION) in vec2 Position;
-layout(location = TEXCOORD) in vec2 Texcoord;
+layout(location = POSITION) in vec2 position;
+layout(location = TEXCOORD) in vec2 texCoord;
 
-out vert
+out Vert
 {
-	vec2 Texcoord;
-} Vert;
+    vec2 texCoord;
+} vert;
 
 void main()
 {	
-	Vert.Texcoord = Texcoord;
-	gl_Position = MVP * vec4(Position, 0.0, 1.0);
+    vert.texCoord = texCoord;
+    gl_Position = mvp * vec4(position, 0.0, 1.0);
 }

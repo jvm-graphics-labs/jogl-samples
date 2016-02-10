@@ -11,11 +11,13 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.nio.FloatBuffer;
 
 /**
@@ -36,7 +38,7 @@ public class Gl_330_query_time extends Test {
     private final String SHADERS_ROOT = "src/data/gl_330";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -128,6 +130,7 @@ public class Gl_330_query_time extends Test {
         // Reserve buffer memory but and copy the values
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
 
         // Unbind the buffer
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
