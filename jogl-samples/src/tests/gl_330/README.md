@@ -81,4 +81,17 @@
 
 ### [gl-330-texture-integer-rgb10a2ui](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_330/Gl_330_texture_integer_rgb10a2ui.java) : not working
 
+### [gl-330-texture-rect](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_330/Gl_330_texture_rect.java) :
+
+* `GL_TEXTURE_RECTANGLE`
+* pixel texture coordinates
+
+### [gl-330-texture-swizzle](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_330/Gl_330_texture_swizzle.java) :
+
+* texture swizzling
+* `GL_TEXTURE_SWIZZLE_R`
+* `GL_TEXTURE_SWIZZLE_G`
+* `GL_TEXTURE_SWIZZLE_B`
+* `GL_TEXTURE_SWIZZLE_A`
+
 
