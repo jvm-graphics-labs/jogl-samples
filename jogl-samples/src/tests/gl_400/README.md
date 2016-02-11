@@ -117,3 +117,8 @@
 * `glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackName[0])`
 * `glBeginTransformFeedback(GL_TRIANGLES)`
 * `glDrawTransformFeedback`, no more primitive number! No more stalling queries! Cool
+* `GL_INTERLEAVED_ATTRIBS`
+
+### [gl-400-transform-feedback-stream](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_transform_feedback_stream.java) :
+
+* ? magic
