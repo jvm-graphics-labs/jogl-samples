@@ -1,4 +1,5 @@
 #version 400 core
+#extension GL_ARB_enhanced_layouts : enable
 
 #define POSITION	0
 #define COLOR		3
@@ -8,7 +9,7 @@ precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 layout(triangles) in;
-layout(triangle_strip, max_vertices = 3) out;
+layout(triangle_strip, max_vertices = 3, xfb_buffer = 1) out;
 
 in Block
 {
@@ -17,7 +18,7 @@ in Block
 
 out Block
 {
-    layout(stream = 0) vec4 color;
+    layout(stream = 1) vec4 color;
 } outBlock;
 
 out gl_PerVertex 

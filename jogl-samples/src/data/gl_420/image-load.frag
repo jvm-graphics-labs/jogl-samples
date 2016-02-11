@@ -4,8 +4,6 @@
 #define DIFFUSE			0
 
 #define MATERIAL	0
-#define TRANSFORM0	1
-#define TRANSFORM1	2	
 
 precision highp float;
 precision highp int;

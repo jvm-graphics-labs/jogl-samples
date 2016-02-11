@@ -11,11 +11,14 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fv2f;
+import glm.vec._2.Vec2;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -45,12 +48,12 @@ public class Gl_410_program_separate extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba_dxt5_unorm.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Integer.BYTES;
@@ -144,18 +147,16 @@ public class Gl_410_program_separate extends Test {
 
             if (validated) {
 
-                String[] vertexSourceContent = new String[]{
-                    new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE + ".vert")).useDelimiter("\\A").next()};
-                separateProgramName[Program.VERTEX]
-                        = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
+                String[] vertexSourceContent = new String[]{new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE
+                    + ".vert")).useDelimiter("\\A").next()};
+                separateProgramName[Program.VERTEX] = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
             }
 
             if (validated) {
 
-                String[] fragmentSourceContent = new String[]{
-                    new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE + ".frag")).useDelimiter("\\A").next()};
-                separateProgramName[Program.FRAGMENT]
-                        = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
+                String[] fragmentSourceContent = new String[]{new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE
+                    + ".frag")).useDelimiter("\\A").next()};
+                separateProgramName[Program.FRAGMENT] = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
             }
 
             if (validated) {
@@ -168,16 +169,13 @@ public class Gl_410_program_separate extends Test {
             if (validated) {
 
                 gl4.glGenProgramPipelines(1, pipelineName, 0);
-                gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT,
-                        separateProgramName[Program.VERTEX]);
-                gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT,
-                        separateProgramName[Program.FRAGMENT]);
+                gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT, separateProgramName[Program.VERTEX]);
+                gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, separateProgramName[Program.FRAGMENT]);
             }
             if (validated) {
 
                 separateUniformMvp = gl4.glGetUniformLocation(separateProgramName[Program.VERTEX], "mvp");
-                separateUniformDiffuse
-                        = gl4.glGetUniformLocation(separateProgramName[Program.FRAGMENT], "diffuse");
+                separateUniformDiffuse = gl4.glGetUniformLocation(separateProgramName[Program.FRAGMENT], "diffuse");
             }
 
         } catch (FileNotFoundException ex) {
@@ -228,11 +226,13 @@ public class Gl_410_program_separate extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         return checkError(gl4, "initArrayBuffer");
@@ -244,8 +244,8 @@ public class Gl_410_program_separate extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);

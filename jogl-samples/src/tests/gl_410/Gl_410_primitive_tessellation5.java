@@ -17,6 +17,7 @@ import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fc4f;
 import java.nio.FloatBuffer;
 
 /**
@@ -37,12 +38,12 @@ public class Gl_410_primitive_tessellation5 extends Test {
     private final String SHADERS_ROOT = "src/data/gl_410";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * (2 + 4) * Float.BYTES;
+    private int vertexSize = vertexCount * Vertex_v2fc4f.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        +1.0f, +1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f, 1.0f, 1.0f};
+        -1.0f, -1.0f,/**/ 1.0f, 0.0f, 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f, 0.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 0.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f, 1.0f, 1.0f};
 
     private class Program {
 

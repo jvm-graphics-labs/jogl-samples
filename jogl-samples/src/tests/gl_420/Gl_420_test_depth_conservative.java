@@ -26,13 +26,13 @@ import glm.vec._2.Vec2;
  *
  * @author GBarbieri
  */
-public class Gl_420_depth_conservative extends Test {
+public class Gl_420_test_depth_conservative extends Test {
 
     public static void main(String[] args) {
-        Gl_420_depth_conservative gl_420_depth_conservative = new Gl_420_depth_conservative();
+        Gl_420_test_depth_conservative gl_420_depth_conservative = new Gl_420_test_depth_conservative();
     }
 
-    public Gl_420_depth_conservative() {
+    public Gl_420_test_depth_conservative() {
         super("gl-420-depth-conservative", Profile.CORE, 4, 2, new Vec2(Math.PI * 0.2f));
     }
 
@@ -40,7 +40,7 @@ public class Gl_420_depth_conservative extends Test {
     private final String SHADERS_ROOT = "src/data/gl_420";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * Vec2.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,

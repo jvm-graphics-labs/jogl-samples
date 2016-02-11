@@ -52,7 +52,7 @@ public class Gl_420_image_store extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, textureName = {0}, programName = new int[Program.MAX], 
+    private int[] vertexArrayName = {0}, textureName = {0}, programName = new int[Program.MAX],
             pipelineName = new int[Pipeline.MAX];
     private Vec2 imageSize = new Vec2();
 
@@ -99,34 +99,30 @@ public class Gl_420_image_store extends Test {
 
             if (validated) {
 
-                String[] vertexSourceContent = new String[]{
-                    new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE_READ + ".vert")).useDelimiter("\\A").next()};
-                programName[Program.VERT_READ]
-                        = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
+                String[] vertexSourceContent = new String[]{new Scanner(new File(SHADERS_ROOT + "/"
+                    + SHADERS_SOURCE_READ + ".vert")).useDelimiter("\\A").next()};
+                programName[Program.VERT_READ] = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
             }
 
             if (validated) {
 
-                String[] fragmentSourceContent = new String[]{
-                    new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE_READ + ".frag")).useDelimiter("\\A").next()};
-                programName[Program.FRAG_READ]
-                        = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
+                String[] fragmentSourceContent = new String[]{new Scanner(new File(SHADERS_ROOT + "/"
+                    + SHADERS_SOURCE_READ + ".frag")).useDelimiter("\\A").next()};
+                programName[Program.FRAG_READ] = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
             }
 
             if (validated) {
 
-                String[] vertexSourceContent = new String[]{
-                    new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE_SAVE + ".vert")).useDelimiter("\\A").next()};
-                programName[Program.VERT_SAVE]
-                        = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
+                String[] vertexSourceContent = new String[]{new Scanner(new File(SHADERS_ROOT + "/"
+                    + SHADERS_SOURCE_SAVE + ".vert")).useDelimiter("\\A").next()};
+                programName[Program.VERT_SAVE] = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
             }
 
             if (validated) {
 
-                String[] fragmentSourceContent = new String[]{
-                    new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE_SAVE + ".frag")).useDelimiter("\\A").next()};
-                programName[Program.FRAG_SAVE]
-                        = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
+                String[] fragmentSourceContent = new String[]{new Scanner(new File(SHADERS_ROOT + "/"
+                    + SHADERS_SOURCE_SAVE + ".frag")).useDelimiter("\\A").next()};
+                programName[Program.FRAG_SAVE] = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
             }
 
             if (validated) {
@@ -140,14 +136,10 @@ public class Gl_420_image_store extends Test {
             if (validated) {
 
                 gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
-                gl4.glUseProgramStages(pipelineName[Pipeline.READ],
-                        GL_VERTEX_SHADER_BIT, programName[Program.VERT_READ]);
-                gl4.glUseProgramStages(pipelineName[Pipeline.READ],
-                        GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG_READ]);
-                gl4.glUseProgramStages(pipelineName[Pipeline.SAVE],
-                        GL_VERTEX_SHADER_BIT, programName[Program.VERT_SAVE]);
-                gl4.glUseProgramStages(pipelineName[Pipeline.SAVE],
-                        GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG_SAVE]);
+                gl4.glUseProgramStages(pipelineName[Pipeline.READ], GL_VERTEX_SHADER_BIT, programName[Program.VERT_READ]);
+                gl4.glUseProgramStages(pipelineName[Pipeline.READ], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG_READ]);
+                gl4.glUseProgramStages(pipelineName[Pipeline.SAVE], GL_VERTEX_SHADER_BIT, programName[Program.VERT_SAVE]);
+                gl4.glUseProgramStages(pipelineName[Pipeline.SAVE], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG_SAVE]);
             }
 
         } catch (FileNotFoundException ex) {

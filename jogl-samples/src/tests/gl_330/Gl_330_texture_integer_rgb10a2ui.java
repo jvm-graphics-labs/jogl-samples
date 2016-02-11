@@ -150,7 +150,7 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
 
             gl3.glTexImage2D(GL_TEXTURE_2D, 0,
 //                    format.internal.value,
-                    Gl.InternalFormat.INTERNAL_RGB10A2_USCALED_GTC.value,
+                    Gl.InternalFormat.INTERNAL_RGB10A2U.value,
                     texture.dimensions(0)[0], texture.dimensions(0)[1],
                     0,
 //                    format.external.value,

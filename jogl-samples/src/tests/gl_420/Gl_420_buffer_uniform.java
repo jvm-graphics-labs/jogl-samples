@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
@@ -40,7 +41,7 @@ public class Gl_420_buffer_uniform extends Test {
     private final String SHADERS_ROOT = "src/data/gl_420";
 
     private int vertexCount = 4;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f,
         +1.0f, -1.0f,
@@ -161,11 +162,13 @@ public class Gl_420_buffer_uniform extends Test {
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         {
@@ -180,6 +183,7 @@ public class Gl_420_buffer_uniform extends Test {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
             FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(diffuse);
             gl4.glBufferData(GL_UNIFORM_BUFFER, diffuse.length * Float.BYTES, diffuseBuffer, GL_STATIC_DRAW);
+            BufferUtils.destroyDirectBuffer(diffuseBuffer);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
@@ -210,7 +214,7 @@ public class Gl_420_buffer_uniform extends Test {
             {
                 Mat4 model = new Mat4(1.0f).rotate((float) (Math.PI * 0.50f + Math.PI * 0.25f), new Vec3(0.f, 1.f, 0.f));
                 Mat4 mvp = projection.mul(viewMat4()).mul(model);
-                
+
                 pointer.position(Mat4.SIZE);
                 pointer.asFloatBuffer().put(mvp.toFa_());
             }
@@ -226,8 +230,8 @@ public class Gl_420_buffer_uniform extends Test {
         gl4.glBindProgramPipeline(pipelineName[0]);
         gl4.glBindVertexArray(vertexArrayName[0]);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
-        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0,
-                bufferName[Buffer.TRANSFORM], 0, Mat4.SIZE * 2);
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM], 0, 
+                Mat4.SIZE * 2);
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL]);
 
         for (int i = 0; i < 2; ++i) {

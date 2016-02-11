@@ -11,10 +11,12 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Test;
+import glm.vec._4.Vec4;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import test.Semantic;
@@ -38,7 +40,7 @@ public class Gl_400_transform_feedback_object extends Test {
     private final String SHADERS_ROOT = "src/data/gl_400";
 
     private int vertexCount = 6;
-    private int positionSize = vertexCount * 4 * Float.BYTES;
+    private int positionSize = vertexCount * Vec4.SIZE;
     private float[] positionData = {
         -1.0f, -1.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 0.0f, 1.0f,
@@ -158,8 +160,8 @@ public class Gl_400_transform_feedback_object extends Test {
         gl4.glBindVertexArray(feedbackVertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, feedbackArrayBufferName[0]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 2 * 4 * Float.BYTES, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, 2 * 4 * Float.BYTES, 4 * Float.BYTES);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 2 * Vec4.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, 2 * Vec4.SIZE, Vec4.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -197,11 +199,12 @@ public class Gl_400_transform_feedback_object extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, transformArrayBufferName[0]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glGenBuffers(1, feedbackArrayBufferName, 0);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, feedbackArrayBufferName[0]);
-        gl4.glBufferData(GL_ARRAY_BUFFER, 2 * 4 * Float.BYTES * vertexCount, null, GL_STATIC_DRAW);
+        gl4.glBufferData(GL_ARRAY_BUFFER, 2 * Vec4.SIZE * vertexCount, null, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return checkError(gl4, "initArrayBuffer");

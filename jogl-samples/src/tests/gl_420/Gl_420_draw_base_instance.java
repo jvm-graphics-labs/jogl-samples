@@ -21,6 +21,8 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import glm.vec._2.Vec2;
 import dev.Vec2i;
+import framework.BufferUtils;
+import glm.vec._4.Vec4;
 
 /**
  *
@@ -39,14 +41,15 @@ public class Gl_420_draw_base_instance extends Test {
     private final String SHADERS_SOURCE = "draw-base-instance";
     private final String SHADERS_ROOT = "src/data/gl_420";
 
-    private int elementCount = 6;
+    private int elementCount = 7;
     private int elementSize = elementCount * Integer.BYTES;
     private int[] elementData = {
+        -1,
         0, 1, 2,
         0, 2, 3};
 
     private int vertexCount = 5;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
         +0.0f, +0.0f,
         -1.0f, -1.0f,
@@ -55,7 +58,7 @@ public class Gl_420_draw_base_instance extends Test {
         -1.0f, +1.0f};
 
     private int colorCount = 10;
-    private int colorSize = colorCount * 4 * Float.BYTES;
+    private int colorSize = colorCount * Vec4.SIZE;
     private float[] colorData = {
         1.0f, 0.5f, 0.0f, 1.0f,
         0.8f, 0.4f, 0.0f, 1.0f,
@@ -156,19 +159,19 @@ public class Gl_420_draw_base_instance extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.POSITION]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
-//        deallocateDirectFloatBuffer(positionBuffer);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COLOR]);
         FloatBuffer colorBuffer = GLBuffers.newDirectFloatBuffer(colorData);
         gl4.glBufferData(GL_ARRAY_BUFFER, colorSize, colorBuffer, GL_STATIC_DRAW);
-//        deallocateDirectFloatBuffer(colorBuffer);
+        BufferUtils.destroyDirectBuffer(colorBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-//        deallocateDirectIntBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
@@ -231,7 +234,11 @@ public class Gl_420_draw_base_instance extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
 
-        gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 0, 5, 1, 5);
+        gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT,
+                1 * Integer.BYTES, // indices offset
+                5, // instance count
+                1, // base vertex
+                5); // base instance
 
         return true;
     }

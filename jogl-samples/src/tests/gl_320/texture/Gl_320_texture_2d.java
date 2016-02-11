@@ -194,10 +194,12 @@ public class Gl_320_texture_2d extends Test {
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
             for (int level = 0; level < texture.levels(); ++level) {
                 gl3.glTexImage2D(GL_TEXTURE_2D, level,
-                        jgli.Gl.InternalFormat.INTERNAL_SRGB8.value,
+//                        jgli.Gl.InternalFormat.INTERNAL_SRGB8.value,
+                        format.internal.value,
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         0,
-                        jgli.Gl.ExternalFormat.EXTERNAL_RGB.value, jgli.Gl.TypeFormat.TYPE_U8.value,
+//                        jgli.Gl.ExternalFormat.EXTERNAL_RGB.value, jgli.Gl.TypeFormat.TYPE_U8.value,
+                        format.external.value, format.type.value,
                         texture.data(level));
             }
 

@@ -16,6 +16,8 @@ import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fv2f;
+import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -45,12 +47,12 @@ public class Gl_410_program_binary extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba_dxt5_unorm.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Integer.BYTES;
@@ -73,7 +75,7 @@ public class Gl_410_program_binary extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] pipelineName = {0}, programName = new int[Program.MAX], bufferName = new int[Buffer.MAX], 
+    private int[] pipelineName = {0}, programName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
             vertexArrayName = {0}, texture2dName = {0};
     private int uniformMvp, uniformDiffuse;
 
@@ -198,8 +200,7 @@ public class Gl_410_program_binary extends Test {
         Files.write(Paths.get(path), data);
         data = Files.readAllBytes(Paths.get(path));
 
-        gl4.glProgramBinary(programName[Program.VERT], binaryFormat[0],
-                GLBuffers.newDirectByteBuffer(data), length[0]);
+        gl4.glProgramBinary(programName[Program.VERT], binaryFormat[0], GLBuffers.newDirectByteBuffer(data), length[0]);
         gl4.glGetProgramiv(programName[Program.VERT], GL_LINK_STATUS, success, 0);
 
         return success[0] == GL_TRUE;
@@ -239,8 +240,7 @@ public class Gl_410_program_binary extends Test {
         Files.write(Paths.get(path), data);
         data = Files.readAllBytes(Paths.get(path));
 
-        gl4.glProgramBinary(programName[Program.GEOM], binaryFormat[0],
-                GLBuffers.newDirectByteBuffer(data), length[0]);
+        gl4.glProgramBinary(programName[Program.GEOM], binaryFormat[0], GLBuffers.newDirectByteBuffer(data), length[0]);
         gl4.glGetProgramiv(programName[Program.GEOM], GL_LINK_STATUS, success, 0);
 
         return success[0] == GL_TRUE;
@@ -280,8 +280,7 @@ public class Gl_410_program_binary extends Test {
         Files.write(Paths.get(path), data);
         data = Files.readAllBytes(Paths.get(path));
 
-        gl4.glProgramBinary(programName[Program.FRAG], binaryFormat[0],
-                GLBuffers.newDirectByteBuffer(data), length[0]);
+        gl4.glProgramBinary(programName[Program.FRAG], binaryFormat[0], GLBuffers.newDirectByteBuffer(data), length[0]);
         gl4.glGetProgramiv(programName[Program.FRAG], GL_LINK_STATUS, success, 0);
 
         return success[0] == GL_TRUE;
@@ -345,8 +344,8 @@ public class Gl_410_program_binary extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -362,9 +361,9 @@ public class Gl_410_program_binary extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        Mat4 projection = glm.perspective_((float)Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
-		Mat4 model = new Mat4(1.0f);
-		Mat4 mvp = projection.mul(viewMat4()).mul(model);
+        Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
+        Mat4 model = new Mat4(1.0f);
+        Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl4.glProgramUniformMatrix4fv(programName[Program.VERT], uniformMvp, 1, false, mvp.toFa_(), 0);
         gl4.glProgramUniform1i(programName[Program.FRAG], uniformDiffuse, 0);

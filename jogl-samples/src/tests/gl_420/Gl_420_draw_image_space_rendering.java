@@ -11,10 +11,12 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Test;
+import glf.Vertex_v2fv2f;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -42,12 +44,12 @@ public class Gl_420_draw_image_space_rendering extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgb_dxt1_unorm.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -59,7 +61,6 @@ public class Gl_420_draw_image_space_rendering extends Test {
 
         public static final int VERTEX = 0;
         public static final int ELEMENT = 1;
-        public static final int TRANSFORM = 2;
         public static final int MAX = 3;
     }
 
@@ -146,24 +147,14 @@ public class Gl_420_draw_image_space_rendering extends Test {
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        int[] uniformBufferOffset = {0};
-
-        gl4.glGetIntegerv(
-                GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT,
-                uniformBufferOffset, 0);
-
-        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
-
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-        gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         return true;
     }
@@ -242,21 +233,6 @@ public class Gl_420_draw_image_space_rendering extends Test {
     protected boolean render(GL gl) {
 
         GL4 gl4 = (GL4) gl;
-
-        {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            ByteBuffer pointer = gl4.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
-                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-
-            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-            Mat4 model = new Mat4(1.0f);
-
-            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
-
-            // Make sure the uniform buffer is uploaded
-            gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
-        }
 
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
         gl4.glBindProgramPipeline(pipelineName[Pipeline.SPLASH]);

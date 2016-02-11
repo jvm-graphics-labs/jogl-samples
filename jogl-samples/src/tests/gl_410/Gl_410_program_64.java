@@ -9,6 +9,8 @@ import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
+import dev.Vec3d;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4d;
 import framework.Profile;
@@ -40,12 +42,12 @@ public class Gl_410_program_64 extends Test {
     private final String SHADERS_ROOT = "src/data/gl_410";
 
     private int vertexCount = 4;
-    private int positionSize = vertexCount * 3 * Double.BYTES;
+    private int positionSize = vertexCount * Vec3d.SIZE;
     private double[] positionData = {
-        -1.0f, -1.0f, +0.0f,
-        +1.0f, -1.0f, +0.0f,
-        +1.0f, +1.0f, +0.0f,
-        -1.0f, +1.0f, +0.0f};
+        -1.0, -1.0, +0.0,
+        +1.0, -1.0, +0.0,
+        +1.0, +1.0, +0.0,
+        -1.0, +1.0, +0.0};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -99,18 +101,16 @@ public class Gl_410_program_64 extends Test {
 
             if (validated) {
 
-                String[] vertexSourceContent = new String[]{
-                    new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE + ".vert")).useDelimiter("\\A").next()};
-                programName[Program.VERT]
-                        = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
+                String[] vertexSourceContent = new String[]{new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE
+                    + ".vert")).useDelimiter("\\A").next()};
+                programName[Program.VERT] = gl4.glCreateShaderProgramv(GL_VERTEX_SHADER, 1, vertexSourceContent);
             }
 
             if (validated) {
 
-                String[] fragmentSourceContent = new String[]{
-                    new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE + ".frag")).useDelimiter("\\A").next()};
-                programName[Program.FRAG]
-                        = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
+                String[] fragmentSourceContent = new String[]{new Scanner(new File(SHADERS_ROOT + "/" + SHADERS_SOURCE
+                    + ".frag")).useDelimiter("\\A").next()};
+                programName[Program.FRAG] = gl4.glCreateShaderProgramv(GL_FRAGMENT_SHADER, 1, fragmentSourceContent);
             }
 
             if (validated) {
@@ -147,11 +147,13 @@ public class Gl_410_program_64 extends Test {
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.F64]);
         DoubleBuffer positionBuffer = GLBuffers.newDirectDoubleBuffer(positionData);
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return checkError(gl4, "initArrayBuffer");
@@ -179,14 +181,13 @@ public class Gl_410_program_64 extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        Mat4d projection = glm.perspective_((float) Math.PI * 0.25, (float) windowSize.x / windowSize.y, 0.1, 100.0);
+        Mat4d projection = glm.perspective_(Math.PI * 0.25, (double) windowSize.x / windowSize.y, 0.1, 100.0);
         Mat4d view = new Mat4d(viewMat4());
-        Mat4d model = new Mat4d(1.0f);
+        Mat4d model = new Mat4d(1.0);
         Mat4d mvp = projection.mul(view).mul(model);
 
         gl4.glProgramUniformMatrix4dv(programName[Program.VERT], uniformMvp, 1, false, mvp.toDa_(), 0);
-        gl4.glProgramUniform4dv(programName[Program.FRAG], uniformDiffuse, 1,
-                new double[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+        gl4.glProgramUniform4dv(programName[Program.FRAG], uniformDiffuse, 1, new double[]{1.0, 0.5, 0.0, 1.0}, 0);
 
         gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x, windowSize.y}, 0);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);

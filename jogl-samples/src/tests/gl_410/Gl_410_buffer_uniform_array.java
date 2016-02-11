@@ -43,11 +43,11 @@ public class Gl_410_buffer_uniform_array extends Test {
 
     private int vertexCount = 4;
     private int positionSize = vertexCount * Vec2.SIZE;
-    private float[] positionData = {
-        -1.0f * 0.8f,/**/ -1.0f * 0.8f,
-        +1.0f * 0.8f,/**/ -1.0f * 0.8f,
-        +1.0f * 0.8f,/**/ +1.0f * 0.8f,
-        -1.0f * 0.8f,/**/ +1.0f * 0.8f};
+    private Vec2[] positionData = {
+        new Vec2(-1.0f, -1.0f).mul(0.8f),
+        new Vec2(+1.0f, -1.0f).mul(0.8f),
+        new Vec2(+1.0f, +1.0f).mul(0.8f),
+        new Vec2(-1.0f, +1.0f).mul(0.8f)};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -168,7 +168,11 @@ public class Gl_410_buffer_uniform_array extends Test {
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        ByteBuffer positionBuffer = GLBuffers.newDirectByteBuffer(positionSize);
+        for (int i = 0; i < vertexCount; i++) {
+            positionData[i].toBb(positionBuffer, i);
+        }
+        positionBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -189,11 +193,11 @@ public class Gl_410_buffer_uniform_array extends Test {
         }
 
         {
-            FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(
-                    new float[]{1.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 1.0f});
+            float[] diffuse = new float[]{1.0f, 0.5f, 0.0f, 1.0f, 0.0f, 0.5f, 1.0f, 1.0f};
+            FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(diffuse);
 
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
-            gl4.glBufferData(GL_UNIFORM_BUFFER, diffuseBuffer.capacity() * Float.BYTES, diffuseBuffer, GL_STATIC_DRAW);
+            gl4.glBufferData(GL_UNIFORM_BUFFER, diffuse.length * Float.BYTES, diffuseBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(diffuseBuffer);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }

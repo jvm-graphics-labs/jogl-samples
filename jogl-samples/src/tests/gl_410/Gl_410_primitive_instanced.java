@@ -11,11 +11,14 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Vec4u8;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fc4ub;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import glm.vec._2.Vec2;
@@ -38,17 +41,12 @@ public class Gl_410_primitive_instanced extends Test {
     private final String SHADERS_ROOT = "src/data/gl_410";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * (2 * Float.BYTES + 4 * Byte.BYTES);
-    private float[] vertexV2fData = {
-        -1.0f, -1.0f,
-        +1.0f, -1.0f,
-        +1.0f, +1.0f,
-        -1.0f, +1.0f};
-    private byte[] vertexV4ubData = {
-        (byte) 255, (byte) 0, (byte) 0, (byte) 255,
-        (byte) 255, (byte) 255, (byte) 0, (byte) 255,
-        (byte) 0, (byte) 255, (byte) 0, (byte) 255,
-        (byte) 0, (byte) 0, (byte) 255, (byte) 255};
+    private int vertexSize = vertexCount * Vertex_v2fc4ub.SIZE;
+    private Vertex_v2fc4ub[] vertexData = {
+        new Vertex_v2fc4ub(new Vec2(-1.0f, -1.0f), new Vec4u8(255, 0, 0, 255)),
+        new Vertex_v2fc4ub(new Vec2(+1.0f, -1.0f), new Vec4u8(255, 255, 0, 255)),
+        new Vertex_v2fc4ub(new Vec2(+1.0f, +1.0f), new Vec4u8(0, 255, 0, 255)),
+        new Vertex_v2fc4ub(new Vec2(-1.0f, +1.0f), new Vec4u8(0, 0, 255, 255))};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -156,9 +154,8 @@ public class Gl_410_primitive_instanced extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Float.BYTES + 4 * Byte.BYTES, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_UNSIGNED_BYTE, true, 2 * Float.BYTES + 4 * Byte.BYTES,
-                    2 * Float.BYTES);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fc4ub.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_UNSIGNED_BYTE, true, Vertex_v2fc4ub.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -176,20 +173,17 @@ public class Gl_410_primitive_instanced extends Test {
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
-        for (int vertex = 0; vertex < vertexCount; vertex++) {
-            for (int position = 0; position < 2; position++) {
-                vertexBuffer.putFloat(vertexV2fData[vertex * 2 + position]);
-            }
-            for (int color = 0; color < 4; color++) {
-                vertexBuffer.put(vertexV4ubData[vertex * 4 + color]);
-            }
+        for (int i = 0; i < vertexCount; i++) {
+            vertexData[i].toBb(vertexBuffer, i);
         }
         vertexBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return checkError(gl4, "initArrayBuffer");
