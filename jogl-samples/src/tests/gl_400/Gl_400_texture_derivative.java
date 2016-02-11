@@ -48,10 +48,10 @@ public class Gl_400_texture_derivative extends Test {
     private int vertexCount = 4;
     private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -187,8 +187,7 @@ public class Gl_400_texture_derivative extends Test {
         // Get variables locations
         if (validated) {
 
-            uniformDiffuse[Program.SPLASH]
-                    = gl4.glGetUniformLocation(programName[Program.SPLASH], "Diffuse");
+            uniformDiffuse[Program.SPLASH] = gl4.glGetUniformLocation(programName[Program.SPLASH], "Diffuse");
             uniformFramebufferSize = gl4.glGetUniformLocation(programName[Program.SPLASH], "FramebufferSize");
         }
 
@@ -286,7 +285,7 @@ public class Gl_400_texture_derivative extends Test {
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl4.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, windowSize.x / FRAMEBUFFER_SIZE, 
+        gl4.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, windowSize.x / FRAMEBUFFER_SIZE,
                 windowSize.y / FRAMEBUFFER_SIZE, 0, GL_DEPTH_COMPONENT, GL_FLOAT, null);
 
         gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);

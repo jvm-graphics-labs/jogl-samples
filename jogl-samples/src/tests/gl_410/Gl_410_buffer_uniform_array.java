@@ -18,6 +18,7 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -41,12 +42,12 @@ public class Gl_410_buffer_uniform_array extends Test {
     private final String SHADERS_ROOT = "src/data/gl_410";
 
     private int vertexCount = 4;
-    private int positionSize = vertexCount * 2 * Float.BYTES;
+    private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
-        -1.0f * 0.8f, -1.0f * 0.8f,
-        +1.0f * 0.8f, -1.0f * 0.8f,
-        +1.0f * 0.8f, +1.0f * 0.8f,
-        -1.0f * 0.8f, +1.0f * 0.8f};
+        -1.0f * 0.8f,/**/ -1.0f * 0.8f,
+        +1.0f * 0.8f,/**/ -1.0f * 0.8f,
+        +1.0f * 0.8f,/**/ +1.0f * 0.8f,
+        -1.0f * 0.8f,/**/ +1.0f * 0.8f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
