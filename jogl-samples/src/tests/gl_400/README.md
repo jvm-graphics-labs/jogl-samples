@@ -1,4 +1,4 @@
-# Highlights
+# GL-400 Highlights
 
 ### [gl-400-blend-rtt](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_blend_rtt.java) :
 
@@ -117,3 +117,9 @@
 * `glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackName[0])`
 * `glBeginTransformFeedback(GL_TRIANGLES)`
 * `glDrawTransformFeedback`, no more primitive number! No more stalling queries! Cool
+* `GL_INTERLEAVED_ATTRIBS`
+
+### [gl-400-transform-feedback-stream](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_transform_feedback_stream.java) :
+
+* same but using explicit stream instead
+* `glDrawTransformFeedbackStream(GL_TRIANGLES, feedbackName[0], 0)` is equivalent to `glDrawTransformFeedback` where stream 0 is implicit
