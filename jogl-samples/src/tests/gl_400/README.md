@@ -1,4 +1,4 @@
-# Highlights
+# GL-400 Highlights
 
 ### [gl-400-blend-rtt](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_blend_rtt.java) :
 
@@ -121,4 +121,5 @@
 
 ### [gl-400-transform-feedback-stream](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_transform_feedback_stream.java) :
 
-* ? magic
+* same but using explicit stream instead
+* `glDrawTransformFeedbackStream(GL_TRIANGLES, feedbackName[0], 0)` is equivalent to `glDrawTransformFeedback` where stream 0 is implicit
