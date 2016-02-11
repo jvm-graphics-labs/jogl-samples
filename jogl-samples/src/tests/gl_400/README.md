@@ -23,7 +23,7 @@
 
 ### [gl-400-fbo-multisample](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_fbo_multisample.java) :
 
-* generates one multisample fbo with a 4-samples texture and one simple fbo with a texture of the same dimension. Before rendering, it enables shading for each sample with `glEnable(GL_MULTISAMPLE)`, `glEnable(GL_SAMPLE_SHADING)` and `glMinSampleShading(1.0f)`. Tt renders the diffuse texture to the multisample fbo, blits the content to the other fbo and then render the final result to screen.
+* generates one multisample fbo with a 4-samples texture and one simple fbo with a texture of the same dimension. Before rendering, it enables shading for each sample with `glEnable(GL_MULTISAMPLE)`, `glEnable(GL_SAMPLE_SHADING)` and `glMinSampleShading(1.0f)`. It renders the diffuse texture to the multisample fbo, blits the content to the other fbo and then render the final result to screen.
 * given a bug in the nvidia [glsl compiler](https://devtalk.nvidia.com/default/topic/914874/opengl/glsl-compiler-bug-on-interpolateatsample-/) I had to find a trick and I was told to use `sample` identifier instead in the fragment shader to get the sample coordinates.
 
 ### [gl-400-fbo-rtt](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_fbo_rtt.java) :
