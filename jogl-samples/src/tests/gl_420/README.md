@@ -129,3 +129,26 @@ GlDebugOutput.messageSent(): GLDebugEvent[ id 0x500
 * `GL_COMPRESSED_RGBA_BPTC_UNORM_ARB`
 * `GL_RGBA8_SNORM`
 
+### [gl-420-texture-cube](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_texture_cube.java) :
+
+* array cube map showcase
+* `glTexStorage3D`
+* `GL_TEXTURE_CUBE_MAP_ARRAY`
+* `glTexSubImage3D`
+* `samplerCubeArray`
+
+### [gl-420-texture-pixel-store](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_texture_pixel_store.java) :
+
+* loads only a portion of a texture by setting pixel store parameters
+* `glPixelStorei`
+* `GL_UNPACK_ROW_LENGTH`
+* `GL_UNPACK_SKIP_PIXELS`
+* `GL_UNPACK_SKIP_ROWS`
+* `glCompressedTexSubImage2D`
+
+### [gl-420-texture-storage](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_texture_storage.java) :
+
+* "the new [`GL_ARB_texture_storage`](https://www.opengl.org/registry/specs/ARB/texture_storage.txt) extension decouples the allocation and the initialisation of a texture object to provide immutable textures. After calling the new commands `glTexStorage*D` the three commands `glTexImage*D`, `glCopyTexImage*D` and `glCompressedTexImage*D` can't be called anymore on this texture object without generating an invalid operation error. Immutable texture objects are initialized with the commands `glTexSubImage*d`, `glCompressedTexSubImage*D` and `glCopyTexSubImage*D` and actually any command or set of commands that won't reallocate the memory for this object.
+* `glTexStorage3D` to allocate
+* `glTexSubImage3D` to initialize
+
