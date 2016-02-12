@@ -1,4 +1,4 @@
-# GL 410 - Highlights
+# OpenGL 4.1 Highlights ([g-truc review](http://www.g-truc.net/doc/OpenGL%204.1%20review.pdf))
 
 ### [gl-410-buffer-uniform-array](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_410/Gl_410_buffer_uniform_array.java) :
 
