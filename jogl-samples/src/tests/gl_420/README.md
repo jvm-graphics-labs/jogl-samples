@@ -64,21 +64,59 @@ GlDebugOutput.messageSent(): GLDebugEvent[ id 0x500
 
 * binds the diffuse texture, gets a 32-bit unsigned int with `imageLoad` and then unpacks it into four 8-bit unsigned integers with `unpackUnorm4x8`, then, each component is converted to a normalized floating-point value to generate the returned four-component vector as `f / 255.0`. [More](https://www.opengl.org/sdk/docs/man/html/unpackUnorm.xhtml)
 
+### [gl-420-interface-matching](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_interface_matching.java) :
+
+* creates a program pipeline made of one stage with vert, tesc, tese, eval and geom and another one with frag. It defines the vertex attribute input `vec2 position[2]` by offsetting only the index `glVertexAttribPointer(Semantic.Attr.POSITION + 0` all the rest remains identical. During the rendering, the program will return, indeed, only a single attribute but with size 2 and type `GL_FLOAT_VEC2`.
+* the program passes a struct and a block through, this one will be modified in the tessellation control shader
+
+### [gl-420-memory-barrier](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_memory_barrier.java) :
+
+* Loads a diffuse texture and creates an fbo with another black texture same as big on `GL_COLOR_ATTACHMENT0`
+* for 255 consecutive frames binds the black texture, set the barrier `glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT)`, while the 256th time it chooses instead the diffuse texture, and renders it to the fbo.
+* then it binds the default framebuffer, the texture on `GL_COLOR_ATTACHMENT0`, sets the `glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT)` and renders it
+
+### [gl-420-picking](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_picking.java) :
+
+* allocates a `Float.BYTES` `GL_TEXTURE_BUFFER` buffer for picking (depth value). 
+* `layout(binding = 1, r32f) writeonly uniform imageBuffer depth`
+* in the fragment shader, at hardcoded coords, it saves the depth `imageStore(depth, 0, vec4(gl_FragCoord.z, 0, 0, 0))`
+* reads it back with `glMapBufferRange`
+* Explaned [here](http://stackoverflow.com/a/34764441/1047713)
+
+### [gl-420-primitive-line-aa](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_primitive_line_aa.java) :
+
+* generates a circle made of lines, a multisample fbo with a 8-sample texture and another basic fbo with a texture same as big.
+* renders three instances of this circle in the multisampled fbo, blits to the other fbo and then resolve it on screen by fetching with a factor of 8 to show easier the multisampling
+* `glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)`
+
+### [gl-420-sampler-fetch](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_primitive_sampler_fetch.java) :
+
+* shows how to fetch from a texture with the builtin `texture(sampler, vec2)` function and how instead implement it completely in shader code by itself
+* custom `textureBicubicLod`
+* custom` textureTrilinear`
+
+### [gl-420-sampler-gather](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_primitive_sampler_gather.java) :
+
+* shows a nice effect through the usage of `textureGatherOffset` that gathers four texels from a texture with offset
 
 ### [gl-420-test-depth-conservative](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_test_depth_conservative.java) :
 
 * "For forward renders, a typical practice is to start by rendering a fast depth buffer pass only and then render the colorbuffer so that only the visible fragments are processed by the fragment shader and write to the framebuffer, saving both compute and bandwaith"
 * `layout (depth_greater) out float gl_FragDepth;`
+* [`GL_ARB_conservative_depth`](https://www.opengl.org/registry/specs/ARB/conservative_depth.txt)
 
+### [gl-420-texture-array](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_texture_array.java) :
 
-## gl-420-image-unpack
+* allocates a 2d texture array with `glTexStorage3D` 
+* initializes it with  `glTexSubImage3D`
+* `sampler2DArray`
 
-- `unpackUnorm4x8`
+### [gl-420-texture-compressed](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_texture_compressed.java) :
 
-## gl-420-picking
+* renders four different types of textures
+* two compressed, dxt5 srgb and unorm
+* two plain, rgba8 and rgb9e5 ufloat
+* `glTexStorage2D`
+* `glCompressedTexSubImage2D`
+* `glTexSubImage2D`
 
-- Explaned [here](http://stackoverflow.com/a/34764441/1047713)
-
-## gl-420-depth-conservative
-
-- [early depth test](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/data/gl_420/test-depth-conservative.frag#L16), optimization. https://www.opengl.org/registry/specs/ARB/conservative_depth.txt
