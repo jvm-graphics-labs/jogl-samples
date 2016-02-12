@@ -21,6 +21,7 @@
 
 ### [gl-420-debug-output](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_debug-output.java) :
 
+* in theory it should illustrates `GL_ARB_debug_output` but since the extension got into core, jogl skipped it and supports directly `GL_KHR_debug`
 * a failing program that show the debug output utility. In this case a `glClearBufferfv` is called by passing `GL_UNIFORM_BUFFER` instead of a valid buffer type.
 * output
 ```
