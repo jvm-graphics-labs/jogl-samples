@@ -6,17 +6,23 @@
 package tests.gl_420;
 
 import com.jogamp.opengl.GL;
+import static com.jogamp.opengl.GL.GL_DONT_CARE;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SEVERITY_LOW;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SOURCE_APPLICATION;
 import static com.jogamp.opengl.GL3.*;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import framework.VertexAttrib;
+import glf.Vertex_v2fc4f;
+import glm.vec._2.Vec2;
 import java.nio.FloatBuffer;
 
 /**
@@ -37,12 +43,12 @@ public class Gl_420_interface_matching extends Test {
     private final String SHADERS_ROOT = "src/data/gl_420";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * (2 + 4) * Float.BYTES;
+    private int vertexSize = vertexCount * Vertex_v2fc4f.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f, 0.0f, 1.0f,
-        +1.0f, +1.0f, 0.0f, 1.0f, 0.0f, 1.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f, 1.0f, 1.0f};
+        -1.0f, -1.0f,/**/ 1.0f, 0.0f, 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f, 0.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 0.0f, 1.0f, 0.0f, 1.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f, 1.0f, 1.0f};
 
     private class Program {
 
@@ -136,8 +142,8 @@ public class Gl_420_interface_matching extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION + 0, 2, GL_FLOAT, false, (2 + 4) * Float.BYTES, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION + 1, 2, GL_FLOAT, false, (2 + 4) * Float.BYTES, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION + 0, 2, GL_FLOAT, false, Vertex_v2fc4f.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION + 1, 2, GL_FLOAT, false, Vertex_v2fc4f.SIZE, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, (2 + 4) * Float.BYTES, 2 * Float.BYTES);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -151,12 +157,12 @@ public class Gl_420_interface_matching extends Test {
         for (int i = 0; i < valid.length; i++) {
             valid[i] = new VertexAttrib();
         }
-        valid[Semantic.Attr.POSITION + 0] = new VertexAttrib(GL_TRUE, 0, 2, (2 + 4) * Float.BYTES,
-                GL_FLOAT, false, GL_FALSE, GL_FALSE, 0, 0);
-        valid[Semantic.Attr.POSITION + 1] = new VertexAttrib(GL_TRUE, 0, 2, (2 + 4) * Float.BYTES,
-                GL_FLOAT, false, GL_FALSE, GL_FALSE, 0, 0);
-        valid[Semantic.Attr.COLOR] = new VertexAttrib(GL_TRUE, 0, 4, (2 + 4) * Float.BYTES,
-                GL_FLOAT, false, GL_FALSE, GL_FALSE, 0, 2 * Float.BYTES);
+        valid[Semantic.Attr.POSITION + 0] = new VertexAttrib(GL_TRUE, 0, 2, Vertex_v2fc4f.SIZE, GL_FLOAT, false,
+                GL_FALSE, GL_FALSE, 0, 0);
+        valid[Semantic.Attr.POSITION + 1] = new VertexAttrib(GL_TRUE, 0, 2, Vertex_v2fc4f.SIZE, GL_FLOAT, false,
+                GL_FALSE, GL_FALSE, 0, 0);
+        valid[Semantic.Attr.COLOR] = new VertexAttrib(GL_TRUE, 0, 4, Vertex_v2fc4f.SIZE, GL_FLOAT, false, GL_FALSE,
+                GL_FALSE, 0, Vec2.SIZE);
         validate(gl4, vertexArrayName[0], valid);
 
         return true;
@@ -168,6 +174,7 @@ public class Gl_420_interface_matching extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         return true;
@@ -276,8 +283,6 @@ public class Gl_420_interface_matching extends Test {
             nameString = new String(attribName);
             // remove spaces at the end
             nameString = nameString.trim();
-//			byte[] nameSwap=new byte[activeAttributeMaxLength[0]];
-//			std::swap(attribName, nameSwap);
 
             int attribLocation = gl4.glGetAttribLocation(programName, nameString);
 

@@ -17,6 +17,8 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fv2f;
+import glm.vec._2.Vec2;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import jgli.Texture2dArray;
@@ -39,14 +41,14 @@ public class Gl_420_texture_array extends Test {
     private final String SHADERS_ROOT = "src/data/gl_420";
 
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
-        -0.4f, -0.4f, 0.0f, 1.0f,
-        +0.4f, -0.4f, 1.0f, 1.0f,
-        +0.4f, +0.4f, 1.0f, 0.0f,
-        +0.4f, +0.4f, 1.0f, 0.0f,
-        -0.4f, +0.4f, 0.0f, 0.0f,
-        -0.4f, -0.4f, 0.0f, 1.0f};
+        -0.4f, -0.4f,/**/ 0.0f, 1.0f,
+        +0.4f, -0.4f,/**/ 1.0f, 1.0f,
+        +0.4f, +0.4f,/**/ 1.0f, 0.0f,
+        +0.4f, +0.4f,/**/ 1.0f, 0.0f,
+        -0.4f, +0.4f,/**/ 0.0f, 0.0f,
+        -0.4f, -0.4f,/**/ 0.0f, 1.0f};
 
     private class Buffer {
 
@@ -140,15 +142,11 @@ public class Gl_420_texture_array extends Test {
 
         jgli.Texture2dArray texture = new Texture2dArray(jgli.Format.FORMAT_RGBA8_UNORM_PACK32, new int[]{4, 4}, 15, 1);
         for (int layerIndex = 0; layerIndex < texture.layers(); ++layerIndex) {
-            /**
-             * Trick to get the 1 inclusive, altought with less probability
-             * compared to all the others.
-             */
             byte[] color = {
-                (byte) ((1 - Math.random()) * 255.f),
-                (byte) ((1 - Math.random()) * 255.f),
-                (byte) ((1 - Math.random()) * 255.f),
-                (byte) ((1 - Math.random()) * 255.f)};
+                (byte) (glm.linearRand(0, 1) * 255.f),
+                (byte) (glm.linearRand(0, 1) * 255.f),
+                (byte) (glm.linearRand(0, 1) * 255.f),
+                (byte) (glm.linearRand(0, 1) * 255.f)};
             texture.clear(layerIndex, 0, 0, color);
         }
 
@@ -178,8 +176,8 @@ public class Gl_420_texture_array extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);

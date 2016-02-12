@@ -17,6 +17,8 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fv2f;
+import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -48,12 +50,12 @@ public class Gl_420_texture_compressed extends Test {
     private final String TEXTURE_DIFFUSE_RGB9E5_UFLOAT = "kueken7_rgb9e5_ufloat.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -90,8 +92,7 @@ public class Gl_420_texture_compressed extends Test {
 
         viewport[Texture.RGB8] = new Vec4i(0, 0, windowSize.x >> 1, windowSize.y >> 1);
         viewport[Texture.DXT5] = new Vec4i(windowSize.x >> 1, 0, windowSize.x >> 1, windowSize.y >> 1);
-        viewport[Texture.RGTC] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1,
-                windowSize.x >> 1, windowSize.y >> 1);
+        viewport[Texture.RGTC] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
         viewport[Texture.BPTC] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
 
         boolean validated = true;
@@ -193,8 +194,8 @@ public class Gl_420_texture_compressed extends Test {
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, swizzles.g.value);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, swizzles.b.value);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, swizzles.a.value);
-                gl4.glTexStorage2D(GL_TEXTURE_2D, texture.levels(),
-                        format.internal.value, texture.dimensions()[0], texture.dimensions()[1]);
+                gl4.glTexStorage2D(GL_TEXTURE_2D, texture.levels(), format.internal.value, texture.dimensions()[0],
+                        texture.dimensions()[1]);
 
                 for (int level = 0; level < texture.levels(); ++level) {
                     gl4.glCompressedTexSubImage2D(GL_TEXTURE_2D, level,
@@ -219,13 +220,13 @@ public class Gl_420_texture_compressed extends Test {
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, swizzles.g.value);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, swizzles.b.value);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, swizzles.a.value);
-                gl4.glTexStorage2D(GL_TEXTURE_2D, texture.levels(),
-                        format.internal.value, texture.dimensions()[0], texture.dimensions()[1]);
+                gl4.glTexStorage2D(GL_TEXTURE_2D, texture.levels(), format.internal.value, texture.dimensions()[0],
+                        texture.dimensions()[1]);
 
                 for (int level = 0; level < texture.levels(); ++level) {
                     gl4.glCompressedTexSubImage2D(GL_TEXTURE_2D, level,
                             0, 0,
-                            texture.dimensions()[0], texture.dimensions()[1],
+                            texture.dimensions(level)[0], texture.dimensions(level)[1],
                             format.internal.value,
                             texture.size(level),
                             texture.data(level));
@@ -245,8 +246,8 @@ public class Gl_420_texture_compressed extends Test {
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, swizzles.g.value);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, swizzles.b.value);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, swizzles.a.value);
-                gl4.glTexStorage2D(GL_TEXTURE_2D, texture.levels(),
-                        format.internal.value, texture.dimensions()[0], texture.dimensions()[1]);
+                gl4.glTexStorage2D(GL_TEXTURE_2D, texture.levels(), format.internal.value, texture.dimensions()[0],
+                        texture.dimensions()[1]);
 
                 for (int level = 0; level < texture.levels(); ++level) {
                     gl4.glTexSubImage2D(GL_TEXTURE_2D, level,
@@ -270,8 +271,8 @@ public class Gl_420_texture_compressed extends Test {
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, swizzles.g.value);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, swizzles.b.value);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, swizzles.a.value);
-                gl4.glTexStorage2D(GL_TEXTURE_2D, texture.levels(),
-                        format.internal.value, texture.dimensions()[0], texture.dimensions()[1]);
+                gl4.glTexStorage2D(GL_TEXTURE_2D, texture.levels(), format.internal.value, texture.dimensions()[0], 
+                        texture.dimensions()[1]);
 
                 for (int level = 0; level < texture.levels(); ++level) {
                     gl4.glTexSubImage2D(GL_TEXTURE_2D, level,
@@ -297,8 +298,8 @@ public class Gl_420_texture_compressed extends Test {
         gl4.glBindVertexArray(vertexArrayName[0]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * 2 * Float.BYTES, 2 * Float.BYTES);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);

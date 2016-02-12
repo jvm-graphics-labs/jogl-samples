@@ -16,7 +16,6 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import jglm.Vec2;
 
 /**
  *
@@ -54,7 +53,6 @@ public class Gl_420_image_store extends Test {
 
     private int[] vertexArrayName = {0}, textureName = {0}, programName = new int[Program.MAX],
             pipelineName = new int[Pipeline.MAX];
-    private Vec2 imageSize = new Vec2();
 
     @Override
     protected boolean begin(GL gl) {
@@ -66,7 +64,7 @@ public class Gl_420_image_store extends Test {
         logImplementationDependentLimit(gl4, GL_MAX_IMAGE_UNITS, "GL_MAX_IMAGE_UNITS");
         logImplementationDependentLimit(gl4, GL_MAX_VERTEX_IMAGE_UNIFORMS, "GL_MAX_VERTEX_IMAGE_UNIFORMS");
         logImplementationDependentLimit(gl4, GL_MAX_TESS_CONTROL_IMAGE_UNIFORMS, "GL_MAX_TESS_CONTROL_IMAGE_UNIFORMS");
-        logImplementationDependentLimit(gl4, GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS,
+        logImplementationDependentLimit(gl4, GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS, 
                 "GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS");
         logImplementationDependentLimit(gl4, GL_MAX_GEOMETRY_IMAGE_UNIFORMS, "GL_MAX_GEOMETRY_IMAGE_UNIFORMS");
         logImplementationDependentLimit(gl4, GL_MAX_FRAGMENT_IMAGE_UNIFORMS, "GL_MAX_FRAGMENT_IMAGE_UNIFORMS");

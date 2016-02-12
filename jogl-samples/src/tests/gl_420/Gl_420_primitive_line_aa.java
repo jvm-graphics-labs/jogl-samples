@@ -11,15 +11,15 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Vec2i;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._2.Vec2;
 import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import jglm.Vec2;
-import jglm.Vec2i;
 
 /**
  *
@@ -149,10 +149,10 @@ public class Gl_420_primitive_line_aa extends Test {
         if (validated) {
 
             gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[Pipeline.MULTISAMPLE],
-                    GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.MULTISAMPLE]);
-            gl4.glUseProgramStages(pipelineName[Pipeline.SPLASH],
-                    GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.SPLASH]);
+            gl4.glUseProgramStages(pipelineName[Pipeline.MULTISAMPLE], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+                    programName[Pipeline.MULTISAMPLE]);
+            gl4.glUseProgramStages(pipelineName[Pipeline.SPLASH], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+                    programName[Pipeline.SPLASH]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -175,19 +175,19 @@ public class Gl_420_primitive_line_aa extends Test {
 				glm::fastCos(glm::mod(Step * float(i), glm::pi<float>())));
          */ {
             vertexData[i] = new Vec2(
-                    (float) Math.sin(step * i),
-                    (float) Math.cos(step * i));
+                    Math.sin(step * i),
+                    Math.cos(step * i));
         }
         gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData.length * 2);
-        for (Vec2 vertex : vertexData) {
-            vertexBuffer.put(vertex.x);
-            vertexBuffer.put(vertex.y);
+        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexData.length * Vec2.SIZE);
+        for (int i = 0; i < vertexData.length; i++) {
+            vertexData[i].toBb(vertexBuffer, i);
         }
         vertexBuffer.rewind();
-        gl4.glBufferData(GL_ARRAY_BUFFER, vertexData.length * 2 * Float.BYTES, vertexBuffer, GL_STATIC_DRAW);
+        gl4.glBufferData(GL_ARRAY_BUFFER, vertexData.length * Vec2.SIZE, vertexBuffer, GL_STATIC_DRAW);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = {0};

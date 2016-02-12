@@ -23,4 +23,6 @@ void main()
     uvec4 texel = texelFetch(diffuse, coord + ivec2(0, 0), 0);
 
     color = vec4(texel) / 255.f;
+
+    //color = texture(diffuse, inBlock.texCoord) / 255.f;
 }

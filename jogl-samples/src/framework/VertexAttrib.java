@@ -25,8 +25,9 @@ public class VertexAttrib {
     public int divisor;
     public int pointer;
 
-    public VertexAttrib(int enabled, int binding, int size, int stride, int type,
-            boolean normalized, int integer, int long_, int divisor, int pointer) {
+    public VertexAttrib(int enabled, int binding, int size, int stride, int type, boolean normalized, int integer, 
+            int long_, int divisor, int pointer) {
+        
         this.enabled = enabled;
         this.binding = binding;
         this.size = size;
@@ -40,6 +41,7 @@ public class VertexAttrib {
     }
 
     public VertexAttrib() {
+        
         enabled = GL_FALSE;
         binding = 0;
         size = 4;
@@ -53,6 +55,7 @@ public class VertexAttrib {
     }
 
     public boolean isEqual(VertexAttrib vertexAttrib) {
+        
         return enabled == vertexAttrib.enabled
                 && size == vertexAttrib.size
                 && stride == vertexAttrib.stride

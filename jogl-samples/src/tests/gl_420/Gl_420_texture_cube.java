@@ -42,14 +42,14 @@ public class Gl_420_texture_cube extends Test {
 
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * 2 * Float.BYTES;
-    private float[] vertexData = {
-        -1.0f * 4.0f, -1.0f * 4.0f,
-        +1.0f * 4.0f, -1.0f * 4.0f,
-        +1.0f * 4.0f, +1.0f * 4.0f,
-        +1.0f * 4.0f, +1.0f * 4.0f,
-        -1.0f * 4.0f, +1.0f * 4.0f,
-        -1.0f * 4.0f, -1.0f * 4.0f};
+    private int vertexSize = vertexCount * Vec2.SIZE;
+    private Vec2[] vertexData = {
+        new Vec2(-1.0f, -1.0f).mul(4.0f),
+        new Vec2(+1.0f, -1.0f).mul(4.0f),
+        new Vec2(+1.0f, +1.0f).mul(4.0f),
+        new Vec2(+1.0f, +1.0f).mul(4.0f),
+        new Vec2(-1.0f, +1.0f).mul(4.0f),
+        new Vec2(-1.0f, -1.0f).mul(4.0f)};
 
     private class Buffer {
 
@@ -82,7 +82,7 @@ public class Gl_420_texture_cube extends Test {
         }
     };
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = {0}, samplerName = {0}, 
+    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = {0}, samplerName = {0},
             bufferName = new int[Buffer.MAX];
     private int programName;
 
@@ -150,7 +150,11 @@ public class Gl_420_texture_cube extends Test {
         gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
+        for (int i = 0; i < vertexCount; i++) {
+            vertexData[i].toBb(vertexBuffer, i);
+        }
+        vertexBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -282,14 +286,14 @@ public class Gl_420_texture_cube extends Test {
                     GL_UNIFORM_BUFFER, 0, Transform.SIZEOF,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
-            Mat4 projection = glm.perspective_((float)Math.PI * 0.25f,(float) windowSize.x / windowSize.y, 0.1f, 1000.0f);
-			Mat4 view = viewMat4();
-			Mat4 model = new Mat4(1.0f);
-			Mat4 mvp = projection.mul(view).mul(model);
-			Mat4 mv = view.mul(model);
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 1000.0f);
+            Mat4 view = viewMat4();
+            Mat4 model = new Mat4(1.0f);
+            Mat4 mvp = projection.mul(view).mul(model);
+            Mat4 mv = view.mul(model);
 
             Transform transform = new Transform(mvp, mv, new Vec3(0.0f, 0.0f, -cameraDistance()));
-            
+
             pointer.asFloatBuffer().put(transform.toFa_());
 
             // Make sure the uniform buffer is uploaded

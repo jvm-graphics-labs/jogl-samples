@@ -22,6 +22,6 @@ vec4 textureBicubicLod(in sampler2D sampler, in vec2 texCoord, in int lod);
 
 void main()
 {
-	//Color = textureTrilinear(Diffuse, In.Texcoord);
+    //color = textureTrilinear(diffuse, inBlock.texCoord);
     color = textureBicubicLod(diffuse, inBlock.texCoord, 0);
 }

@@ -119,7 +119,7 @@ public class Test implements GLEventListener, KeyListener {
         glWindow.setVisible(true);
         glWindow.addGLEventListener(this);
 //        if (glDebug) {
-            glWindow.getContext().addGLDebugListener(new GlDebugOutput());
+        glWindow.getContext().addGLDebugListener(new GlDebugOutput());
 //        }
         glWindow.addKeyListener(this);
 
@@ -137,8 +137,12 @@ public class Test implements GLEventListener, KeyListener {
         GL gl = getGl(drawable);
 
         assert checkGLVersion();
-        
-        assert begin(gl) == (success != Success.GENERATE_ERROR);
+
+        if (success != Success.GENERATE_ERROR) {
+            assert begin(gl);
+        } else {
+            begin(gl);
+        }
     }
 
     private GLProfile getGlProfile() {

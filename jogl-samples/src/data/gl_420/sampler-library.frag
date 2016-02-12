@@ -1,418 +1,400 @@
 #version 420 core
 
-vec4 hermite(in vec4 A, in vec4 B, in vec4 C, in vec4 D, in float s)
+vec4 hermite(in vec4 a, in vec4 b, in vec4 c, in vec4 d, in float s)
 {
-	mat4 Hermite = mat4(
+	mat4 hermite = mat4(
 		vec4( 2,-3, 0, 1), 
 		vec4(-2, 3, 0, 0),
 		vec4( 1,-2, 1, 0),
 		vec4( 1,-1, 0, 0));
 
-	vec4 Expo = vec4(s * s * s, s * s, s, 1);
+	vec4 expo = vec4(s * s * s, s * s, s, 1);
 
-	return Expo * Hermite * mat4(
-		A[0], B[0], C[0], D[0],
-		A[1], B[1], C[1], D[1],
-		A[2], B[2], C[2], D[2],
-		A[3], B[3], C[3], D[3]);
+	return expo * hermite * mat4(
+		a[0], b[0], c[0], d[0],
+		a[1], b[1], c[1], d[1],
+		a[2], b[2], c[2], d[2],
+		a[3], b[3], c[3], d[3]);
 }
 
-vec4 bezier(in vec4 A, in vec4 B, in vec4 C, in vec4 D, in float s)
+vec4 bezier(in vec4 a, in vec4 b, in vec4 c, in vec4 d, in float s)
 {
-	mat4 Bezier = mat4(
+	mat4 bezier = mat4(
 		vec4(-1, 3,-3, 1), 
 		vec4( 3,-6, 3, 0),
 		vec4(-3, 3, 0, 0),
 		vec4( 1, 0, 0, 0));
 
-	vec4 Expo = vec4(s * s * s, s * s, s, 1);
+	vec4 expo = vec4(s * s * s, s * s, s, 1);
 
-	return Expo * Bezier * mat4(
-		A[0], B[0], C[0], D[0],
-		A[1], B[1], C[1], D[1],
-		A[2], B[2], C[2], D[2],
-		A[3], B[3], C[3], D[3]);
+	return expo * bezier * mat4(
+		a[0], b[0], c[0], d[0],
+		a[1], b[1], c[1], d[1],
+		a[2], b[2], c[2], d[2],
+		a[3], b[3], c[3], d[3]);
 }
 
-vec4 catmullRom(in vec4 A, in vec4 B, in vec4 C, in vec4 D, in float s)
+vec4 catmullRom(in vec4 a, in vec4 b, in vec4 c, in vec4 d, in float s)
 {
-	mat4 CatmullRom = mat4(
+	mat4 catmullRom = mat4(
 		vec4(-1, 2,-1, 0), 
 		vec4( 3,-5, 0, 2),
 		vec4(-3, 4, 1, 0),
 		vec4( 1,-1, 0, 0));
 
-	vec4 Expo = vec4(s * s * s, s * s, s, 1);
+	vec4 expo = vec4(s * s * s, s * s, s, 1);
 
-	return 0.5 * Expo * CatmullRom * mat4(
-		A[0], B[0], C[0], D[0],
-		A[1], B[1], C[1], D[1],
-		A[2], B[2], C[2], D[2],
-		A[3], B[3], C[3], D[3]);
+	return 0.5 * expo * catmullRom * mat4(
+		a[0], b[0], c[0], d[0],
+		a[1], b[1], c[1], d[1],
+		a[2], b[2], c[2], d[2],
+		a[3], b[3], c[3], d[3]);
 }
 
-vec2 mirrorRepeat(in vec2 Texcoord)
+vec2 mirrorRepeat(in vec2 texCoord)
 {
-	vec2 Clamp = vec2(ivec2(floor(Texcoord)) % ivec2(2));
-	vec2 Floor = floor(Texcoord);
-	vec2 Rest = Texcoord - Floor;
-	vec2 Mirror = Clamp + Rest;
+	vec2 clamp_ = vec2(ivec2(floor(texCoord)) % ivec2(2));
+	vec2 floor_ = floor(texCoord);
+	vec2 rest = texCoord - floor_;
+	vec2 mirror = clamp_ + rest;
 	
-	return mix(vec2(1) - Rest, Rest, greaterThanEqual(Mirror, vec2(1)));
+	return mix(vec2(1) - rest, rest, greaterThanEqual(mirror, vec2(1)));
 }
 
-float textureLevel(in sampler2D Sampler, in vec2 Texcoord)
+float textureLevel(in sampler2D sampler, in vec2 texCoord)
 {
-	vec2 TextureSize = vec2(textureSize(Sampler, 0));
+	vec2 textureSize_ = vec2(textureSize(sampler, 0));
 
-	float LevelCount = max(log2(TextureSize.x), log2(TextureSize.y));
+	float levelCount = max(log2(textureSize_.x), log2(textureSize_.y));
 
-	vec2 dx = dFdx(Texcoord * TextureSize);
-	vec2 dy = dFdy(Texcoord * TextureSize);
+	vec2 dx = dFdx(texCoord * textureSize_);
+	vec2 dy = dFdy(texCoord * textureSize_);
 	float d = max(dot(dx, dx), dot(dy, dy));
 
-	d = clamp(d, 1.0, pow(2, (LevelCount - 1) * 2));
+	d = clamp(d, 1.0, pow(2, (levelCount - 1) * 2));
 
 	return 0.5 * log2(d);
 }
 
-vec4 fetchBilinear(
-	in sampler2D Sampler, in vec2 Interpolant, in ivec2 Texelcoords[4], in int Lod)
+vec4 fetchBilinear(in sampler2D sampler, in vec2 interpolant, in ivec2 texelCoords[4], in int lod)
 {
-	vec4 Texel00 = texelFetch(Sampler, Texelcoords[0], Lod);
-	vec4 Texel10 = texelFetch(Sampler, Texelcoords[1], Lod);
-	vec4 Texel11 = texelFetch(Sampler, Texelcoords[2], Lod);
-	vec4 Texel01 = texelFetch(Sampler, Texelcoords[3], Lod);
+	vec4 texel00 = texelFetch(sampler, texelCoords[0], lod);
+	vec4 texel10 = texelFetch(sampler, texelCoords[1], lod);
+	vec4 texel11 = texelFetch(sampler, texelCoords[2], lod);
+	vec4 texel01 = texelFetch(sampler, texelCoords[3], lod);
 	
-	vec4 Texel0 = mix(Texel00, Texel01, Interpolant.y);
-	vec4 Texel1 = mix(Texel10, Texel11, Interpolant.y);
-	return mix(Texel0, Texel1, Interpolant.x);
+	vec4 texel0 = mix(texel00, texel01, interpolant.y);
+	vec4 texel1 = mix(texel10, texel11, interpolant.y);
+	return mix(texel0, texel1, interpolant.x);
 }
 
 ///////////////
 // Nearest 
-vec4 textureNearest(
-	in sampler2D Sampler, in vec2 Texcoord)
+vec4 textureNearest(in sampler2D sampler, in vec2 texCoord)
 {
-	int LodNearest = int(round(textureQueryLod(Sampler, Texcoord).x));
+	int lodNearest = int(round(textureQueryLod(sampler, texCoord).x));
 
-	ivec2 TextureSize = textureSize(Sampler, LodNearest);
-	ivec2 Texelcoord = ivec2(TextureSize * Texcoord);
+	ivec2 textureSize_ = textureSize(sampler, lodNearest);
+	ivec2 texelCoord = ivec2(textureSize_ * texCoord);
 
-	return texelFetch(Sampler, Texelcoord, LodNearest);
+	return texelFetch(sampler, texelCoord, lodNearest);
 }
 
-vec4 textureNearestLod(
-	in sampler2D Sampler, in vec2 Texcoord, in float Lod)
+vec4 textureNearestLod(in sampler2D sampler, in vec2 texCoord, in float lod)
 {
-	int LodNearest = int(round(Lod));
+	int lodNearest = int(round(lod));
 
-	ivec2 TextureSize = textureSize(Sampler, LodNearest);
-	ivec2 Texelcoord = ivec2(TextureSize * Texcoord);
+	ivec2 textureSize_ = textureSize(sampler, lodNearest);
+	ivec2 texelCoord = ivec2(textureSize_ * texCoord);
 
-	return texelFetch(Sampler, Texelcoord, LodNearest);
+	return texelFetch(sampler, texelCoord, lodNearest);
 }
 
-vec4 textureNearestLod(
-	in sampler2D Sampler, in vec2 Texcoord, in int Lod)
+vec4 textureNearestLod(in sampler2D sampler, in vec2 texCoord, in int lod)
 {
-	ivec2 TextureSize = textureSize(Sampler, Lod);
-	ivec2 Texelcoord = ivec2(TextureSize * Texcoord);
+	ivec2 textureSize_ = textureSize(sampler, lod);
+	ivec2 texelCoord = ivec2(textureSize_ * texCoord);
 
-	return texelFetch(Sampler, Texelcoord, Lod);
+	return texelFetch(sampler, texelCoord, lod);
 }
 
-vec4 textureNearestLodRepeat(
-	in sampler2D Sampler, in vec2 Texcoord, in float Lod)
+vec4 textureNearestLodRepeat(in sampler2D sampler, in vec2 texCoord, in float lod)
 {
-	int LodNearest = int(round(Lod));
-	ivec2 Size = textureSize(Sampler, LodNearest);
+	int lodNearest = int(round(lod));
+	ivec2 size = textureSize(sampler, lodNearest);
 
-	ivec2 TextureSize = textureSize(Sampler, LodNearest);
-	ivec2 Texelcoord = ivec2(TextureSize * Texcoord) % Size;
+	ivec2 textureSize_ = textureSize(sampler, lodNearest);
+	ivec2 texelCoord = ivec2(textureSize_ * texCoord) % size;
 
-	return texelFetch(Sampler, Texelcoord, LodNearest);
+	return texelFetch(sampler, texelCoord, lodNearest);
 }
 
 ///////////////
 // Bilinear 
-vec4 textureBilinear(
-	in sampler2D Sampler, in vec2 Texcoord)
+vec4 textureBilinear(in sampler2D sampler, in vec2 texCoord)
 {
-	int Lod = int(round(textureQueryLod(Sampler, Texcoord).x));
+	int lod = int(round(textureQueryLod(sampler, texCoord).x));
 
-	ivec2 Size = textureSize(Sampler, Lod);
-	vec2 Texelcoord = Texcoord * Size - 0.5;
-	ivec2 TexelIndex = ivec2(Texelcoord);
+	ivec2 size = textureSize(sampler, lod);
+	vec2 texelCoord = texCoord * size - 0.5;
+	ivec2 texelIndex = ivec2(texelCoord);
 	
-	ivec2 Texelcoords[] = ivec2[4](
-		TexelIndex + ivec2(0, 0),
-		TexelIndex + ivec2(1, 0),
-		TexelIndex + ivec2(1, 1),
-		TexelIndex + ivec2(0, 1));
+	ivec2 texelCoords[] = ivec2[4](
+		texelIndex + ivec2(0, 0),
+		texelIndex + ivec2(1, 0),
+		texelIndex + ivec2(1, 1),
+		texelIndex + ivec2(0, 1));
 
 	return fetchBilinear(
-		Sampler, 
-		fract(Texelcoord), 
-		Texelcoords, 
-		Lod);
+		sampler, 
+		fract(texelCoord), 
+		texelCoords, 
+		lod);
 }
 
-vec4 textureBilinearLod(
-	in sampler2D Sampler, in vec2 Texcoord, in int Lod)
+vec4 textureBilinearLod(in sampler2D sampler, in vec2 texCoord, in int lod)
 {
-	ivec2 Size = textureSize(Sampler, Lod);
-	vec2 Texelcoord = Texcoord * Size - 0.5;
-	ivec2 TexelIndex = ivec2(Texelcoord);
+	ivec2 size = textureSize(sampler, lod);
+	vec2 texelCoord = texCoord * size - 0.5;
+	ivec2 texelIndex = ivec2(texelCoord);
 	
-	ivec2 Texelcoords[] = ivec2[4](
-		TexelIndex + ivec2(0, 0),
-		TexelIndex + ivec2(1, 0),
-		TexelIndex + ivec2(1, 1),
-		TexelIndex + ivec2(0, 1));
+	ivec2 texelCoords[] = ivec2[4](
+		texelIndex + ivec2(0, 0),
+		texelIndex + ivec2(1, 0),
+		texelIndex + ivec2(1, 1),
+		texelIndex + ivec2(0, 1));
 
 	return fetchBilinear(
-		Sampler, 
-		fract(Texelcoord), 
-		Texelcoords, 
-		Lod);
+		sampler, 
+		fract(texelCoord), 
+		texelCoords, 
+		lod);
 }
 
-vec4 textureBilinearLodRepeat(
-	in sampler2D Sampler, in vec2 Texcoord, in int Lod)
+vec4 textureBilinearLodRepeat(in sampler2D sampler, in vec2 texCoord, in int lod)
 {
-	ivec2 Size = textureSize(Sampler, Lod);
-	vec2 Texelcoord = Texcoord * Size - 0.5;
-	ivec2 TexelIndex = ivec2(Texelcoord);
+	ivec2 size = textureSize(sampler, lod);
+	vec2 texelCoord = texCoord * size - 0.5;
+	ivec2 texelIndex = ivec2(texelCoord);
 		
-	ivec2 Texelcoords[] = ivec2[4](
-		(TexelIndex + ivec2(0, 0)) % Size,
-		(TexelIndex + ivec2(1, 0)) % Size,
-		(TexelIndex + ivec2(1, 1)) % Size,
-		(TexelIndex + ivec2(0, 1)) % Size);
+	ivec2 texelCoords[] = ivec2[4](
+		(texelIndex + ivec2(0, 0)) % size,
+		(texelIndex + ivec2(1, 0)) % size,
+		(texelIndex + ivec2(1, 1)) % size,
+		(texelIndex + ivec2(0, 1)) % size);
 	
 	return fetchBilinear(
-		Sampler, 
-		fract(Texelcoord), 
-		Texelcoords, 
-		Lod);
+		sampler, 
+		fract(texelCoord), 
+		texelCoords, 
+		lod);
 }
 
-vec4 textureBilinearLodMirrorRepeat(
-	in sampler2D Sampler, in vec2 Texcoord, in int Lod)
+vec4 textureBilinearLodMirrorRepeat(in sampler2D sampler, in vec2 texCoord, in int lod)
 {
-	ivec2 Size = textureSize(Sampler, Lod);
-	vec2 Texelcoord = mirrorRepeat(Texcoord) * Size - 0.5;
-	ivec2 TexelIndex = ivec2(Texelcoord);
+	ivec2 size = textureSize(sampler, lod);
+	vec2 texelCoord = mirrorRepeat(texCoord) * size - 0.5;
+	ivec2 texelIndex = ivec2(texelCoord);
 		
-	ivec2 Texelcoords[] = ivec2[4](
-		(TexelIndex + ivec2(0, 0)) % Size,
-		(TexelIndex + ivec2(1, 0)) % Size,
-		(TexelIndex + ivec2(1, 1)) % Size,
-		(TexelIndex + ivec2(0, 1)) % Size);
+	ivec2 texelCoords[] = ivec2[4](
+		(texelIndex + ivec2(0, 0)) % size,
+		(texelIndex + ivec2(1, 0)) % size,
+		(texelIndex + ivec2(1, 1)) % size,
+		(texelIndex + ivec2(0, 1)) % size);
 	
 	return fetchBilinear(
-		Sampler, 
-		fract(Texelcoord), 
-		Texelcoords, 
-		Lod);
+		sampler, 
+		fract(texelCoord), 
+		texelCoords, 
+		lod);
 }
 
-vec4 textureBilinearLodClampToBorder(
-	in sampler2D Sampler, in vec2 Texcoord, in int Lod)
+vec4 textureBilinearLodClampToBorder(in sampler2D sampler, in vec2 texCoord, in int lod)
 {
-	ivec2 Size = textureSize(Sampler, Lod);
-	vec2 Texelcoord = clamp(Texcoord, 0, 1) * Size - 0.5;
-	ivec2 TexelIndex = ivec2(Texelcoord);
+	ivec2 size = textureSize(sampler, lod);
+	vec2 texelCoord = clamp(texCoord, 0, 1) * size - 0.5;
+	ivec2 texelIndex = ivec2(texelCoord);
 	
-	ivec2 Texelcoords[] = ivec2[4](
-		clamp(TexelIndex + ivec2(0, 0), ivec2(0), Size - 1),
-		clamp(TexelIndex + ivec2(1, 0), ivec2(0), Size - 1),
-		clamp(TexelIndex + ivec2(1, 1), ivec2(0), Size - 1),
-		clamp(TexelIndex + ivec2(0, 1), ivec2(0), Size - 1));
+	ivec2 texelCoords[] = ivec2[4](
+		clamp(texelIndex + ivec2(0, 0), ivec2(0), size - 1),
+		clamp(texelIndex + ivec2(1, 0), ivec2(0), size - 1),
+		clamp(texelIndex + ivec2(1, 1), ivec2(0), size - 1),
+		clamp(texelIndex + ivec2(0, 1), ivec2(0), size - 1));
 
 	return fetchBilinear(
-		Sampler, 
-		fract(Texelcoord), 
-		Texelcoords, 
-		Lod);
+		sampler, 
+		fract(texelCoord), 
+		texelCoords, 
+		lod);
 }
 
 ///////////////
 // Trilinear 
-vec4 textureTrilinear(
-	in sampler2D Sampler, in vec2 Texcoord)
+vec4 textureTrilinear(in sampler2D sampler, in vec2 texCoord)
 {
-	float Lod = textureQueryLod(Sampler, Texcoord).x;
+	float lod = textureQueryLod(sampler, texCoord).x;
 
-	int lodMin = int(floor(Lod));
-	int lodMax = int(ceil(Lod));
+	int lodMin = int(floor(lod));
+	int lodMax = int(ceil(lod));
 
-	vec4 TexelMin = textureBilinearLod(Sampler, Texcoord, lodMin);
-	vec4 TexelMax = textureBilinearLod(Sampler, Texcoord, lodMax);
+	vec4 texelMin = textureBilinearLod(sampler, texCoord, lodMin);
+	vec4 texelMax = textureBilinearLod(sampler, texCoord, lodMax);
 
-	return mix(TexelMin, TexelMax, fract(Lod));
+	return mix(texelMin, texelMax, fract(lod));
 }
 
-vec4 textureTrilinearLod(
-	in sampler2D Sampler, in vec2 Texcoord, in float Lod)
+vec4 textureTrilinearLod(in sampler2D sampler, in vec2 texCoord, in float lod)
 {
-	int LodMin = int(floor(Lod));
-	int LodMax = int(ceil(Lod));
+	int lodMin = int(floor(lod));
+	int lodMax = int(ceil(lod));
 
-	vec4 TexelMin = textureBilinearLod(Sampler, Texcoord, LodMin);
-	vec4 TexelMax = textureBilinearLod(Sampler, Texcoord, LodMax);
+	vec4 texelMin = textureBilinearLod(sampler, texCoord, lodMin);
+	vec4 texelMax = textureBilinearLod(sampler, texCoord, lodMax);
 
-	return mix(TexelMin, TexelMax, fract(Lod));
+	return mix(texelMin, texelMax, fract(lod));
 }
 
-vec4 textureTrilinearLodRepeat(
-	in sampler2D Sampler, in vec2 Texcoord, in float Lod)
+vec4 textureTrilinearLodRepeat(in sampler2D sampler, in vec2 texCoord, in float lod)
 {
-	int LodMin = int(floor(Lod));
-	int LodMax = int(ceil(Lod));
+	int lodMin = int(floor(lod));
+	int lodMax = int(ceil(lod));
 
-	vec4 TexelMin = textureBilinearLodRepeat(Sampler, Texcoord, LodMin);
-	vec4 TexelMax = textureBilinearLodRepeat(Sampler, Texcoord, LodMax);
+	vec4 texelMin = textureBilinearLodRepeat(sampler, texCoord, lodMin);
+	vec4 texelMax = textureBilinearLodRepeat(sampler, texCoord, lodMax);
 
-	return mix(TexelMin, TexelMax, fract(Lod));
+	return mix(texelMin, texelMax, fract(lod));
 }
 
-vec4 textureTrilinearLodMirrorRepeat(
-	in sampler2D Sampler, in vec2 Texcoord, in float Lod)
+vec4 textureTrilinearLodMirrorRepeat(in sampler2D sampler, in vec2 texCoord, in float lod)
 {
-	int LodMin = int(floor(Lod));
-	int LodMax = int(ceil(Lod));
+	int lodMin = int(floor(lod));
+	int lodMax = int(ceil(lod));
 
-	vec4 TexelMin = textureBilinearLodMirrorRepeat(Sampler, Texcoord, LodMin);
-	vec4 TexelMax = textureBilinearLodMirrorRepeat(Sampler, Texcoord, LodMax);
+	vec4 texelMin = textureBilinearLodMirrorRepeat(sampler, texCoord, lodMin);
+	vec4 texelMax = textureBilinearLodMirrorRepeat(sampler, texCoord, lodMax);
 
-	return mix(TexelMin, TexelMax, fract(Lod));
+	return mix(texelMin, texelMax, fract(lod));
 }
 
-vec4 textureTrilinearLodClampToBorder(
-	in sampler2D Sampler, in vec2 Texcoord, in float Lod)
+vec4 textureTrilinearLodClampToBorder(in sampler2D sampler, in vec2 texCoord, in float lod)
 {
-	int LodMin = int(floor(Lod));
-	int LodMax = int(ceil(Lod));
+	int lodMin = int(floor(lod));
+	int lodMax = int(ceil(lod));
 
-	vec4 TexelMin = textureBilinearLodClampToBorder(Sampler, Texcoord, LodMin);
-	vec4 TexelMax = textureBilinearLodClampToBorder(Sampler, Texcoord, LodMax);
+	vec4 texelMin = textureBilinearLodClampToBorder(sampler, texCoord, lodMin);
+	vec4 texelMax = textureBilinearLodClampToBorder(sampler, texCoord, lodMax);
 
-	return mix(TexelMin, TexelMax, fract(Lod));
+	return mix(texelMin, texelMax, fract(lod));
 }
 
 ///////////////
 // Bicubic 
-vec4 textureBicubicLod(
-	in sampler2D Sampler, in vec2 Texcoord, in int Lod)
+vec4 textureBicubicLod(in sampler2D sampler, in vec2 texCoord, in int lod)
 {
-	ivec2 Size = textureSize(Sampler, Lod);
-	vec2 Texelcoord = Texcoord * Size - 0.5;
-	ivec2 TexelIndex = ivec2(Texelcoord);
+	ivec2 size = textureSize(sampler, lod);
+	vec2 texelCoord = texCoord * size - 0.5;
+	ivec2 texelIndex = ivec2(texelCoord);
 
-	vec4 Texel00 = texelFetch(Sampler, TexelIndex + ivec2(-1,-1), Lod);
-	vec4 Texel10 = texelFetch(Sampler, TexelIndex + ivec2( 0,-1), Lod);
-	vec4 Texel20 = texelFetch(Sampler, TexelIndex + ivec2( 1,-1), Lod);
-	vec4 Texel30 = texelFetch(Sampler, TexelIndex + ivec2( 2,-1), Lod);
+	vec4 texel00 = texelFetch(sampler, texelIndex + ivec2(-1,-1), lod);
+	vec4 texel10 = texelFetch(sampler, texelIndex + ivec2( 0,-1), lod);
+	vec4 texel20 = texelFetch(sampler, texelIndex + ivec2( 1,-1), lod);
+	vec4 texel30 = texelFetch(sampler, texelIndex + ivec2( 2,-1), lod);
 
-	vec4 Texel01 = texelFetch(Sampler, TexelIndex + ivec2(-1, 0), Lod);
-	vec4 Texel11 = texelFetch(Sampler, TexelIndex + ivec2( 0, 0), Lod);
-	vec4 Texel21 = texelFetch(Sampler, TexelIndex + ivec2( 1, 0), Lod);
-	vec4 Texel31 = texelFetch(Sampler, TexelIndex + ivec2( 2, 0), Lod);
+	vec4 texel01 = texelFetch(sampler, texelIndex + ivec2(-1, 0), lod);
+	vec4 texel11 = texelFetch(sampler, texelIndex + ivec2( 0, 0), lod);
+	vec4 texel21 = texelFetch(sampler, texelIndex + ivec2( 1, 0), lod);
+	vec4 texel31 = texelFetch(sampler, texelIndex + ivec2( 2, 0), lod);
 	
-	vec4 Texel02 = texelFetch(Sampler, TexelIndex + ivec2(-1, 1), Lod);
-	vec4 Texel12 = texelFetch(Sampler, TexelIndex + ivec2( 0, 1), Lod);
-	vec4 Texel22 = texelFetch(Sampler, TexelIndex + ivec2( 1, 1), Lod);
-	vec4 Texel32 = texelFetch(Sampler, TexelIndex + ivec2( 2, 1), Lod);
+	vec4 texel02 = texelFetch(sampler, texelIndex + ivec2(-1, 1), lod);
+	vec4 texel12 = texelFetch(sampler, texelIndex + ivec2( 0, 1), lod);
+	vec4 texel22 = texelFetch(sampler, texelIndex + ivec2( 1, 1), lod);
+	vec4 texel32 = texelFetch(sampler, texelIndex + ivec2( 2, 1), lod);
 
-	vec4 Texel03 = texelFetch(Sampler, TexelIndex + ivec2(-1, 2), Lod);
-	vec4 Texel13 = texelFetch(Sampler, TexelIndex + ivec2( 0, 2), Lod);
-	vec4 Texel23 = texelFetch(Sampler, TexelIndex + ivec2( 1, 2), Lod);
-	vec4 Texel33 = texelFetch(Sampler, TexelIndex + ivec2( 2, 2), Lod);
+	vec4 texel03 = texelFetch(sampler, texelIndex + ivec2(-1, 2), lod);
+	vec4 texel13 = texelFetch(sampler, texelIndex + ivec2( 0, 2), lod);
+	vec4 texel23 = texelFetch(sampler, texelIndex + ivec2( 1, 2), lod);
+	vec4 texel33 = texelFetch(sampler, texelIndex + ivec2( 2, 2), lod);
 
-	vec2 SplineCoord = fract(Texelcoord);
+	vec2 splineCoord = fract(texelCoord);
 
-	vec4 Row0 = catmullRom(Texel00, Texel10, Texel20, Texel30, SplineCoord.x);
-	vec4 Row1 = catmullRom(Texel01, Texel11, Texel21, Texel31, SplineCoord.x);
-	vec4 Row2 = catmullRom(Texel02, Texel12, Texel22, Texel32, SplineCoord.x);
-	vec4 Row3 = catmullRom(Texel03, Texel13, Texel23, Texel33, SplineCoord.x);
+	vec4 row0 = catmullRom(texel00, texel10, texel20, texel30, splineCoord.x);
+	vec4 row1 = catmullRom(texel01, texel11, texel21, texel31, splineCoord.x);
+	vec4 row2 = catmullRom(texel02, texel12, texel22, texel32, splineCoord.x);
+	vec4 row3 = catmullRom(texel03, texel13, texel23, texel33, splineCoord.x);
 
-	return catmullRom(Row0, Row1, Row2, Row3, SplineCoord.y);
+	return catmullRom(row0, row1, row2, row3, splineCoord.y);
 }
 
-vec4 textureBicubicLodRepeat(
-	in sampler2D Sampler, in vec2 Texcoord, in int Lod)
+vec4 textureBicubicLodRepeat(in sampler2D sampler, in vec2 texCoord, in int lod)
 {
-	ivec2 Size = textureSize(Sampler, Lod);
-	vec2 Texelcoord = Texcoord * Size - 0.5;
-	ivec2 TexelIndex = ivec2(Texelcoord);
+	ivec2 size = textureSize(sampler, lod);
+	vec2 texelCoord = texCoord * size - 0.5;
+	ivec2 texelIndex = ivec2(texelCoord);
 
-	vec4 Texel00 = texelFetch(Sampler, (TexelIndex + ivec2(-1,-1)) % Size, Lod);
-	vec4 Texel10 = texelFetch(Sampler, (TexelIndex + ivec2( 0,-1)) % Size, Lod);
-	vec4 Texel20 = texelFetch(Sampler, (TexelIndex + ivec2( 1,-1)) % Size, Lod);
-	vec4 Texel30 = texelFetch(Sampler, (TexelIndex + ivec2( 2,-1)) % Size, Lod);
+	vec4 texel00 = texelFetch(sampler, (texelIndex + ivec2(-1,-1)) % size, lod);
+	vec4 texel10 = texelFetch(sampler, (texelIndex + ivec2( 0,-1)) % size, lod);
+	vec4 texel20 = texelFetch(sampler, (texelIndex + ivec2( 1,-1)) % size, lod);
+	vec4 texel30 = texelFetch(sampler, (texelIndex + ivec2( 2,-1)) % size, lod);
 
-	vec4 Texel01 = texelFetch(Sampler, (TexelIndex + ivec2(-1, 0)) % Size, Lod);
-	vec4 Texel11 = texelFetch(Sampler, (TexelIndex + ivec2( 0, 0)) % Size, Lod);
-	vec4 Texel21 = texelFetch(Sampler, (TexelIndex + ivec2( 1, 0)) % Size, Lod);
-	vec4 Texel31 = texelFetch(Sampler, (TexelIndex + ivec2( 2, 0)) % Size, Lod);
+	vec4 texel01 = texelFetch(sampler, (texelIndex + ivec2(-1, 0)) % size, lod);
+	vec4 texel11 = texelFetch(sampler, (texelIndex + ivec2( 0, 0)) % size, lod);
+	vec4 texel21 = texelFetch(sampler, (texelIndex + ivec2( 1, 0)) % size, lod);
+	vec4 texel31 = texelFetch(sampler, (texelIndex + ivec2( 2, 0)) % size, lod);
 
-	vec4 Texel02 = texelFetch(Sampler, (TexelIndex + ivec2(-1, 1)) % Size, Lod);
-	vec4 Texel12 = texelFetch(Sampler, (TexelIndex + ivec2( 0, 1)) % Size, Lod);
-	vec4 Texel22 = texelFetch(Sampler, (TexelIndex + ivec2( 1, 1)) % Size, Lod);
-	vec4 Texel32 = texelFetch(Sampler, (TexelIndex + ivec2( 2, 1)) % Size, Lod);
+	vec4 texel02 = texelFetch(sampler, (texelIndex + ivec2(-1, 1)) % size, lod);
+	vec4 texel12 = texelFetch(sampler, (texelIndex + ivec2( 0, 1)) % size, lod);
+	vec4 texel22 = texelFetch(sampler, (texelIndex + ivec2( 1, 1)) % size, lod);
+	vec4 texel32 = texelFetch(sampler, (texelIndex + ivec2( 2, 1)) % size, lod);
 
-	vec4 Texel03 = texelFetch(Sampler, (TexelIndex + ivec2(-1, 2)) % Size, Lod);
-	vec4 Texel13 = texelFetch(Sampler, (TexelIndex + ivec2( 0, 2)) % Size, Lod);
-	vec4 Texel23 = texelFetch(Sampler, (TexelIndex + ivec2( 1, 2)) % Size, Lod);
-	vec4 Texel33 = texelFetch(Sampler, (TexelIndex + ivec2( 2, 2)) % Size, Lod);
+	vec4 texel03 = texelFetch(sampler, (texelIndex + ivec2(-1, 2)) % size, lod);
+	vec4 texel13 = texelFetch(sampler, (texelIndex + ivec2( 0, 2)) % size, lod);
+	vec4 texel23 = texelFetch(sampler, (texelIndex + ivec2( 1, 2)) % size, lod);
+	vec4 texel33 = texelFetch(sampler, (texelIndex + ivec2( 2, 2)) % size, lod);
 
-	vec2 SplineCoord = fract(Texelcoord);
+	vec2 splineCoord = fract(texelCoord);
 
-	vec4 Row0 = catmullRom(Texel00, Texel10, Texel20, Texel30, SplineCoord.x);
-	vec4 Row1 = catmullRom(Texel01, Texel11, Texel21, Texel31, SplineCoord.x);
-	vec4 Row2 = catmullRom(Texel02, Texel12, Texel22, Texel32, SplineCoord.x);
-	vec4 Row3 = catmullRom(Texel03, Texel13, Texel23, Texel33, SplineCoord.x);
+	vec4 row0 = catmullRom(texel00, texel10, texel20, texel30, splineCoord.x);
+	vec4 row1 = catmullRom(texel01, texel11, texel21, texel31, splineCoord.x);
+	vec4 row2 = catmullRom(texel02, texel12, texel22, texel32, splineCoord.x);
+	vec4 row3 = catmullRom(texel03, texel13, texel23, texel33, splineCoord.x);
 
-	return catmullRom(Row0, Row1, Row2, Row3, SplineCoord.y);
+	return catmullRom(row0, row1, row2, row3, splineCoord.y);
 }
 
-vec4 textureBicubicLodRepeat2(
-	in sampler2D Sampler, in vec2 Texcoord, in int Lod)
+vec4 textureBicubicLodRepeat2(in sampler2D sampler, in vec2 texCoord, in int lod)
 {
-	ivec2 Size = textureSize(Sampler, Lod);
-	vec2 Texelcoord = Texcoord * Size - 1.5;
-	ivec2 TexelIndex = ivec2(Texelcoord);
+	ivec2 size = textureSize(sampler, lod);
+	vec2 texelCoord = texCoord * size - 1.5;
+	ivec2 texelIndex = ivec2(texelCoord);
 
-	vec4 Texel00 = texelFetch(Sampler, (TexelIndex + ivec2(0, 0)) % Size, Lod);
-	vec4 Texel10 = texelFetch(Sampler, (TexelIndex + ivec2(1, 0)) % Size, Lod);
-	vec4 Texel20 = texelFetch(Sampler, (TexelIndex + ivec2(2, 0)) % Size, Lod);
-	vec4 Texel30 = texelFetch(Sampler, (TexelIndex + ivec2(3, 0)) % Size, Lod);
+	vec4 texel00 = texelFetch(sampler, (texelIndex + ivec2(0, 0)) % size, lod);
+	vec4 texel10 = texelFetch(sampler, (texelIndex + ivec2(1, 0)) % size, lod);
+	vec4 texel20 = texelFetch(sampler, (texelIndex + ivec2(2, 0)) % size, lod);
+	vec4 texel30 = texelFetch(sampler, (texelIndex + ivec2(3, 0)) % size, lod);
 
-	vec4 Texel01 = texelFetch(Sampler, (TexelIndex + ivec2(0, 1)) % Size, Lod);
-	vec4 Texel11 = texelFetch(Sampler, (TexelIndex + ivec2(1, 1)) % Size, Lod);
-	vec4 Texel21 = texelFetch(Sampler, (TexelIndex + ivec2(2, 1)) % Size, Lod);
-	vec4 Texel31 = texelFetch(Sampler, (TexelIndex + ivec2(3, 1)) % Size, Lod);
+	vec4 texel01 = texelFetch(sampler, (texelIndex + ivec2(0, 1)) % size, lod);
+	vec4 texel11 = texelFetch(sampler, (texelIndex + ivec2(1, 1)) % size, lod);
+	vec4 texel21 = texelFetch(sampler, (texelIndex + ivec2(2, 1)) % size, lod);
+	vec4 texel31 = texelFetch(sampler, (texelIndex + ivec2(3, 1)) % size, lod);
 
-	vec4 Texel02 = texelFetch(Sampler, (TexelIndex + ivec2(0, 2)) % Size, Lod);
-	vec4 Texel12 = texelFetch(Sampler, (TexelIndex + ivec2(1, 2)) % Size, Lod);
-	vec4 Texel22 = texelFetch(Sampler, (TexelIndex + ivec2(2, 2)) % Size, Lod);
-	vec4 Texel32 = texelFetch(Sampler, (TexelIndex + ivec2(3, 2)) % Size, Lod);
+	vec4 texel02 = texelFetch(sampler, (texelIndex + ivec2(0, 2)) % size, lod);
+	vec4 texel12 = texelFetch(sampler, (texelIndex + ivec2(1, 2)) % size, lod);
+	vec4 texel22 = texelFetch(sampler, (texelIndex + ivec2(2, 2)) % size, lod);
+	vec4 texel32 = texelFetch(sampler, (texelIndex + ivec2(3, 2)) % size, lod);
 
-	vec4 Texel03 = texelFetch(Sampler, (TexelIndex + ivec2(0, 3)) % Size, Lod);
-	vec4 Texel13 = texelFetch(Sampler, (TexelIndex + ivec2(1, 3)) % Size, Lod);
-	vec4 Texel23 = texelFetch(Sampler, (TexelIndex + ivec2(2, 3)) % Size, Lod);
-	vec4 Texel33 = texelFetch(Sampler, (TexelIndex + ivec2(3, 3)) % Size, Lod);
+	vec4 texel03 = texelFetch(sampler, (texelIndex + ivec2(0, 3)) % size, lod);
+	vec4 texel13 = texelFetch(sampler, (texelIndex + ivec2(1, 3)) % size, lod);
+	vec4 texel23 = texelFetch(sampler, (texelIndex + ivec2(2, 3)) % size, lod);
+	vec4 texel33 = texelFetch(sampler, (texelIndex + ivec2(3, 3)) % size, lod);
 
-	vec2 SplineCoord = fract(Texelcoord);
+	vec2 splineCoord = fract(texelCoord);
 
-	vec4 Row0 = catmullRom(Texel00, Texel10, Texel20, Texel30, SplineCoord.x);
-	vec4 Row1 = catmullRom(Texel01, Texel11, Texel21, Texel31, SplineCoord.x);
-	vec4 Row2 = catmullRom(Texel02, Texel12, Texel22, Texel32, SplineCoord.x);
-	vec4 Row3 = catmullRom(Texel03, Texel13, Texel23, Texel33, SplineCoord.x);
+	vec4 row0 = catmullRom(texel00, texel10, texel20, texel30, splineCoord.x);
+	vec4 row1 = catmullRom(texel01, texel11, texel21, texel31, splineCoord.x);
+	vec4 row2 = catmullRom(texel02, texel12, texel22, texel32, splineCoord.x);
+	vec4 row3 = catmullRom(texel03, texel13, texel23, texel33, splineCoord.x);
 
-	return catmullRom(Row0, Row1, Row2, Row3, SplineCoord.y);
+	return catmullRom(row0, row1, row2, row3, splineCoord.y);
 }
 
 vec4 textureBicubicLinearLodRepeat(in sampler2D sampler, in vec2 texCoord, in float lod)
@@ -428,25 +410,24 @@ vec4 textureBicubicLinearLodRepeat(in sampler2D sampler, in vec2 texCoord, in fl
 
 ///////////////
 // Tricubic 
-vec4 textureTricubicLodRepeat(
-	in sampler2D Sampler, in vec2 Texcoord, in float Lod)
+vec4 textureTricubicLodRepeat(in sampler2D sampler, in vec2 texCoord, in float lod)
 {
-	int lodMin = int(floor(Lod));
-	int lodMax = int(ceil(Lod));
+	int lodMin = int(floor(lod));
+	int lodMax = int(ceil(lod));
 
-	vec4 TexelA = textureBicubicLodRepeat(Sampler, Texcoord, max(lodMin - 1, 0));
-	vec4 TexelB = textureBicubicLodRepeat(Sampler, Texcoord, lodMin);
-	vec4 TexelC = textureBicubicLodRepeat(Sampler, Texcoord, lodMax);
-	vec4 TexelD = textureBicubicLodRepeat(Sampler, Texcoord, lodMax + 1);
+	vec4 texelA = textureBicubicLodRepeat(sampler, texCoord, max(lodMin - 1, 0));
+	vec4 texelB = textureBicubicLodRepeat(sampler, texCoord, lodMin);
+	vec4 texelC = textureBicubicLodRepeat(sampler, texCoord, lodMax);
+	vec4 texelD = textureBicubicLodRepeat(sampler, texCoord, lodMax + 1);
 
-	return catmullRom(TexelA, TexelB, TexelC, TexelD, fract(Lod));
+	return catmullRom(texelA, texelB, texelC, texelD, fract(lod));
 }
 
 /////////////////////
 // Color procesing 
-vec4 squeeze(in vec4 Color, in float Ratio)
+vec4 squeeze(in vec4 color, in float ratio)
 {
-	return Color * (1.0 - Ratio) + (Ratio * 0.5);
+	return color * (1.0 - ratio) + (ratio * 0.5);
 }
 
 

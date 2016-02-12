@@ -137,10 +137,10 @@ public class Gl_420_memory_barrier extends Test {
         if (validated) {
 
             gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[Pipeline.UPDATE], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Program.UPDATE]);
-            gl4.glUseProgramStages(pipelineName[Pipeline.BLIT], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Program.BLIT]);
+            gl4.glUseProgramStages(pipelineName[Pipeline.UPDATE], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+                    programName[Program.UPDATE]);
+            gl4.glUseProgramStages(pipelineName[Pipeline.BLIT], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+                    programName[Program.BLIT]);
         }
 
         return validated & checkError(gl4, "initProgram - stage");
@@ -249,8 +249,7 @@ public class Gl_420_memory_barrier extends Test {
         gl4.glBindProgramPipeline(pipelineName[Pipeline.UPDATE]);
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, frameIndex != 0 ? textureName[Texture.COLORBUFFER]
-                : textureName[Texture.DIFFUSE]);
+        gl4.glBindTexture(GL_TEXTURE_2D, frameIndex != 0 ? textureName[Texture.COLORBUFFER] : textureName[Texture.DIFFUSE]);
 
         gl4.glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT);
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, vertexCount, 1, 0);

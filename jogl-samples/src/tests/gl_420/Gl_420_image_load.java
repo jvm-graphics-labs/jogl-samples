@@ -17,6 +17,7 @@ import framework.Semantic;
 import framework.Test;
 import glf.Vertex_v2fv2f;
 import glm.vec._2.Vec2;
+import glm.vec._2.u.Vec2u;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -76,7 +77,7 @@ public class Gl_420_image_load extends Test {
         public static final int MAX = 2;
     }
 
-    private Vec2 imageSize = new Vec2();
+    private Vec2u imageSize = new Vec2u();
 
     private int[] vertexArrayName = {0}, pipelineName = {0}, programName = new int[Program.MAX],
             bufferName = new int[Buffer.MAX], textureName = {0};
@@ -218,11 +219,7 @@ public class Gl_420_image_load extends Test {
                         format.external.value, format.type.value,
                         texture.data(level));
             }
-            // TODO switch to pure glm
-            imageSize.x = texture.dimensions()[0];
-            imageSize.y = texture.dimensions()[1];
-            
-            imageSize.toUnsignedFloat();
+            imageSize.set(texture.dimensions());
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 
@@ -273,10 +270,7 @@ public class Gl_420_image_load extends Test {
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Vec2.SIZE, GL_MAP_WRITE_BIT);
-            // unsigned floats!
-            pointer.putFloat(imageSize.x);
-            pointer.putFloat(imageSize.y);
-            pointer.rewind();
+            pointer.putInt(imageSize.x).putInt(imageSize.y).rewind();
 
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }

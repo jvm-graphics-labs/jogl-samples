@@ -91,8 +91,7 @@ public class Gl_430_buffer_uniform extends Test {
         public static final int SIZE = (Vec3.SIZE + 1 * Float.BYTES) * 3;
 
         public float[] toFa_() {
-            return new float[]{ambient.x, ambient.y, ambient.z, padding1,
-                diffuse.x, diffuse.y, diffuse.z, padding2,
+            return new float[]{ambient.x, ambient.y, ambient.z, padding1, diffuse.x, diffuse.y, diffuse.z, padding2,
                 specular.x, specular.y, specular.z, shininess};
         }
     };

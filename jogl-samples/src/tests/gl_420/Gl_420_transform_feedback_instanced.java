@@ -20,6 +20,7 @@ import framework.Test;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import glm.vec._2.Vec2;
+import glm.vec._4.Vec4;
 
 /**
  *
@@ -40,7 +41,7 @@ public class Gl_420_transform_feedback_instanced extends Test {
     private final String SHADERS_ROOT = "src/data/gl_420";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 4 * Float.BYTES;
+    private int vertexSize = vertexCount * Vec4.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f, 0.0f, 1.0f,
         +1.0f, -1.0f, 0.0f, 1.0f,
@@ -187,8 +188,8 @@ public class Gl_420_transform_feedback_instanced extends Test {
         gl4.glBindVertexArray(vertexArrayName[Pipeline.FEEDBACK]);
         {
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.FEEDBACK_VERTEX]);
-            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 2 * 4 * Float.BYTES, 0);
-            gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, 2 * 4 * Float.BYTES, 4 * Float.BYTES);
+            gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 2 * Vec4.SIZE, 0);
+            gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, 2 * Vec4.SIZE, Vec4.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
