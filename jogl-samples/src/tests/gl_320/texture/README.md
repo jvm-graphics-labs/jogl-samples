@@ -1,4 +1,4 @@
-# Highlights
+# OpenGL 3.2 Texture Highlights
 
 ### [gl-320-texture-2d](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/texture/Gl_320_texture_2d.java) :
 
