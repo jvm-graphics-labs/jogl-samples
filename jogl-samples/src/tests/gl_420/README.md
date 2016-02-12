@@ -119,4 +119,13 @@ GlDebugOutput.messageSent(): GLDebugEvent[ id 0x500
 * `glTexStorage2D`
 * `glCompressedTexSubImage2D`
 * `glTexSubImage2D`
+* `sampler2D`
+
+### [gl-420-texture-conversion](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_texture_conversion.java) :
+
+* loads the same diffuse texture in four different formats
+* `GL_COMPRESSED_RGBA_S3TC_DXT5_EXT`
+* `GL_RGBA8UI`
+* `GL_COMPRESSED_RGBA_BPTC_UNORM_ARB`
+* `GL_RGBA8_SNORM`
 
