@@ -1,4 +1,4 @@
-# GL 420 - Highlights
+# OpenGL 4.2 Highlights ([g-truc review](http://www.g-truc.net/doc/OpenGL%204.2%20review.pdf))
 
 ### [gl-420-atomic-counter](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_atomic_counter.java) :
 
