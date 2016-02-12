@@ -51,8 +51,18 @@ GlDebugOutput.messageSent(): GLDebugEvent[ id 0x500
 
 * `glTexStorage2D` to allocate the image/texture
 * `glTexSubImage2D` to initialize it
+* `glBindImageTexture`
 * `layout(binding = DIFFUSE, rgba16f) coherent uniform image2D diffuse;` in the fragment shader
-* 
+* `imageLoad`
+
+### [gl-420-image-store](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_image_store.java) :
+
+* disables any draw buffer and writes/stores an hardcoded color to an image with `imageStore`
+* then at the second step it offset the splashing a little in order to see the background color and read from the previous image with `imageLoad`
+
+### [gl-420-image-unpack](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_image_unpack.java) :
+
+* binds the diffuse texture, gets a 32-bit unsigned int with `imageLoad` and then unpacks it into four 8-bit unsigned integers with `unpackUnorm4x8`, then, each component is converted to a normalized floating-point value to generate the returned four-component vector as `f / 255.0`. [More](https://www.opengl.org/sdk/docs/man/html/unpackUnorm.xhtml)
 
 
 ### [gl-420-test-depth-conservative](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_test_depth_conservative.java) :
