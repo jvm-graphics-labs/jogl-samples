@@ -1,4 +1,4 @@
-# GL 410 - Highlights
+# OpenGL 4.1 Highlights ([g-truc review](http://www.g-truc.net/doc/OpenGL%204.1%20review.pdf))
 
 ### [gl-410-buffer-uniform-array](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_410/Gl_410_buffer_uniform_array.java) :
 
@@ -19,7 +19,8 @@
 
 ### [gl-410-fbo-layered](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_410/Gl_410_fbo_layered.java) :
 
-* allocates a texture with depth equal 4 and attach it to the `GL_COLOR_ATTACHMENT0` of an fbo. It renders to each of them via geometry shader invocation `layout(triangles, invocations = 4) in` and set the destination layer by `gl_Layer = gl_InvocationID`. Colors hardcoded in the fragment shader.
+* allocates a texture with depth equal 4 and attach it to the `GL_COLOR_ATTACHMENT0` of an fbo. It renders to each of them via geometry shader invocation `layout(triangles, invocations = 4) in` and set the destination layer by `gl_LayerID = gl_InvocationID`. Colors hardcoded in the fragment shader.
+* `gl_LayerID` allows dispatching primitives to a layered framebuffer
 * in the same way splash them to screen. Geometry shader this time will set also `gl_ViewportIndex = gl_InvocationID`, viewports set previously through `glViewportIndexedfv`
 
 ### [gl-410-glsl-block](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_410/Gl_410_glsl_block.java) :

@@ -1,4 +1,4 @@
-# GL-400 Highlights
+# OpenGL 4.0 Highlights ([g-truc review](http://www.g-truc.net/doc/OpenGL%204.0%20review.pdf))
 
 ### [gl-400-blend-rtt](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_blend_rtt.java) :
 

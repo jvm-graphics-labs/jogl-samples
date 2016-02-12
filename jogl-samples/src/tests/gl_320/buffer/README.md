@@ -1,4 +1,4 @@
-# Highlights
+# OpenGL 3.2 Buffer Highlights
 
 ### [gl-320-buffer-uniform](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/buffer/Gl_320_buffer_uniform.java) :
 

@@ -1,4 +1,4 @@
-# Highlights
+# OpenGL 3.2 Draw Highlights
 
 ### [gl-320-draw-base-vertex](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/draw/Gl_320_draw_base_vertex.java) :
 
