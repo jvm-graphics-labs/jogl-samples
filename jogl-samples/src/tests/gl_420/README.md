@@ -49,6 +49,7 @@ GlDebugOutput.messageSent(): GLDebugEvent[ id 0x500
 
 ### [gl-420-image-load](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_image_load.java) :
 
+* [`GL_ARB_shader_image_load_store`](https://www.opengl.org/registry/specs/ARB/shader_image_load_store.txt) "This extension provides GLSL built-in functions allowing shaders to load from, store to, and perform atomic read-modify-write operations to a single level of a texture object from any shader stage."
 * `glTexStorage2D` to allocate the image/texture
 * `glTexSubImage2D` to initialize it
 * `glBindImageTexture`
