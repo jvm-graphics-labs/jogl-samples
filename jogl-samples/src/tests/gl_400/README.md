@@ -3,6 +3,9 @@
 ### [gl-400-blend-rtt](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_blend_rtt.java) :
 
 * ? Probabily magic
+* [`GL_ARB_draw_buffers_blend`](https://www.opengl.org/registry/specs/ARB/draw_buffers_blend.txt) which extends 
+[`GL_EXT_draw_buffers2`](http://www.opengl.org/registry/specs/EXT/draw_buffers2.txt) with per rendertarget 
+functions and equations.
 
 ### [gl-400-buffer-uniform-array](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_buffer_uniform_array.java) :
 
@@ -38,6 +41,10 @@
 
 ### [gl-400-fbo-shadow](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_fbo_shadow.java) :
 
+* [`GL_ARB_texture_gather`](https://www.opengl.org/registry/specs/ARB/texture_gather.txt) provides an 
+equivalent to the Direct3D 10.1 gather4 instruction to fetch 4 texels components from 4 different texel in 
+one call for soft shadow and some post processing effects. 
+* `textureGather`
 * render to a shadow map (depth texture) and use it to render the shadow in the next step
 
 ### [gl-400-primitive-instanced](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_primitive_instanced.java) :
@@ -50,7 +57,48 @@
 
 ### [gl-400-primitive-tessellation](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_primitive_tessellation.java) :
 
-* primitive tessellation (`glPatchParameterfv` calls seem to be useless)
+*  OpenGL 4.0 brings 3 new processing stages that take place between the vertex shader and geometry shader.
+
+    Control shader (Known as Hull shader in Direct3D 11)
+
+    Primitive generator
+
+    Evaluation shader (Known as Domain shader in Direct3D 11)
+
+In a way, the tessellation stages replace the vertex shader stage in the graphics pipeline. Most of the 
+vertex shader tasks will be dispatched in the control shader and the evaluation shader. So far, the vertex 
+shader stage is still required but the control shader and the evaluation shader are both optional.
+
+Control shaders work on 'patches', a set of vertices. Their output per-vertex data and per-patch data used by 
+the primitive generator and available as read only in the evaluation shader.
+
+Input per-vertex data are stored in an array called `gl_in` which maximum size is `gl_MaxPatchVertives`. The 
+elements of `gl_in` contain the variables `gl_Position`, `gl_PointSize`, `gl_ClipDistance` and `gl_ClipVertex`. 
+The per-patch variables are `gl_PatchVerticesIn` (number of vertices in the patch), `gl_PrimitiveID` (number 
+of primitives of the draw call) and `gl_InvocationID` (Invocation number).
+
+The control shaders have a `gl_out` array of per-vertex data which members are `gl_Position`, `gl_PointSize` 
+and `gl_ClipDistance`. They also output per-patch data with the variables `gl_TessLevelOuter` and 
+`gl_TesslevelInner` to control the tessellation level.
+
+A control shader is invoked several times, one by vertex of a patch and each invocation is identified by 
+`gl_InvocationID`. These invocations can be synchronized by the built-in function barrier.
+
+The primitive generator consumes a patch and produces a set of points, lines or triangles. Each vertex 
+generated are associated with (u, v, w) or (u, v) position available in the evaluation shader thanks to 
+the variable `gl_TessCoord` where `u + v + w = 1`.
+
+The evaluation shaders provide a `gl_In` array like control shaders. The members of the elements of `gl_In` 
+are `gl_Position`, `gl_PointSize` and `gl_ClipDistance` for each vertex of a patch. The evaluation shaders 
+have the variables `gl_PatchVerticesIn` and `gl_PrimitivesID` but also some extra variables 
+`gl_TessLevelOuter` and `gl_TessLevelInner` which contain the tessellation levels of the patch.
+
+The evaluation shaders output `gl_Position`, `gl_PointSize` and `gl_ClipDistance`.
+
+Tessellation has a lot more details to understand to work on a real implementation in a project! Those 
+details are available in [`GL_ARB_tessellation_shader`](https://www.opengl.org/registry/specs/ARB/tessellation_shader.txt) 
+and obviously in [OpenGL 4.0 specification](http://www.opengl.org/registry/doc/glspec40.core.20100311.withchanges.pdf).
+
 
 ### [gl-400-program-64](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_program_64.java) :
 
@@ -92,6 +140,10 @@
 
 ### [gl-400-sampler-fetch](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_sampler_fetch.java) :
 
+* [`GL_ARB_texture_query_lod`](https://www.opengl.org/registry/specs/ARB/texture_query_lod.txt). This 
+extension allows to get the LOD that would have been used for a texture fetch. This would make possible a 
+per fragment LOD, like we could choose a lighting algorithm more or less accurate according this LOD value... 
+* `textureQueryLOD`
 * `texelFetch(sampler*, ivec3 coord, int level)`
 * trinilinearLod (`GL_LINEAR_MIPMAPS_LINEAR`) shader implementation
 

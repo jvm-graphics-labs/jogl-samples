@@ -14,6 +14,7 @@
 
 ### [gl-320-texture-buffer](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/texture/Gl_320_texture_buffer.java) :
 
+* [`GL_ARB_texture_buffer_object`](https://www.opengl.org/registry/specs/ARB/texture_buffer_object.txt) an access of a whole large buffer like a 1D texture
 * use textures as data containers
 * `GL_TEXTURE_BUFFER`
 * `glTexBuffer`
@@ -27,11 +28,14 @@
 ### [gl-320-texture-cube](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/texture/Gl_320_texture_cube.java) :
 
 * cube texture, `GL_TEXTURE_CUBE_MAP`
-* `samplerCube`
-* by standard, filtering across cube texture faces does not work. But you can enable it globally by `glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS)`
+* `samplerCube` 
+* [`GL_ARB_seamless_cube_map`](https://www.opengl.org/registry/specs/ARB/seamless_cube_map.txt) allows the 
+implementation to access adjacent cube map faces for the filtering, by standard indeed filtering across cube 
+texture faces does not work. But you can enable it globally by `glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS)`
 
 ### [gl-320-texture-derivative](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/texture/Gl_320_texture_derivative.java) :
 
+* [`GL_ARB_sample_shading`](https://www.opengl.org/registry/specs/ARB/sample_shading.txt) to force the processing of a minimum number of samples per fragment to reduce antialising
 * `dFdx` - `dFdy`, _available only in the fragment shader_, these functions return the partial derivative of expression p with respect to the window x coordinate (for `dFdx\*`) and y coordinate (for `dFdy*`).
 `dFdx` returns either `dFdxCoarse` or `dFdxFine`. `dFdy` returns either `dFdyCoarse` or `dFdyFine`. The implementation may choose which calculation to perform based upon factors such as performance or the value of the API `GL_FRAGMENT_SHADER_DERIVATIVE_HINT` hint. 
 

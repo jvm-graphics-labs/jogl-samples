@@ -2,6 +2,8 @@
 
 ### [gl-320-primitive-front-face](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/primitive/Gl_320_primitive_front_face.java) :
 
+* [`GL_ARB_provoking_vertex`](https://www.opengl.org/registry/specs/ARB/provoking_vertex.txt) allows to choose 
+the provoking vertex convention either like Reality Lab and Direct3D (first vertex) or OpenGL (last vertex)
 * `gl_FrontFacing`
 * `glProvokingVertex(GL_LAST_VERTEX_CONVENTION)`
 

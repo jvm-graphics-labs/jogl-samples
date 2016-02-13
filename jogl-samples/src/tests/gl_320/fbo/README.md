@@ -51,10 +51,12 @@ So disable it in core, use it only in compatibility
 
 ### [gl-320-fbo-layered](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/fbo/Gl_320_fbo_layered.java) :
 
+* [`GL_ARB_geometry_shader4`](https://www.opengl.org/registry/specs/ARB/geometry_shader4.txt) is now part of OpenGL 3.2 core
 * Layered rendering to an fbo with a 3d texture based on 4 layers. The output layer is controlled by the geometry shader via `gl_Layer`
 
 ### [gl-320-fbo-multisample](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/fbo/Gl_320_fbo_multisample.java) :
 
+* [`ARB_texture_multisample`](https://www.opengl.org/registry/specs/ARB/texture_multisample.txt) to access to sample values
 * render to multisample fbo, blit to another fbo and render this content to screen
 
 ### [gl-320-fbo-multisample-explicit](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/fbo/Gl_320_fbo_multisample_explicit.java) :

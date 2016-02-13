@@ -42,6 +42,13 @@ GlDebugOutput.messageSent(): GLDebugEvent[ id 0x500
 ### [gl-420-draw-image-space](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_draw_image_space.java) :
 
 * renders a texture directly in image space (pixels coordinates)
+* [`GL_ARB_shading_language_include`](https://www.opengl.org/registry/specs/ARB/shading_language_include.txt) 
+is an extension that provides an `#include` directive to GLSL. The goal is to reuse the same shader text in 
+multiple shader across multiple contexts. The way `GL_ARB_shading_language_include` allows this, it 
+introduces _named strings_ to create some kind of paths in the GLSL compiler space that contains the shader 
+texts. These name strings are created and deleted by `glNamedStringARB` and `glDeleteNamedStringARB`. From 
+these name strings, the shader text can be compiled with the function `glCompileShaderIncludeARB` of 
+`glCompileShader`. 
 * `#include draw-image-space-rendering.glsl`
  
 ### [gl-420-fbo](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_fbo.java) :
@@ -99,7 +106,8 @@ GlDebugOutput.messageSent(): GLDebugEvent[ id 0x500
 
 ### [gl-420-sampler-gather](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_primitive_sampler_gather.java) :
 
-* shows a nice effect through the usage of `textureGatherOffset` that gathers four texels from a texture with offset
+* It shows a nice effect 
+through the usage of `textureGatherOffset` that gathers four texels from a texture with a given offset
 
 ### [gl-420-test-depth-conservative](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_test_depth_conservative.java) :
 
@@ -135,6 +143,8 @@ GlDebugOutput.messageSent(): GLDebugEvent[ id 0x500
 
 * array cube map showcase
 * `glTexStorage3D`
+* [`GL_ARB_texture_cube_map_array`}(https://www.opengl.org/registry/specs/ARB/texture_cube_map_array.txt)
+provides D3D10.1 cube map arrays
 * `GL_TEXTURE_CUBE_MAP_ARRAY`
 * `glTexSubImage3D`
 * `samplerCubeArray`
