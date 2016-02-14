@@ -178,7 +178,7 @@ public class Gl_400_transform_feedback_stream extends Test {
         // Generate a buffer object
         gl4.glGenTransformFeedbacks(1, feedbackName, 0);
         gl4.glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackName[0]);
-        gl4.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 1, feedbackArrayBufferName[0]);
+        gl4.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, feedbackArrayBufferName[0]);
         gl4.glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 
         return checkError(gl4, "initFeedback");
@@ -249,7 +249,7 @@ public class Gl_400_transform_feedback_stream extends Test {
 
         gl4.glBindVertexArray(feedbackVertexArrayName[0]);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-        gl4.glDrawTransformFeedbackStream(GL_TRIANGLES, feedbackName[0], 1);
+        gl4.glDrawTransformFeedbackStream(GL_TRIANGLES, feedbackName[0], 0);
 
         return true;
     }

@@ -9,7 +9,7 @@ precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 layout(triangles) in;
-layout(triangle_strip, max_vertices = 3, xfb_buffer = 1) out;
+layout(triangle_strip, max_vertices = 3, xfb_buffer = 0) out;
 
 in Block
 {
@@ -18,7 +18,7 @@ in Block
 
 out Block
 {
-    layout(stream = 1) vec4 color;
+    layout(stream = 0) vec4 color;
 } outBlock;
 
 out gl_PerVertex 
