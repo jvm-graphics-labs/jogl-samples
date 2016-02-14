@@ -139,12 +139,9 @@ and obviously in [OpenGL 4.0 specification](http://www.opengl.org/registry/doc/g
 
 ### [gl-400-program-64](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_program_64.java) :
 
-* `double` matrices and uniforms
-* `dmat4`
-* `dvec4`
-
-### [gl-400-program-64](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_program_64.java) :
-
+* [`GL_ARB_gpu_shader_fp64`](https://www.opengl.org/registry/specs/ARB/gpu_shader_fp64.txt) is part 
+[OpenGL 4.0](http://www.opengl.org/registry/doc/glspec40.core.20100311.withchanges.pdf) and exposes support 
+of FP64 uniforms and FP64 computations in GLSL.
 * `double` matrices and uniforms
 * `dmat4`
 * `dvec4`
@@ -206,14 +203,6 @@ locations, OpenGL provides the function `glGetSubroutineIndex`.
 
 * varying color with blocks
 
-### [gl-400-program-varying-structs](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_program_varying_blocks.java) :
-
-* varying color with blocks
-
-### [gl-400-program-varying-structs](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_program_varying_blocks.java) :
-
-* varying color with structs
-
 ### [gl-400-sampler-array](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_sampler_array.java) :
 
 * loads a diffuse texture twice with right (rgba) and inverted (brga) swizzle and set the layer with an uniform `uniformDiffuseIndex` variable
@@ -228,13 +217,28 @@ locations, OpenGL provides the function `glGetSubroutineIndex`.
 
 * [`GL_ARB_texture_query_lod`](https://www.opengl.org/registry/specs/ARB/texture_query_lod.txt). This 
 extension allows to get the LOD that would have been used for a texture fetch. This would make possible a 
-per fragment LOD, like we could choose a lighting algorithm more or less accurate according this LOD value... 
+per fragment LOD, like we could choose a lighting algorithm more or less accurate according this LOD value...
+With such feature, we can perform a per-fragment adaptive texture filtering. "Anisotropic filtering 16x" is 
+no longer a meaningful concept.  
 * `textureQueryLOD`
 * `texelFetch(sampler*, ivec3 coord, int level)`
 * trinilinearLod (`GL_LINEAR_MIPMAPS_LINEAR`) shader implementation
 
-### [gl-400-texture-buffer](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_texture_buffer.java) :
+### [gl-400-texture-buffer-rgb](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_400/Gl_400_texture_buffer_rgb.java) :
 
+*  Almost all OpenGL release implies more texture formats. This is again the case with [OpenGL 4.0](http://www.opengl.org/registry/doc/glspec40.core.20100311.withchanges.pdf) 
+as 2 new extensions on that side has been released. [`GL_ARB_texture_buffer_object_rgb32`](https://www.opengl.org/registry/specs/ARB/texture_buffer_object_rgb32.txt) 
+also part of OpenGL 4.0 specification and [`GL_ARB_texture_compression_bptc`](https://www.opengl.org/registry/specs/ARB/texture_compression_bptc.txt) 
+excluded from OpenGL 4.0 specification, probably just because of an S3 patent just like 
+[`GL_EXT_texture_compression_s3tc`](https://www.opengl.org/registry/specs/EXT/texture_compression_s3tc.txt)
+
+`GL_ARB_texture_buffer_object_rgb32` trivially adds 3 channels 32 bits texture buffers: `GL_RGB32I`, 
+`GL_RGB32UI` and `GL_RGB32F`.
+
+`GL_ARB_texture_compression_bptc` provides Direct3D 11 compressed formats known as `BC6H` and `BC7` and 
+called respectivelly `GL_BPTC_FLOAT` and `GL_BPTC` with OpenGL. They aim high dynamic range, low dynamic 
+range texture compression and high quality compression of sharp edges. The compression ratio for 
+`GL_BPTC_FLOAT` and `GL_BPTC` are 6:1 and 3:1. 
 * `samplerBuffer`
 * loads position offsets and diffuse color in texture buffers
 
