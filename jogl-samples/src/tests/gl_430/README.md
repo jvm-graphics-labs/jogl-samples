@@ -217,3 +217,53 @@ the right side of the screen.
 ### [gl-430-query-occlusion](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_query_occlusion.java):
 
 * queries `GL_ANY_SAMPLES_PASSED_CONSERVATIVE`
+
+### [gl-430-texture-buffer](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_texture_buffer.java):
+
+* One of the good concepts of OpenGL is the possibility to bind ranges of a buffer so that for a specific draw
+call, only a subset of the buffer will be used. Interestingly, the only exception was for the texture buffer
+but this is fixed with OpenGL 4.3
+* [`ARB_texture_buffer_range`](https://www.opengl.org/registry/specs/ARB/texture_buffer_range.txt) allows binding
+a range of a texture buffer
+* `glTexBufferRange`
+* saves offset and diffuse color inside texture buffer and renders 5 instanced square
+* `GL_TEXTURE_BUFFER`
+* `samplerBuffer`
+* `texelFetch`
+* `GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT`
+
+### [gl-430-texture-copy](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_texture_copy.java):
+
+* This could be maybe a basic functionality, but it is a functionality that was missing: the copy of a sub-image
+to another sub-image directly from GPU memory to GPU memory. Yes, it was already somehow possible with using
+two framebuffer objects and `glBlitFramebuffer` but this is not exactly convenient.
+
+[`ARB_copy_image`](https://www.opengl.org/registry/specs/ARB/copy_image.txt) (promoted from [`NV_copy_image`](https://www.opengl.org/registry/specs/NV/copy_image.txt))
+resolves this issue but also provides some extra goodness like the possibility of copying a `GL_RGBA16UI` texture
+to a `GL_COMPRESSED_RED_RGTC1` texture. This is going to make on-GPU texture compression a lot easier, avoiding
+to setup an unpack buffer object to read the `GL_RGBA16UI` texture and a pack buffer object to write the data
+to the `GL_COMPRESSED_RED_RGTC1` texture and possibly gaining some performance on the way, doing a simple memory
+transfer instead of two. `ARB_copy_image` strictly works like a memcpy for images, being either a level of a
+texture or the data or a renderbuffer object.
+* [`ARB_copy_image`](https://www.opengl.org/registry/specs/ARB/copy_image.txt) allows to memcpy image tiles from
+GPU memory to GPU memory
+* `glCopyImageSubData`
+* loads a diffuse texture and copies it to another texture and render this last one.
+
+### [gl-430-texture-fetch-dependent](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_texture_fetch_dependent.java):
+
+* ? surely magic
+
+### [gl-430-texture-storage](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_texture_storage.java):
+
+* The OpenGL ecosystem is fragmented. Not only we have OpenGL and OpenGL ES but we have also many different 
+versions of OpenGL and all the implementors have reach the same level of implementation. In theory, these days
+an OpenGL software need to support OpenGL 4.2 for OpenGL 4 hardware, OpenGL 3.3 for OpenGL 3 hardware and maybe
+OpenGL 2.1 for OpenGL 2.1 hardware. In practise, this is only possible on AMD and NVIDIA implementations
+because Intel only support OpenGL 4.0 and Apple only supports OpenGL 3.2. [`GL_ARB_internalformat_query2`](https://www.opengl.org/registry/specs/ARB/internalformat_query2.txt)
+is a great opportunity, which may partially resolve this issue for texture and framebuffer capabilities.
+* `glGetInternalformati64v`
+
+### [gl-430-texture-view](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_texture_view.java):
+
+*
