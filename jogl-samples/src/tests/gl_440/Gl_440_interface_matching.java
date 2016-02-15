@@ -263,8 +263,8 @@ public class Gl_440_interface_matching extends Test {
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
-        for (Vertex_v2fc4d vertex : vertexData) {
-            vertexBuffer.put(vertex.toBB_());
+        for (int i = 0; i < vertexCount; i++) {
+            vertexData[i].toBB(vertexBuffer, i);
         }
         vertexBuffer.rewind();
         gl4.glBufferStorage(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, 0);

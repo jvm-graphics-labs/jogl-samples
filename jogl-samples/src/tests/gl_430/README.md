@@ -145,6 +145,75 @@ edge.
 * loads a diffuse texture, bind an attachmentless fbo and renders it on another texture through `glBindImageTexture` and
 `imageStore` and then splashes it on screen.
 
-### [gl-430-fbo-without-attachment](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_fbo_without_attachment.java):
+### [gl-430-image-sampling](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_image_sampling.java):
 
-*
+* loads a diffuse texture and binds the first 3 levels to the first 3 texture units. An instanced rendering will offset
+those three levels one side each other. 
+* shader bilinear interpolation
+* `imageLoad`
+* `mix`
+* `imageSize`
+* `fract`
+
+### [gl-430-image-store](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_image_store.java):
+
+* writes and reads from image
+* `imageStore`
+
+### [gl-430-interface-matching](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_interface_matching.java):
+
+* interfaces debug
+
+### [gl-430-multi-draw-indirect](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_multi_draw_indirect.java): to fix
+
+### [gl-430-perf-monitor-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_perf_monitor_amd.java): to finish
+
+### [gl-430-program-compute](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_program_compute.java):
+
+* OpenGL has a new shader stage thanks to [`ARB_compute_shader`](https://www.opengl.org/registry/specs/ARB/compute_shader.txt)
+that provides a lightweight compute capability to OpenGL. This stage can't be attached to a program pipeline that already 
+has any other stage attached to it. Hence, it can be executed before a vertex program, after a transform feedback or a
+fragment program but never in between shader stages.
+
+The OpenGL compute shader stage has several advantages over OpenCL. It natively supports GLSL types (`vec*`, `mat*`) and the
+shader code can be reused across the compute shader stage and the other stages. All the ingrastructures available with others
+stages like the sampler, the uniform block or the shader storage buffer is available at this stage. Only missing: the input
+variables (for vertex attributes) and the output variables (for framebuffer attachments). Also, just like OpenCL kernels, it
+supports a shared amount of memory, giving access to GPUs Local Data Store (LDS).
+
+Built-in variables of a compute shader stage controlling the stage execution:
+```glsl
+// work group dimensions
+in uvec3 gl_NumWorkGroups;
+const uvec3 gl_WorkGroupSize;
+// work group and invocation IDs
+in uvec3 gl_WorkGroupID;
+in uvec3 gl_LocalInvocationID;
+// derived variables
+in uvec3 gl_GlobalInvocationID;
+in uint gl_LocalInvocationIndex
+```
+
+By itself, `ARB_compute_shader` is not really a big deal to me but when put into perspective with the OpenGL pipeline it 
+starts to shine: OpenGL 4.3 enables Programmable Vertex Pulling and some forms of Programmable Blending!
+* uses a compute program to copy the vertex attributes from one ssbo to another one and then use them to render a diffuse
+texture
+
+### [gl-430-program-compute](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_program_compute.java):
+
+* uses a compute program to copy the vertex attributes (multiplying the positions by the mvp matrix) from one ssbo to 
+another one and then use them to render a diffuse texture
+
+### [gl-430-program-subroutine](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_program_subroutine.java):
+
+* loads a compressed and an uncompressed image and through subroutine selection renderd first one on the left and the other on
+the right side of the screen.
+
+### [gl-430-query-conditional](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_query_conditional.java):
+
+* conditional rendering
+* `GL_ANY_SAMPLES_PASSED_CONSERVATIVE`
+
+### [gl-430-query-occlusion](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_query_occlusion.java):
+
+* queries `GL_ANY_SAMPLES_PASSED_CONSERVATIVE`

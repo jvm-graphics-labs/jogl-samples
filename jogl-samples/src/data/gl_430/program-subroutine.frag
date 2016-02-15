@@ -32,13 +32,13 @@ layout(location = FRAG_COLOR, index = 0) out vec4 color;
 layout(index = SUBROUTINE_DXT1) subroutine(Diffuse)
 vec4 diffuseLQ()
 {
-	return texture(diffuseDXT1, inBlock.texCoord);
+    return texture(diffuseDXT1, inBlock.texCoord);
 }
 
 layout(index = SUBROUTINE_RGB8) subroutine(Diffuse)
 vec4 diffuseHQ()
 {
-	return texture(diffuseRGB8, inBlock.texCoord);
+    return texture(diffuseRGB8, inBlock.texCoord);
 }
 
 void main()

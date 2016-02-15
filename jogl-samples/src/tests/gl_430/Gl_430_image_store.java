@@ -8,12 +8,15 @@ package tests.gl_430;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL4;
+import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import dev.Vec2i;
+import framework.BufferUtils;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -40,8 +43,9 @@ public class Gl_430_image_store extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, textureName = {0}, pipelineName = new int[Pipeline.MAX],
-            programName = new int[Pipeline.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), textureName = GLBuffers.newDirectIntBuffer(1),
+            pipelineName = GLBuffers.newDirectIntBuffer(Pipeline.MAX),
+            programName = GLBuffers.newDirectIntBuffer(Pipeline.MAX);
 
     @Override
     protected boolean begin(GL gl) {
@@ -81,8 +85,8 @@ public class Gl_430_image_store extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_READ, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.READ] = shaderProgram.program();
-            gl4.glProgramParameteri(programName[Pipeline.READ], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName.put(Pipeline.READ, shaderProgram.program());
+            gl4.glProgramParameteri(programName.get(Pipeline.READ), GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -98,8 +102,8 @@ public class Gl_430_image_store extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SAVE, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.SAVE] = shaderProgram.program();
-            gl4.glProgramParameteri(programName[Pipeline.SAVE], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName.put(Pipeline.SAVE, shaderProgram.program());
+            gl4.glProgramParameteri(programName.get(Pipeline.SAVE), GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -107,11 +111,11 @@ public class Gl_430_image_store extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[Pipeline.READ], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.READ]);
-            gl4.glUseProgramStages(pipelineName[Pipeline.SAVE], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.SAVE]);
+            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName);
+            gl4.glUseProgramStages(pipelineName.get(Pipeline.READ), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+                    programName.get(Pipeline.READ));
+            gl4.glUseProgramStages(pipelineName.get(Pipeline.SAVE), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+                    programName.get(Pipeline.SAVE));
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -119,9 +123,9 @@ public class Gl_430_image_store extends Test {
 
     private boolean initTexture(GL4 gl4) {
 
-        gl4.glGenTextures(1, textureName, 0);
+        gl4.glGenTextures(1, textureName);
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[0]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
@@ -137,8 +141,8 @@ public class Gl_430_image_store extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glBindVertexArray(0);
 
         return true;
@@ -157,10 +161,9 @@ public class Gl_430_image_store extends Test {
         {
             gl4.glDrawBuffer(GL_NONE);
 
-            gl4.glBindProgramPipeline(pipelineName[Pipeline.SAVE]);
-            gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[0], 0,
-                    false, 0, GL_WRITE_ONLY, GL_RGBA8);
-            gl4.glBindVertexArray(vertexArrayName[0]);
+            gl4.glBindProgramPipeline(pipelineName.get(Pipeline.SAVE));
+            gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName.get(0), 0, false, 0, GL_WRITE_ONLY, GL_RGBA8);
+            gl4.glBindVertexArray(vertexArrayName.get(0));
             gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
         }
 
@@ -168,10 +171,9 @@ public class Gl_430_image_store extends Test {
         {
             gl4.glDrawBuffer(GL_BACK);
 
-            gl4.glBindProgramPipeline(pipelineName[Pipeline.READ]);
-            gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[0], 0,
-                    false, 0, GL_READ_ONLY, GL_RGBA8);
-            gl4.glBindVertexArray(vertexArrayName[0]);
+            gl4.glBindProgramPipeline(pipelineName.get(Pipeline.READ));
+            gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName.get(0), 0, false, 0, GL_READ_ONLY, GL_RGBA8);
+            gl4.glBindVertexArray(vertexArrayName.get(0));
             gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
         }
 
@@ -183,11 +185,15 @@ public class Gl_430_image_store extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteTextures(1, textureName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteProgram(programName[Pipeline.READ]);
-        gl4.glDeleteProgram(programName[Pipeline.SAVE]);
-        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName, 0);
+        gl4.glDeleteTextures(1, textureName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        gl4.glDeleteProgram(programName.get(Pipeline.READ));
+        gl4.glDeleteProgram(programName.get(Pipeline.SAVE));
+        BufferUtils.destroyDirectBuffer(programName);
+        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
 
         return true;
     }
