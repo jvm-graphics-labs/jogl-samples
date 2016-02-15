@@ -8,12 +8,15 @@ package tests.gl_430;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL4;
+import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
@@ -53,8 +56,11 @@ public class Gl_430_fbo_without_attachment extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, framebufferName = {0}, samplerName = {0}, pipelineName = new int[Pipeline.MAX],
-            programName = new int[Pipeline.MAX], textureName = new int[Texture.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            framebufferName = GLBuffers.newDirectIntBuffer(1), samplerName = GLBuffers.newDirectIntBuffer(1),
+            pipelineName = GLBuffers.newDirectIntBuffer(Pipeline.MAX),
+            programName = GLBuffers.newDirectIntBuffer(Pipeline.MAX),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
 
     @Override
     protected boolean begin(GL gl) {
@@ -98,8 +104,8 @@ public class Gl_430_fbo_without_attachment extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_RENDER, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.RENDER] = shaderProgram.program();
-            gl4.glProgramParameteri(programName[Pipeline.RENDER], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName.put(Pipeline.RENDER, shaderProgram.program());
+            gl4.glProgramParameteri(programName.get(Pipeline.RENDER), GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -115,8 +121,8 @@ public class Gl_430_fbo_without_attachment extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName[Pipeline.SPLASH] = shaderProgram.program();
-            gl4.glProgramParameteri(programName[Pipeline.SPLASH], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName.put(Pipeline.SPLASH, shaderProgram.program());
+            gl4.glProgramParameteri(programName.get(Pipeline.SPLASH), GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -124,11 +130,11 @@ public class Gl_430_fbo_without_attachment extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[Pipeline.RENDER], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.RENDER]);
-            gl4.glUseProgramStages(pipelineName[Pipeline.SPLASH], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.SPLASH]);
+            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName);
+            gl4.glUseProgramStages(pipelineName.get(Pipeline.RENDER), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+                    programName.get(Pipeline.RENDER));
+            gl4.glUseProgramStages(pipelineName.get(Pipeline.SPLASH), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+                    programName.get(Pipeline.SPLASH));
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -136,18 +142,18 @@ public class Gl_430_fbo_without_attachment extends Test {
 
     private boolean initSampler(GL4 gl4) {
 
-        gl4.glGenSamplers(1, samplerName, 0);
-        gl4.glSamplerParameteri(samplerName[0], GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-        gl4.glSamplerParameteri(samplerName[0], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl4.glSamplerParameteri(samplerName[0], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        gl4.glSamplerParameteri(samplerName[0], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        gl4.glSamplerParameteri(samplerName[0], GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        gl4.glSamplerParameterfv(samplerName[0], GL_TEXTURE_BORDER_COLOR, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
-        gl4.glSamplerParameterf(samplerName[0], GL_TEXTURE_MIN_LOD, -1000.f);
-        gl4.glSamplerParameterf(samplerName[0], GL_TEXTURE_MAX_LOD, 1000.f);
-        gl4.glSamplerParameterf(samplerName[0], GL_TEXTURE_LOD_BIAS, 0.0f);
-        gl4.glSamplerParameteri(samplerName[0], GL_TEXTURE_COMPARE_MODE, GL_NONE);
-        gl4.glSamplerParameteri(samplerName[0], GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        gl4.glGenSamplers(1, samplerName);
+        gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        gl4.glSamplerParameterfv(samplerName.get(0), GL_TEXTURE_BORDER_COLOR, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
+        gl4.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_MIN_LOD, -1000.f);
+        gl4.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_MAX_LOD, 1000.f);
+        gl4.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_LOD_BIAS, 0.0f);
+        gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_COMPARE_MODE, GL_NONE);
+        gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
         return true;
     }
@@ -162,10 +168,10 @@ public class Gl_430_fbo_without_attachment extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glGenTextures(Texture.MAX, textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, swizzles.r.value);
@@ -183,7 +189,7 @@ public class Gl_430_fbo_without_attachment extends Test {
                         texture.data(level));
             }
 
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl4.glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, windowSize.x, windowSize.y);
@@ -198,8 +204,8 @@ public class Gl_430_fbo_without_attachment extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glBindVertexArray(0);
 
         return true;
@@ -209,14 +215,14 @@ public class Gl_430_fbo_without_attachment extends Test {
 
         boolean validated = true;
 
-        gl4.glGenFramebuffers(1, framebufferName, 0);
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
+        gl4.glGenFramebuffers(1, framebufferName);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
         gl4.glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_WIDTH, windowSize.x);
         gl4.glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_HEIGHT, windowSize.y);
         gl4.glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_LAYERS, 1);
         gl4.glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_SAMPLES, 1);
         gl4.glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_DEFAULT_FIXED_SAMPLE_LOCATIONS, GL_TRUE);
-        if (!isFramebufferComplete(gl4, framebufferName[0])) {
+        if (!isFramebufferComplete(gl4, framebufferName.get(0))) {
             return false;
         }
 
@@ -231,27 +237,27 @@ public class Gl_430_fbo_without_attachment extends Test {
 
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
 
-        gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindSampler(0, samplerName[0]);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
+        gl4.glBindSampler(0, samplerName.get(0));
 
         // Render
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.RENDER]);
+        gl4.glBindProgramPipeline(pipelineName.get(Pipeline.RENDER));
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
-        gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[Texture.COLORBUFFER], 0, false,
-                0, GL_WRITE_ONLY, GL_RGBA8);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
+        gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName.get(Texture.COLORBUFFER), 0, false, 0, GL_WRITE_ONLY, 
+                GL_RGBA8);
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
 
         // Splash
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.SPLASH]);
+        gl4.glBindProgramPipeline(pipelineName.get(Pipeline.SPLASH));
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
 
@@ -263,13 +269,19 @@ public class Gl_430_fbo_without_attachment extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteSamplers(1, samplerName, 0);
-        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName, 0);
-        gl4.glDeleteProgram(programName[Pipeline.SPLASH]);
-        gl4.glDeleteProgram(programName[Pipeline.RENDER]);
-        gl4.glDeleteFramebuffers(1, framebufferName, 0);
-        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl4.glDeleteSamplers(1, samplerName);
+        BufferUtils.destroyDirectBuffer(samplerName);
+        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
+        gl4.glDeleteProgram(programName.get(Pipeline.SPLASH));
+        gl4.glDeleteProgram(programName.get(Pipeline.RENDER));
+        BufferUtils.destroyDirectBuffer(programName);
+        gl4.glDeleteFramebuffers(1, framebufferName);
+        BufferUtils.destroyDirectBuffer(framebufferName);
+        gl4.glDeleteTextures(Texture.MAX, textureName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return true;
     }

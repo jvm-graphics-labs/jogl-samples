@@ -21,6 +21,7 @@ import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 /**
@@ -133,7 +134,8 @@ public class Gl_430_buffer_uniform extends Test {
         }
     };
 
-    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), 
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX);
     private int programName, uniformPerDraw, uniformPerPass, uniformPerScene;
 
     @Override
@@ -411,10 +413,10 @@ public class Gl_430_buffer_uniform extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, glf.Vertex_v3fn3fc4f.SIZE,
                     glf.Vertex_v3fn3fc4f.OFFSET_POSITION);
             gl4.glVertexAttribPointer(Semantic.Attr.NORMAL, 3, GL_FLOAT, false, glf.Vertex_v3fn3fc4f.SIZE,
@@ -427,7 +429,7 @@ public class Gl_430_buffer_uniform extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.NORMAL);
             gl4.glEnableVertexAttribArray(Semantic.Attr.COLOR);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         }
         gl4.glBindVertexArray(0);
 
@@ -436,22 +438,22 @@ public class Gl_430_buffer_uniform extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_DRAW]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.PER_DRAW));
             gl4.glBufferData(GL_UNIFORM_BUFFER, Transform.SIZE, null, GL_DYNAMIC_DRAW);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
@@ -459,7 +461,7 @@ public class Gl_430_buffer_uniform extends Test {
         {
             Light light = new Light(new Vec3(0.0f, 0.0f, 100.f));
 
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_PASS]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.PER_PASS));
             FloatBuffer lightBuffer = GLBuffers.newDirectFloatBuffer(light.toFa_());
             gl4.glBufferData(GL_UNIFORM_BUFFER, Light.SIZE, lightBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(lightBuffer);
@@ -470,7 +472,7 @@ public class Gl_430_buffer_uniform extends Test {
             Material material = new Material(new Vec3(0.7f, 0.0f, 0.0f), new Vec3(0.0f, 0.5f, 0.0f),
                     new Vec3(0.0f, 0.0f, 0.5f), 128.0f);
 
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_SCENE]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.PER_SCENE));
             FloatBuffer materialBuffer = GLBuffers.newDirectFloatBuffer(material.toFa_());
             gl4.glBufferData(GL_UNIFORM_BUFFER, Material.SIZE, materialBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(materialBuffer);
@@ -486,7 +488,7 @@ public class Gl_430_buffer_uniform extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_DRAW]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.PER_DRAW));
             ByteBuffer transform = gl4.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, Transform.SIZE, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -510,10 +512,10 @@ public class Gl_430_buffer_uniform extends Test {
         gl4.glClearBufferfv(GL_DEPTH, 0, new float[]{1.0f}, 0);
 
         gl4.glUseProgram(programName);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.PER_SCENE, bufferName[Buffer.PER_SCENE]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.PER_PASS, bufferName[Buffer.PER_PASS]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.PER_DRAW, bufferName[Buffer.PER_DRAW]);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.PER_SCENE, bufferName.get(Buffer.PER_SCENE));
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.PER_PASS, bufferName.get(Buffer.PER_PASS));
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.PER_DRAW, bufferName.get(Buffer.PER_DRAW));
+        gl4.glBindVertexArray(vertexArrayName.get(0));
 
         gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
 
@@ -525,8 +527,10 @@ public class Gl_430_buffer_uniform extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        BufferUtils.destroyDirectBuffer(bufferName);
         gl4.glDeleteProgram(programName);
 
         return true;

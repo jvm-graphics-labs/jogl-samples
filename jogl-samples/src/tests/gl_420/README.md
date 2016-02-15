@@ -77,9 +77,10 @@ To remove these restrictions, the new command:
 `glDrawElementsInstancedBaseVertexBaseInstance` (*ouf*!) 
 
 It adds a new parameter call _baseinstance_ which adds an offset to the element index using the following equation:
+
 _element_ = floor(`gl_InstanceID` / _divisor_) + _baseinstance_
 
-The <baseinstance> parameter has no effect if the value of the divisor is 0. 
+The _baseinstance_ parameter has no effect if the value of the divisor is 0. 
 
 * `gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 1 * Integer.BYTES, 5, 1, 5);` requires primitive type, indices count, indices type, indices offset, instance count, base vertex (constant added to each element of indices when chosing elements from the enabled vertex arrays), base instance (in fetching instanced vertex attributes). The indices offset is the offset in bytes to add before fetching any index from `elementData`. Instance count is the number of instances we want. Base vertex indicates the index offset before using the vertex in `positionData`. Base instance is the number the `layout(location = COLOR) in vec4 color` will start choosing colors from.
 * `glVertexAttribDivisor` to 1 set to increment the attribute every instance. 
@@ -246,9 +247,29 @@ through the usage of `textureGatherOffset` that gathers four texels from a textu
 
 ### [gl-420-test-depth-conservative](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_test_depth_conservative.java) :
 
-* "For forward renders, a typical practice is to start by rendering a fast depth buffer pass only and then render the colorbuffer so that only the visible fragments are processed by the fragment shader and write to the framebuffer, saving both compute and bandwaith"
-* `layout (depth_greater) out float gl_FragDepth;`
-* [`GL_ARB_conservative_depth`](https://www.opengl.org/registry/specs/ARB/conservative_depth.txt)
+* [`AMD_conservative_depth`](https://www.opengl.org/registry/specs/AMD/conservative_depth.txt) has been promoted to 
+[`ARB_conservative_depth`](https://www.opengl.org/registry/specs/ARB/conservative_depth.txt) and OpenGL 4.2 core 
+specification. It enables some hardware optimisations according criteria defined by the OpenGL users. 
+
+For forward renderers, a typical practice is to start by rendering a fast depth buffer pass only and then render the 
+colorbuffer so that only the visible fragments are processed by the fragment shader and write to the framebuffer, saving 
+both compute and bandwidth.
+
+This extension provides a level of programmability for at least some of the optimisations involved at this level using some 
+layout qualifiers to specify how to expect the value of the `gl_FragDepth`.
+```glsl
+// assume it may be modified in any way
+layout (depth_any) out float gl_FragDepth;
+
+// assume it may be modified such that its value will only increase
+layout (depth_greater) out float gl_FragDepth;
+
+// assume it may be modified such that its value will only decrease
+layout (depth_less) out float gl_FragDepth;
+
+// assume it will not be modified
+layout (depth_unchanged) out float gl_FragDepth;
+```
 
 ### [gl-420-texture-array](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_texture_array.java) :
 
@@ -430,4 +451,20 @@ gl4.glTextureSubImage*DEXT(GL_TEXTURE_2D, ...); // Initialisation
 * transforms `vec4 position` in `vec4 position` and `vec4 color` and performs an instanced rendering on the results
 * `glDrawTransformFeedbackStreamInstanced`
 * `GL_TRIANGLE_STRIP`
+* OpenGL 4.0 brought a lot of improvement for transform feedback including a transform feedback object, transform feedback 
+streams, the capability to pause the transform feedback or to draw directly without querying the number of primitives 
+recorded in the buffer. 
+
+However an interaction with an essential extension has been forgotten on the way: [`ARB_draw_instanced`](https://www.opengl.org/registry/specs/ARB/draw_instanced.txt) 
+which is part of OpenGL 3.2 core specification. It implies that with OpenGL 4.1, it isn’t possible to draw instances from transform feedback buffers without querying the number of primitives written in these buffers. A penalty because of the CPU - GPU synchronisation.
+
+Fortunately, OpenGL 4.2 and [`ARB_transform_feedback_instanced`](https://www.opengl.org/registry/specs/ARB/transform_feedback_instanced.txt) 
+fixed this issue by providing the following new commands:
+
+`glDrawTransformFeedbackInstanced`
+
+`glDrawTransformFeedbackStreamInstanced`
+
+Including these new commands, I don’t think it’s enough features for transform feedback but it might be all OpenGL 4 
+hardware got.
 
