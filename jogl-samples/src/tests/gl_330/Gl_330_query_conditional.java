@@ -215,7 +215,7 @@ public class Gl_330_query_conditional extends Test {
         gl3.glUseProgram(programName);
         gl3.glBindVertexArray(vertexArrayName[0]);
 
-        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL], 0, Mat4.SIZE);
+        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL], 0, Vec4.SIZE);
 
         // The first orange quad is not written in the framebuffer.
         gl3.glColorMaski(0, false, false, false, false);
@@ -235,7 +235,7 @@ public class Gl_330_query_conditional extends Test {
         gl3.glColorMaski(0, true, true, true, true);
 
         gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL],
-                uniformMaterialOffset, 4 * Float.BYTES);
+                uniformMaterialOffset, Vec4.SIZE);
 
         // Draw only if one sample went through the tests, 
         // we don't need to get the query result which prevent the rendering pipeline to stall.

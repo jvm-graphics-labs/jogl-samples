@@ -26,9 +26,12 @@ This extension is extremely simple to use. An atomic counter is an opaque type d
 the sampler object. A buffer object is bound to an atomic counter binding point but unlike sampler, we can't set the index 
 of the bounding point with `glUniform1i`. It requires to be set within the GLSL program using the layout qualifier 
 _binding_. This is also possible for samplers thanks to [`GL_ARB_shading_language_420pack`](https://www.opengl.org/registry/specs/ARB/shading_language_420pack.txt).
-
+* OpenGL 4.2 provides two new opaque objects for both image types and atomic counter types. To associate variables declared 
+with these types, GLSL provides the layout qualifier _binding_. The extra goodness is that this qualifier has been extended 
+to sampler and uniform buffer objects, bye bye `glUniform1i` and `glUniformBlockBinding`, I won’t miss you!
 * `GL_ATOMIC_COUNTER_BUFFER`
 * `layout(binding = 0, offset = 0) uniform atomic_uint atomic`
+* `layout(binding = TRANSFORM0) uniform Transform`
 * `atomicCounterIncrement(atomic)`
 
 ### [gl-420-buffer-uniform](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_buffer_uniform.java) :
@@ -59,6 +62,24 @@ GlDebugOutput.messageSent(): GLDebugEvent[ id 0x500
 ```
 
 ### [gl-420-draw-base-instance](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_draw_base_instance.java) :
+
+* OpenGL 3.2 brought a very interesting feature on the regard of buffer management through the extension 
+[`ARB_draw_elements_base_vertex`](https://www.opengl.org/registry/specs/ARB/draw_elements_base_vertex.txt). It allows to 
+run a draw call on a subset of the array buffers attached to the VAO for what could be understood as sparse rendering of 
+large buffers, multiple rendering of different meshes with the same VAO.
+
+Effectively, this extension provides a parameter call _basevertex_ which is an offset from the beginning of the array 
+buffer. This offset is really interesting but the interaction with instanced arrays is not so good. Instanced arrays can 
+be small, building larger instanced arrays by packing multiple of then could have benefits for performance. This wasn’t 
+possible until the release of OpenGL 4.2 and [`ARB_base_instance`](https://www.opengl.org/registry/specs/ARB/base_instance.txt).
+
+To remove these restrictions, the new command: 
+`glDrawElementsInstancedBaseVertexBaseInstance` (*ouf*!) 
+
+It adds a new parameter call _baseinstance_ which adds an offset to the element index using the following equation:
+_element_ = floor(`gl_InstanceID` / _divisor_) + _baseinstance_
+
+The <baseinstance> parameter has no effect if the value of the divisor is 0. 
 
 * `gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 1 * Integer.BYTES, 5, 1, 5);` requires primitive type, indices count, indices type, indices offset, instance count, base vertex (constant added to each element of indices when chosing elements from the enabled vertex arrays), base instance (in fetching instanced vertex attributes). The indices offset is the offset in bytes to add before fetching any index from `elementData`. Instance count is the number of instances we want. Base vertex indicates the index offset before using the vertex in `positionData`. Base instance is the number the `layout(location = COLOR) in vec4 color` will start choosing colors from.
 * `glVertexAttribDivisor` to 1 set to increment the attribute every instance. 
@@ -143,6 +164,17 @@ imageAtomicCompSwap
 * then at the second step it offset the splashing a little in order to see the background color and read from the previous image with `imageLoad`
 
 ### [gl-420-image-unpack](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_image_unpack.java) :
+
+* [`GL_ARB_shading_language_packing`](https://www.opengl.org/registry/specs/ARB/shading_language_packing.txt) provides a 
+set of _pack_ and _unpack_ functions which allow loading and storing 16 bits floating values as an unsigned integer in a 
+similar fashion than `packDouble2x32` and `unpackDouble2x32` using the new GLSL functions `packHalf2x16` and `unpackHalf2x16`.
+
+This extension also gathers some packing functions from ARB_gpu_shader5 so that the packing functions can be exposed by 
+OpenGL 3 hardware. This includes `[un]packUnorm4x8`, `[un]packSnorm4x8`, `[un]packUnorm2x16` and the previously missing 
+`[un]packSnorm2x16`. These functions are essential as they expose the normalization mechanisms of the hardware.
+
+The feature set exposed by this extension is taking a new light with the release of OpenGL 4.2 and [`ARB_shader_image_load_store`](https://www.opengl.org/registry/specs/ARB/shader_image_load_store.txt) 
+because atomic operations on image data can only been perform on signed and unsigned 32 bits integers.
 
 * binds the diffuse texture, gets a 32-bit unsigned int with `imageLoad` and then unpacks it into four 8-bit unsigned integers with `unpackUnorm4x8`, then, each component is converted to a normalized floating-point value to generate the returned four-component vector as `f / 255.0`. [More](https://www.opengl.org/sdk/docs/man/html/unpackUnorm.xhtml)
 
@@ -239,8 +271,23 @@ through the usage of `textureGatherOffset` that gathers four texels from a textu
 * loads the same diffuse texture in four different formats
 * `GL_COMPRESSED_RGBA_S3TC_DXT5_EXT`
 * `GL_RGBA8UI`
-* `GL_COMPRESSED_RGBA_BPTC_UNORM_ARB`
+* `GL_COMPRESSED_RGBA_BPTC_UNORM_ARB` (BC7)
 * `GL_RGBA8_SNORM`
+* Released alongside with OpenGL 4.0, [`ARB_texture_compression_bptc`](https://www.opengl.org/registry/specs/ARB/texture_compression_bptc.txt) 
+extension finally reach OpenGL core specification. It provides Direct3D 11 compressed formats known as BC6H and BC7 and 
+called respectively `GL_BPTC_FLOAT` and `GL_BPTC` with OpenGL. They aim high dynamic range, low dynamic range texture 
+compression and high quality compression of sharp edges. The compression ratio for `GL_BPTC_FLOAT` and `GL_BPTC` are 6:1 
+and 3:1.
+[image comparison, read the review]
+The result given by BPTC is absolutely stunning. This picture is actually challenging which explains the ugly result given 
+by DXT1: it's blocky, smooth parts become stairs and noisy parts become fat pixels. BPTC remains very close to the 
+uncompressed texture. BPTC even manage to provide more details than RGTC1 in many cases.
+
+BPTC is a great texture format for visual quality so that for this property I expect to see it used instead of DXT1 and 
+DXT5 in many cases in the future. However, the BPTC format has a main drawback: it's slow, very slow to generate! Chances 
+are that all the real-time compression use cases of DXT5 will stick to this format for a while. I even think that this is 
+such a limitation that it will prevent a wide adoption in real application for a while.
+
 
 ### [gl-420-texture-cube](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_texture_cube.java) :
 
@@ -254,6 +301,77 @@ provides D3D10.1 cube map arrays
 
 ### [gl-420-texture-pixel-store](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_texture_pixel_store.java) :
 
+* OpenGL provides a functionality which allows uploading a subset of a texture to graphics memory without creating 
+temporary buffers. This is accomplished using `glPixelStorei` with the arguments `GL_UNPACK_ROW_LENGTH`, 
+`GL_UNPACK_SKIP_PIXELS` and `GL_UNPACK_SKIP_ROWS`. It also allows downloading to global memory a subset of a texture store 
+in graphics memory using the arguments `GL_PACK_ROW_LENGTH`, `GL_PACK_SKIP_PIXELS` and `GL_PACK_SKIP_ROWS`. 
+
+The following code uploads a subset of the image _TEXTURE_DIFFUSE_RGB8_ which is half the size and the centre of original 
+picture.
+
+jgli.Texture2d image = new Texture2d(jgli.Load.load(TEXTURE_DIFFUSE_RGB8));
+
+gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+gl4.glPixelStorei(GL_UNPACK_ROW_LENGTH, image.dimensions(0).x);
+gl4.glPixelStorei(GL_UNPACK_SKIP_PIXELS, image.dimensions(0).x) / 4);
+gl4.glPixelStorei(GL_UNPACK_SKIP_ROWS, image.dimensions(0).y) / 4);
+
+gl4.glTexImage2D(
+    GL_TEXTURE_2D, 
+    0, 
+    GL_RGBA8, 
+    image.dimensions(0).x / 2, 
+    image.dimensions(0).y / 2, 
+    0,  
+    GL_BGR, 
+    GL_UNSIGNED_BYTE, 
+    image.data(0));
+
+However, this is designed to work on pixels. It is not good for compressed texture formats which are typically packed 
+blocks of N by M pixels. Thus, this isn’t available for compressed texture format in OpenGL 4.1.
+
+OpenGL 4.2 and [`ARB_compressed_texture_pixel_storage`](https://www.opengl.org/registry/specs/ARB/compressed_texture_pixel_storage.txt) 
+remove this limitation of compressed textures allowing `glPixelStorei` to control the way compressed texture are uploaded 
+and downloaded from the GPU memory. To make this possible, arguments for `glPixelStorei` has been added:
+
+New tokens for partial compressed texture data copy:
+
+`GL_UNPACK_COMPRESSED_BLOCK_WIDTH` 
+`GL_UNPACK_COMPRESSED_BLOCK_HEIGHT` 
+`GL_UNPACK_COMPRESSED_BLOCK_DEPTH` 
+`GL_UNPACK_COMPRESSED_BLOCK_SIZE` 
+`GL_PACK_COMPRESSED_BLOCK_WIDTH`
+`GL_PACK_COMPRESSED_BLOCK_HEIGHT`
+`GL_PACK_COMPRESSED_BLOCK_DEPTH`
+`GL_PACK_COMPRESSED_BLOCK_SIZE`
+
+These arguments are used to specify the size of a block in pixels and in bytes giving to OpenGL implementations enough 
+information to read and write subset of compressed images without splitting compression blocks.
+
+The following code uploads a subset of the compressed texture _TEXTURE_DIFFUSE_DXT1_ which is half the size and the centre 
+of original picture.
+
+jgli.Texture2d image = jgli.Load.load(TEXTURE_DIFFUSE_DXT1);
+
+gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+gl4.glPixelStorei(GL_UNPACK_COMPRESSED_BLOCK_WIDTH, 4);
+gl4.glPixelStorei(GL_UNPACK_COMPRESSED_BLOCK_HEIGHT, 4);
+gl4.glPixelStorei(GL_UNPACK_COMPRESSED_BLOCK_DEPTH, 1);
+gl4.glPixelStorei(GL_UNPACK_COMPRESSED_BLOCK_SIZE, 8);
+gl4.glPixelStorei(GL_UNPACK_SKIP_PIXELS, image.dimensions(0).x / 4);
+gl4.glPixelStorei(GL_UNPACK_SKIP_ROWS, image.dimensions(0).y / 4);
+gl4.glPixelStorei(GL_UNPACK_ROW_LENGTH, image.dimensions().x);
+
+gl4.glCompressedTexImage2D(
+    GL_TEXTURE_2D, 
+    0, 
+    GL_COMPRESSED_RGB_S3TC_DXT1_EXT, 
+    image.dimensions(0).x) / 2, 
+    image.dimensions(0).y) / 2, 
+    0,  
+    image.capacity(0) / 4, 
+    image.data(0));
+
 * loads only a portion of a texture by setting pixel store parameters
 * `glPixelStorei`
 * `GL_UNPACK_ROW_LENGTH`
@@ -263,7 +381,47 @@ provides D3D10.1 cube map arrays
 
 ### [gl-420-texture-storage](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_texture_storage.java) :
 
-* "the new [`GL_ARB_texture_storage`](https://www.opengl.org/registry/specs/ARB/texture_storage.txt) extension decouples the allocation and the initialisation of a texture object to provide immutable textures. After calling the new commands `glTexStorage*D` the three commands `glTexImage*D`, `glCopyTexImage*D` and `glCompressedTexImage*D` can't be called anymore on this texture object without generating an invalid operation error. Immutable texture objects are initialized with the commands `glTexSubImage*d`, `glCompressedTexSubImage*D` and `glCopyTexSubImage*D` and actually any command or set of commands that won't reallocate the memory for this object.
+* "the new [`GL_ARB_texture_storage`](https://www.opengl.org/registry/specs/ARB/texture_storage.txt) extension decouples 
+the allocation and the initialisation of a texture object to provide immutable textures. After calling the new commands 
+`glTexStorage*D` the three commands `glTexImage*D`, `glCopyTexImage*D` and `glCompressedTexImage*D` can't be called 
+anymore on this texture object without generating an invalid operation error. Immutable texture objects are initialized 
+with the commands `glTexSubImage*d`, `glCompressedTexSubImage*D` and `glCopyTexSubImage*D` and actually any command or set 
+of commands that won't reallocate the memory for this object.
+
+The purpose of immutable texture objects is mainly on the drivers side to avoid continuous complex completeness checking. 
+Hence, it should provide some performance improvement without really affecting the user programmability. If a user really 
+needs to change the format, the target or the size of a texture, he can always delete and create a new texture object 
+which is pretty much what is happening anyway on mutable texture object. 
+
+Bonus of this extension: it provides some good interactions with [`EXT_direct_state_access`](https://www.opengl.org/registry/specs/EXT/direct_state_access.txt). 
+However, this extension doesn't provide any interaction with multisample textures so that it's not possible to create 
+immutable multisample texture objects. This type of texture doesn't really have completeness checking as it doesn't hold 
+mipmaps so the functionality itself isn't needed and we could only enjoy such command for consistency.
+```java
+// OpenGL 4.1, mutable texture creation
+gl4.glGenTextures(1, texture);
+gl4.glActiveTexture(GL_TEXTURE0);
+gl4.glBindTexture(GL_TEXTURE_2D, texture.get(0);
+gl4.glTexParameteri(GL_TEXTURE_2D, GL_*, …);
+   for(int level = 0; level < levels; ++level)
+gl4.glTexImage2D(GL_TEXTURE_2D, …); // Allocation and initialisation
+
+// OpenGL 4.2, immutable texture creation
+gl4.glGenTextures(1, texture);
+gl4.glActiveTexture(GL_TEXTURE0);
+gl4.glBindTexture(GL_TEXTURE_2D, texture.get(0));
+gl4.glTexParameteri(GL_TEXTURE_2D, GL_*, …);
+gl4.glTexStorage2D(GL_TEXTURE_2D, ...); // Allocation
+   for(int level = 0; level < levels; ++level)
+glTexSubImage*D(GL_TEXTURE_2D, ...); // Initialisation
+
+// OpenGL 4.2 + EXT_direct_state_access, immutable texture creation
+gl4.glGenTextures(1, texture);
+gl4.glTextureParameteriEXT(GL_TEXTURE_2D, GL_*, ... );
+gl4.glTextureStorage2DEXT(GL_TEXTURE_2D, ...); // Allocation
+   for(int level = 0; level < levels; ++level)
+gl4.glTextureSubImage*DEXT(GL_TEXTURE_2D, ...); // Initialisation
+```
 * `glTexStorage3D` to allocate
 * `glTexSubImage3D` to initialize
 
