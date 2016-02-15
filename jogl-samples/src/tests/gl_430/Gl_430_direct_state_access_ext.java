@@ -10,6 +10,7 @@ import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
 import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL4;
+import com.jogamp.opengl.math.FloatUtil;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
@@ -319,7 +320,7 @@ public class Gl_430_direct_state_access_ext extends Test {
         gl4.glBlitFramebuffer(
                 0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
                 0, 0, windowSize.x, windowSize.y, GL_COLOR_BUFFER_BIT, GL_NEAREST);
-
+        
         return true;
     }
 

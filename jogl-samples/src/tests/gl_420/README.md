@@ -2,7 +2,31 @@
 
 ### [gl-420-atomic-counter](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_atomic_counter.java) :
 
-* atomic counter usage, can only be int or uint
+* The atomic counter is a new opaque type which can be declare in any stage with up to 8 instances of them. The atomic 
+counter must be backed by a buffer object which allows accessing on the application side to the values of an atomic 
+counter.
+ 
+An atomic counter is represented by a 32 bits unsigned int and only three operations can be performed on it: 
+
+we can read the current value (`atomicCounter`)
+
+get the counter value then increment it (`atomicCounterIncrement`) 
+
+decrement the counter value then get the counter value (`atomicCounterDecrement`)
+ 
+It is safe to increment or decrement in any shader stage and for any execution of this stage. However, incrementing and 
+decrementing within an execution should be considered as if the operations on the atomic counter were unordered. The 
+OpenGL specification doesn’t define any mechanism (memory barrier) to ensure operations ordering. 
+```glsl
+// binding: unit where the atomic buffer is bound
+// offset: buffer data offset, where the atomic counter value is stored.
+layout(binding = 0, offset = 0) uniform atomic_uint a;
+```
+This extension is extremely simple to use. An atomic counter is an opaque type declared as a uniform variable just like 
+the sampler object. A buffer object is bound to an atomic counter binding point but unlike sampler, we can't set the index 
+of the bounding point with `glUniform1i`. It requires to be set within the GLSL program using the layout qualifier 
+_binding_. This is also possible for samplers thanks to [`GL_ARB_shading_language_420pack`](https://www.opengl.org/registry/specs/ARB/shading_language_420pack.txt).
+
 * `GL_ATOMIC_COUNTER_BUFFER`
 * `layout(binding = 0, offset = 0) uniform atomic_uint atomic`
 * `atomicCounterIncrement(atomic)`
@@ -57,12 +81,61 @@ these name strings, the shader text can be compiled with the function `glCompile
 
 ### [gl-420-image-load](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_image_load.java) :
 
-* [`GL_ARB_shader_image_load_store`](https://www.opengl.org/registry/specs/ARB/shader_image_load_store.txt) "This extension provides GLSL built-in functions allowing shaders to load from, store to, and perform atomic read-modify-write operations to a single level of a texture object from any shader stage."
+* [`GL_ARB_shader_image_load_store`](https://www.opengl.org/registry/specs/ARB/shader_image_load_store.txt) is wonderful 
+new extension but also the promoted extension to core of [`EXT_shader_image_load_store`](https://www.opengl.org/registry/specs/EXT/shader_image_load_store.txt) 
+thanks to few changes between the two extensions. To introduce this extension, I think that there is nothing like the first 
+sentence of the extension overview:
+
+_This extension provides GLSL built-in functions allowing shaders to load from, store to, and perform atomic read-modify-write 
+operations to a single level of a texture object from any shader stage."
+
+Incredible? This is exactly the feeling I had when I first discovered it.
+
+OpenGL 4.2 clarifies and maybe actually specify what is an _image_ in OpenGL. An image could be a single mipmap level or a 
+single texture 2d array layer which composes a texture. Images are bound to _image units_ using the command 
+`glBindImageTexture` for a maximum minimum of 8 units in the fragment shader stage only according to the OpenGL 4.2 
+specifications. In practice, I believe that both AMD and NVIDIA hardware allow binding these units to the vertex shader 
+stage as well and maybe any shader stage. 
+```java
+void glBindImageTexture(
+    int unit, 
+    int texture, 
+    int level, 
+    boolean layered, 
+    int layer, 
+    int access, 
+    int format);
+```
+Most of the rest of this extension happens in GLSL and take the following shape for example:
+```glsl
+layout(binding = 0, rgba8ui) uniform readonly image2D Image;
+```
+Two main GLSL functions are available to access any image of any format: `imageLoad` and `imageStore`. However, the 
+following extended set of atomic functions is only available for images using the formats `r32i` and `r32ui`.
+
+Atomic operations on integer types:
+
+imageAtomicAdd
+
+imageAtomicMin
+
+imageAtomicMax
+
+imageAtomicAnd
+
+imageAtomicOr
+
+imageAtomicXor
+
+imageAtomicExchange
+
+imageAtomicCompSwap
+
+* `imageLoad`
 * `glTexStorage2D` to allocate the image/texture
 * `glTexSubImage2D` to initialize it
 * `glBindImageTexture`
 * `layout(binding = DIFFUSE, rgba16f) coherent uniform image2D diffuse;` in the fragment shader
-* `imageLoad`
 
 ### [gl-420-image-store](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_image_store.java) :
 
@@ -80,6 +153,36 @@ these name strings, the shader text can be compiled with the function `glCompile
 
 ### [gl-420-memory-barrier](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_420/Gl_420_memory_barrier.java) :
 
+* These dynamic load and store involve some pretty complex memory management issues: when we are reading a data, are we 
+sure the result of a previous operation is stored already? For this purpose, this extension provides a GLSL function and 
+an OpenGL command which will make sure that the previous operations are executed: `glMemoryBarrier` and `memoryBarrier. 
+
+`glMemoryBarrier` orders that the memory transactions of certain types are issued prior the commands after this barrier. 
+This barrier apply only to selected types of data by the OpenGL programmer.  
+
+Flags that can be passed to glMemoryBarrier:
+`GL_VERTEX_ATTRIB_ARRAY_BARRIER_BIT`
+`GL_ELEMENT_ARRAY_BARRIER_BIT`
+`GL_UNIFORM_BARRIER_BIT`
+`GL_TEXTURE_FETCH_BARRIER_BIT`
+`GL_SHADER_IMAGE_ACCESS_BARRIER_BIT`
+`GL_COMMAND_BARRIER_BIT`
+`GL_PIXEL_BUFFER_BARRIER_BIT`
+`GL_TEXTURE_UPDATE_BARRIER_BIT`
+`GL_BUFFER_UPDATE_BARRIER_BIT`
+`GL_FRAMEBUFFER_BARRIER_BIT`
+`GL_TRANSFORM_FEEDBACK_BARRIER_BIT`
+`GL_ATOMIC_COUNTER_BARRIER_BIT`
+`GL_ALL_BARRIER_BITS`
+
+`memoryBarrier` (unfortunately not yet present in jogl) behaves the same way than `glMemoryBarrier` except that it doesn’t 
+expose a fine grain memory barrier and ensure instead that all memory accesses are performed prior to the synchronization 
+point. 
+
+This set of feature is inherited from [`NV_texture_barrier`](https://www.opengl.org/registry/specs/NV/texture_barrier.txt) 
+which has demonstrated effective use cases outside the scope of OpenGL images, for example for ping-pong rendering and it 
+provides significative performance benefices. I believe that this extension should have been exposed in a separated 
+ARB extension to benefit OpenGL 3 hardware.
 * Loads a diffuse texture and creates an fbo with another black texture same as big on `GL_COLOR_ATTACHMENT0`
 * for 255 consecutive frames binds the black texture, set the barrier `glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT | GL_TEXTURE_FETCH_BARRIER_BIT)`, while the 256th time it chooses instead the diffuse texture, and renders it to the fbo.
 * then it binds the default framebuffer, the texture on `GL_COLOR_ATTACHMENT0`, sets the `glMemoryBarrier(GL_TEXTURE_UPDATE_BARRIER_BIT)` and renders it
