@@ -4,9 +4,9 @@
 #define COLOR			3
 #define FRAG_COLOR		0
 
-struct vertex
+struct Vertex
 {
-	vec4 Color;
+    vec4 color;
 };
 
 precision highp float;
@@ -18,50 +18,50 @@ layout(triangle_strip, max_vertices = 4) out;
 
 in gl_PerVertex
 {
-	vec4 gl_Position;
-	float gl_PointSize;
-	float gl_ClipDistance[];
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
 } gl_in[];
 
-layout(location = 0) in vertex st_In[][2];
+layout(location = 0) in Vertex st_In[][2];
 
 /*layout(location = 0 + 1 * st_In[0].length()) in block*/
-layout(location = 0 + 1 * 2) in block
+layout(location = 0 + 1 * 2) in Block
 {
-	vec4 Color;
+    vec4 color;
 } bl_In[]; 
 
 out gl_PerVertex 
 {
-	vec4 gl_Position;
-	float gl_PointSize;
-	float gl_ClipDistance[];
+    vec4 gl_Position;
+    float gl_PointSize;
+    float gl_ClipDistance[];
 };
 
-layout(location = 0) out vertex st_Out;
+layout(location = 0) out Vertex st_Out;
 
-out vec4 ColorGNI;
+out vec4 colorGNI;
 
-layout(location = 0 + 1) out block
+layout(location = 0 + 1) out Block
 {
-	vec4 Color;
+    vec4 color;
 } bl_Out; 
 
-layout(location = 0 + 2) out block2
+layout(location = 0 + 2) out Block2
 {
-	vec4 Color;
+    vec4 color;
 } bl_Pou; 
 
 void main()
 {	
-	for(int i = 0; i < gl_in.length(); ++i)
-	{
-		gl_Position = gl_in[i].gl_Position;
-		ColorGNI = st_In[i][0].Color + st_In[i][1].Color;
-		st_Out.Color = st_In[i][0].Color + st_In[i][1].Color;
-		bl_Out.Color = bl_In[i].Color;
-		bl_Pou.Color = st_In[i][0].Color + bl_In[i].Color;
-		EmitVertex();
-	}
-	EndPrimitive();
+    for(int i = 0; i < gl_in.length(); ++i)
+    {
+        gl_Position = gl_in[i].gl_Position;
+        colorGNI = st_In[i][0].color + st_In[i][1].color;
+        st_Out.color = st_In[i][0].color + st_In[i][1].color;
+        bl_Out.color = bl_In[i].color;
+        bl_Pou.color = st_In[i][0].color + bl_In[i].color;
+        EmitVertex();
+    }
+    EndPrimitive();
 }

@@ -13,11 +13,11 @@ import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import glm.glm;
 import glm.mat._4.Mat4;
-import glm.vec._2.Vec2;
 import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fv2f;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -46,7 +46,7 @@ public class Gl_440_fbo_without_attachment extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * Vec2.SIZE;
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ 0.0f, 1.0f,
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,
@@ -167,10 +167,10 @@ public class Gl_440_fbo_without_attachment extends Test {
         if (validated) {
 
             gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[Pipeline.RENDER], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.RENDER]);
-            gl4.glUseProgramStages(pipelineName[Pipeline.SPLASH], GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.SPLASH]);
+            gl4.glUseProgramStages(pipelineName[Pipeline.RENDER], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+                    programName[Pipeline.RENDER]);
+            gl4.glUseProgramStages(pipelineName[Pipeline.SPLASH], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, 
+                    programName[Pipeline.SPLASH]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -179,13 +179,14 @@ public class Gl_440_fbo_without_attachment extends Test {
     private boolean initSampler(GL4 gl4) {
 
         gl4.glGenSamplers(Pipeline.MAX, samplerName, 0);
+        FloatBuffer borderColorBuffer=GLBuffers.newDirectFloatBuffer(new float[]{0.0f, 0.0f, 0.0f, 0.0f});
 
         gl4.glSamplerParameteri(samplerName[Pipeline.RENDER], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         gl4.glSamplerParameteri(samplerName[Pipeline.RENDER], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         gl4.glSamplerParameteri(samplerName[Pipeline.RENDER], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         gl4.glSamplerParameteri(samplerName[Pipeline.RENDER], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         gl4.glSamplerParameteri(samplerName[Pipeline.RENDER], GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        gl4.glSamplerParameterfv(samplerName[Pipeline.RENDER], GL_TEXTURE_BORDER_COLOR, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
+        gl4.glSamplerParameterfv(samplerName[Pipeline.RENDER], GL_TEXTURE_BORDER_COLOR, borderColorBuffer);
         gl4.glSamplerParameterf(samplerName[Pipeline.RENDER], GL_TEXTURE_MIN_LOD, -1000.f);
         gl4.glSamplerParameterf(samplerName[Pipeline.RENDER], GL_TEXTURE_MAX_LOD, 1000.f);
         gl4.glSamplerParameterf(samplerName[Pipeline.RENDER], GL_TEXTURE_LOD_BIAS, 0.0f);
@@ -197,12 +198,14 @@ public class Gl_440_fbo_without_attachment extends Test {
         gl4.glSamplerParameteri(samplerName[Pipeline.SPLASH], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         gl4.glSamplerParameteri(samplerName[Pipeline.SPLASH], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         gl4.glSamplerParameteri(samplerName[Pipeline.SPLASH], GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        gl4.glSamplerParameterfv(samplerName[Pipeline.SPLASH], GL_TEXTURE_BORDER_COLOR, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
+        gl4.glSamplerParameterfv(samplerName[Pipeline.SPLASH], GL_TEXTURE_BORDER_COLOR, borderColorBuffer);
         gl4.glSamplerParameterf(samplerName[Pipeline.SPLASH], GL_TEXTURE_MIN_LOD, -1000.f);
         gl4.glSamplerParameterf(samplerName[Pipeline.SPLASH], GL_TEXTURE_MAX_LOD, 1000.f);
         gl4.glSamplerParameterf(samplerName[Pipeline.SPLASH], GL_TEXTURE_LOD_BIAS, 0.0f);
         gl4.glSamplerParameteri(samplerName[Pipeline.SPLASH], GL_TEXTURE_COMPARE_MODE, GL_NONE);
         gl4.glSamplerParameteri(samplerName[Pipeline.SPLASH], GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        
+        BufferUtils.destroyDirectBuffer(borderColorBuffer);
 
         return true;
     }
@@ -344,7 +347,8 @@ public class Gl_440_fbo_without_attachment extends Test {
         gl4.glBindProgramPipeline(pipelineName[Pipeline.RENDER]);
         gl4.glActiveTexture(GL_TEXTURE0);
         gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
-        gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[Texture.COLORBUFFER], 0, false, 0, GL_WRITE_ONLY, GL_RGBA8);
+        gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[Texture.COLORBUFFER], 0, false, 0, GL_WRITE_ONLY,
+                GL_RGBA8);
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
         gl4.glBindBufferBase(GL_SHADER_STORAGE_BUFFER, Semantic.Storage.VERTEX, bufferName[Buffer.VERTEX]);
 

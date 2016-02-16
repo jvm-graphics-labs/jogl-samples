@@ -16,34 +16,34 @@ precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-layout(binding = INDIRECTION) uniform indirection
+layout(binding = INDIRECTION) uniform Indirection
 {
-	int Transform[MAX_DRAW];
-} Indirection;
+    int transform[MAX_DRAW];
+} indirection;
 
-layout(binding = TRANSFORM0) uniform transform
+layout(binding = TRANSFORM0) uniform Transform
 {
-	mat4 MVP[MAX_DRAW];
-} Transform;
+    mat4 mvp[MAX_DRAW];
+} transform;
 
-layout(location = POSITION) in vec2 Position;
-layout(location = TEXCOORD) in vec2 Texcoord;
-layout(location = DRAW_ID) in int DrawID;
+layout(location = POSITION) in vec2 position;
+layout(location = TEXCOORD) in vec2 texCoord;
+layout(location = DRAW_ID) in int drawID;
 
 out gl_PerVertex
 {
-	vec4 gl_Position;
+    vec4 gl_Position;
 };
 
-out block
+out Block
 {
-	vec2 Texcoord;
-	flat int DrawID;
-} Out;
+    vec2 texCoord;
+    flat int drawID;
+} outBlock;
 
 void main()
 {
-	Out.DrawID = DrawID;
-	Out.Texcoord = Texcoord.st;
-	gl_Position = Transform.MVP[Indirection.Transform[DrawID]] * vec4(Position, 0.0, 1.0);
+    outBlock.drawID = drawID;
+    outBlock.texCoord = texCoord.st;
+    gl_Position = transform.mvp[indirection.transform[drawID]] * vec4(position, 0.0, 1.0);
 }

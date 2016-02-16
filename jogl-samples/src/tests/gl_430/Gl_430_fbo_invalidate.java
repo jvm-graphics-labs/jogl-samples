@@ -73,11 +73,11 @@ public class Gl_430_fbo_invalidate extends Test {
     }
 
     private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(Pipeline.MAX),
-            programName = GLBuffers.newDirectIntBuffer(Pipeline.MAX), 
-            vertexArrayName = GLBuffers.newDirectIntBuffer(Pipeline.MAX), 
+            vertexArrayName = GLBuffers.newDirectIntBuffer(Pipeline.MAX),
             framebufferName = GLBuffers.newDirectIntBuffer(Framebuffer.MAX),
-            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), 
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
             textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
+    private int[] programName = new int[Pipeline.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -124,8 +124,8 @@ public class Gl_430_fbo_invalidate extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_AA, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName.put(Pipeline.MULTISAMPLE, shaderProgram.program());
-            gl4.glProgramParameteri(programName.get(Pipeline.MULTISAMPLE), GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.MULTISAMPLE] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.MULTISAMPLE], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -141,8 +141,8 @@ public class Gl_430_fbo_invalidate extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName.put(Pipeline.SPLASH, shaderProgram.program());
-            gl4.glProgramParameteri(programName.get(Pipeline.SPLASH), GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.SPLASH] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.SPLASH], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -152,9 +152,9 @@ public class Gl_430_fbo_invalidate extends Test {
 
             gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName);
             gl4.glUseProgramStages(pipelineName.get(Pipeline.MULTISAMPLE), GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName.get(Pipeline.MULTISAMPLE));
+                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.MULTISAMPLE]);
             gl4.glUseProgramStages(pipelineName.get(Pipeline.SPLASH), GL_VERTEX_SHADER_BIT
-                    | GL_FRAGMENT_SHADER_BIT, programName.get(Pipeline.SPLASH));
+                    | GL_FRAGMENT_SHADER_BIT, programName[Pipeline.SPLASH]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -339,9 +339,8 @@ public class Gl_430_fbo_invalidate extends Test {
         BufferUtils.destroyDirectBuffer(textureName);
         gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName);
         BufferUtils.destroyDirectBuffer(pipelineName);
-        gl4.glDeleteProgram(programName.get(Pipeline.MULTISAMPLE));
-        gl4.glDeleteProgram(programName.get(Pipeline.SPLASH));
-        BufferUtils.destroyDirectBuffer(programName);
+        gl4.glDeleteProgram(programName[Pipeline.MULTISAMPLE]);
+        gl4.glDeleteProgram(programName[Pipeline.SPLASH]);
         gl4.glDeleteBuffers(Buffer.MAX, bufferName);
         BufferUtils.destroyDirectBuffer(bufferName);
         gl4.glDeleteVertexArrays(Pipeline.MAX, vertexArrayName);

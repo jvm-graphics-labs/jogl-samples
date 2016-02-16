@@ -66,7 +66,8 @@ public class Gl_430_interface_matching extends Test {
     }
 
     private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(1), vertexArrayName = GLBuffers.newDirectIntBuffer(1),
-            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), programName = GLBuffers.newDirectIntBuffer(Program.MAX);
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX);
+    private int[] programName = new int[Program.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -144,11 +145,11 @@ public class Gl_430_interface_matching extends Test {
             shaderPrograms[Program.VERT].init(gl4);
             shaderPrograms[Program.FRAG].init(gl4);
 
-            programName.put(Program.VERT, shaderPrograms[Program.VERT].program());
-            programName.put(Program.FRAG, shaderPrograms[Program.FRAG].program());
+            programName[Program.VERT] = shaderPrograms[Program.VERT].program();
+            programName[Program.FRAG] = shaderPrograms[Program.FRAG].program();
 
-            gl4.glProgramParameteri(programName.get(Program.VERT), GL_PROGRAM_SEPARABLE, GL_TRUE);
-            gl4.glProgramParameteri(programName.get(Program.FRAG), GL_PROGRAM_SEPARABLE, GL_TRUE);
+            gl4.glProgramParameteri(programName[Program.VERT], GL_PROGRAM_SEPARABLE, GL_TRUE);
+            gl4.glProgramParameteri(programName[Program.FRAG], GL_PROGRAM_SEPARABLE, GL_TRUE);
 
             shaderPrograms[Program.VERT].add(vertShaderCode);
             shaderPrograms[Program.VERT].add(contShaderCode);
@@ -164,8 +165,8 @@ public class Gl_430_interface_matching extends Test {
         if (validated) {
 
             gl4.glUseProgramStages(pipelineName.get(0), GL_VERTEX_SHADER_BIT | GL_TESS_CONTROL_SHADER_BIT
-                    | GL_TESS_EVALUATION_SHADER_BIT | GL_GEOMETRY_SHADER_BIT, programName.get(Program.VERT));
-            gl4.glUseProgramStages(pipelineName.get(0), GL_FRAGMENT_SHADER_BIT, programName.get(Program.FRAG));
+                    | GL_TESS_EVALUATION_SHADER_BIT | GL_GEOMETRY_SHADER_BIT, programName[Program.VERT]);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -355,8 +356,7 @@ public class Gl_430_interface_matching extends Test {
                     return true;
                 }
             } else// if((VertexAttrib.Normalized == GL_TRUE) || (GL_VERTEX_ATTRIB_ARRAY_FLOAT == GL_TRUE))
-            {
-                if (!(vertexAttrib.type == GL_FLOAT
+             if (!(vertexAttrib.type == GL_FLOAT
                         || vertexAttrib.type == GL_FLOAT_VEC2
                         || vertexAttrib.type == GL_FLOAT_VEC3
                         || vertexAttrib.type == GL_FLOAT_VEC4
@@ -371,7 +371,6 @@ public class Gl_430_interface_matching extends Test {
                         || vertexAttrib.type == GL_FLOAT_MAT4x3)) {
                     return true;
                 } // It could be any vertex array attribute type
-            }
             System.out.println("glGetActiveAttrib(" + i + ", " + attribLocation + ", " + attribLength[0]
                     + ", " + attribSize[0] + ", " + attribType[0] + ", " + nameString + ")");
         }
@@ -410,7 +409,7 @@ public class Gl_430_interface_matching extends Test {
         gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glPatchParameteri(GL_PATCH_VERTICES, vertexCount);
 
-        assert (!validate(gl4, programName.get(Program.VERT)));
+        assert (!validate(gl4, programName[Program.VERT]));
         gl4.glDrawArraysInstancedBaseInstance(GL_PATCHES, 0, vertexCount, 1, 0);
 
         return true;
@@ -426,9 +425,8 @@ public class Gl_430_interface_matching extends Test {
         gl4.glDeleteBuffers(Buffer.MAX, bufferName);
         BufferUtils.destroyDirectBuffer(bufferName);
         for (int i = 0; i < Program.MAX; ++i) {
-            gl4.glDeleteProgram(programName.get(i));
+            gl4.glDeleteProgram(programName[i]);
         }
-        BufferUtils.destroyDirectBuffer(programName);
         gl4.glDeleteProgramPipelines(1, pipelineName);
         BufferUtils.destroyDirectBuffer(pipelineName);
 

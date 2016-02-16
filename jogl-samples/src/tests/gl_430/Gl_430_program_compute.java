@@ -89,8 +89,8 @@ public class Gl_430_program_compute extends Test {
 
     private IntBuffer textureName = GLBuffers.newDirectIntBuffer(1), vertexArrayName = GLBuffers.newDirectIntBuffer(1),
             pipelineName = GLBuffers.newDirectIntBuffer(Program.MAX),
-            programName = GLBuffers.newDirectIntBuffer(Program.MAX),
             bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX);
+    private int[] programName = new int[Program.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -153,9 +153,9 @@ public class Gl_430_program_compute extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "comp", null, true);
 
             shaderProgram.init(gl4);
-            programName.put(Program.GRAPHICS, shaderProgram.program());
+            programName[Program.GRAPHICS] = shaderProgram.program();
 
-            gl4.glProgramParameteri(programName.get(Program.GRAPHICS), GL_PROGRAM_SEPARABLE, GL_TRUE);
+            gl4.glProgramParameteri(programName[Program.GRAPHICS], GL_PROGRAM_SEPARABLE, GL_TRUE);
 
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
@@ -163,8 +163,8 @@ public class Gl_430_program_compute extends Test {
 
             shaderProgram = new ShaderProgram();
             shaderProgram.init(gl4);
-            programName.put(Program.COMPUTE, shaderProgram.program());
-            gl4.glProgramParameteri(programName.get(Program.COMPUTE), GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Program.COMPUTE] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Program.COMPUTE], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(compShaderCode);
             shaderProgram.link(gl4, System.out);
         }
@@ -173,9 +173,8 @@ public class Gl_430_program_compute extends Test {
 
             gl4.glGenProgramPipelines(Program.MAX, pipelineName);
             gl4.glUseProgramStages(pipelineName.get(Program.GRAPHICS), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
-                    programName.get(Program.GRAPHICS));
-            gl4.glUseProgramStages(pipelineName.get(Program.COMPUTE), GL_COMPUTE_SHADER_BIT, 
-                    programName.get(Program.COMPUTE));
+                    programName[Program.GRAPHICS]);
+            gl4.glUseProgramStages(pipelineName.get(Program.COMPUTE), GL_COMPUTE_SHADER_BIT, programName[Program.COMPUTE]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -311,9 +310,8 @@ public class Gl_430_program_compute extends Test {
 
         gl4.glDeleteProgramPipelines(Program.MAX, pipelineName);
         BufferUtils.destroyDirectBuffer(pipelineName);
-        gl4.glDeleteProgram(programName.get(Program.GRAPHICS));
-        gl4.glDeleteProgram(programName.get(Program.COMPUTE));
-        BufferUtils.destroyDirectBuffer(programName);
+        gl4.glDeleteProgram(programName[Program.GRAPHICS]);
+        gl4.glDeleteProgram(programName[Program.COMPUTE]);
         gl4.glDeleteBuffers(Buffer.MAX, bufferName);
         BufferUtils.destroyDirectBuffer(bufferName);
         gl4.glDeleteTextures(1, textureName);

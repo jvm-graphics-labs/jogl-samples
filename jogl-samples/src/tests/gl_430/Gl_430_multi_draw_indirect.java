@@ -105,11 +105,10 @@ public class Gl_430_multi_draw_indirect extends Test {
 
     private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), pipelineName = GLBuffers.newDirectIntBuffer(1),
             bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), textureName = GLBuffers.newDirectIntBuffer(Texture.MAX),
-            drawOffset = GLBuffers.newDirectIntBuffer(indirectBufferCount),
-            drawCount = GLBuffers.newDirectIntBuffer(indirectBufferCount),
             uniformArrayStrideMat = GLBuffers.newDirectIntBuffer(1).put(0, 256),
             uniformArrayStrideInt = GLBuffers.newDirectIntBuffer(1).put(0, 256);
     private int programName;
+    private int[] drawOffset = new int[indirectBufferCount], drawCount = new int[indirectBufferCount];
     private Vec4i[] viewport = new Vec4i[indirectBufferCount];
 
     @Override
@@ -177,11 +176,11 @@ public class Gl_430_multi_draw_indirect extends Test {
             String stringName = new String(name).trim();
 
             IntBuffer indices = GLBuffers.newDirectIntBuffer(1).put(0, i);
-            if (stringName.equals("transform.MVP[0]")) {
+            if (stringName.equals("Transform.mvp[0]")) {
                 gl4.glGetActiveUniformsiv(programName, 1, indices, GL_UNIFORM_ARRAY_STRIDE, uniformArrayStrideMat);
             }
 
-            if (stringName.equals("indirection.Transform[0]")) {
+            if (stringName.equals("Indirection.transform[0]")) {
                 gl4.glGetActiveUniformsiv(programName, 1, indices, GL_UNIFORM_ARRAY_STRIDE, uniformArrayStrideInt);
             }
             BufferUtils.destroyDirectBuffer(indices);
@@ -245,12 +244,12 @@ public class Gl_430_multi_draw_indirect extends Test {
         commands[4] = new DrawElementsIndirectCommand(elementCount >> 1, 1, 6, 4, 1);
         commands[5] = new DrawElementsIndirectCommand(elementCount, 1, 9, 7, 2);
 
-        drawCount.put(0, 3);
-        drawCount.put(1, 2);
-        drawCount.put(2, 1);
-        drawOffset.put(0, 0);
-        drawOffset.put(1, 1);
-        drawOffset.put(2, 3);
+        drawCount[0] = 3;
+        drawCount[1] = 2;
+        drawCount[2] = 1;
+        drawOffset[0] = 0;
+        drawOffset[1] = 1;
+        drawOffset[2] = 3;
 
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName.get(Buffer.INDIRECT));
         IntBuffer commandsBuffer = GLBuffers.newDirectIntBuffer(5 * commands.length);
@@ -453,9 +452,25 @@ public class Gl_430_multi_draw_indirect extends Test {
 //            buffer.put(5 * Integer.BYTES * drawOffset[i]).rewind();
 //            buffer.asIntBuffer().put(0).rewind();
 //            buffer.rewind();
-            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount.get(i),
+            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i],
                     DrawElementsIndirectCommand.SIZEOF);
         }
+
+        return true;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        BufferUtils.destroyDirectBuffer(bufferName);
+        gl4.glDeleteProgramPipelines(1, pipelineName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
+        gl4.glDeleteProgram(programName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return true;
     }

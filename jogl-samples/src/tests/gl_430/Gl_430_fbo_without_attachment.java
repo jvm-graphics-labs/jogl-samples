@@ -59,8 +59,8 @@ public class Gl_430_fbo_without_attachment extends Test {
     private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1),
             framebufferName = GLBuffers.newDirectIntBuffer(1), samplerName = GLBuffers.newDirectIntBuffer(1),
             pipelineName = GLBuffers.newDirectIntBuffer(Pipeline.MAX),
-            programName = GLBuffers.newDirectIntBuffer(Pipeline.MAX),
             textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
+    private int[] programName = new int[Pipeline.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -104,8 +104,8 @@ public class Gl_430_fbo_without_attachment extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_RENDER, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName.put(Pipeline.RENDER, shaderProgram.program());
-            gl4.glProgramParameteri(programName.get(Pipeline.RENDER), GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.RENDER] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.RENDER], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -121,8 +121,8 @@ public class Gl_430_fbo_without_attachment extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName.put(Pipeline.SPLASH, shaderProgram.program());
-            gl4.glProgramParameteri(programName.get(Pipeline.SPLASH), GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.SPLASH] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.SPLASH], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -132,9 +132,9 @@ public class Gl_430_fbo_without_attachment extends Test {
 
             gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName);
             gl4.glUseProgramStages(pipelineName.get(Pipeline.RENDER), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
-                    programName.get(Pipeline.RENDER));
+                    programName[Pipeline.RENDER]);
             gl4.glUseProgramStages(pipelineName.get(Pipeline.SPLASH), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
-                    programName.get(Pipeline.SPLASH));
+                    programName[Pipeline.SPLASH]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -247,7 +247,7 @@ public class Gl_430_fbo_without_attachment extends Test {
         gl4.glBindProgramPipeline(pipelineName.get(Pipeline.RENDER));
         gl4.glActiveTexture(GL_TEXTURE0);
         gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
-        gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName.get(Texture.COLORBUFFER), 0, false, 0, GL_WRITE_ONLY, 
+        gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName.get(Texture.COLORBUFFER), 0, false, 0, GL_WRITE_ONLY,
                 GL_RGBA8);
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
@@ -273,9 +273,8 @@ public class Gl_430_fbo_without_attachment extends Test {
         BufferUtils.destroyDirectBuffer(samplerName);
         gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName);
         BufferUtils.destroyDirectBuffer(pipelineName);
-        gl4.glDeleteProgram(programName.get(Pipeline.SPLASH));
-        gl4.glDeleteProgram(programName.get(Pipeline.RENDER));
-        BufferUtils.destroyDirectBuffer(programName);
+        gl4.glDeleteProgram(programName[Pipeline.SPLASH]);
+        gl4.glDeleteProgram(programName[Pipeline.RENDER]);
         gl4.glDeleteFramebuffers(1, framebufferName);
         BufferUtils.destroyDirectBuffer(framebufferName);
         gl4.glDeleteTextures(Texture.MAX, textureName);

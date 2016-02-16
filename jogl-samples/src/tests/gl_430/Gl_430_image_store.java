@@ -44,8 +44,8 @@ public class Gl_430_image_store extends Test {
     }
 
     private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), textureName = GLBuffers.newDirectIntBuffer(1),
-            pipelineName = GLBuffers.newDirectIntBuffer(Pipeline.MAX),
-            programName = GLBuffers.newDirectIntBuffer(Pipeline.MAX);
+            pipelineName = GLBuffers.newDirectIntBuffer(Pipeline.MAX);
+    private int[] programName = new int[Pipeline.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -85,8 +85,8 @@ public class Gl_430_image_store extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_READ, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName.put(Pipeline.READ, shaderProgram.program());
-            gl4.glProgramParameteri(programName.get(Pipeline.READ), GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.READ] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.READ], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -102,8 +102,8 @@ public class Gl_430_image_store extends Test {
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SAVE, "frag", null, true);
 
             shaderProgram.init(gl4);
-            programName.put(Pipeline.SAVE, shaderProgram.program());
-            gl4.glProgramParameteri(programName.get(Pipeline.SAVE), GL_PROGRAM_SEPARABLE, GL_TRUE);
+            programName[Pipeline.SAVE] = shaderProgram.program();
+            gl4.glProgramParameteri(programName[Pipeline.SAVE], GL_PROGRAM_SEPARABLE, GL_TRUE);
             shaderProgram.add(vertShaderCode);
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
@@ -113,9 +113,9 @@ public class Gl_430_image_store extends Test {
 
             gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName);
             gl4.glUseProgramStages(pipelineName.get(Pipeline.READ), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
-                    programName.get(Pipeline.READ));
+                    programName[Pipeline.READ]);
             gl4.glUseProgramStages(pipelineName.get(Pipeline.SAVE), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
-                    programName.get(Pipeline.SAVE));
+                    programName[Pipeline.SAVE]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -189,9 +189,8 @@ public class Gl_430_image_store extends Test {
         BufferUtils.destroyDirectBuffer(textureName);
         gl4.glDeleteVertexArrays(1, vertexArrayName);
         BufferUtils.destroyDirectBuffer(vertexArrayName);
-        gl4.glDeleteProgram(programName.get(Pipeline.READ));
-        gl4.glDeleteProgram(programName.get(Pipeline.SAVE));
-        BufferUtils.destroyDirectBuffer(programName);
+        gl4.glDeleteProgram(programName[Pipeline.READ]);
+        gl4.glDeleteProgram(programName[Pipeline.SAVE]);
         gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName);
         BufferUtils.destroyDirectBuffer(pipelineName);
 

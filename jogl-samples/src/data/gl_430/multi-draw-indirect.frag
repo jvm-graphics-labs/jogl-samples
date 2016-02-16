@@ -8,22 +8,22 @@
 #define MATERIAL	0
 #define TRANSFORM0	1
 
-in block
+in Block
 {
-	vec2 Texcoord;
-	flat int DrawID;
-} In;
+    vec2 texCoord;
+    flat int drawID;
+} inBlock;
 
 precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-layout(location = FRAG_COLOR, index = 0) out vec4 Color;
+layout(location = FRAG_COLOR, index = 0) out vec4 color;
 
-layout(binding = 0) uniform sampler2D Diffuse[3];
+layout(binding = 0) uniform sampler2D diffuse[3];
 
 void main()
 {
-	Color = texture(Diffuse[In.DrawID], In.Texcoord.st);
+    color = texture(diffuse[inBlock.drawID], inBlock.texCoord.st);
 }
 
