@@ -40,7 +40,8 @@ public class Gl_440_atomic_counter extends Test {
         public static final int MAX = 1;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = new int[Buffer.MAX];
+    private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(1), vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX);
     private int programName;
 
     @Override
@@ -90,8 +91,8 @@ public class Gl_440_atomic_counter extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(1, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName);
+            gl4.glGenProgramPipelines(1, pipelineName);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -115,9 +116,9 @@ public class Gl_440_atomic_counter extends Test {
         gl4.glGetIntegerv(GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS, maxFragmentAtomicCounterBuffers, 0);
         gl4.glGetIntegerv(GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS, maxCombinedAtomicCounterBuffers, 0);
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
 
-        gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName[Buffer.ATOMIC_COUNTER]);
+        gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName.get(Buffer.ATOMIC_COUNTER));
         gl4.glBufferStorage(GL_ATOMIC_COUNTER_BUFFER, Integer.BYTES, null, GL_MAP_WRITE_BIT);
         gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
 
@@ -128,8 +129,8 @@ public class Gl_440_atomic_counter extends Test {
 
         boolean validated = true;
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glBindVertexArray(0);
 
         return validated;
@@ -140,18 +141,18 @@ public class Gl_440_atomic_counter extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName[Buffer.ATOMIC_COUNTER]);
+        gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName.get(Buffer.ATOMIC_COUNTER));
         int[] data = {0};
         IntBuffer dataBuffer = GLBuffers.newDirectIntBuffer(data);
-        gl4.glClearBufferSubData(GL_ATOMIC_COUNTER_BUFFER, GL_R8UI, 0, Integer.BYTES,
-                GL_RGBA, GL_UNSIGNED_INT, dataBuffer);
+        gl4.glClearBufferSubData(GL_ATOMIC_COUNTER_BUFFER, GL_R8UI, 0, Integer.BYTES, GL_RGBA, GL_UNSIGNED_INT,
+                dataBuffer);
         BufferUtils.destroyDirectBuffer(dataBuffer);
 
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
 
-        gl4.glBindProgramPipeline(pipelineName[0]);
-        gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, bufferName[Buffer.ATOMIC_COUNTER]);
+        gl4.glBindProgramPipeline(pipelineName.get(0));
+        gl4.glBindVertexArray(vertexArrayName.get(0));
+        gl4.glBindBufferBase(GL_ATOMIC_COUNTER_BUFFER, 0, bufferName.get(Buffer.ATOMIC_COUNTER));
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
 
@@ -163,10 +164,13 @@ public class Gl_440_atomic_counter extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        BufferUtils.destroyDirectBuffer(bufferName);
         gl4.glDeleteProgram(programName);
-        gl4.glDeleteProgramPipelines(1, pipelineName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl4.glDeleteProgramPipelines(1, pipelineName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return true;
     }

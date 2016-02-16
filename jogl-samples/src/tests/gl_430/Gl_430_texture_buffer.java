@@ -74,9 +74,8 @@ public class Gl_430_texture_buffer extends Test {
     }
 
     private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1),
-            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
-            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
-    private int programName, uniformMvp;
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
+    private int programName;
 
     @Override
     protected boolean begin(GL gl) {
@@ -135,12 +134,6 @@ public class Gl_430_texture_buffer extends Test {
             shaderProgram.add(fragShaderCode);
 
             shaderProgram.link(gl4, System.out);
-        }
-
-        // Get variables locations
-        if (validated) {
-
-            uniformMvp = gl4.glGetUniformLocation(programName, "mvp");
         }
 
         return validated & checkError(gl4, "initProgram");

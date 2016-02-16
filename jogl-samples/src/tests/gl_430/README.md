@@ -164,7 +164,53 @@ those three levels one side each other.
 
 * interfaces debug
 
-### [gl-430-multi-draw-indirect](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_multi_draw_indirect.java): to fix
+### [gl-430-multi-draw-indirect](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_multi_draw_indirect.java): to fix (buffer offset)
+
+"The idea hiding Programmable Vertex Pulling is composed with two main desires: we want to control the draw dispatched by
+the GPU on the GPUs and we want to build ourselves the inputs of a vertex shaders. All in all Programmable Vertex Pulling is
+about taking control of the beginning of the pipeline by controlling the vertex invocations on the GPUs.
+
+With OpenGL 4.2 the application is responsible to dispatch the _draws_ to the GPU. With OpenGL 1.0 it was done using 
+`glBegin`/`glEnd`, the immediate mode but quickly it appeared that such approach building and sending vertices one by one 
+was way too slow to be interesting because the GPUs were faster to consume the primitives than the CPUs were able to 
+submit them.
+
+OpenGL has evolved many times to ensure that this submission could be done quick enough, Vertex Array (GL1.1), Vertex
+ArrayBuffer (GL1.5), Vertex Array Object (GL3.0), Base Vertex (GL3.2), Instancing (GL3.2), Base Instance (GL4.2) and 
+probably more features that I am missing here.
+
+By batching multiple VAOs into a single VAO by copying multiple sets of buffers into a single set of buffers and then calling
+`glDrawElementsInstancedBaseVertexBaseInstance` or `glDrawArraysInstancedBaseInstance` multiple times on that single VAO to
+draw the needed meshes we can already achieve extremely good performances and the CPU overhead taken by this approach will
+be very low. However, the CPU remains in change of figuring out which meshes needs to be drawn for a specific frame which 
+for many applications can occupy an entire CPU core...
+
+Thanks to [`ARB_multi_draw_indirect`](https://www.opengl.org/registry/specs/ARB/multi_draw_indirect.txt) and [`ARB_compute_shader`](https://www.opengl.org/registry/specs/ARB/compute_shader.txt)
+it is possible to move this processing on the GPU, the compute shader becoming responsible to create a draw indirect buffer,
+which will store the parameters for the multiple draw calls. This buffer will then be consumed by `glMultiDrawElementsIndirect`
+or `glMultiDrawArraysIndirect`.
+
+The `glMultiDraw*Indirect` functions are nothing more than evolutions of the `glDraw*Indirect` introduced with OpenGL 4.0.
+Instead of processing a single draw per draw call, the new functions can submit many draws per calls.
+
+CPU draws dispatching:
+```java
+gl4.glBindBuffer(GL_DRAW_INDIRECT, bufferName);
+for(int drawIndex = 0; drawIndex < drawCount; ++drawIndex) {
+   gl4.glDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, offset);
+}
+```
+Command processor draws dispatching:
+```java
+gl4.glBindBuffer(GL_DRAW_INDIRECT, bufferName);
+gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_INT, null, drawCount.get(i), 0);
+```
+
+A first usage of the shader storage buffer is when is brought together with rendering without vertex attribute and multi
+draw indirect (`ARB_multi_draw_indirect` promoted from [`AMD_multi_draw_indirect`](https://www.opengl.org/registry/specs/AMD/multi_draw_indirect.txt)).
+We can image that a computer shader can select in advance which parts of a mesh actually need to be rendered. This detection
+generates the multi draw indirect buffer, which will be used to pull specific draws from shader storage buffers that store
+a larger mesh. This method will be demonstrated in my GPU Pro article to be released."
 
 ### [gl-430-perf-monitor-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_perf_monitor_amd.java): to finish
 
@@ -266,4 +312,12 @@ is a great opportunity, which may partially resolve this issue for texture and f
 
 ### [gl-430-texture-view](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_texture_view.java):
 
-*
+* Texture views are a new type of texture object, which are created from a subset an existing texture object. They are 
+somehow similar to image copy except that it is designed to avoid any memory copy by preserving the same memory layout across
+the original texture object and all the views. For this to be possible, texture views can only be created from immutable
+textures.
+
+Texture views allow reinterpreting the internal format and provide a way to handle sRGB decode ([`EXT_texture_srgb_decode`](https://www.opengl.org/registry/specs/EXT/texture_sRGB_decode.txt)).
+For example, the original texture may be created with a sRGB internal format but a texture view could be created with a vintage 
+RGB internal format which effectively disable the sRGB decode.
+* loads a diffuse texture and `glTextureView` using mipmap [0-levels] and [0, 1] and renders them

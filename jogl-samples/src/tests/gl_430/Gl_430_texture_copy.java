@@ -70,10 +70,8 @@ public class Gl_430_texture_copy extends Test {
         public static final int MAX = 2;
     }
 
-    private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(1),
-            vertexArrayName = GLBuffers.newDirectIntBuffer(1),
-            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
-            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
+    private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(1), vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
     private int programName;
 
     @Override

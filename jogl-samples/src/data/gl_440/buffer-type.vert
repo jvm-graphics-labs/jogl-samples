@@ -11,20 +11,20 @@ precision highp float;
 precision highp int;
 layout(std140, column_major) uniform;
 
-layout(binding = TRANSFORM0) uniform transform
+layout(binding = TRANSFORM0) uniform Transform
 {
-	mat4 MVP;
-} Transform;
+    mat4 mvp;
+} transform;
 
-layout(location = ATTR_POSITION) in vec4 Position;
+layout(location = ATTR_POSITION) in vec4 position;
 
 out gl_PerVertex
 {
-	vec4 gl_Position;
+    vec4 gl_Position;
 };
 
 void main()
 {
-	gl_Position = Transform.MVP * Position;
+    gl_Position = transform.mvp * position;
 }
 

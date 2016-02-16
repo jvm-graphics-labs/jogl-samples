@@ -43,7 +43,8 @@ public class Gl_430_texture_fetch_dependent extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = new int[Texture.MAX];
+    private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(1), vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
     private int programName;
 
     @Override
@@ -93,8 +94,8 @@ public class Gl_430_texture_fetch_dependent extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(1, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName);
+            gl4.glGenProgramPipelines(1, pipelineName);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -102,10 +103,10 @@ public class Gl_430_texture_fetch_dependent extends Test {
 
     private boolean initTexture(GL4 gl4) {
 
-        gl4.glGenTextures(Texture.MAX, textureName, 0);
+        gl4.glGenTextures(Texture.MAX, textureName);
 
         {
-            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE]);
+            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName.get(Texture.DIFFUSE));
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_RED);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
@@ -132,7 +133,7 @@ public class Gl_430_texture_fetch_dependent extends Test {
         }
 
         {
-            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.INDIRECTION]);
+            gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName.get(Texture.INDIRECTION));
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_RED);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
             gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
@@ -162,8 +163,8 @@ public class Gl_430_texture_fetch_dependent extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glBindVertexArray(0);
 
         return true;
@@ -177,12 +178,12 @@ public class Gl_430_texture_fetch_dependent extends Test {
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
 
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        gl4.glBindProgramPipeline(pipelineName[0]);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glBindProgramPipeline(pipelineName.get(0));
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.DIFFUSE]);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName.get(Texture.DIFFUSE));
         gl4.glActiveTexture(GL_TEXTURE1);
-        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.INDIRECTION]);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName.get(Texture.INDIRECTION));
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
         return true;
@@ -194,9 +195,12 @@ public class Gl_430_texture_fetch_dependent extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glDeleteProgram(programName);
-        gl4.glDeleteProgramPipelines(1, pipelineName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
+        gl4.glDeleteProgramPipelines(1, pipelineName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
+        gl4.glDeleteTextures(Texture.MAX, textureName);
+        BufferUtils.destroyDirectBuffer(textureName);
 
         return true;
     }

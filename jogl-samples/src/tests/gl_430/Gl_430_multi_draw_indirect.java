@@ -448,8 +448,10 @@ public class Gl_430_multi_draw_indirect extends Test {
             gl4.glViewportIndexedfv(0, viewport[i].toFloatArray(), 0);
 //            IntBuffer buffer = GLBuffers.newDirectIntBuffer();
 //            IntBuffer buffer = GLBuffers.newDirectIntBuffer(new int[]{drawOffset.get(i)});
+//            ByteBuffer buffer = GLBuffers.newDirectByteBuffer(Integer.BYTES);
 //            ShortBuffer buffer = GLBuffers.newDirectShortBuffer(new short[]{(short) drawOffset.get(i)});
 //            buffer.put(5 * Integer.BYTES * drawOffset[i]).rewind();
+//            buffer.asIntBuffer().put(0).rewind();
 //            buffer.rewind();
             gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount.get(i),
                     DrawElementsIndirectCommand.SIZEOF);

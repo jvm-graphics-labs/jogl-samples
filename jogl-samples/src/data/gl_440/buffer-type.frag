@@ -4,10 +4,10 @@
 
 precision highp float;
 
-layout(location = FRAG_COLOR, index = 0) out vec4 Color;
+layout(location = FRAG_COLOR, index = 0) out vec4 color;
 
 void main()
 {
-	Color = vec4(1.0, 0.5, 0.0, 1.0);
+    color = vec4(1.0, 0.5, 0.0, 1.0);
 }
 
