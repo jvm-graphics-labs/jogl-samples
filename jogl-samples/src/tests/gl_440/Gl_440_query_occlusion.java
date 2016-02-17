@@ -234,18 +234,20 @@ public class Gl_440_query_occlusion extends Test {
         gl4.glBindBuffer(GL_QUERY_BUFFER, bufferName.get(Buffer.QUERY));
         IntBuffer params = GLBuffers.newDirectIntBuffer(1);
         for (int i = 0; i < viewports.length; ++i) {
-            params.put(0, Integer.BYTES * i);
-            gl4.glGetQueryObjectuiv(queryName.get(i), GL_QUERY_RESULT, params);
+//            params.put(0, Integer.BYTES * i);
+            int[] a = {0};
+            gl4.glGetQueryObjectuiv(queryName.get(i), GL_QUERY_RESULT, a, 0);
+            System.out.println("a: "+a[0]);
         }
 
-        ByteBuffer pointer = gl4.glMapBufferRange(GL_QUERY_BUFFER, 0, Integer.BYTES * queryName.capacity(),
-                GL_MAP_READ_BIT);
+//        ByteBuffer pointer = gl4.glMapBufferRange(GL_QUERY_BUFFER, 0, Integer.BYTES * queryName.capacity(),
+//                GL_MAP_READ_BIT);
 
-        System.out.println("Samples count: " + pointer.get(0) + ", " + pointer.get(1) + ", " + pointer.get(2)
-                + ", " + pointer.get(3) + "\r");
+//        System.out.println("Samples count: " + pointer.get(0) + ", " + pointer.get(1) + ", " + pointer.get(2)
+//                + ", " + pointer.get(3) + "\r");
 
-        gl4.glUnmapBuffer(GL_QUERY_BUFFER);
-        gl4.glBindBuffer(GL_QUERY_BUFFER, 0);
+//        gl4.glUnmapBuffer(GL_QUERY_BUFFER);
+//        gl4.glBindBuffer(GL_QUERY_BUFFER, 0);
 
         return true;
     }

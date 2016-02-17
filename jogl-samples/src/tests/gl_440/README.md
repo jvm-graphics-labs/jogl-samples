@@ -39,7 +39,7 @@ in them the corresponding data from `COPY`. Then it renders the diffuse texture.
 ### [gl-440-buffer-type](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_buffer_type.java):
 
 * 6 different types of data buffer: `F32`, `I8`, `I32`, `RGB10A2`, `F16`, `RG11B10F`
-* `GL_ARB_vertex_type_10f_11f_11f_rev`
+* [`GL_ARB_vertex_type_10f_11f_11f_rev`](https://www.opengl.org/registry/specs/ARB/vertex_type_10f_11f_11f_rev.txt) 
 
 ### [gl-440-caps](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_caps.java):
 
@@ -99,7 +99,7 @@ Example of a shader input interface matching by location:
 layout (location = 0) in vec4 M;
 layout (location = 2) in float N;
 ```
-Same for blocks, example of a shader output interface matching by block name:
+* Same for blocks, example of a shader output interface matching by block name:
 ```glsl
 out blockA // This is called the block name
 {
@@ -122,7 +122,7 @@ in blockB
 } inB;
 ```
 If we don't link the interface won't match.
-Example of a shader output interface matching by block name:
+Example of a shader output interface matching by location:
 ```glsl
 layout (location = 0) out blockA
 {
@@ -136,7 +136,7 @@ layout (location = 2) out blockB
    vec2 B;
 } outB;
 ```
-Example of a shader input interface matching by block name:
+Example of a shader input interface matching by location:
 ```glsl
 
 layout (location = 2) in blockB
@@ -154,7 +154,7 @@ implementations necessarily consume 4 components when we use a float variable fo
 locate where variables are stored but giving enough freedom to the compiler to pack the inputs and the outputs the way it
 wants."
 
-Moreover, struct member can't have location:
+* Moreover, struct member can't have location:
 ```glsl
 layout(location = 3) in struct S {
     vec3 a;                       // gets location 3
@@ -163,7 +163,7 @@ layout(location = 3) in struct S {
     layout (location = 8) vec2 A; // ERROR, can't use on struct member
 } s;
 ```
-and you need to take care if you explicitely want to assign a specific location to a block member:
+* you need to take care if you explicitely want to assign a specific location to a block member:
 ```glsl
 layout(location = 4) in block {
     vec4 d;                       // gets location 4
@@ -177,7 +177,7 @@ layout(location = 4) in block {
 };
 ```
 
-`ARB_enhanced_layouts` gives a finer granularity control of how the components are consumed by the locations. Along with 
+* `ARB_enhanced_layouts` gives a finer granularity control of how the components are consumed by the locations. Along with 
 the `location` qualifier we have a new `component` layout qualifier to assign for each component of a single location
 multiple variables. "
 Think about `component` as a kind of _component offset_ where the variable starts from, components count is 4, you cannot
@@ -193,7 +193,7 @@ layout(location = 4, component = 1) in float b;
 // ERROR: c overflows components 2 and 3
 layout(location = 3, component = 2) in vec3 c;
 ```
-If the variable is an array, each element of the array, in order, is assigned to consecutive locations, but all 
+* If the variable is an array, each element of the array, in order, is assigned to consecutive locations, but all 
 at the same specified component within each location.  For example:
 ```glsl
 // component 3 in 6 locations are consumed
@@ -202,7 +202,7 @@ layout(location = 2, component = 3) in float d[6];
 That is, location 2 component 3 will hold `d[0]`, location 3 component 3 will hold `d[1]`, ..., up through location 7 
 component 3 holding `d[5]`.
 
-This allows packing of two arrays into the same set of locations:
+* This allows packing of two arrays into the same set of locations:
 ```glsl
 // e consumes beginning (components 0, 1 and 2) of each of 6 slots
 layout(location = 0, component = 0) in vec3 e[6];  
@@ -210,6 +210,57 @@ layout(location = 0, component = 0) in vec3 e[6];
 // f consumes last component of the same 6 slots            
 layout(location = 0, component = 3) in float f[6]; 
 ```
+* Two new qualifiers have been added to uniform and storage blocks: `offset`and `align`. These qualifiers give a control 
+per variable on how they map the memory:
+```glsl
+uniform block
+{
+   layout (offset = 0) vec4 kueken;
+   layout (offset = 64) vec4 ovtsa;
+};
+```
+The value passed to the `offset` qualifier is expressed in bytes and points to the memory used to store the variable in
+memory. If the compiler removes a variable between `kueken` and `ovtsa` because it is not an active variable, thanks to the
+`offset` qualifier on `ovtsa` we can guarantee that the variable will back the right memory.
+
+The `align` qualifier provides guarantees that the variables will use the correct padding of the memory:
+```glsl
+uniform block
+{
+   vec4 kueken;
+   layout (offset = 44, align = 8) vec4 ovtsa; // Effectively store at offset 48
+};
+```
+
+* Constant expressions. Let's say that we want to do a partial interface matching on the `outB` block:
+```glsl
+out block
+{
+   A a; // A is a structure
+   B b; // B is a structure
+   C c; // C is a structure
+} outB;
+```
+If we remove `B` in the corresponding input block, the shader interface won't match when using separate programs so we need
+to use the layout `location` qualifier:
+```glsl
+out block
+{
+   layout (lofation = 0) A a; // A is a structure
+   layout (lofation = LOCATION_OF_A) B b; // B is a structure
+   layout (lofation = LOCATION_OF_A + LOCATION_OF_B) C c; // C is a structure
+} outB;
+
+// In the subsequent shader stage:
+in block
+{
+   layout (location = 0) A a; 
+   layout (location = LOCATION_OF_A + LOCATION_OF_B) C c;
+} inB;
+```
+
+* More in the [GLSL 4.4 specifications](https://www.opengl.org/registry/doc/GLSLangSpec.4.40.pdf).
+
 ### [gl-440-multi-draw-indirect-id](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_multi_draw_indirect_id.java): broken
 
 * "A common misconception in rendering is that draw calls are expensive. They are not. What's expensive is switching 
@@ -220,9 +271,10 @@ pulling rendering pipeline"](http://nedrilad.com/Tutorial/topic-58/GPU-Pro-Advan
 purpose, OpenGL introduces two new extentions: [`ARB_shader_draw_parameters`](https://www.opengl.org/registry/specs/ARB/shader_draw_parameters.txt)
 and [`ARB_indirect_parameters`](https://www.opengl.org/registry/specs/ARB/indirect_parameters.txt).
 
-### [gl-440-query-occlusion](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_query_occlusion.java): broken
+### [gl-440-query-occlusion](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_query_occlusion.java): broken (bug)
 
 * http://stackoverflow.com/questions/35451405/glgetqueryobjectuiv-bound-query-buffer-is-not-large-enough-to-store-result
+* https://jogamp.org/bugzilla/show_bug.cgi?id=1291
 * "Looking at my OpenGL Pipeline Map (in the review), we see that GPUs do a lot of things using fixed function hardware.
 Having both programmable and fixed functions functionalities invites us at considering the interoperability between both.
 This is what [`ARB_query_buffer_object`](https://www.opengl.org/registry/specs/ARB/query_buffer_object.txt) does by 
@@ -276,6 +328,18 @@ of submitting one OpenGL command per query to get each result.
 
 ### [gl-440-sampler-wrap](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_sampler_wrap.java)
 
+* "Some features seem to live forgotten by all until someone realized: "Hey, we all support it now, let's put it in core".
+This is what happens to [`ARB_texture_mirror_clamp_to_edge`](https://www.opengl.org/registry/specs/ARB/texture_mirror_clamp_to_edge.txt)
+that has been promoted from [`EXT_texture_mirror_clamp`](https://www.opengl.org/registry/specs/EXT/texture_mirror_clamp.txt),
+itself promoted from [`ATI_texture_mirror_once`](https://www.opengl.org/registry/specs/ATI/texture_mirror_once.txt) and
+stripped down to one feature, a new wrap mode called `GL_MIRROR_CLAMP_TO_EDGE`. It looks like that `GL_MIRROR_CLAMP_TO_BORDER`
+has been removed because every vendor doesn't support it. A quick look at [glCapsViewer database](http://delphigl.de/glcapsviewer/gl_listreports.php)
+shows that AMD and NVIDIA support `EXT_texture_mirror_clamp` but not Intel.
+
+Ultimately, the GPU texture units will remain fixed function at least for the 10 years to come. This is because a texture 
+unit gathers many texels but only outputs a single filtered sample. Sending all these texels to the shader units would cost
+too much transistors just to convoy them and it consumes a lot more local registers. Using the `fetchTexel` instruction it
+is possible to program even an anisotropic sampling but this is magnitude slower according to my experience. "
 * "As mentioned, what's expensive is not submitting draw calls but switching resources. With [`ARB_multi_bind`](https://www.opengl.org/registry/specs/ARB/multi_bind.txt)
 we can bind all the textures, all the buffers, all the texture images, all the samplers in one call, reducing the CPU 
 overhead. I like the API because we no longer need the target parameter or selectors to bind a texture:
@@ -290,6 +354,36 @@ gl4.glBindTextures(0, 2, textureNames);
 ```
 Furthermore, derived texture states are also use to bind texture images. Maybe one limitation of this extension is that we
 must bind consecutive units.
-* `GL_ARB_texture_mirror_clamp_to_edge`
+* [`GL_ARB_texture_mirror_clamp_to_edge`](https://www.opengl.org/registry/specs/ARB/texture_mirror_clamp_to_edge.txt)
 * `glBindSamplers(int first, int count, samplers)`
 * `glBindTextures(int first, int count, textures)`
+
+### [gl-440-transform-feedback](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_transform_feedback.java)
+
+* * With OpenGL 4.3 every single shader interface could reference its resource unit in the shader... every interface but 
+one! The one used for transform feedback. This is done using new ugly namespaced qualifier. Transform feedback setup in a 
+geometry shader:
+```glsl
+layout (xfb_buffer = 0, xfb_offset = 0) out vec3 var1;
+layout (xfb_buffer = 0, xfb_offset = 24) out vec3 var1;
+layout (xfb_buffer = 1, xfb_offset = 0) out vec3 var1;
+layout (xfb_buffer = 1, xfb_offset = 32) out vec3 var1;
+```
+The process is actually simpler that the old API approach. We just need to bind our buffers to transform feedbacks unit and
+then set at which offset we will store the variable data. The stride qualifier is used to specify at which offset to output
+the next vertex.
+* transforms a `vec4 position` into `vec4 position` and `vec4 color`
+* set the interface in the following way:
+```glsl
+layout(xfb_buffer = 0, xfb_stride = 32) out;
+
+out Block
+{
+    layout(xfb_buffer = 0, xfb_offset = 16) vec4 color;
+} outBlock;
+
+out gl_PerVertex
+{
+    layout(xfb_buffer = 0, xfb_offset = 0) vec4 gl_Position;
+};
+```
