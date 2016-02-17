@@ -20,9 +20,11 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glf.Vertex_v2fv2f;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
@@ -47,7 +49,7 @@ public class Gl_440_sampler_wrap extends Test {
 
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     private int vertexCount = 6;
-    private int vertexSize = vertexCount * 2 * Vec2.SIZE;
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
         -1.0f, -1.0f,/**/ -2.0f, +2.0f,
         +1.0f, -1.0f,/**/ +2.0f, +2.0f,
@@ -74,8 +76,9 @@ public class Gl_440_sampler_wrap extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, textureName = {0}, bufferName = new int[Buffer.MAX],
-            samplerName = new int[Viewport.MAX];
+    private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(1), vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            textureName = GLBuffers.newDirectIntBuffer(1), bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            samplerName = GLBuffers.newDirectIntBuffer(Viewport.MAX);
     private int programName;
     private ByteBuffer uniformPointer;
     private Vec4[] viewport = new Vec4[Viewport.MAX];
@@ -119,9 +122,9 @@ public class Gl_440_sampler_wrap extends Test {
             validated = initVertexArray(gl4);
         }
         if (validated) {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            uniformPointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
-                    GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
+            uniformPointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE, GL_MAP_WRITE_BIT
+                    | GL_MAP_INVALIDATE_BUFFER_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
         }
 
         return validated;
@@ -152,8 +155,8 @@ public class Gl_440_sampler_wrap extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(1, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName);
+            gl4.glGenProgramPipelines(1, pipelineName);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -162,9 +165,9 @@ public class Gl_440_sampler_wrap extends Test {
     private boolean initBuffer(GL4 gl4) {
 
         // Generate a buffer object
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferStorage(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, 0);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -174,7 +177,7 @@ public class Gl_440_sampler_wrap extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferStorage(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT
                 | GL_MAP_COHERENT_BIT);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
@@ -184,36 +187,37 @@ public class Gl_440_sampler_wrap extends Test {
 
     private boolean initSampler(GL4 gl4) {
 
-        gl4.glGenSamplers(Viewport.MAX, samplerName, 0);
+        gl4.glGenSamplers(Viewport.MAX, samplerName);
 
         for (int i = 0; i < Viewport.MAX; ++i) {
 
-            gl4.glSamplerParameteri(samplerName[i], GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-            gl4.glSamplerParameteri(samplerName[i], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            Vec4 borderColor = new Vec4(0.0f, 0.5f, 1.0f, 1.0f);
-            gl4.glSamplerParameterfv(samplerName[i], GL_TEXTURE_BORDER_COLOR, borderColor.toFA_(), 0);
+            gl4.glSamplerParameteri(samplerName.get(i), GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+            gl4.glSamplerParameteri(samplerName.get(i), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            FloatBuffer borderColor = GLBuffers.newDirectFloatBuffer(new float[]{0.0f, 0.5f, 1.0f, 1.0f});
+            gl4.glSamplerParameterfv(samplerName.get(i), GL_TEXTURE_BORDER_COLOR, borderColor);
+            BufferUtils.destroyDirectBuffer(borderColor);
         }
 
-        gl4.glSamplerParameteri(samplerName[Viewport._0], GL_TEXTURE_WRAP_S, GL_REPEAT);
-        gl4.glSamplerParameteri(samplerName[Viewport._1], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        gl4.glSamplerParameteri(samplerName[Viewport._2], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
-        gl4.glSamplerParameteri(samplerName[Viewport._3], GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-        gl4.glSamplerParameteri(samplerName[Viewport._4], GL_TEXTURE_WRAP_S, GL_MIRROR_CLAMP_TO_EDGE);
+        gl4.glSamplerParameteri(samplerName.get(Viewport._0), GL_TEXTURE_WRAP_S, GL_REPEAT);
+        gl4.glSamplerParameteri(samplerName.get(Viewport._1), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        gl4.glSamplerParameteri(samplerName.get(Viewport._2), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        gl4.glSamplerParameteri(samplerName.get(Viewport._3), GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+        gl4.glSamplerParameteri(samplerName.get(Viewport._4), GL_TEXTURE_WRAP_S, GL_MIRROR_CLAMP_TO_EDGE);
         if (checkExtension(gl4, "GL_EXT_texture_mirror_clamp")) {
-            gl4.glSamplerParameteri(samplerName[Viewport._5], GL_TEXTURE_WRAP_S, GL_MIRROR_CLAMP_TO_BORDER_EXT);
+            gl4.glSamplerParameteri(samplerName.get(Viewport._5), GL_TEXTURE_WRAP_S, GL_MIRROR_CLAMP_TO_BORDER_EXT);
         } else {
-            gl4.glSamplerParameteri(samplerName[Viewport._5], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+            gl4.glSamplerParameteri(samplerName.get(Viewport._5), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         }
 
-        gl4.glSamplerParameteri(samplerName[Viewport._0], GL_TEXTURE_WRAP_T, GL_REPEAT);
-        gl4.glSamplerParameteri(samplerName[Viewport._1], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        gl4.glSamplerParameteri(samplerName[Viewport._2], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
-        gl4.glSamplerParameteri(samplerName[Viewport._3], GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-        gl4.glSamplerParameteri(samplerName[Viewport._4], GL_TEXTURE_WRAP_T, GL_MIRROR_CLAMP_TO_EDGE);
+        gl4.glSamplerParameteri(samplerName.get(Viewport._0), GL_TEXTURE_WRAP_T, GL_REPEAT);
+        gl4.glSamplerParameteri(samplerName.get(Viewport._1), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        gl4.glSamplerParameteri(samplerName.get(Viewport._2), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+        gl4.glSamplerParameteri(samplerName.get(Viewport._3), GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+        gl4.glSamplerParameteri(samplerName.get(Viewport._4), GL_TEXTURE_WRAP_T, GL_MIRROR_CLAMP_TO_EDGE);
         if (checkExtension(gl4, "GL_EXT_texture_mirror_clamp")) {
-            gl4.glSamplerParameteri(samplerName[Viewport._5], GL_TEXTURE_WRAP_T, GL_MIRROR_CLAMP_TO_BORDER_EXT);
+            gl4.glSamplerParameteri(samplerName.get(Viewport._5), GL_TEXTURE_WRAP_T, GL_MIRROR_CLAMP_TO_BORDER_EXT);
         } else {
-            gl4.glSamplerParameteri(samplerName[Viewport._5], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+            gl4.glSamplerParameteri(samplerName.get(Viewport._5), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         }
 
         return checkError(gl4, "initSampler");
@@ -224,9 +228,9 @@ public class Gl_440_sampler_wrap extends Test {
         try {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE_DXT5));
 
-            gl4.glGenTextures(1, textureName, 0);
+            gl4.glGenTextures(1, textureName);
 
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[0]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
 
@@ -251,8 +255,8 @@ public class Gl_440_sampler_wrap extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         {
             gl4.glVertexAttribFormat(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0);
             gl4.glVertexAttribBinding(Semantic.Attr.POSITION, Semantic.Buffer.STATIC);
@@ -282,11 +286,12 @@ public class Gl_440_sampler_wrap extends Test {
 
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-        gl4.glBindProgramPipeline(pipelineName[0]);
-        gl4.glBindBuffersBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, 1, bufferName, Buffer.TRANSFORM);
-        gl4.glBindTextures(Semantic.Sampler.DIFFUSE, 1, textureName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName[Buffer.VERTEX], 0, 2 * Vec2.SIZE);
+        gl4.glBindProgramPipeline(pipelineName.get(0));
+        bufferName.position(Buffer.TRANSFORM);
+        gl4.glBindBuffersBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, 1, bufferName);
+        gl4.glBindTextures(Semantic.Sampler.DIFFUSE, 1, textureName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
+        gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName.get(Buffer.VERTEX), 0, Vertex_v2fv2f.SIZE);
 
         for (int index = 0; index < Viewport.MAX; ++index) {
 
@@ -296,7 +301,8 @@ public class Gl_440_sampler_wrap extends Test {
                     viewport[index].z,
                     viewport[index].w);
 
-            gl4.glBindSamplers(0, 1, samplerName, index);
+            samplerName.position(index);
+            gl4.glBindSamplers(0, 1, samplerName);
             gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
 
@@ -308,11 +314,11 @@ public class Gl_440_sampler_wrap extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
         gl4.glDeleteProgram(programName);
-        gl4.glDeleteProgramPipelines(1, pipelineName, 0);
-        gl4.glDeleteTextures(1, textureName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl4.glDeleteProgramPipelines(1, pipelineName);
+        gl4.glDeleteTextures(1, textureName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
 
         return true;
     }

@@ -39,6 +39,7 @@ in them the corresponding data from `COPY`. Then it renders the diffuse texture.
 ### [gl-440-buffer-type](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_buffer_type.java):
 
 * 6 different types of data buffer: `F32`, `I8`, `I32`, `RGB10A2`, `F16`, `RG11B10F`
+* `GL_ARB_vertex_type_10f_11f_11f_rev`
 
 ### [gl-440-caps](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_caps.java):
 
@@ -60,11 +61,155 @@ Then it splashes on screen.
 * `GL_ARB_clear_texture`
 * `GL_ARB_shader_storage_buffer_object`
 * loads a diffuse texture and renders it to another texture via an attachmentless fbo and then splashes it to screen
+* "Clearing a texture with OpenGL 4.3 is the most cumbersome thing to do. We need to create an FBO with this texture
+attached and clear it as a framebuffer attachment. Ah! Not only it costs a lot of CPU overhead to create that FBO but this
+affects the rendering pipeline as we need to bind this FBO to clear it.
+
+Fortunately OpenGL 4.4 [`GL_ARB_clear_texture`](https://www.opengl.org/registry/specs/ARB/clear_texture.txt) introduces 
+`glClearTexImage` to clear a texture image and `glClearTexSubimage` to clear a part of this texture image. This feature 
+provides a nice interaction with sparse textures and image load and store."
 
 ### [gl-440-interface-matching](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_interface_matching.java):
 
 * interface matching
+* "I have discussed many times about the issues with the GLSL shader interface and even ended up writing an article for
+_OpenGL Insight_ about this topic. Since then, many things have changed and GLSL 4.40 shader interface are a lot more 
+robust than what they used to be in GLSL 1.50. Unfortunately, these improvements come at the cost of complexity. In the 
+following section we will cover the features provided by [`ARB_enhanced_layouts`](https://www.opengl.org/registry/specs/ARB/enhanced_layouts.txt)
+to OpenGL 4.4 core specifications."
+You should now match interfaces by location rather than by name to avoid any trouble for the compiler if we don't link.
+Example of a shader output interface matching by name:
+```glsl
+layout out vec4 A;
+layout out vec3 B;
+layout out float C;
+Example of a shader input interface matching by name:
+```glsl
+layout out vec4 A;
+layout out float C;
+```
+Example of a shader output interface matching by location:
+```glsl
+layout (location = 0) out vec4 A;
+layout (location = 1) out vec3 B;
+layout (location = 2) out float C;
+```
+Example of a shader input interface matching by location:
+```glsl
+layout (location = 0) in vec4 M;
+layout (location = 2) in float N;
+```
+Same for blocks, example of a shader output interface matching by block name:
+```glsl
+out blockA // This is called the block name
+{
+   vec4 A;
+   vec3 B;
+} outA; // This is called the instance name
 
+out blockB
+{
+   vec2 A;
+   vec2 B;
+} outB;
+```
+Example of a shader input interface matching by block name:
+```glsl
+in blockB
+{
+   vec2 A;
+   vec2 B;
+} inB;
+```
+If we don't link the interface won't match.
+Example of a shader output interface matching by block name:
+```glsl
+layout (location = 0) out blockA
+{
+   vec4 A;
+   vec3 B;
+} outA; 
+
+layout (location = 2) out blockB
+{
+   vec2 A;
+   vec2 B;
+} outB;
+```
+Example of a shader input interface matching by block name:
+```glsl
+
+layout (location = 2) in blockB
+{
+   vec2 A;
+   vec2 B;
+} inB;
+```
+" I used 0 and 2 as the locations fro the two blocks. Why not using 0 and 1? In that case outB.A and OutA.B would use the 
+same location for these two variables.
+
+A location is not an index but an abstract representation of the memory layout. Basically, all scalar and vector types
+consume 1 location except `dvec3` and `dvec4` that may consume 2 locations. However, it doesn't mean that the OpenGL 
+implementations necessarily consume 4 components when we use a float variable for example. Locations provide a way to 
+locate where variables are stored but giving enough freedom to the compiler to pack the inputs and the outputs the way it
+wants."
+
+Moreover, struct member can't have location:
+```glsl
+layout(location = 3) in struct S {
+    vec3 a;                       // gets location 3
+    mat2 b;                       // gets locations 4 and 5
+    vec4 c[2];                    // gets locations 6 and 7
+    layout (location = 8) vec2 A; // ERROR, can't use on struct member
+} s;
+```
+and you need to take care if you explicitely want to assign a specific location to a block member:
+```glsl
+layout(location = 4) in block {
+    vec4 d;                       // gets location 4
+    vec4 e;                       // gets location 5
+    layout(location = 7) vec4 f;  // gets location 7
+    vec4 g;                       // gets location 8
+    layout (location = 1) vec4 h; // gets location 1
+    vec4 i;                       // gets location 2
+    vec4 j;                       // gets location 3
+    vec4 k;                       // ERROR, location 4 already used
+};
+```
+
+`ARB_enhanced_layouts` gives a finer granularity control of how the components are consumed by the locations. Along with 
+the `location` qualifier we have a new `component` layout qualifier to assign for each component of a single location
+multiple variables. "
+Think about `component` as a kind of _component offset_ where the variable starts from, components count is 4, you cannot
+exceed that value.
+The specifications give a good code sample to understand the feature:
+```glsl
+// a consumes components 2 and 3 of location 4
+layout(location = 4, component = 2) in vec2 a;
+  
+// b consumes component 1 of location 4
+layout(location = 4, component = 1) in float b; 
+
+// ERROR: c overflows components 2 and 3
+layout(location = 3, component = 2) in vec3 c;
+```
+If the variable is an array, each element of the array, in order, is assigned to consecutive locations, but all 
+at the same specified component within each location.  For example:
+```glsl
+// component 3 in 6 locations are consumed
+layout(location = 2, component = 3) in float d[6]; 
+```
+That is, location 2 component 3 will hold `d[0]`, location 3 component 3 will hold `d[1]`, ..., up through location 7 
+component 3 holding `d[5]`.
+
+This allows packing of two arrays into the same set of locations:
+```glsl
+// e consumes beginning (components 0, 1 and 2) of each of 6 slots
+layout(location = 0, component = 0) in vec3 e[6];  
+
+// f consumes last component of the same 6 slots            
+layout(location = 0, component = 3) in float f[6]; 
+```
 ### [gl-440-multi-draw-indirect-id](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_multi_draw_indirect_id.java): broken
 
 * "A common misconception in rendering is that draw calls are expensive. They are not. What's expensive is switching 
@@ -75,8 +220,76 @@ pulling rendering pipeline"](http://nedrilad.com/Tutorial/topic-58/GPU-Pro-Advan
 purpose, OpenGL introduces two new extentions: [`ARB_shader_draw_parameters`](https://www.opengl.org/registry/specs/ARB/shader_draw_parameters.txt)
 and [`ARB_indirect_parameters`](https://www.opengl.org/registry/specs/ARB/indirect_parameters.txt).
 
+### [gl-440-query-occlusion](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_query_occlusion.java): broken
+
+* http://stackoverflow.com/questions/35451405/glgetqueryobjectuiv-bound-query-buffer-is-not-large-enough-to-store-result
+* "Looking at my OpenGL Pipeline Map (in the review), we see that GPUs do a lot of things using fixed function hardware.
+Having both programmable and fixed functions functionalities invites us at considering the interoperability between both.
+This is what [`ARB_query_buffer_object`](https://www.opengl.org/registry/specs/ARB/query_buffer_object.txt) does by 
+capturing results into a buffer object that we can directly access within shaders without CPU round trip.
+Usage sample of query buffers:
+```java
+//    
+-­‐-­‐-­‐
+Application    side    
+-­‐-­‐-­‐
+// Create a buffer object for the query result
+gl4.glGenBuffers(1, queryBuffer);
+gl4.glBindBuffer(GL_QUERY_BUFFER_AMD, queryBuffer.get(0));
+gl4.glBufferData(GL_QUERY_BUFFER_AMD, Integer.BYTES, null, GL_DYNAMIC_COPY);
+// Perform occlusion query
+gl4.glBeginQuery(GL_SAMPLES_PASSED, queryId.get(0))
+...
+gl4.glEndQuery(GL_SAMPLES_PASSED);
+// Get query results to buffer object
+gl4.glBindBuffer(GL_QUERY_BUFFER_AMD, queryBuffer.get(0));
+gl4.glGetQueryObjectuiv(queryId, GL_QUERY_RESULT, 0);
+// Bind query result buffer as uniform buffer
+gl4.glBindBufferBase(GL_UNIFORM_BUFFER, 0, queryBuffer.get(0));
+...
+//    
+-­‐-­‐-­‐
+Shader    
+-­‐-­‐-­‐
+...
+uniform queryResult
+{
+uint samplesPassed;
+}
+void main()
+{
+   ...
+   if(samplesPassed > threshold)    {
+      //    Complex    processing
+      ...
+   }    
+   else
+   {
+      //    Simplified    processing
+      ...
+   }
+}
+```
+Furthermore, with query buffers, we can request the result of many queries at the same time by mapping the buffer instead 
+of submitting one OpenGL command per query to get each result.
+
+
 ### [gl-440-sampler-wrap](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_sampler_wrap.java)
 
-* `glBindBufferBase(int target, int first, int count, int[] buffers, int buffers_offset)`
-* `glBindSamplers(int first, int count, int[] samplers, int samplers_offset)`
-* `glBindTextures(int first, int count, int[] textures, int textures_offset)`
+* "As mentioned, what's expensive is not submitting draw calls but switching resources. With [`ARB_multi_bind`](https://www.opengl.org/registry/specs/ARB/multi_bind.txt)
+we can bind all the textures, all the buffers, all the texture images, all the samplers in one call, reducing the CPU 
+overhead. I like the API because we no longer need the target parameter or selectors to bind a texture:
+```java
+// Binding textures with OpenGL 4.3
+gl4.glActiveTexture(GL_TEXTURE0);
+gl4.glBindTexture(GL_TEXTURE_2D, textureNames.get(0));
+gl4.glActiveTexture(GL_TEXTURE1);
+gl4.glBindTexture(GL_TEXTURE_2D, textureNames.get(1));
+// Binding textures with OpenGL 4.4
+gl4.glBindTextures(0, 2, textureNames);
+```
+Furthermore, derived texture states are also use to bind texture images. Maybe one limitation of this extension is that we
+must bind consecutive units.
+* `GL_ARB_texture_mirror_clamp_to_edge`
+* `glBindSamplers(int first, int count, samplers)`
+* `glBindTextures(int first, int count, textures)`

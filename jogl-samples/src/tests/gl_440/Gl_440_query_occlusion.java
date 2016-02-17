@@ -177,8 +177,8 @@ public class Gl_440_query_occlusion extends Test {
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         gl4.glBindBuffer(GL_QUERY_BUFFER, bufferName.get(Buffer.QUERY));
-//        gl4.glBufferData(GL_QUERY_BUFFER, Integer.BYTES * queryName.capacity(), null, GL_DYNAMIC_COPY);
-        gl4.glBufferData(GL_QUERY_BUFFER, 500, null, GL_DYNAMIC_COPY);
+        gl4.glBufferData(GL_QUERY_BUFFER, Integer.BYTES * queryName.capacity(), null, GL_DYNAMIC_COPY);
+//        gl4.glBufferData(GL_QUERY_BUFFER, 500, null, GL_DYNAMIC_COPY);
         gl4.glBindBuffer(GL_QUERY_BUFFER, 0);
 
         return checkError(gl4, "initBuffer");
@@ -232,9 +232,9 @@ public class Gl_440_query_occlusion extends Test {
         }
 
         gl4.glBindBuffer(GL_QUERY_BUFFER, bufferName.get(Buffer.QUERY));
-        IntBuffer params = GLBuffers.newDirectIntBuffer(100);
+        IntBuffer params = GLBuffers.newDirectIntBuffer(1);
         for (int i = 0; i < viewports.length; ++i) {
-            params.put(0, i);
+            params.put(0, Integer.BYTES * i);
             gl4.glGetQueryObjectuiv(queryName.get(i), GL_QUERY_RESULT, params);
         }
 
