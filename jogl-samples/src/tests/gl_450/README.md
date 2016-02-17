@@ -6,8 +6,7 @@
 
 ### [gl-450-clip-control](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_clip_control.java):
 
-*[`GL_ARB_clip_control`](https://www.opengl.org/registry/specs/ARB/clip_control.txt) provides additional clip control modes to configure how
-    clip space is mapped to window space.  This extension's goal is to 1)
+*[`GL_ARB_clip_control`](https://www.opengl.org/registry/specs/ARB/clip_control.txt) provides additional clip control modes to configure how    clip space is mapped to window space.  This extension's goal is to 1)
     allow OpenGL to effectively match Direct3D's coordinate system
     conventions, and 2) potentially improve the numerical precision of the Z
     coordinate mapping.
