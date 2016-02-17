@@ -17,7 +17,7 @@ Developers interested in this functionality may be porting content
     accuracy of depth testing, particularly with floating-point depth
     buffers.
 
-    OpenGL's initial and conventional clip control state is configured by:
+OpenGL's initial and conventional clip control state is configured by:
 ```java
         gl4.glClipControl(GL_LOWER_LEFT, GL_NEGATIVE_ONE_TO_ONE);
 ```
