@@ -42,6 +42,7 @@ import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -78,8 +79,10 @@ public class Gl_440_query_occlusion extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0}, pipelineName = {0}, queryName = new int[4];
-    private Vec4[] viewports = new Vec4[4];
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1), pipelineName = GLBuffers.newDirectIntBuffer(1),
+            queryName = GLBuffers.newDirectIntBuffer(4);
+    private Vec4[] viewports;
     private int programName;
 
     @Override
@@ -94,6 +97,7 @@ public class Gl_440_query_occlusion extends Test {
         gl4.glGetQueryiv(GL_ANY_SAMPLES_PASSED_CONSERVATIVE, GL_QUERY_COUNTER_BITS, queryCounter, 0);
         assert (queryCounter[0] > 0);
 
+        viewports = new Vec4[4];
         viewports[0] = new Vec4(windowSize.x * -0.5f, windowSize.y * -0.5f, windowSize.x * 0.5f, windowSize.y * 0.5f);
         viewports[1] = new Vec4(0, 0, windowSize.x * 0.5f, windowSize.y * 0.5f);
         viewports[2] = new Vec4(windowSize.x * 0.5f, windowSize.y * 0.5f, windowSize.x * 0.5f, windowSize.y * 0.5f);
@@ -117,7 +121,7 @@ public class Gl_440_query_occlusion extends Test {
 
     private boolean initQuery(GL4 gl4) {
 
-        gl4.glGenQueries(queryName.length, queryName, 0);
+        gl4.glGenQueries(queryName.capacity(), queryName);
 
         return checkError(gl4, "initQuery");
     }
@@ -147,8 +151,8 @@ public class Gl_440_query_occlusion extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(1, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName);
+            gl4.glGenProgramPipelines(1, pipelineName);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -156,9 +160,9 @@ public class Gl_440_query_occlusion extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
 
-        gl4.glBindBuffer(GL_SHADER_STORAGE_BUFFER, bufferName[Buffer.VERTEX]);
+        gl4.glBindBuffer(GL_SHADER_STORAGE_BUFFER, bufferName.get(Buffer.VERTEX));
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl4.glBufferData(GL_SHADER_STORAGE_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(positionBuffer);
@@ -168,12 +172,13 @@ public class Gl_440_query_occlusion extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_QUERY_BUFFER, bufferName[Buffer.QUERY]);
-        gl4.glBufferData(GL_QUERY_BUFFER, Integer.BYTES * queryName.length, null, GL_DYNAMIC_COPY);
+        gl4.glBindBuffer(GL_QUERY_BUFFER, bufferName.get(Buffer.QUERY));
+//        gl4.glBufferData(GL_QUERY_BUFFER, Integer.BYTES * queryName.capacity(), null, GL_DYNAMIC_COPY);
+        gl4.glBufferData(GL_QUERY_BUFFER, 500, null, GL_DYNAMIC_COPY);
         gl4.glBindBuffer(GL_QUERY_BUFFER, 0);
 
         return checkError(gl4, "initBuffer");
@@ -181,8 +186,8 @@ public class Gl_440_query_occlusion extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glBindVertexArray(0);
 
         return checkError(gl4, "initVertexArray");
@@ -194,7 +199,7 @@ public class Gl_440_query_occlusion extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, Mat4.SIZE, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -209,29 +214,32 @@ public class Gl_440_query_occlusion extends Test {
         // Clear color buffer with black
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
 
-        gl4.glBindProgramPipeline(pipelineName[0]);
-        gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
-        gl4.glBindBufferBase(GL_SHADER_STORAGE_BUFFER, Semantic.Storage.VERTEX, bufferName[Buffer.VERTEX]);
+        gl4.glBindProgramPipeline(pipelineName.get(0));
+        gl4.glBindVertexArray(vertexArrayName.get(0));
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
+        gl4.glBindBufferBase(GL_SHADER_STORAGE_BUFFER, Semantic.Storage.VERTEX, bufferName.get(Buffer.VERTEX));
 
         // Samples count query
         for (int i = 0; i < viewports.length; ++i) {
+
             gl4.glViewportArrayv(0, 1, viewports[i].toFA_(), 0);
 
-            gl4.glBeginQuery(GL_ANY_SAMPLES_PASSED, queryName[i]);
+            gl4.glBeginQuery(GL_ANY_SAMPLES_PASSED, queryName.get(i));
             {
                 gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
             }
             gl4.glEndQuery(GL_ANY_SAMPLES_PASSED);
         }
 
-        gl4.glBindBuffer(GL_QUERY_BUFFER, bufferName[Buffer.QUERY]);
+        gl4.glBindBuffer(GL_QUERY_BUFFER, bufferName.get(Buffer.QUERY));
+        IntBuffer params = GLBuffers.newDirectIntBuffer(100);
         for (int i = 0; i < viewports.length; ++i) {
-            int[] params = {Integer.BYTES * i};
-            gl4.glGetQueryObjectuiv(queryName[i], GL_QUERY_RESULT, params, 0);
+            params.put(0, i);
+            gl4.glGetQueryObjectuiv(queryName.get(i), GL_QUERY_RESULT, params);
         }
 
-        ByteBuffer pointer = gl4.glMapBufferRange(GL_QUERY_BUFFER, 0, Integer.BYTES * queryName.length, GL_MAP_READ_BIT);
+        ByteBuffer pointer = gl4.glMapBufferRange(GL_QUERY_BUFFER, 0, Integer.BYTES * queryName.capacity(),
+                GL_MAP_READ_BIT);
 
         System.out.println("Samples count: " + pointer.get(0) + ", " + pointer.get(1) + ", " + pointer.get(2)
                 + ", " + pointer.get(3) + "\r");
