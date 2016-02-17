@@ -6,7 +6,7 @@ The project aims to promote the new OpenGL features making easier version transi
 
 These samples use [NEWT](http://jogamp.org/jogl/doc/NEWT-Overview.html) to create window and [jogl](http://jogamp.org/jogl/www/) of [Jogamp](http://jogamp.org/) as OpenGL wrapper, [jglm](https://github.com/elect86/Jglm) as math library and to replace OpenGL fixed pipeline functions and [jgli](https://github.com/elect86/jgli) to load images. 
 
-The over 230 samples illustrate almost all OpenGL features ranging from ES 2.0 up to the last GL extenstions, same of them usually also called AZDO (Almost Zero Driver Overhead) and they are divided per profiles:
+The over 230 samples illustrate almost all OpenGL features ranging from ES 2.0 up to the last GL extenstions, same of them usually also called AZDO (Almost Zero Driver Overhead). They are divided per profiles and I also wrote a little wiki for each profile quoting the most relevant part of g-truc review, really interesting (I have learnt a lot myself reading them):
 
 * [es-200](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/tests/es_200)
 * [es-300](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/tests/es_300)
