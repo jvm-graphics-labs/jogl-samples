@@ -29,12 +29,15 @@ buffer, these changes will be visible on this other side.
 So, no more hints on buffers? Unfortunately, these are not dead as two hints have been included: `GL_DYNAMIC_STORAGE_BIT` and 
 `GL_CLIENT_STORAGE_BIT`. I guess if we want to be serious about OpenGL programming and performance level, we should never use
 `GL_DYNAMIC_STORAGE_BIT` and `GL_CLIENT_STORAGE_BIT`.
+* `GL_ARB_clear_buffer_object`
 
 ### [gl-440-buffer-storage](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_buffer_storage.java):
 
 * loads a diffuse texture and creates a `COPY` immutable storage buffer with `glBufferStorage` and ´GL_MAP_WRITE_BIT` and 
 writes in it the vertex positions and indices. Then it creates other two immutable buffers, `VERTEX` and `ELEMENT`, and copies 
 in them the corresponding data from `COPY`. Then it renders the diffuse texture.
+* `GL_ARB_buffer_storage`
+* `GL_ARB_shader_storage_buffer_object`
 
 ### [gl-440-buffer-type](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_buffer_type.java):
 
@@ -270,6 +273,10 @@ uniform resource indexing. I have largely cover this topic in my GPU Pro 4 chapt
 pulling rendering pipeline"](http://nedrilad.com/Tutorial/topic-58/GPU-Pro-Advanced-Rendering-Techniques-35.html). For this
 purpose, OpenGL introduces two new extentions: [`ARB_shader_draw_parameters`](https://www.opengl.org/registry/specs/ARB/shader_draw_parameters.txt)
 and [`ARB_indirect_parameters`](https://www.opengl.org/registry/specs/ARB/indirect_parameters.txt).
+* `GL_ARB_multi_draw_indirect`
+* `GL_ARB_shader_draw_parameters`
+* `GL_ARB_shader_storage_buffer_object`
+* `GL_ARB_buffer_storage`
 
 ### [gl-440-query-occlusion](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_query_occlusion.java): broken (bug)
 
@@ -324,7 +331,7 @@ void main()
 ```
 Furthermore, with query buffers, we can request the result of many queries at the same time by mapping the buffer instead 
 of submitting one OpenGL command per query to get each result.
-
+* `GL_ARB_query_buffer_object`
 
 ### [gl-440-sampler-wrap](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_sampler_wrap.java)
 
@@ -360,7 +367,7 @@ must bind consecutive units.
 
 ### [gl-440-transform-feedback](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_440/Gl_440_transform_feedback.java)
 
-* * With OpenGL 4.3 every single shader interface could reference its resource unit in the shader... every interface but 
+* With OpenGL 4.3 every single shader interface could reference its resource unit in the shader... every interface but 
 one! The one used for transform feedback. This is done using new ugly namespaced qualifier. Transform feedback setup in a 
 geometry shader:
 ```glsl
@@ -387,3 +394,4 @@ out gl_PerVertex
     layout(xfb_buffer = 0, xfb_offset = 0) vec4 gl_Position;
 };
 ```
+* `GL_ARB_enhanced_layouts`
