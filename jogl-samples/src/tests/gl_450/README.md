@@ -39,9 +39,16 @@ to avoid the loss of precision from the DepthRange transformation (which by defa
 
 ### [gl-450-culling](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_culling.java)
 
-* [GL_ARB_cull_distance](https://www.opengl.org/registry/specs/ARB/cull_distance.txt)
-* no interference in shaders between `vec4 position` and `vec3 position`
+* [GL_ARB_cull_distance](https://www.opengl.org/registry/specs/ARB/cull_distance.txt) adds a new GLSL `gl_CullDistance` shader output, similar to `gl_ClipDistance`, but used for whole primitive culling:
+```glsl
+out gl_PerVertex
+{
+    vec4 gl_Position;
+    float gl_CullDistance[1];
+};
+```
+This new stage in the pipeline is added as part of the primitive clipping stage.
 
 ### [gl-450-direct-state-access](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_direct_state_access.java)
 
-* `public void glBindTextureUnit(int unit, int texture)`
+* 
