@@ -276,7 +276,7 @@ public class Gl_400_fbo_multisample extends Test {
         // Pass 1, render the scene in a multisampled framebuffer
         gl4.glEnable(GL_MULTISAMPLE);
         gl4.glEnable(GL_SAMPLE_SHADING);
-        gl4.glMinSampleShading(2.0f);
+        gl4.glMinSampleShading(4 / 2.0f);
 
         float[] min = {0};
         gl4.glGetFloatv(GL_MIN_SAMPLE_SHADING_VALUE, min, 0);

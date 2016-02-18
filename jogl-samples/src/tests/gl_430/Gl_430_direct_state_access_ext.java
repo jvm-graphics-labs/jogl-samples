@@ -337,7 +337,7 @@ public class Gl_430_direct_state_access_ext extends Test {
 
         gl4.glEnable(GL_MULTISAMPLE);
         gl4.glEnable(GL_SAMPLE_SHADING);
-        gl4.glMinSampleShading(4.0f);
+        gl4.glMinSampleShading(4 / 4.0f);
 
         gl4.glViewportIndexedf(0, 0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.RENDER));

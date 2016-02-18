@@ -86,6 +86,9 @@ public class Gl_320_texture_derivative extends Test {
             validated = initVertexArray(gl3);
         }
 
+        /**
+         * No sense here? Moreovec 4.0f is illegal, [0, 1] allowed.
+         */
         gl3.glEnable(GL_SAMPLE_SHADING);
         gl3.glMinSampleShading(4.0f);
 

@@ -224,7 +224,7 @@ public class Gl_430_query_conditional extends Test {
         gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName.get(Buffer.MATERIAL), 0, Vec4.SIZE);
 
         // The first orange quad is not written in the framebuffer.
-        gl4.glColorMaski(0, false, false, false, false);
+//        gl4.glColorMaski(0, false, false, false, false);
 
         // Beginning of the samples count query
         gl4.glBeginQuery(GL_ANY_SAMPLES_PASSED_CONSERVATIVE, queryName.get(0));
@@ -233,30 +233,29 @@ public class Gl_430_query_conditional extends Test {
                 // To test the condional rendering, comment this line, the next draw call won't happen.
                 gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
             }
-            // End of the samples count query
-            gl4.glEndQuery(GL_ANY_SAMPLES_PASSED_CONSERVATIVE);
+        }// End of the samples count query
+        gl4.glEndQuery(GL_ANY_SAMPLES_PASSED_CONSERVATIVE);
 
-            // The second blue quad is written in the framebuffer only if a sample pass the occlusion query.
-            gl4.glColorMaski(0, true, true, true, true);
+        // The second blue quad is written in the framebuffer only if a sample pass the occlusion query.
+        gl4.glColorMaski(0, true, true, true, true);
 
-            gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName.get(Buffer.MATERIAL),
-                    uniformMaterialOffset, Vec4.SIZE);
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName.get(Buffer.MATERIAL),
+                uniformMaterialOffset, Vec4.SIZE);
 
-            // Draw only if one sample went through the tests, 
-            // we don't need to get the query result which prevent the rendering pipeline to stall.
-            gl4.glBeginConditionalRender(queryName.get(0), GL_QUERY_WAIT);
-            {
-                // Clear color buffer with white
-                gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+        // Draw only if one sample went through the tests, 
+        // we don't need to get the query result which prevent the rendering pipeline to stall.
+        gl4.glBeginConditionalRender(queryName.get(0), GL_QUERY_WAIT);
+        {
+            // Clear color buffer with white
+            gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
 
-                gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
-            }
-            gl4.glEndConditionalRender();
-
-            toggle = !toggle;
-
-            return true;
+//            gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
+        gl4.glEndConditionalRender();
+
+        toggle = !toggle;
+
+        return true;
     }
 
     @Override

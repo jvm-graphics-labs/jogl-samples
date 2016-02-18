@@ -15,6 +15,7 @@ import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._2.Vec2;
 import dev.Vec2i;
+import framework.BufferUtils;
 import glm.vec._3.Vec3;
 import framework.Profile;
 import framework.Semantic;
@@ -22,6 +23,7 @@ import framework.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
@@ -101,10 +103,12 @@ public class Gl_450_fbo_multisample_explicit extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] framebufferName = new int[Framebuffer.MAX], pipelineName = new int[Program.MAX],
-            programName = new int[Program.MAX], textureName = new int[Texture.MAX], bufferName = new int[Buffer.MAX],
-            vertexArrayName = {0};
+    private IntBuffer framebufferName = GLBuffers.newDirectIntBuffer(Framebuffer.MAX),
+            pipelineName = GLBuffers.newDirectIntBuffer(Program.MAX),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), vertexArrayName = GLBuffers.newDirectIntBuffer(1);
     private int uniformBlockSize;
+    private int[] programName = new int[Program.MAX];
     private ByteBuffer uniformPointer;
 
     @Override
@@ -161,9 +165,9 @@ public class Gl_450_fbo_multisample_explicit extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(Program.MAX, pipelineName, 0);
-            for (int i = 0; i < pipelineName.length; i++) {
-                gl4.glUseProgramStages(pipelineName[i], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName[i]);
+            gl4.glGenProgramPipelines(Program.MAX, pipelineName);
+            for (int i = 0; i < pipelineName.capacity(); i++) {
+                gl4.glUseProgramStages(pipelineName.get(i), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName[i]);
             }
         }
 
@@ -176,13 +180,13 @@ public class Gl_450_fbo_multisample_explicit extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
-        gl4.glCreateBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glCreateBuffers(Buffer.MAX, bufferName);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferStorage(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, 0);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferStorage(GL_UNIFORM_BUFFER, uniformBlockSize * 2, null,
                 GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 
@@ -199,9 +203,9 @@ public class Gl_450_fbo_multisample_explicit extends Test {
         try {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
-            gl4.glGenTextures(Texture.MAX, textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName);
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -215,15 +219,15 @@ public class Gl_450_fbo_multisample_explicit extends Test {
                         texture.data(level));
             }
 
-            gl4.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName[Texture.MULTISAMPLE_COLORBUFFER]);
+            gl4.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName.get(Texture.MULTISAMPLE_COLORBUFFER));
             gl4.glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
                     true);
-            gl4.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName[Texture.MULTISAMPLE_DEPTHBUFFER]);
+            gl4.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName.get(Texture.MULTISAMPLE_DEPTHBUFFER));
             gl4.glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_DEPTH_COMPONENT24, FRAMEBUFFER_SIZE.x,
                     FRAMEBUFFER_SIZE.y, true);
             gl4.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
             gl4.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, 0, GL_RGBA,
                     GL_UNSIGNED_BYTE, null);
             gl4.glBindTexture(GL_TEXTURE_2D, 0);
@@ -236,19 +240,19 @@ public class Gl_450_fbo_multisample_explicit extends Test {
 
     private boolean initFramebuffer(GL4 gl4) {
 
-        gl4.glGenFramebuffers(Framebuffer.MAX, framebufferName, 0);
+        gl4.glGenFramebuffers(Framebuffer.MAX, framebufferName);
 
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RENDER]);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.MULTISAMPLE_COLORBUFFER], 0);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.MULTISAMPLE_DEPTHBUFFER], 0);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.RENDER));
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName.get(Texture.MULTISAMPLE_COLORBUFFER), 0);
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName.get(Texture.MULTISAMPLE_DEPTHBUFFER), 0);
 
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RESOLVE]);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.RESOLVE));
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName.get(Texture.COLORBUFFER), 0);
 
-        if (!isFramebufferComplete(gl4, framebufferName[Framebuffer.RENDER])) {
+        if (!isFramebufferComplete(gl4, framebufferName.get(Framebuffer.RENDER))) {
             return false;
         }
-        if (!isFramebufferComplete(gl4, framebufferName[Framebuffer.RESOLVE])) {
+        if (!isFramebufferComplete(gl4, framebufferName.get(Framebuffer.RESOLVE))) {
             return false;
         }
 
@@ -259,10 +263,10 @@ public class Gl_450_fbo_multisample_explicit extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -309,7 +313,7 @@ public class Gl_450_fbo_multisample_explicit extends Test {
         // Pass 1
         // Render the scene in a multisampled framebuffer
         gl4.glEnable(GL_MULTISAMPLE);
-        renderFBO(gl4, framebufferName[Framebuffer.RENDER]);
+        renderFBO(gl4, framebufferName.get(Framebuffer.RENDER));
         gl4.glDisable(GL_MULTISAMPLE);
 
         // Pass 2
@@ -323,8 +327,8 @@ public class Gl_450_fbo_multisample_explicit extends Test {
 
         gl4.glEnable(GL_DEPTH_TEST);
 
-        gl4.glBindProgramPipeline(pipelineName[Program.THROUGH]);
-        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM], 0,
+        gl4.glBindProgramPipeline(pipelineName.get(Program.THROUGH));
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM), 0,
                 uniformBlockSize);
 
         gl4.glViewport(0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
@@ -334,8 +338,10 @@ public class Gl_450_fbo_multisample_explicit extends Test {
         gl4.glClearBufferfv(GL_DEPTH, 0, depth, 0);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-        gl4.glBindTextures(0, 1, textureName, Texture.DIFFUSE);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        textureName.position(Texture.DIFFUSE);
+        gl4.glBindTextures(0, 1, textureName);
+        textureName.rewind();
+        gl4.glBindVertexArray(vertexArrayName.get(0));
 
         gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 5);
 
@@ -347,9 +353,11 @@ public class Gl_450_fbo_multisample_explicit extends Test {
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        gl4.glBindTextures(0, 1, textureName, Texture.MULTISAMPLE_COLORBUFFER);
-        gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM],
+        textureName.position(Texture.MULTISAMPLE_COLORBUFFER);
+        gl4.glBindTextures(0, 1, textureName);
+        textureName.rewind();
+        gl4.glBindVertexArray(vertexArrayName.get(0));
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM),
                 uniformBlockSize, uniformBlockSize);
 
         gl4.glEnable(GL_SCISSOR_TEST);
@@ -358,7 +366,7 @@ public class Gl_450_fbo_multisample_explicit extends Test {
         {
             gl4.glScissor(1, 1, windowSize.x / 2 - 2, windowSize.y - 2);
 
-            gl4.glBindProgramPipeline(pipelineName[Program.RESOLVE_BOX]);
+            gl4.glBindProgramPipeline(pipelineName.get(Program.RESOLVE_BOX));
             gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 5);
         }
 
@@ -366,7 +374,7 @@ public class Gl_450_fbo_multisample_explicit extends Test {
         {
             gl4.glScissor(windowSize.x / 2 + 1, 1, windowSize.x / 2 - 2, windowSize.y - 2);
 
-            gl4.glBindProgramPipeline(pipelineName[Program.RESOLVE_NEAR]);
+            gl4.glBindProgramPipeline(pipelineName.get(Program.RESOLVE_NEAR));
             gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 5);
         }
 
@@ -382,11 +390,16 @@ public class Gl_450_fbo_multisample_explicit extends Test {
             gl4.glDeleteProgram(programName[i]);
         }
 
-        gl4.glDeleteProgramPipelines(Program.MAX, pipelineName, 0);
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
-        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
-        gl4.glDeleteFramebuffers(Framebuffer.MAX, framebufferName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl4.glDeleteProgramPipelines(Program.MAX, pipelineName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        BufferUtils.destroyDirectBuffer(bufferName);
+        gl4.glDeleteTextures(Texture.MAX, textureName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        gl4.glDeleteFramebuffers(Framebuffer.MAX, framebufferName);
+        BufferUtils.destroyDirectBuffer(framebufferName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return true;
     }

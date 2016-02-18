@@ -228,7 +228,7 @@ public class Gl_330_query_conditional extends Test {
                 gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
             }
         }
-// End of the samples count query
+        // End of the samples count query
         gl3.glEndQuery(GL_ANY_SAMPLES_PASSED);
 
         // The second blue quad is written in the framebuffer only if a sample pass the occlusion query.

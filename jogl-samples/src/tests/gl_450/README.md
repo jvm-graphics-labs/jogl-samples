@@ -70,11 +70,17 @@
     to avoid the loss of precision from the DepthRange transformation
     (which by default is z_window = z_ndc * 0.5 + 0.5).
 
-### [gl-450-culling](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_culling.java)
+### [gl-450-culling](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_culling.java):
 
 * [GL_ARB_cull_distance](https://www.opengl.org/registry/specs/ARB/cull_distance.txt)
 * no interference in shaders between `vec4 position` and `vec3 position`
 
-### [gl-450-direct-state-access](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_direct_state_access.java)
+### [gl-450-direct-state-access](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_direct_state_access.java): broken
 
-* `public void glBindTextureUnit(int unit, int texture)`
+* shit
+
+### [gl-450-fbo-multisample-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_fbo_multisample_explicit.java):
+
+* loads a diffuse texture and creates two fbo, one multisampled and one normal. It renders the diffuse texture in the 
+multisample buffer and then resolve to screen by picking only the first sample for the right half and an average of all
+the sample for the left half.
