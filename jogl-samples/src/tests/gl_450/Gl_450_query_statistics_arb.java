@@ -6,54 +6,8 @@
 package tests.gl_450;
 
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL.GL_ALPHA;
-import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_DYNAMIC_DRAW;
-import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
-import static com.jogamp.opengl.GL.GL_FLOAT;
-import static com.jogamp.opengl.GL.GL_LINEAR;
-import static com.jogamp.opengl.GL.GL_LINEAR_MIPMAP_LINEAR;
-import static com.jogamp.opengl.GL.GL_MAP_INVALIDATE_BUFFER_BIT;
-import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
-import static com.jogamp.opengl.GL.GL_STATIC_DRAW;
-import static com.jogamp.opengl.GL.GL_TEXTURE0;
-import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
-import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
-import static com.jogamp.opengl.GL.GL_TRIANGLES;
-import static com.jogamp.opengl.GL.GL_TRUE;
-import static com.jogamp.opengl.GL.GL_UNPACK_ALIGNMENT;
-import static com.jogamp.opengl.GL.GL_UNSIGNED_SHORT;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES2.GL_PROGRAM_SEPARABLE;
-import static com.jogamp.opengl.GL2ES2.GL_QUERY_COUNTER_BITS;
-import static com.jogamp.opengl.GL2ES2.GL_QUERY_RESULT;
-import static com.jogamp.opengl.GL2ES2.GL_RED;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES3.GL_BLUE;
-import static com.jogamp.opengl.GL2ES3.GL_COLOR;
-import static com.jogamp.opengl.GL2ES3.GL_GREEN;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_2D_ARRAY;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_A;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_B;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_G;
-import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_SWIZZLE_R;
-import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
-import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT;
-import static com.jogamp.opengl.GL2GL3.GL_CLIPPING_INPUT_PRIMITIVES_ARB;
-import static com.jogamp.opengl.GL2GL3.GL_CLIPPING_OUTPUT_PRIMITIVES_ARB;
-import static com.jogamp.opengl.GL2GL3.GL_COMPUTE_SHADER_INVOCATIONS_ARB;
-import static com.jogamp.opengl.GL2GL3.GL_FRAGMENT_SHADER_INVOCATIONS_ARB;
-import static com.jogamp.opengl.GL2GL3.GL_GEOMETRY_SHADER_PRIMITIVES_EMITTED_ARB;
-import static com.jogamp.opengl.GL2GL3.GL_PRIMITIVES_SUBMITTED_ARB;
-import static com.jogamp.opengl.GL2GL3.GL_TESS_CONTROL_SHADER_PATCHES_ARB;
-import static com.jogamp.opengl.GL2GL3.GL_TESS_EVALUATION_SHADER_INVOCATIONS_ARB;
-import static com.jogamp.opengl.GL2GL3.GL_VERTEX_SHADER_INVOCATIONS_ARB;
-import static com.jogamp.opengl.GL2GL3.GL_VERTICES_SUBMITTED_ARB;
-import static com.jogamp.opengl.GL3ES3.GL_GEOMETRY_SHADER_INVOCATIONS;
+import static com.jogamp.opengl.GL2GL3.*;
+import static com.jogamp.opengl.GL3ES3.*;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
@@ -196,7 +150,7 @@ public class Gl_450_query_statistics_arb extends Test {
             shaderProgram.add(fragShaderCode);
             shaderProgram.link(gl4, System.out);
         }
-        
+
         if (validated) {
 
             gl4.glGenProgramPipelines(1, pipelineName, 0);
@@ -397,16 +351,16 @@ public class Gl_450_query_statistics_arb extends Test {
         for (int i = 0; i < queryResult.length; ++i) {
             gl4.glGetQueryObjectuiv(queryName[i], GL_QUERY_RESULT, queryResult, i);
         }
-        System.out.println("Verts: " + queryResult[Statistics.VERTICES_SUBMITTED] + "; Prims: ("
-                + queryResult[Statistics.PRIMITIVES_SUBMITTED] + ", "
-                + queryResult[Statistics.GEOMETRY_SHADER_PRIMITIVES_EMITTED] + "); Shaders("
-                + queryResult[Statistics.VERTEX_SHADER_INVOCATIONS] + ", "
+        System.out.println("Verts: " + queryResult[Statistics.VERTICES_SUBMITTED]
+                + "; Prims: (" + queryResult[Statistics.PRIMITIVES_SUBMITTED] + ", "
+                + queryResult[Statistics.GEOMETRY_SHADER_PRIMITIVES_EMITTED]
+                + "); Shaders(" + queryResult[Statistics.VERTEX_SHADER_INVOCATIONS] + ", "
                 + queryResult[Statistics.TESS_CONTROL_SHADER_PATCHES] + ", "
                 + queryResult[Statistics.TESS_EVALUATION_SHADER_INVOCATIONS] + ", "
                 + queryResult[Statistics.GEOMETRY_SHADER_INVOCATIONS] + ", "
                 + queryResult[Statistics.FRAGMENT_SHADER_INVOCATIONS] + ", "
-                + queryResult[Statistics.COMPUTE_SHADER_INVOCATIONS] + "); Clip("
-                + queryResult[Statistics.CLIPPING_INPUT_PRIMITIVES] + ", "
+                + queryResult[Statistics.COMPUTE_SHADER_INVOCATIONS]
+                + "); Clip(" + queryResult[Statistics.CLIPPING_INPUT_PRIMITIVES] + ", "
                 + queryResult[Statistics.CLIPPING_OUTPUT_PRIMITIVES] + ")\r");
 
         return true;

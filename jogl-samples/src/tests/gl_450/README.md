@@ -59,3 +59,31 @@ This new stage in the pipeline is added as part of the primitive clipping stage.
 multisample buffer and then resolve to screen by picking only the first sample for the right half and an average of all
 the sample for the left half.
  
+### [gl-450-fbo-multisample-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_fbo_multisample_explicit.java):
+
+* loads a diffuse texture and creates two fbo, one multisampled and one normal. It renders the diffuse texture in the 
+multisample buffer and then resolve to screen by picking only the first sample for the right half and an average of all
+the sample for the left half.
+ 
+### [gl-450-query-conditional](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_query_conditional.java):
+
+* inverted conditional rendering without GPU stalling
+* [`GL_ARB_conditional_render_inverted`](https://www.opengl.org/registry/specs/ARB/conditional_render_inverted.txt) adds 
+new modes to BeginConditionalRender which invert the condition used to determine whether to draw or not.
+ 
+### [gl-450-query-statistics-arb](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_query_statistic_arb.java):
+
+* [`GL_ARB_pipeline_statistics_query`](https://www.opengl.org/registry/specs/ARB/pipeline_statistics_query.txt] introduces 
+new query types that allow applications to get statistics information about different parts of the pipeline:
+
+- Number of vertices and primitives issued to the GL;
+
+- Number of times a vertex shader, tessellation evaluation shader, geometry shader, fragment shader, and compute shader was invoked;
+
+- Number of patches processed by the tessellation control shader stage;
+
+- Number of primitives emitted by a geometry shader;
+
+- Number of primitives that entered the primitive clipping stage;
+
+- Number of primitives that are output by the primitive clipping stage;
