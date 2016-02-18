@@ -76,14 +76,14 @@ new modes to BeginConditionalRender which invert the condition used to determine
 * [`GL_ARB_pipeline_statistics_query`](https://www.opengl.org/registry/specs/ARB/pipeline_statistics_query.txt] introduces 
 new query types that allow applications to get statistics information about different parts of the pipeline:
 
-- Number of vertices and primitives issued to the GL;
+      * Number of vertices and primitives issued to the GL;
 
-- Number of times a vertex shader, tessellation evaluation shader, geometry shader, fragment shader, and compute shader was invoked;
+      * Number of times a vertex shader, tessellation evaluation shader, geometry shader, fragment shader, and compute shader was invoked;
 
-- Number of patches processed by the tessellation control shader stage;
+      * Number of patches processed by the tessellation control shader stage;
 
-- Number of primitives emitted by a geometry shader;
+      * Number of primitives emitted by a geometry shader;
 
-- Number of primitives that entered the primitive clipping stage;
+      * Number of primitives that entered the primitive clipping stage;
 
-- Number of primitives that are output by the primitive clipping stage;
+      * Number of primitives that are output by the primitive clipping stage;
