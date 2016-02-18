@@ -268,7 +268,7 @@ public class Gl_440_transform_feedback extends Test {
 
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
-            uniformPointer = null;
+            BufferUtils.destroyDirectBuffer(uniformPointer);
         }
 
         gl4.glDeleteVertexArrays(Program.MAX, vertexArrayName, 0);

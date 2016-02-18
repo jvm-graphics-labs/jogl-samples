@@ -268,7 +268,7 @@ public class Gl_440_buffer_storage extends Test {
 
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
-            uniformPointer = null;
+            BufferUtils.destroyDirectBuffer(uniformPointer);
         }
 
         gl4.glDeleteProgramPipelines(1, pipelineName);

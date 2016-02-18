@@ -20,6 +20,7 @@ import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -64,8 +65,11 @@ public class Gl_450_transform_feedback_arb extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] bufferName = new int[Buffer.MAX], pipelineName = new int[Program.MAX], programName = new int[Program.MAX],
-            vertexArrayName = new int[Program.MAX], queryName = {0}, feedbackName = {0};
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            pipelineName = GLBuffers.newDirectIntBuffer(Program.MAX),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(Program.MAX), queryName = GLBuffers.newDirectIntBuffer(1),
+            feedbackName = GLBuffers.newDirectIntBuffer(1);
+    private int[] programName = new int[Program.MAX];
     private ByteBuffer uniformPointer;
 
     @Override
@@ -91,9 +95,9 @@ public class Gl_450_transform_feedback_arb extends Test {
             validated = initFeedback(gl4);
         }
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-        uniformPointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
-                GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
+        uniformPointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT
+                | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
         return validated;
     }
@@ -138,10 +142,10 @@ public class Gl_450_transform_feedback_arb extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(Program.MAX, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[Program.TRANSFORM], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+            gl4.glGenProgramPipelines(Program.MAX, pipelineName);
+            gl4.glUseProgramStages(pipelineName.get(Program.TRANSFORM), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
                     programName[Program.TRANSFORM]);
-            gl4.glUseProgramStages(pipelineName[Program.FEEDBACK], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+            gl4.glUseProgramStages(pipelineName.get(Program.FEEDBACK), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
                     programName[Program.FEEDBACK]);
         }
 
@@ -150,9 +154,9 @@ public class Gl_450_transform_feedback_arb extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
+        gl4.glGenVertexArrays(Program.MAX, vertexArrayName);
 
-        gl4.glBindVertexArray(vertexArrayName[Program.TRANSFORM]);
+        gl4.glBindVertexArray(vertexArrayName.get(Program.TRANSFORM));
         {
             gl4.glVertexAttribFormat(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 0);
             gl4.glVertexAttribBinding(Semantic.Attr.POSITION, Semantic.Buffer.STATIC);
@@ -160,7 +164,7 @@ public class Gl_450_transform_feedback_arb extends Test {
         }
         gl4.glBindVertexArray(0);
 
-        gl4.glBindVertexArray(vertexArrayName[Program.FEEDBACK]);
+        gl4.glBindVertexArray(vertexArrayName.get(Program.FEEDBACK));
         {
             gl4.glVertexAttribFormat(Semantic.Attr.POSITION, 4, GL_FLOAT, false, 0);
             gl4.glVertexAttribBinding(Semantic.Attr.POSITION, Semantic.Buffer.STATIC);
@@ -177,7 +181,7 @@ public class Gl_450_transform_feedback_arb extends Test {
 
     private boolean initQuery(GL4 gl4) {
 
-        gl4.glGenQueries(1, queryName, 0);
+        gl4.glGenQueries(1, queryName);
 
         int[] queryBits = {0};
         gl4.glGetQueryiv(GL_TRANSFORM_FEEDBACK_STREAM_OVERFLOW_ARB, GL_QUERY_COUNTER_BITS, queryBits, 0);
@@ -187,9 +191,9 @@ public class Gl_450_transform_feedback_arb extends Test {
 
     private boolean initFeedback(GL4 gl4) {
 
-        gl4.glGenTransformFeedbacks(1, feedbackName, 0);
-        gl4.glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackName[0]);
-        gl4.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, bufferName[Buffer.FEEDBACK]);
+        gl4.glGenTransformFeedbacks(1, feedbackName);
+        gl4.glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackName.get(0));
+        gl4.glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, bufferName.get(Buffer.FEEDBACK));
         gl4.glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, 0);
 
         return true;
@@ -197,15 +201,15 @@ public class Gl_450_transform_feedback_arb extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl4.glBufferStorage(GL_ARRAY_BUFFER, positionSize, positionBuffer, 0);
         BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.FEEDBACK]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.FEEDBACK));
         gl4.glBufferStorage(GL_ARRAY_BUFFER, glf.Vertex_v4fc4f.SIZE * vertexCount, null, 0);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -213,7 +217,7 @@ public class Gl_450_transform_feedback_arb extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferStorage(GL_UNIFORM_BUFFER, uniformBlockSize, null,
                 GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT);
 
@@ -245,14 +249,14 @@ public class Gl_450_transform_feedback_arb extends Test {
         // Disable rasterisation, vertices processing only!
         gl4.glEnable(GL_RASTERIZER_DISCARD);
 
-        gl4.glBindProgramPipeline(pipelineName[Program.TRANSFORM]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
-        gl4.glBindVertexArray(vertexArrayName[Program.TRANSFORM]);
-        gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName[Buffer.VERTEX], 0, Vec4.SIZE);
+        gl4.glBindProgramPipeline(pipelineName.get(Program.TRANSFORM));
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
+        gl4.glBindVertexArray(vertexArrayName.get(Program.TRANSFORM));
+        gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName.get(Buffer.VERTEX), 0, Vec4.SIZE);
 
-        gl4.glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackName[0]);
+        gl4.glBindTransformFeedback(GL_TRANSFORM_FEEDBACK, feedbackName.get(0));
 
-        gl4.glBeginQueryIndexed(GL_TRANSFORM_FEEDBACK_STREAM_OVERFLOW_ARB, 0, queryName[0]);
+        gl4.glBeginQueryIndexed(GL_TRANSFORM_FEEDBACK_STREAM_OVERFLOW_ARB, 0, queryName.get(0));
         gl4.glBeginTransformFeedback(GL_TRIANGLES);
         {
             gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
@@ -264,19 +268,20 @@ public class Gl_450_transform_feedback_arb extends Test {
 
         gl4.glDisable(GL_RASTERIZER_DISCARD);
 
-        int[] streamOverflow = {0};
-        gl4.glGetQueryObjectuiv(queryName[0], GL_QUERY_RESULT, streamOverflow, 0);
+        IntBuffer streamOverflow = GLBuffers.newDirectIntBuffer(1);
+        gl4.glGetQueryObjectuiv(queryName.get(0), GL_QUERY_RESULT, streamOverflow);
 
-        if (streamOverflow[0] == 0) {
+        if (streamOverflow.get(0) == 0) {
 
             // Second draw, reuse the captured attributes
-            gl4.glBindProgramPipeline(pipelineName[Program.FEEDBACK]);
-            gl4.glBindVertexArray(vertexArrayName[Program.FEEDBACK]);
-            gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName[Buffer.FEEDBACK], 0, glf.Vertex_v4fc4f.SIZE);
+            gl4.glBindProgramPipeline(pipelineName.get(Program.FEEDBACK));
+            gl4.glBindVertexArray(vertexArrayName.get(Program.FEEDBACK));
+            gl4.glBindVertexBuffer(Semantic.Buffer.STATIC, bufferName.get(Buffer.FEEDBACK), 0, glf.Vertex_v4fc4f.SIZE);
 
-            gl4.glDrawTransformFeedback(GL_TRIANGLES, feedbackName[0]);
+            gl4.glDrawTransformFeedback(GL_TRIANGLES, feedbackName.get(0));
         }
-
+        BufferUtils.destroyDirectBuffer(streamOverflow);
+        
         return true;
     }
 
@@ -287,17 +292,21 @@ public class Gl_450_transform_feedback_arb extends Test {
 
         if (uniformPointer == null) {
 
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
-            uniformPointer = null;
+            BufferUtils.destroyDirectBuffer(uniformPointer);
         }
 
-        gl4.glDeleteVertexArrays(Program.MAX, vertexArrayName, 0);
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteVertexArrays(Program.MAX, vertexArrayName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        BufferUtils.destroyDirectBuffer(bufferName);
         gl4.glDeleteProgram(programName[Program.FEEDBACK]);
         gl4.glDeleteProgram(programName[Program.TRANSFORM]);
-        gl4.glDeleteProgramPipelines(Program.MAX, pipelineName, 0);
-        gl4.glDeleteTransformFeedbacks(1, feedbackName, 0);
+        gl4.glDeleteProgramPipelines(Program.MAX, pipelineName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
+        gl4.glDeleteTransformFeedbacks(1, feedbackName);
+        BufferUtils.destroyDirectBuffer(feedbackName);
 
         return true;
     }

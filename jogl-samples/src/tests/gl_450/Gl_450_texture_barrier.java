@@ -23,6 +23,7 @@ import framework.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -84,8 +85,11 @@ public class Gl_450_texture_barrier extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] framebufferName = {0}, programName = new int[Pipeline.MAX], vertexArrayName = new int[Pipeline.MAX],
-            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], pipelineName = new int[Pipeline.MAX];
+    private IntBuffer framebufferName = GLBuffers.newDirectIntBuffer(1),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(Pipeline.MAX),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), textureName = GLBuffers.newDirectIntBuffer(Texture.MAX),
+            pipelineName = GLBuffers.newDirectIntBuffer(Pipeline.MAX);
+    private int[] programName = new int[Pipeline.MAX];
     private Vec4[] viewports;
 
     @Override
@@ -103,7 +107,7 @@ public class Gl_450_texture_barrier extends Test {
             Vec2 viewportPos = new Vec2(i % 17, i % 13);
             Vec2 viewportSize = new Vec2(i % 11);
             viewports[i] = new Vec4(viewportPos.div(new Vec2(17, 13)).mul(windowRange)
-                    .sub(new Vec2(windowSize.x, windowSize.y)),
+                    .sub(new Vec2(windowSize.x, windowSize.y)), 
                     new Vec2(windowSize.x, windowSize.y).mul(viewportSize).div(new Vec2(11)));
         }
         /*
@@ -182,10 +186,10 @@ public class Gl_450_texture_barrier extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[Pipeline.SPLASH], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName);
+            gl4.glUseProgramStages(pipelineName.get(Pipeline.SPLASH), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
                     programName[Pipeline.SPLASH]);
-            gl4.glUseProgramStages(pipelineName[Pipeline.TEXTURE], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+            gl4.glUseProgramStages(pipelineName.get(Pipeline.TEXTURE), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
                     programName[Pipeline.TEXTURE]);
         }
 
@@ -194,15 +198,15 @@ public class Gl_450_texture_barrier extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -212,7 +216,7 @@ public class Gl_450_texture_barrier extends Test {
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -231,9 +235,9 @@ public class Gl_450_texture_barrier extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glGenTextures(Texture.MAX, textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName);
 
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
@@ -255,7 +259,7 @@ public class Gl_450_texture_barrier extends Test {
                         texture.data(level));
             }
 
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -272,9 +276,9 @@ public class Gl_450_texture_barrier extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(Pipeline.MAX, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[Pipeline.TEXTURE]);
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+        gl4.glGenVertexArrays(Pipeline.MAX, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(Pipeline.TEXTURE));
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, 0);
         gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, Vec2.SIZE);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -282,10 +286,10 @@ public class Gl_450_texture_barrier extends Test {
         gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
         gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl4.glBindVertexArray(0);
 
-        gl4.glBindVertexArray(vertexArrayName[Pipeline.SPLASH]);
+        gl4.glBindVertexArray(vertexArrayName.get(Pipeline.SPLASH));
         gl4.glBindVertexArray(0);
 
         return true;
@@ -295,11 +299,11 @@ public class Gl_450_texture_barrier extends Test {
 
         boolean validated = true;
 
-        gl4.glGenFramebuffers(1, framebufferName, 0);
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
+        gl4.glGenFramebuffers(1, framebufferName);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName.get(Texture.COLORBUFFER), 0);
 
-        if (!isFramebufferComplete(gl4, framebufferName[0])) {
+        if (!isFramebufferComplete(gl4, framebufferName.get(0))) {
             return false;
         }
 
@@ -314,7 +318,7 @@ public class Gl_450_texture_barrier extends Test {
         GL4 gl4 = (GL4) gl;
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -327,19 +331,20 @@ public class Gl_450_texture_barrier extends Test {
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
 
-        java.nio.Buffer buffer = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 0.5f, 0.0f, 1.0f});
-        gl4.glClearTexImage(textureName[Texture.COLORBUFFER], 0, GL_RGBA, GL_FLOAT, buffer);
+        FloatBuffer buffer = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 0.5f, 0.0f, 1.0f});
+        gl4.glClearTexImage(textureName.get(Texture.COLORBUFFER), 0, GL_RGBA, GL_FLOAT, buffer);
+        BufferUtils.destroyDirectBuffer(buffer);
 
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
 
         // Bind rendering objects
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.TEXTURE]);
+        gl4.glBindProgramPipeline(pipelineName.get(Pipeline.TEXTURE));
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
         gl4.glActiveTexture(GL_TEXTURE1);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
-        gl4.glBindVertexArray(vertexArrayName[Pipeline.TEXTURE]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
+        gl4.glBindVertexArray(vertexArrayName.get(Pipeline.TEXTURE));
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
 
         for (int i = 0; i < viewports.length; ++i) {
 
@@ -351,10 +356,10 @@ public class Gl_450_texture_barrier extends Test {
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
 
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.SPLASH]);
+        gl4.glBindProgramPipeline(pipelineName.get(Pipeline.SPLASH));
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindVertexArray(vertexArrayName[Pipeline.SPLASH]);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+        gl4.glBindVertexArray(vertexArrayName.get(Pipeline.SPLASH));
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
 
@@ -366,13 +371,18 @@ public class Gl_450_texture_barrier extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName, 0);
+        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
         gl4.glDeleteProgram(programName[Pipeline.SPLASH]);
         gl4.glDeleteProgram(programName[Pipeline.TEXTURE]);
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
-        gl4.glDeleteFramebuffers(1, framebufferName, 0);
-        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
-        gl4.glDeleteVertexArrays(Pipeline.MAX, vertexArrayName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        BufferUtils.destroyDirectBuffer(bufferName);
+        gl4.glDeleteFramebuffers(1, framebufferName);
+        BufferUtils.destroyDirectBuffer(framebufferName);
+        gl4.glDeleteTextures(Texture.MAX, textureName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        gl4.glDeleteVertexArrays(Pipeline.MAX, vertexArrayName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return true;
     }

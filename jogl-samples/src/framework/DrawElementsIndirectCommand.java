@@ -27,7 +27,7 @@ public class DrawElementsIndirectCommand {
         this.baseInstance = baseInstance;
     }
     
-    public int [] toIntArray() {
+    public int [] toIa_() {
         return new int[]{primitiveCount, instanceCount, firstIndex, baseVertex, baseInstance};
     }
 }

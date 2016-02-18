@@ -239,7 +239,7 @@ public class Gl_500_multi_draw_indirect_count_arb extends Test {
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName[Buffer.INDIRECT]);
         IntBuffer commandsBuffer = GLBuffers.newDirectIntBuffer(5 * commands.length);
         for (DrawElementsIndirectCommand command : commands) {
-            commandsBuffer.put(command.toIntArray());
+            commandsBuffer.put(command.toIa_());
         }
         /**
          * Critical, I forgot once to rewing the buffer, the driver video crashed.

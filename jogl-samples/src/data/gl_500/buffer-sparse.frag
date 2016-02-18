@@ -8,16 +8,16 @@ precision highp int;
 layout(std140, column_major) uniform;
 //layout(std430, column_major) buffer; AMD bug
 
-layout(binding = DIFFUSE) uniform sampler2DArray Diffuse;
+layout(binding = DIFFUSE) uniform sampler2DArray diffuse;
 
-in block
+in Block
 {
-	vec2 Texcoord;
-} In;
+    vec2 texCoord;
+} inBlock;
 
-layout(location = FRAG_COLOR, index = 0) out vec4 Color;
+layout(location = FRAG_COLOR, index = 0) out vec4 color;
 
 void main()
 {
-	Color = texture(Diffuse, vec3(In.Texcoord.st, 0.0));
+    color = texture(diffuse, vec3(inBlock.texCoord.st, 0.0));
 }

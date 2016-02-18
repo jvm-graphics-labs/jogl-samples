@@ -87,3 +87,23 @@ new query types that allow applications to get statistics information about diff
       * Number of primitives that entered the primitive clipping stage;
 
       * Number of primitives that are output by the primitive clipping stage;
+
+### [gl-450-texture-barrier](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_texture_barrier.java):
+
+* loads a diffuse texture and creates 1000 random small viewports. Then, for each viewport, applies the viewport itself, 
+renders the texture and set the texture barrier.
+* [`GL_ARB_texture_barrier`](https://www.opengl.org/registry/specs/ARB/texture_barrier.txt) relaxes the restrictions on 
+rendering to a currently bound texture and provides a mechanism to avoid read-after-write hazards.
+* `glTextureBarrier()`
+
+### [gl-450-texture-derivative](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_texture_derivative.java):
+
+* [`GL_ARB_derivative_control`](https://www.opengl.org/registry/specs/ARB/derivative_control.txt)
+
+### [gl-450-transform-feedback-arb](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_transform_feedback_arb.java):
+
+* [`GL_ARB_transform_feedback_overflow_query`](https://www.opengl.org/registry/specs/ARB/transform_feedback_overflow_query.txt) 
+adds new query types which can be used to detect overflow of transform feedback buffers. The new query types are also 
+accepted by conditional rendering commands.
+* `GL_TRANSFORM_FEEDBACK_STREAM_OVERFLOW_ARB`
+* transforms positions and if there is no overflow it renders a quad.

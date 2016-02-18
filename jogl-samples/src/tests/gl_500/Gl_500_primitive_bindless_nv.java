@@ -21,6 +21,7 @@ import framework.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
@@ -61,7 +62,9 @@ public class Gl_500_primitive_bindless_nv extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0}, pipelineName = {0}, textureName = {0};
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1), pipelineName = GLBuffers.newDirectIntBuffer(1),
+            textureName = GLBuffers.newDirectIntBuffer(1);
     private int programName;
     private long[] address = {0};
 
@@ -125,8 +128,8 @@ public class Gl_500_primitive_bindless_nv extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(1, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName);
+            gl4.glGenProgramPipelines(1, pipelineName);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT, programName);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -134,9 +137,9 @@ public class Gl_500_primitive_bindless_nv extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
@@ -144,7 +147,7 @@ public class Gl_500_primitive_bindless_nv extends Test {
         gl4.glMakeBufferResidentNV(GL_ARRAY_BUFFER, GL_READ_ONLY);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferData(GL_UNIFORM_BUFFER, Mat4.SIZE, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
@@ -160,20 +163,20 @@ public class Gl_500_primitive_bindless_nv extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glCreateTextures(GL_TEXTURE_2D, 1, textureName, 0);
-            gl4.glTextureParameteri(textureName[0], GL_TEXTURE_BASE_LEVEL, 0);
-            gl4.glTextureParameteri(textureName[0], GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
-            gl4.glTextureParameteri(textureName[0], GL_TEXTURE_SWIZZLE_R, GL_RED);
-            gl4.glTextureParameteri(textureName[0], GL_TEXTURE_SWIZZLE_G, GL_GREEN);
-            gl4.glTextureParameteri(textureName[0], GL_TEXTURE_SWIZZLE_B, GL_BLUE);
-            gl4.glTextureParameteri(textureName[0], GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
+            gl4.glCreateTextures(GL_TEXTURE_2D, 1, textureName);
+            gl4.glTextureParameteri(textureName.get(0), GL_TEXTURE_BASE_LEVEL, 0);
+            gl4.glTextureParameteri(textureName.get(0), GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
+            gl4.glTextureParameteri(textureName.get(0), GL_TEXTURE_SWIZZLE_R, GL_RED);
+            gl4.glTextureParameteri(textureName.get(0), GL_TEXTURE_SWIZZLE_G, GL_GREEN);
+            gl4.glTextureParameteri(textureName.get(0), GL_TEXTURE_SWIZZLE_B, GL_BLUE);
+            gl4.glTextureParameteri(textureName.get(0), GL_TEXTURE_SWIZZLE_A, GL_ALPHA);
 
-            gl4.glTextureStorage2D(textureName[0], texture.levels(), format.internal.value,
-                    texture.dimensions()[0], texture.dimensions()[1]);
+            gl4.glTextureStorage2D(textureName.get(0), texture.levels(), format.internal.value, texture.dimensions()[0],
+                    texture.dimensions()[1]);
 
             for (int level = 0; level < texture.levels(); ++level) {
 
-                gl4.glTextureSubImage2D(textureName[0], level,
+                gl4.glTextureSubImage2D(textureName.get(0), level,
                         0, 0,
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         format.external.value, format.type.value,
@@ -188,8 +191,8 @@ public class Gl_500_primitive_bindless_nv extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glCreateVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glCreateVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         {
             gl4.glVertexAttribFormatNV(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE);
             gl4.glVertexAttribFormatNV(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE);
@@ -230,7 +233,7 @@ public class Gl_500_primitive_bindless_nv extends Test {
             Mat4 model = new Mat4(1.0f);
             Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             ByteBuffer pointer = gl4.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE, GL_MAP_WRITE_BIT);
             pointer.asFloatBuffer().put(mvp.toFa_());
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
@@ -239,10 +242,10 @@ public class Gl_500_primitive_bindless_nv extends Test {
         gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x, windowSize.y}, 0);
         gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
-        gl4.glBindProgramPipeline(pipelineName[0]);
-        gl4.glBindTextureUnit(0, textureName[0]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glBindProgramPipeline(pipelineName.get(0));
+        gl4.glBindTextureUnit(0, textureName.get(0));
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
+        gl4.glBindVertexArray(vertexArrayName.get(0));
 
         gl4.glBufferAddressRangeNV(GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, Semantic.Attr.POSITION, address[0], vertexSize);
         gl4.glBufferAddressRangeNV(GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, Semantic.Attr.TEXCOORD, address[0] + Vec2.SIZE,
@@ -258,11 +261,15 @@ public class Gl_500_primitive_bindless_nv extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        BufferUtils.destroyDirectBuffer(bufferName);
         gl4.glDeleteProgram(programName);
-        gl4.glDeleteTextures(1, textureName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteProgramPipelines(1, pipelineName, 0);
+        gl4.glDeleteTextures(1, textureName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        gl4.glDeleteProgramPipelines(1, pipelineName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
 
         return true;
     }

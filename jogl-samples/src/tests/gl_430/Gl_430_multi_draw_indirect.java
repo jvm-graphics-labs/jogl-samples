@@ -254,7 +254,7 @@ public class Gl_430_multi_draw_indirect extends Test {
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName.get(Buffer.INDIRECT));
         IntBuffer commandsBuffer = GLBuffers.newDirectIntBuffer(5 * commands.length);
         for (DrawElementsIndirectCommand command : commands) {
-            commandsBuffer.put(command.toIntArray());
+            commandsBuffer.put(command.toIa_());
         }
         commandsBuffer.rewind();
         gl4.glBufferData(GL_DRAW_INDIRECT_BUFFER, commandsBuffer.capacity() * Integer.BYTES, commandsBuffer,
