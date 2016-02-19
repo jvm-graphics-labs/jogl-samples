@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import glm.vec._2.Vec2;
-import dev.Vec2i;
+import glm.vec._2.i.Vec2i;
 import framework.BufferUtils;
 import glm.vec._4.Vec4;
 

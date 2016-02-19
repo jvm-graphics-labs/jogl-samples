@@ -88,7 +88,7 @@ public class Gl_400_draw_indirect extends Test {
             this.reservedMustBeZero = reservedMustBeZero;
         }
 
-        public final int SIZEOF = 5 * Integer.BYTES;
+        public final int SIZE = 5 * Integer.BYTES;
 
         public int[] toIa_() {
             return new int[]{count, primCount, firstIndex, baseVertex, reservedMustBeZero};
@@ -162,7 +162,7 @@ public class Gl_400_draw_indirect extends Test {
         gl4.glGenBuffers(1, indirectBufferName, 0);
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBufferName[0]);
         IntBuffer commandBuffer = GLBuffers.newDirectIntBuffer(command.toIa_());
-        gl4.glBufferData(GL_DRAW_INDIRECT_BUFFER, command.SIZEOF, commandBuffer, GL_STATIC_READ);
+        gl4.glBufferData(GL_DRAW_INDIRECT_BUFFER, command.SIZE, commandBuffer, GL_STATIC_READ);
         BufferUtils.destroyDirectBuffer(commandBuffer);
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 

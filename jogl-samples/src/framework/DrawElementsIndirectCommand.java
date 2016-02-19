@@ -11,7 +11,7 @@ package framework;
  */
 public class DrawElementsIndirectCommand {
 
-    public static final int SIZEOF = 5 * Integer.BYTES;
+    public static final int SIZE = 5 * Integer.BYTES;
     
     public int primitiveCount;
     public int instanceCount;

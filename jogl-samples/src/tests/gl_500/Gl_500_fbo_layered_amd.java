@@ -7,7 +7,7 @@ package tests.gl_500;
 
 import com.jogamp.opengl.GL;
 import com.jogamp.opengl.GL4;
-import dev.Vec2i;
+import glm.vec._2.i.Vec2i;
 import framework.Profile;
 import framework.Test;
 

@@ -14,7 +14,7 @@ import com.jogamp.opengl.util.glsl.ShaderProgram;
 import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._2.Vec2;
-import dev.Vec2i;
+import glm.vec._2.i.Vec2i;
 import glm.vec._3.Vec3;
 import glm.vec._4.Vec4;
 import framework.BufferUtils;
@@ -434,7 +434,7 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
         for (int i = 0; i < indirectBufferCount; ++i) {
             gl4.glViewportIndexedfv(0, viewport[i].toFA_(), 0);
             gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i],
-                    DrawElementsIndirectCommand.SIZEOF);
+                    DrawElementsIndirectCommand.SIZE);
         }
 
         return true;

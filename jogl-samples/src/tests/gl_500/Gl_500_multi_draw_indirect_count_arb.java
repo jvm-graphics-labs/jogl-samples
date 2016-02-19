@@ -14,7 +14,7 @@ import com.jogamp.opengl.util.glsl.ShaderProgram;
 import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._2.Vec2;
-import dev.Vec2i;
+import glm.vec._2.i.Vec2i;
 import glm.vec._4.Vec4;
 import framework.BufferUtils;
 import framework.Caps;
@@ -245,7 +245,7 @@ public class Gl_500_multi_draw_indirect_count_arb extends Test {
          * Critical, I forgot once to rewing the buffer, the driver video crashed.
          */
         commandsBuffer.rewind();
-        gl4.glBufferData(GL_DRAW_INDIRECT_BUFFER, DrawElementsIndirectCommand.SIZEOF * commands.length, commandsBuffer,
+        gl4.glBufferData(GL_DRAW_INDIRECT_BUFFER, DrawElementsIndirectCommand.SIZE * commands.length, commandsBuffer,
                 GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
         BufferUtils.destroyDirectBuffer(commandsBuffer);
@@ -435,9 +435,9 @@ public class Gl_500_multi_draw_indirect_count_arb extends Test {
 
             gl4.glViewportIndexedfv(0, viewport[i].toFA_(), 0);
             gl4.glMultiDrawElementsIndirectCountARB(GL_TRIANGLES, GL_UNSIGNED_SHORT,
-                    DrawElementsIndirectCommand.SIZEOF * drawOffset[i], // Offset in the indirect draw buffer
+                    DrawElementsIndirectCommand.SIZE * drawOffset[i], // Offset in the indirect draw buffer
                     drawCount[i], // Offset in the paramter buffer
-                    4, DrawElementsIndirectCommand.SIZEOF);
+                    4, DrawElementsIndirectCommand.SIZE);
         }
 
         return true;

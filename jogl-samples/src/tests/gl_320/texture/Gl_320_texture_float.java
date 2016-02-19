@@ -19,7 +19,7 @@ import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
-import dev.Vec2i;
+import glm.vec._2.i.Vec2i;
 import framework.BufferUtils;
 import glm.mat._4.Mat4;
 import glm.vec._2.Vec2;

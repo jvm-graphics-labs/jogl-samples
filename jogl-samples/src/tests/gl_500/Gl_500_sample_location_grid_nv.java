@@ -5,24 +5,39 @@
  */
 package tests.gl_500;
 
+import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_ELEMENT_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_FLOAT;
+import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
+import static com.jogamp.opengl.GL.GL_NEAREST;
+import static com.jogamp.opengl.GL.GL_RGBA8;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MAG_FILTER;
+import static com.jogamp.opengl.GL.GL_TEXTURE_MIN_FILTER;
 import static com.jogamp.opengl.GL.GL_TRUE;
 import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER_BIT;
 import static com.jogamp.opengl.GL2ES2.GL_PROGRAM_SEPARABLE;
+import static com.jogamp.opengl.GL2ES2.GL_TEXTURE_2D_MULTISAMPLE;
 import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
-import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER_BIT;
-import static com.jogamp.opengl.GL2ES3.GL_GEOMETRY_SHADER_BIT;
-import static com.jogamp.opengl.GL3ES3.GL_GEOMETRY_SHADER;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_BASE_LEVEL;
+import static com.jogamp.opengl.GL2ES3.GL_TEXTURE_MAX_LEVEL;
+import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
+import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT;
 import com.jogamp.opengl.GL4;
+import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import glm.mat._4.Mat4;
 import glm.vec._2.Vec2;
-import dev.Vec4u8;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
-import glf.Vertex_v2fc4ub;
+import glf.Vertex_v2fv2f;
+import glm.vec._2.i.Vec2i;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.ShortBuffer;
 
 /**
  *
@@ -49,7 +64,7 @@ public class Gl_500_sample_location_grid_nv extends Test {
         -1.0f, -1.0f,/**/ 0.0f, 1.0f,
         +1.0f, -1.0f,/**/ 1.0f, 1.0f,
         +1.0f, +1.0f,/**/ 1.0f, 0.0f
-        -1.0f, +1.0f,/**/ 0.0f, 0.0f};
+        - 1.0f, +1.0f,/**/ 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -98,17 +113,22 @@ public class Gl_500_sample_location_grid_nv extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX],
-            framebufferName = new int[Framebuffer.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(Program.MAX),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), textureName = GLBuffers.newDirectIntBuffer(Texture.MAX),
+            framebufferName = GLBuffers.newDirectIntBuffer(Framebuffer.MAX);
+    private int[] programName = new int[Program.MAX], uniformDiffuse = new int[Program.MAX];
     private int vertexCount, framebufferScale = 3, uniformTransform;
-    
+    /**
+     * https://jogamp.org/bugzilla/show_bug.cgi?id=1287
+     */
+    private boolean bug1287 = true;
+
     private boolean initProgram(GL4 gl4) {
 
         boolean validated = true;
 
         ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
-        
+
         if (validated) {
 
             shaderCodes[Shader.VERT_TEXTURE] = ShaderCode.create(gl4, GL_VERTEX_SHADER,
@@ -125,14 +145,14 @@ public class Gl_500_sample_location_grid_nv extends Test {
 
             shaderProgram.add(shaderCodes[Shader.VERT_TEXTURE]);
             shaderProgram.add(shaderCodes[Shader.FRAG_TEXTURE]);
-            
+
             gl4.glBindAttribLocation(programName[Program.TEXTURE], Semantic.Attr.POSITION, "Position");
             gl4.glBindAttribLocation(programName[Program.TEXTURE], Semantic.Attr.TEXCOORD, "Texcoord");
             gl4.glBindFragDataLocation(programName[Program.TEXTURE], Semantic.Frag.COLOR, "Color");
-            
+
             shaderProgram.link(gl4, System.out);
         }
-        
+
         if (validated) {
 
             shaderCodes[Shader.VERT_SPLASH] = ShaderCode.create(gl4, GL_VERTEX_SHADER,
@@ -149,9 +169,9 @@ public class Gl_500_sample_location_grid_nv extends Test {
 
             shaderProgram.add(shaderCodes[Shader.VERT_SPLASH]);
             shaderProgram.add(shaderCodes[Shader.FRAG_SPLASH]);
-            
+
             gl4.glBindFragDataLocation(programName[Program.SPLASH], Semantic.Frag.COLOR, "Color");
-            
+
             shaderProgram.link(gl4, System.out);
         }
 
@@ -171,25 +191,150 @@ public class Gl_500_sample_location_grid_nv extends Test {
 
         return validated & checkError(gl4, "initProgram");
     }
-    
-    private boolean initBuffer(GL4 gl4)	{
-        
-//		int[] uniformBufferOffset={0};
-//		gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset,0);
-//		int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
-//
-//		Vec2[] data=new Vec2[36];
-//		for(int i = 0; i < data.length; ++i)		{
-//			float angle = (float)Math.PI * 2.0f * i / data.length;
-//			data[i] = new Vec2((float)Math.sin(angle), (float)Math.cos(angle)).normalize();
-//		}
-//		vertexCount = 18;//static_cast<GLsizei>(Data.size() - 8);
-//
-//		gl4.glCreateBuffers(buffer::MAX, &BufferName[0]);
-//		gl4.glNamedBufferStorage(BufferName[buffer::ELEMENT], ElementSize, ElementData, 0);
-//		gl4.glNamedBufferStorage(BufferName[buffer::VERTEX], data.size() * sizeof(glm::vec2), &data[0], 0);
-//		gl4.glNamedBufferStorage(BufferName[buffer::TRANSFORM], uniformBlockSize, nullptr, GL_MAP_WRITE_BIT);
 
+    private boolean initBuffer(GL4 gl4) {
+
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
+
+        Vec2[] data = new Vec2[36];
+        for (int i = 0; i < data.length; ++i) {
+            float angle = (float) Math.PI * 2.0f * i / data.length;
+            data[i] = new Vec2((float) Math.sin(angle), (float) Math.cos(angle)).normalize();
+        }
+        vertexCount = 18;//static_cast<GLsizei>(Data.size() - 8);
+
+        gl4.glCreateBuffers(Buffer.MAX, bufferName);
+
+        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        FloatBuffer dataBuffer = GLBuffers.newDirectFloatBuffer(data.length * Vec2.SIZE);
+        for (Vec2 data1 : data) {
+            dataBuffer.put(data1.x).put(data1.y);
+        }
+        dataBuffer.rewind();
+
+        if (bug1287) {
+
+            gl4.glNamedBufferStorage(bufferName.get(Buffer.ELEMENT), elementSize, elementBuffer, 0);
+            gl4.glNamedBufferStorage(bufferName.get(Buffer.VERTEX), data.length * Vec2.SIZE, dataBuffer, 0);
+            gl4.glNamedBufferStorage(bufferName.get(Buffer.TRANSFORM), uniformBlockSize, null, GL_MAP_WRITE_BIT);
+
+        } else {
+
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
+            gl4.glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, 0);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
+            gl4.glBufferStorage(GL_ARRAY_BUFFER, vertexSize, dataBuffer, 0);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
+            gl4.glBufferStorage(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_MAP_WRITE_BIT);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+
+        return true;
+    }
+
+    private boolean initTexture(GL4 gl4) {
+
+        boolean validated = true;
+
+        Vec2i windowSize_ = new Vec2i(this.windowSize).shiftR(framebufferScale);
+
+        textureName.position(Texture.COLORBUFFER);
+        gl4.glCreateTextures(GL_TEXTURE_2D, 1, textureName);
+        gl4.glTextureParameteri(textureName.get(Texture.COLORBUFFER), GL_TEXTURE_BASE_LEVEL, 0);
+        gl4.glTextureParameteri(textureName.get(Texture.COLORBUFFER), GL_TEXTURE_MAX_LEVEL, 0);
+        gl4.glTextureParameteri(textureName.get(Texture.COLORBUFFER), GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gl4.glTextureParameteri(textureName.get(Texture.COLORBUFFER), GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        gl4.glTextureStorage2D(textureName.get(Texture.COLORBUFFER), 1, GL_RGBA8, windowSize_.x, windowSize_.y);
+
+        textureName.position(Texture.RENDERBUFFER);
+        gl4.glCreateTextures(GL_TEXTURE_2D_MULTISAMPLE, 1, textureName);
+        gl4.glTextureParameteri(textureName.get(Texture.RENDERBUFFER), GL_TEXTURE_BASE_LEVEL, 0);
+        gl4.glTextureParameteri(textureName.get(Texture.RENDERBUFFER), GL_TEXTURE_MAX_LEVEL, 0);
+        gl4.glTextureStorage2DMultisample(textureName.get(Texture.RENDERBUFFER), 4, GL_RGBA8, windowSize_.x,
+                windowSize_.y, true);
+
+        textureName.rewind();
+
+        return validated;
+    }
+
+    private boolean initVertexArray(GL4 gl4) {
+
+        gl4.glCreateVertexArrays(Program.MAX, vertexArrayName);
+
+        gl4.glVertexArrayAttribBinding(vertexArrayName.get(Program.TEXTURE), Semantic.Attr.POSITION, 0);
+        gl4.glVertexArrayAttribFormat(vertexArrayName.get(Program.TEXTURE), Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0);
+        gl4.glEnableVertexArrayAttrib(vertexArrayName.get(Program.TEXTURE), Semantic.Attr.POSITION);
+
+        gl4.glVertexArrayAttribBinding(vertexArrayName.get(Program.TEXTURE), Semantic.Attr.TEXCOORD, 0);
+        gl4.glVertexArrayAttribFormat(vertexArrayName.get(Program.TEXTURE), Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false,
+                Vec2.SIZE);
+        gl4.glEnableVertexArrayAttrib(vertexArrayName.get(Program.TEXTURE), Semantic.Attr.TEXCOORD);
+
+        gl4.glVertexArrayElementBuffer(vertexArrayName.get(Program.TEXTURE), bufferName.get(Buffer.ELEMENT));
+        gl4.glVertexArrayVertexBuffer(vertexArrayName.get(Program.TEXTURE), 0, bufferName.get(Buffer.VERTEX), 0,
+                Vertex_v2fv2f.SIZE);
+
+        return true;
+    }
+    
+    private boolean initFramebuffer(GL4 gl4)	{
+        
+//		Vec2[] sampleLocations = new ;
+//
+//		static glm::vec2 SamplesPositions16[] =
+//		{
+//			glm::vec2( 1.f,  0.f) / 16.f,
+//			glm::vec2( 4.f,  1.f) / 16.f,
+//			glm::vec2( 3.f,  6.f) / 16.f,
+//			glm::vec2( 7.f,  5.f) / 16.f,
+//			glm::vec2( 8.f,  1.f) / 16.f,
+//			glm::vec2(11.f,  3.f) / 16.f,
+//			glm::vec2(12.f,  7.f) / 16.f,
+//			glm::vec2(15.f,  4.f) / 16.f,
+//			glm::vec2( 0.f,  8.f) / 16.f,
+//			glm::vec2( 5.f, 10.f) / 16.f,
+//			glm::vec2( 2.f, 12.f) / 16.f,
+//			glm::vec2( 6.f, 14.f) / 16.f,
+//			glm::vec2( 9.f,  9.f) / 16.f,
+//			glm::vec2(13.f, 11.f) / 16.f,
+//			glm::vec2(10.f, 13.f) / 16.f,
+//			glm::vec2(14.f, 15.f) / 16.f
+//		};
+//
+//		GLint SubPixelBits(0);
+//		glm::ivec2 PixelGrid(0);
+//		GLint TableSize(0);
+//
+//		glGetIntegerv(GL_SAMPLE_LOCATION_SUBPIXEL_BITS_NV, &SubPixelBits);
+//		glGetIntegerv(GL_SAMPLE_LOCATION_PIXEL_GRID_WIDTH_NV, &PixelGrid.x);
+//		glGetIntegerv(GL_SAMPLE_LOCATION_PIXEL_GRID_HEIGHT_NV, &PixelGrid.y);
+//		glGetIntegerv(GL_PROGRAMMABLE_SAMPLE_LOCATION_TABLE_SIZE_NV, &TableSize);
+//
+//		glGenFramebuffers(framebuffer::MAX, &FramebufferName[0]);
+//
+//		for(int FramebufferIndex = 0; FramebufferIndex < 4; ++FramebufferIndex)
+//		{
+//			glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName[framebuffer::RENDERBUFFER0 + FramebufferIndex]);
+//			glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, TextureName[texture::RENDERBUFFER], 0);
+//			glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_PROGRAMMABLE_SAMPLE_LOCATIONS_NV, FramebufferIndex == 0 ? GL_FALSE : GL_TRUE);
+//			glFramebufferParameteri(GL_FRAMEBUFFER, GL_FRAMEBUFFER_SAMPLE_LOCATION_PIXEL_GRID_NV, GL_TRUE);
+//			gl4.glFramebufferSampleLocationsfvNV(GL_FRAMEBUFFER, 0, TableSize, &SamplesPositions16[0][0]);
+//		}
+//
+//		glBindFramebuffer(GL_FRAMEBUFFER, FramebufferName[texture::COLORBUFFER]);
+//		glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, TextureName[texture::COLORBUFFER], 0);
+//
+//		for(int FramebufferIndex = 0; FramebufferIndex < framebuffer::MAX; ++FramebufferIndex)
+//			if(!this->checkFramebuffer(FramebufferName[FramebufferIndex]))
+//				return false;
+//
+//		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		return true;
 	}
 }

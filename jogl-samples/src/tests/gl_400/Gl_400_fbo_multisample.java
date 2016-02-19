@@ -22,7 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
 import glm.vec._2.Vec2;
-import dev.Vec2i;
+import glm.vec._2.i.Vec2i;
 import framework.BufferUtils;
 import glf.Vertex_v2fv2f;
 import glm.vec._3.Vec3;

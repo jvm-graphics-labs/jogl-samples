@@ -15,7 +15,6 @@ import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._3.Vec3;
 import framework.BufferUtils;
-import framework.Glm;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
@@ -206,7 +205,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
 
         int[] uniformBufferOffsetAlignment = {0};
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffsetAlignment, 0);
-        uniformBufferOffsetAlignment[0] = Glm.ceilMultiple(Mat4.SIZE, uniformBufferOffsetAlignment[0]);
+        uniformBufferOffsetAlignment[0] = glm.ceilMultiple(Mat4.SIZE, uniformBufferOffsetAlignment[0]);
 
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBufferOffsetAlignment[0] * 2, null, GL_DYNAMIC_DRAW);
@@ -321,7 +320,7 @@ public class Gl_320_fbo_depth_stencil extends Test {
         int[] uniformBufferOffsetAlignment = {0};
         {
             gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffsetAlignment, 0);
-            uniformBufferOffsetAlignment[0] = Glm.ceilMultiple(Mat4.SIZE, uniformBufferOffsetAlignment[0]);
+            uniformBufferOffsetAlignment[0] = glm.ceilMultiple(Mat4.SIZE, uniformBufferOffsetAlignment[0]);
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, uniformBufferOffsetAlignment[0] * 2,

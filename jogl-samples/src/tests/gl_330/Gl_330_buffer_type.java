@@ -11,7 +11,7 @@ import static com.jogamp.opengl.GL3ES3.*;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import dev.Vec2i;
+import glm.vec._2.i.Vec2i;
 import dev.Vec2i8;
 import framework.BufferUtils;
 import glm.glm;

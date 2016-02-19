@@ -128,7 +128,7 @@ public class Gl_500_glsl_vote_arb extends Test {
         DrawElementsIndirectCommand command = new DrawElementsIndirectCommand(elementCount, 1, 0, 0, 0);
         IntBuffer commandBuffer = GLBuffers.newDirectIntBuffer(command.toIa_());
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName.get(Buffer.INDIRECT));
-        gl4.glBufferStorage(GL_DRAW_INDIRECT_BUFFER, DrawElementsIndirectCommand.SIZEOF, commandBuffer, 0);
+        gl4.glBufferStorage(GL_DRAW_INDIRECT_BUFFER, DrawElementsIndirectCommand.SIZE, commandBuffer, 0);
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
         BufferUtils.destroyDirectBuffer(elementBuffer);
@@ -245,7 +245,7 @@ public class Gl_500_glsl_vote_arb extends Test {
         gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName.get(Buffer.INDIRECT));
 
-        gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, 1, DrawElementsIndirectCommand.SIZEOF);
+        gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, 1, DrawElementsIndirectCommand.SIZE);
 
         return true;
     }

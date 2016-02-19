@@ -12,7 +12,6 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
-import dev.Vec2i;
 import framework.BufferUtils;
 import glm.mat._4.Mat4;
 import glm.vec._2.Vec2;
@@ -252,9 +251,8 @@ public class Gl_500_conservative_raster_nv extends Test {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
 
-            // TODO vec2u divide
-//            Vec2i framebufferSize = windowSize() / 16u);
-            Vec2i framebufferSize = new Vec2i(windowSize.x / 16, windowSize.y / 16);
+            
+            Vec2u framebufferSize = new Vec2u(windowSize).div(16);
 
             gl4.glCreateTextures(GL_TEXTURE_2D_ARRAY, Texture.MAX, textureName);
             gl4.glTextureParameteri(textureName.get(0), GL_TEXTURE_BASE_LEVEL, 0);

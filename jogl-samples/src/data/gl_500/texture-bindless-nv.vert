@@ -1,7 +1,11 @@
 #version 420 core
+#extension GL_NV_bindless_texture : require
 
-#define DIFFUSE			0
-#define FRAG_COLOR		0
+#define POSITION	0
+#define COLOR		3
+#define TEXCOORD	4
+#define FRAG_COLOR	0
+#define DIFFUSE		0
 
 precision highp float;
 precision highp int;
@@ -18,6 +22,5 @@ layout(location = FRAG_COLOR, index = 0) out vec4 Color;
 
 void main()
 {
-	Color = texture(Diffuse, vec3(In.Texcoord.st, 0.0));
-        //Color = vec4(0.5);
+	Color = texture(Diffuse, vec3(In.Texcoord.st, 0));
 }

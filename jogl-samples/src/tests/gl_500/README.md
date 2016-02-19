@@ -1,14 +1,14 @@
 # OpenGL 5 Highlights
 
-### [gl-500-blend-op-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_blend_op_amd.java): todo
+### [gl-500-blend-op-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_blend_op_amd.java): todo I don't have ext
 
 * [`GL_AMD_blend_minmax_factor`](https://www.opengl.org/registry/specs/AMD/blend_minmax_factor.txt)
 
-### [gl-500-buffer-pinned-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_buffer_pinned_amd.java): todo
+### [gl-500-buffer-pinned-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_buffer_pinned_amd.java): todo I don't have ext
 
 * [`GL_AMD_pinned_memory`](https://www.opengl.org/registry/specs/AMD/pinned_memory.txt)
 
-### [gl-500-buffer-sparse-arb](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_buffer_sparse_arb.java): todo
+### [gl-500-buffer-sparse-arb](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_buffer_sparse_arb.java): todo I don't have ext
 
 * The ARB_sparse_texture extension adds to GL a mechanism to decouple the virtual and physical storage requirements of 
 textures and allows an application to create partially populated textures that would over-subscribe available graphics memory 
@@ -40,20 +40,20 @@ sparse texture.
 
 * Direct State Access
 
-### [gl-500-fbo-layered-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_fbo_layered_amd.java): todo
+### [gl-500-fbo-layered-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_fbo_layered_amd.java): todo I don't have ext
 
 * `GL_AMD_vertex_shader_viewport_index`
 * `GL_AMD_vertex_shader_layer`
 
-### [gl-500-fbo-layered-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_fbo_layered_nv.java): todo
+### [gl-500-fbo-layered-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_fbo_layered_nv.java): todo I don't have ext
 
 * `GL_NV_viewport_array2`
 
-### [gl-500-fbo-multisample-position-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_multisample_position_amd.java): todo
+### [gl-500-fbo-multisample-position-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_multisample_position_amd.java): todo I don't have ext
 
 * `GL_AMD_sample_positions`
 
-### [gl-500-fill-rectangle-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_fill_rectangle_nv.java): todo, missing ext
+### [gl-500-fill-rectangle-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_fill_rectangle_nv.java): todo, I don't have ext
 
 * `GL_NV_fill_rectangle`
 
@@ -97,6 +97,11 @@ complex function iteratively by starting with an approximation of the result and
 input values may require a small number of iterations to generate an accurate result (`do_fast_path`) while others require 
 a larger number (`do_general_path`). In another example, shader code might want to evaluate a complex function 
 (`do_general_path`) that can be greatly simplified when assuming a specific value for one of its inputs (`do_fast_path`).
+* loads a diffuse texture and if all the fragment shader invocations of the same group satisfies this condition:
+```glsl
+gl_FragCoord.y / gl_FragCoord.x < 3.0 / 4.0
+```
+then the level 5 (mipmap), instead of the base one (0), will be choosen.
 
 ### [gl-500-multi-draw-indirect-arb](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_multi_draw_indirect_arb.java): toFix
 
@@ -111,3 +116,80 @@ a larger number (`do_general_path`). In another example, shader code might want 
 * `GL_NV_shader_buffer_load`
 * `GL_NV_vertex_buffer_unified_memory`
 * [heavy performance issues on jogl](https://jogamp.org/bugzilla/show_bug.cgi?id=1167)
+
+### [gl-500-primitive-shading-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_primitive_shading_nv.java): toFinish, I dont have ext
+
+* `GL_NV_geometry_shader_passthrough`
+
+### [gl-500-sample-location-grid-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_sample_location_grid_nv.java): toFinish, jogl has to implement it yet
+
+* `GL_NV_sample_locations`
+* [jogl bug 1292](https://jogamp.org/bugzilla/show_bug.cgi?id=1292)
+
+### [gl-500-sample-location-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_sample_location_nv.java): toFinish, jogl has to implement it yet
+
+* same
+* `GL_NV_sample_locations`
+* `GL_NV_internalformat_sample_query`
+
+### [gl-500-shader-blend-intel](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_shader_blend_intel.java): todo, I dont have ext
+
+* `GL_INTEL_fragment_shader_ordering`
+
+### [gl-500-shader-blend-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_shader_blend_nv.java): todo, I dont have ext
+
+* `GL_NV_fragment_shader_interlock`
+
+### [gl-500-shader-group-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_shader_group_nv.java):
+
+* ? surely magic
+* [`NV_shader_thread_group`](https://www.opengl.org/registry/specs/NV/shader_thread_group.txt)
+* `in bool gl_HelperInvocation`
+
+### [gl-500-shader-invocation-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_shader_invocation_nv.java):
+
+* [`NV_shader_thread_group`](https://www.opengl.org/registry/specs/NV/shader_thread_group.txt)
+* renders an imaged computing the fragment color based on the id of the warp and on the SM (Streaming Multiprocessor)
+* `gl_WarpIDNV` holds the warp id of the executing thread. This  variable is in the range [0, `gl_WarpsPerSMNV - 1`], 
+where `gl_WarpsPerSMNV` is the maximum number of warp executing on a SM.
+* `gl_SMIDNV` holds the SM id of the executing thread. This variable is in the range [0, `gl_SMCountNV - 1`], where 
+`gl_SMCountNV` is the number of SM on the GPU.
+
+### [gl-500-test-depth-clamp-separate-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_test_depth_clamp_separate_amd.java): todo, I don't have ext
+
+*
+
+### [gl-500-texture-bindless-arb](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_texture_bindless_arb.java): broken
+
+*
+
+### [gl-500-texture-bindless-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_texture_bindless_nv.java): broken
+
+*
+
+### [gl-500-texture-cube-arb](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_texture_cube_arb.java): 
+
+* In unextended OpenGL, cube maps are treated as sets of six, independent texture images. Once a face is selected from the 
+set, it is treated exactly as any other two-dimensional texture would be. When sampling linearly from the texture, all of 
+the individual texels that would be used to to create the final, bilinear sample values are taken from the same cube face. 
+The normal, two-dimensional texture coordinate wrapping modes are honored. This sometimes causes seams to appear in cube maps.
+
+`ARB_seamless_cube_map` (and subsequently, OpenGL 3.2) addresses this issue by providing a mechanism whereby an 
+implementation could take each of the taps of a bilinear sample from a different face, spanning face boundaries and 
+providing seamless filtering from cube map textures. However, in `ARB_seamless_cube_map`, this feature was exposed as a 
+global state, affecting all bound cube map textures. It was not possible to mix seamless and per-face cube map sampling 
+modes during sampling. Furthermore, if an application included cube maps that were meant to be sampled seamlessly and 
+non-seamlessly, it would have to track this state and enable or disable seamless cube map sampling as needed.
+
+[`ARB_seamless_cubemap_per_texture`](https://www.opengl.org/registry/specs/ARB/seamless_cubemap_per_texture.txt) addresses 
+this issue and provides an orthogonal method for allowing an implementation to provide a per-texture setting for enabling 
+seamless sampling from cube maps.
+* `GL_ARB_shader_storage_buffer_object`
+* `GL_ARB_buffer_storage`
+* `GL_ARB_multi_bind`
+* generates a cube texture and two sampler, one seamless one non-seamless. Then it renders the seamless on the left half
+side of the screen and the non-seamless one on the left side.
+
+### [gl-500-texture-spars-arb](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_texture_spars_arb.java): broken
+
+* 

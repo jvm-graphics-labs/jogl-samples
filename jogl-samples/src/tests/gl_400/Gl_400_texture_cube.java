@@ -67,7 +67,7 @@ public class Gl_400_texture_cube extends Test {
         public Mat4 mv;
         public Vec3 camera;
 
-        public static final int SIZEOF = 2 * Mat4.SIZE + Vec3.SIZE;
+        public static final int SIZE = 2 * Mat4.SIZE + Vec3.SIZE;
 
         public Transform(Mat4 mvp, Mat4 mv, Vec3 camera) {
             this.mvp = mvp;
@@ -165,7 +165,7 @@ public class Gl_400_texture_cube extends Test {
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Transform.SIZEOF, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Transform.SIZE, uniformBufferOffset[0]);
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
@@ -246,7 +246,7 @@ public class Gl_400_texture_cube extends Test {
         {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
             ByteBuffer pointer = gl4.glMapBufferRange(
-                    GL_UNIFORM_BUFFER, 0, Transform.SIZEOF,
+                    GL_UNIFORM_BUFFER, 0, Transform.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 1000.0f);

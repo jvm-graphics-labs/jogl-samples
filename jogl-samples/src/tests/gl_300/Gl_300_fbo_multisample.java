@@ -26,7 +26,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Gl;
 import jgli.Load;
-import dev.Vec2i;
+import glm.vec._2.i.Vec2i;
 import glm.vec._4.Vec4;
 import glf.Vertex_v2fv2f;
 

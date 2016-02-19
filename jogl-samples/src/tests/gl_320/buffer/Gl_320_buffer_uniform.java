@@ -65,7 +65,7 @@ public class Gl_320_buffer_uniform extends Test {
     private class Light {
 
         public Vec3 position;
-        public static final int SIZEOF = Vec3.SIZE;
+        public static final int SIZE = Vec3.SIZE;
 
         public Light(Vec3 position) {
             this.position = position;
@@ -84,7 +84,7 @@ public class Gl_320_buffer_uniform extends Test {
         public float padding2;
         public Vec3 specular;
         public float shininess;
-        public static final int SIZEOF = 3 * Vec3.SIZE + 3 * Float.BYTES;
+        public static final int SIZE = 3 * Vec3.SIZE + 3 * Float.BYTES;
 
         public Material(Vec3 ambient, Vec3 diffuse, Vec3 specular, float shininess) {
             this.ambient = ambient;
@@ -232,7 +232,7 @@ public class Gl_320_buffer_uniform extends Test {
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_PASS]);
             FloatBuffer lightBuffer = GLBuffers.newDirectFloatBuffer(light.toFa_());
-            gl3.glBufferData(GL_UNIFORM_BUFFER, Light.SIZEOF, lightBuffer, GL_STATIC_DRAW);
+            gl3.glBufferData(GL_UNIFORM_BUFFER, Light.SIZE, lightBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(lightBuffer);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
@@ -243,7 +243,7 @@ public class Gl_320_buffer_uniform extends Test {
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.PER_SCENE]);
             FloatBuffer materialBuffer = GLBuffers.newDirectFloatBuffer(material.toFloatArray());
-            gl3.glBufferData(GL_UNIFORM_BUFFER, Material.SIZEOF, materialBuffer, GL_STATIC_DRAW);
+            gl3.glBufferData(GL_UNIFORM_BUFFER, Material.SIZE, materialBuffer, GL_STATIC_DRAW);
             BufferUtils.destroyDirectBuffer(materialBuffer);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }

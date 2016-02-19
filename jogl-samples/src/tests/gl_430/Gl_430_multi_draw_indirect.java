@@ -27,7 +27,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
 import glm.vec._2.Vec2;
-import dev.Vec2i;
+import glm.vec._2.i.Vec2i;
 import glf.Vertex_v2fv2f;
 import glm.vec._3.Vec3;
 import jglm.Vec4i;
@@ -453,7 +453,7 @@ public class Gl_430_multi_draw_indirect extends Test {
 //            buffer.asIntBuffer().put(0).rewind();
 //            buffer.rewind();
             gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i],
-                    DrawElementsIndirectCommand.SIZEOF);
+                    DrawElementsIndirectCommand.SIZE);
         }
 
         return true;
