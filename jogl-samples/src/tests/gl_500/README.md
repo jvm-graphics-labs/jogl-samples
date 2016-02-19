@@ -106,7 +106,8 @@ a larger number (`do_general_path`). In another example, shader code might want 
 
 * [jogl bug 1288](https://jogamp.org/bugzilla/show_bug.cgi?id=1288)
 
-### [gl-500-primitive-blindless-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_primitive_blindless_nv.java): jogl bug
+### [gl-500-primitive-blindless-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_500/Gl_500_primitive_blindless_nv.java): jogl issue
 
 * `GL_NV_shader_buffer_load`
 * `GL_NV_vertex_buffer_unified_memory`
+* [heavy performance issues on jogl](https://jogamp.org/bugzilla/show_bug.cgi?id=1167)

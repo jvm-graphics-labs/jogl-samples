@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
@@ -66,7 +67,7 @@ public class Gl_500_primitive_bindless_nv extends Test {
             vertexArrayName = GLBuffers.newDirectIntBuffer(1), pipelineName = GLBuffers.newDirectIntBuffer(1),
             textureName = GLBuffers.newDirectIntBuffer(1);
     private int programName;
-    private long[] address = {0};
+    private LongBuffer address = GLBuffers.newDirectLongBuffer(1);
 
     @Override
     protected boolean begin(GL gl) {
@@ -143,7 +144,7 @@ public class Gl_500_primitive_bindless_nv extends Test {
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
-        gl4.glGetBufferParameterui64vNV(GL_ARRAY_BUFFER, GL_BUFFER_GPU_ADDRESS_NV, address, 0);
+        gl4.glGetBufferParameterui64vNV(GL_ARRAY_BUFFER, GL_BUFFER_GPU_ADDRESS_NV, address);
         gl4.glMakeBufferResidentNV(GL_ARRAY_BUFFER, GL_READ_ONLY);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -247,8 +248,8 @@ public class Gl_500_primitive_bindless_nv extends Test {
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
         gl4.glBindVertexArray(vertexArrayName.get(0));
 
-        gl4.glBufferAddressRangeNV(GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, Semantic.Attr.POSITION, address[0], vertexSize);
-        gl4.glBufferAddressRangeNV(GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, Semantic.Attr.TEXCOORD, address[0] + Vec2.SIZE,
+        gl4.glBufferAddressRangeNV(GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, Semantic.Attr.POSITION, address.get(0), vertexSize);
+        gl4.glBufferAddressRangeNV(GL_VERTEX_ATTRIB_ARRAY_ADDRESS_NV, Semantic.Attr.TEXCOORD, address.get(0) + Vec2.SIZE,
                 vertexSize - Vec2.SIZE);
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, vertexCount, 1, 0);
@@ -270,6 +271,8 @@ public class Gl_500_primitive_bindless_nv extends Test {
         BufferUtils.destroyDirectBuffer(vertexArrayName);
         gl4.glDeleteProgramPipelines(1, pipelineName);
         BufferUtils.destroyDirectBuffer(pipelineName);
+        
+        BufferUtils.destroyDirectBuffer(address);
 
         return true;
     }

@@ -66,13 +66,6 @@ public class Gl_500_direct_state_access_gtc extends Test {
         0, 1, 2,
         2, 3, 0};
 
-    private class Program {
-
-        public static final int VERTEX = 0;
-        public static final int FRAGMENT = 1;
-        public static final int MAX = 2;
-    }
-
     private class Framebuffer {
 
         public static final int RENDER = 0;
