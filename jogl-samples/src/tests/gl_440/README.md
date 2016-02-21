@@ -249,9 +249,9 @@ to use the layout `location` qualifier:
 ```glsl
 out block
 {
-   layout (lofation = 0) A a; // A is a structure
-   layout (lofation = LOCATION_OF_A) B b; // B is a structure
-   layout (lofation = LOCATION_OF_A + LOCATION_OF_B) C c; // C is a structure
+   layout (location = 0) A a; // A is a structure
+   layout (location = LOCATION_OF_A) B b; // B is a structure
+   layout (location = LOCATION_OF_A + LOCATION_OF_B) C c; // C is a structure
 } outB;
 
 // In the subsequent shader stage:
