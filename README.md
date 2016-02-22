@@ -24,4 +24,5 @@ The over 230 samples illustrate almost all OpenGL features ranging from ES 2.0 u
 
 
 Ps: Hello Triangle and Hello Texture have been moved into a stand-alone [project](https://github.com/elect86/helloTriangle)
+
 Pps: I need some amd volunteer to test the amd-only extensions :octocat:
