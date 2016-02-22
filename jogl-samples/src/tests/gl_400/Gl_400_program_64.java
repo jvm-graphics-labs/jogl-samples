@@ -12,7 +12,7 @@ import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import glm.glm;
-import glm.mat._4.Mat4d;
+import glm.mat._4.d.Mat4d;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
