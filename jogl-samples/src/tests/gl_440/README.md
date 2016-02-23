@@ -86,6 +86,7 @@ Example of a shader output interface matching by name:
 layout out vec4 A;
 layout out vec3 B;
 layout out float C;
+```
 Example of a shader input interface matching by name:
 ```glsl
 layout out vec4 A;
