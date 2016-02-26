@@ -68,7 +68,7 @@ new modes to BeginConditionalRender which invert the condition used to determine
  
 ### [gl-450-query-statistics-arb](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_query_statistic_arb.java):
 
-* [`GL_ARB_pipeline_statistics_query`](https://www.opengl.org/registry/specs/ARB/pipeline_statistics_query.txt] introduces 
+* [`GL_ARB_pipeline_statistics_query`](https://www.opengl.org/registry/specs/ARB/pipeline_statistics_query.txt) introduces 
 new query types that allow applications to get statistics information about different parts of the pipeline:
 
       * Number of vertices and primitives issued to the GL;
