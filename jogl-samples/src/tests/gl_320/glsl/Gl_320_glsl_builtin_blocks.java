@@ -115,6 +115,10 @@ public class Gl_320_glsl_builtin_blocks extends Test {
             gl3.glBindFragDataLocation(programName, Semantic.Frag.COLOR, "color");
 
             shaderProgram.link(gl3, System.out);
+            
+//            System.out.println("position: "+gl3.glGetAttribLocation(programName, "position"));
+//            System.out.println("texCoord: "+gl3.glGetAttribLocation(programName, "texCoord"));
+//            System.out.println("color: "+gl3.glGetFragDataLocation(programName, "color"));
         }
         if (validated) {
 
