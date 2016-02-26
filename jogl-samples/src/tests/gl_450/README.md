@@ -6,8 +6,9 @@
 
 ### [gl-450-clip-control](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_clip_control.java):
 
-*[`GL_ARB_clip_control`](https://www.opengl.org/registry/specs/ARB/clip_control.txt) provides additional clip control modes to configure how clip space is mapped to window space.  This extension's goal is to 1) allow OpenGL to effectively match Direct3D's coordinate system
-conventions, and 2) potentially improve the numerical precision of the Z coordinate mapping.
+*[`GL_ARB_clip_control`](https://www.opengl.org/registry/specs/ARB/clip_control.txt) provides additional clip control modes to configure how clip space is mapped to window space.  This extension's goal is to:
+   * allow OpenGL to effectively match Direct3D's coordinate system conventions
+   * potentially improve the numerical precision of the Z coordinate mapping.
 
 Developers interested in this functionality may be porting content from Direct3D to OpenGL and/or interested in improving the numerical accuracy of depth testing, particularly with floating-point depth buffers.
 
@@ -53,12 +54,6 @@ This new stage in the pipeline is added as part of the primitive clipping stage.
 
 * shit
 
-### [gl-450-fbo-multisample-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_fbo_multisample_explicit.java):
-
-* loads a diffuse texture and creates two fbo, one multisampled and one normal. It renders the diffuse texture in the 
-multisample buffer and then resolve to screen by picking only the first sample for the right half and an average of all
-the sample for the left half.
- 
 ### [gl-450-fbo-multisample-nv](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_fbo_multisample_explicit.java):
 
 * loads a diffuse texture and creates two fbo, one multisampled and one normal. It renders the diffuse texture in the 
