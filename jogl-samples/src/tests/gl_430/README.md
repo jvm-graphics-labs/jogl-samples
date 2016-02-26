@@ -47,7 +47,7 @@ should lead to less bugs on that side.
 evolutions that OpenGL has known for the past years. There is really no reason on platforms supporting it to keep using 
 `glGetError`. Using an API is only viable when it's practical to use it. `ARB_debug_output`  brings this level of viability to
 OpenGL. We can instantly figure out where an error happens and have a descriptive comment for the nature of the error. 
-OpenGL Insights includes a chapter called [ARB_debug_output: An Helping Hand for Desperate Developer](http://www.seas.upenn.edu/~pcozzi/OpenGLInsights/OpenGLInsights-ARB_debug_output.pdf]
+OpenGL Insights includes a chapter called [ARB_debug_output: An Helping Hand for Desperate Developer](http://www.seas.upenn.edu/~pcozzi/OpenGLInsights/OpenGLInsights-ARB_debug_output.pdf)
 by Antonio Remises Fernandes and Bruno Oliveira describing in details this extension and what we can expect from implementations.
 
 This extension didn't reach OpenGL core as it is. Instead it got promoted to [`KHR_debug`](https://www.opengl.org/registry/specs/KHR/debug.txt),

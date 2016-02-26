@@ -14,7 +14,7 @@
 
 ### [gl-320-glsl-input-struct](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/glsl/Gl_320_glsl_input_struct.java) :
 
-* glsl `struct` input
+* glsl `struct` input as vertex attribute input
 
 ### [gl-320-glsl-precision](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/glsl/Gl_320_glsl_precision.java) :
 
