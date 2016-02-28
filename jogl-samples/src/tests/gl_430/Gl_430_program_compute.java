@@ -192,16 +192,16 @@ public class Gl_430_program_compute extends Test {
         BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.INPUT));
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
-        gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer.rewind(), GL_STATIC_DRAW);
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
+        
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.INPUT));
+        gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.OUTPUT));
-        vertexBuffer.put(vertexData);
-        gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer.rewind(), GL_STATIC_COPY);
+        gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_COPY);
+        
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);        
         BufferUtils.destroyDirectBuffer(vertexBuffer);
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = {0};
         gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);

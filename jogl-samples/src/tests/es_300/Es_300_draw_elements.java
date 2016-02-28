@@ -55,7 +55,9 @@ public class Es_300_draw_elements extends Test {
         +1f, +1f,
         -1f, +1f};
 
-    private int[] vertexArrayName = {0}, arrayBufferName = {0}, elementBufferName = {0};
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            arrayBufferName = GLBuffers.newDirectIntBuffer(1),
+            elementBufferName = GLBuffers.newDirectIntBuffer(1);
     private int programName, uniformMvp, uniformDiffuse;
 
     public Es_300_draw_elements() {
@@ -147,31 +149,33 @@ public class Es_300_draw_elements extends Test {
 
     private boolean initBuffer(GL3ES3 gl3es3) {
 
-        gl3es3.glGenBuffers(1, arrayBufferName, 0);
-        gl3es3.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
+
+        gl3es3.glGenBuffers(1, arrayBufferName);
+        gl3es3.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName.get(0));
         gl3es3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl3es3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl3es3.glGenBuffers(1, elementBufferName, 0);
-        gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferName[0]);
-        IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
+        gl3es3.glGenBuffers(1, elementBufferName);
+        gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferName.get(0));
         gl3es3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(positionBuffer);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
 
         return checkError(gl3es3, "initBuffer");
     }
 
     private boolean initVertexArray(GL3ES3 gl3es3) {
 
-        gl3es3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3es3.glBindVertexArray(vertexArrayName[0]);
-        gl3es3.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
+        gl3es3.glGenVertexArrays(1, vertexArrayName);
+        gl3es3.glBindVertexArray(vertexArrayName.get(0));
+        gl3es3.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName.get(0));
         gl3es3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
         gl3es3.glBindBuffer(GL_ARRAY_BUFFER, 0);
-        gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferName[0]);
+        gl3es3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferName.get(0));
 
         gl3es3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
         gl3es3.glBindVertexArray(0);
@@ -206,7 +210,7 @@ public class Es_300_draw_elements extends Test {
         // Set the value of MVP uniform.
         gl3es3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
-        gl3es3.glBindVertexArray(vertexArrayName[0]);
+        gl3es3.glBindVertexArray(vertexArrayName.get(0));
 
         gl3es3.glDrawElements(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 0);
 
@@ -219,9 +223,14 @@ public class Es_300_draw_elements extends Test {
         GL3ES3 gl3es3 = (GL3ES3) gl;
 
         // Delete objects
-        gl3es3.glDeleteBuffers(1, arrayBufferName, 0);
-        gl3es3.glDeleteBuffers(1, elementBufferName, 0);
+        gl3es3.glDeleteBuffers(1, arrayBufferName);
+        gl3es3.glDeleteBuffers(1, elementBufferName);
+        gl3es3.glDeleteVertexArrays(1, vertexArrayName);
         gl3es3.glDeleteProgram(programName);
+        
+        BufferUtils.destroyDirectBuffer(arrayBufferName);
+        BufferUtils.destroyDirectBuffer(elementBufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return true;
     }

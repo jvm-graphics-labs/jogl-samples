@@ -19,6 +19,7 @@ import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 /**
@@ -50,12 +51,13 @@ public class Es_200_draw_elements extends Test {
     };
 
     private class Buffer {
-        private static final int VERTEX=0;
-        private static final int ELEMENT=1;
-        private static final int MAX=2;
+
+        private static final int VERTEX = 0;
+        private static final int ELEMENT = 1;
+        private static final int MAX = 2;
     }
 
-    private final int[] bufferName = new int[Buffer.MAX];
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX);
     private int programName, uniformMvp, uniformDiffuse;
 
     public Es_200_draw_elements() {
@@ -125,19 +127,22 @@ public class Es_200_draw_elements extends Test {
     }
 
     private boolean initBuffer(GL2ES2 gl2es2) {
-        gl2es2.glGenBuffers(bufferName.length, bufferName, 0);
 
-        gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+        gl2es2.glGenBuffers(Buffer.MAX, bufferName);
+
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        ShortBuffer shortBuffer = GLBuffers.newDirectShortBuffer(elementData);
+
+        gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl2es2.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl2es2.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl2es2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
-        ShortBuffer shortBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        gl2es2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl2es2.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, shortBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(shortBuffer);
         gl2es2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(positionBuffer);
+        BufferUtils.destroyDirectBuffer(shortBuffer);
 
         return checkError(gl2es2, "initBuffer");
     }
@@ -166,12 +171,12 @@ public class Es_200_draw_elements extends Test {
         // Set the value of MVP uniform.
         gl2es2.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
-        gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+        gl2es2.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         {
             gl2es2.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
         }
         gl2es2.glBindBuffer(GL_ARRAY_BUFFER, 0);
-        gl2es2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+        gl2es2.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
 
         gl2es2.glEnableVertexAttribArray(Semantic.Attr.POSITION);
         {
@@ -189,8 +194,10 @@ public class Es_200_draw_elements extends Test {
     protected boolean end(GL gl) {
         GL2ES2 gl2es2 = (GL2ES2) gl;
 
-        gl2es2.glDeleteBuffers(bufferName.length, bufferName, 0);
+        gl2es2.glDeleteBuffers(Buffer.MAX, bufferName);
         gl2es2.glDeleteProgram(programName);
+        
+        BufferUtils.destroyDirectBuffer(bufferName);
 
         return true;
     }
