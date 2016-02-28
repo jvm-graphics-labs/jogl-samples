@@ -22,6 +22,7 @@ The over 230 samples illustrate almost all OpenGL features ranging from ES 2.0 u
 * [gl-500](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/tests/gl_500)
 * [micro]
 
+Reminder, you need to add "-ea" in VM options in run config for the `assert`s to work
 
 Ps: Hello Triangle and Hello Texture have been moved into a stand-alone [project](https://github.com/elect86/helloTriangle)
 

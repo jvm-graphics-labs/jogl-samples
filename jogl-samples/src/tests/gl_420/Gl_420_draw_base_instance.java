@@ -44,14 +44,15 @@ public class Gl_420_draw_base_instance extends Test {
     private int elementCount = 7;
     private int elementSize = elementCount * Integer.BYTES;
     private int[] elementData = {
-        -1,
+        100, // will be skipped
         0, 1, 2,
         0, 2, 3};
 
-    private int vertexCount = 5;
+    private int vertexCount = 6;
     private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
-        +0.0f, +0.0f,
+        +0.0f, +0.0f, // will be skipper
+        +0.0f, +0.0f, // will be skipper
         -1.0f, -1.0f,
         +1.0f, -1.0f,
         +1.0f, +1.0f,
@@ -237,7 +238,7 @@ public class Gl_420_draw_base_instance extends Test {
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT,
                 1 * Integer.BYTES, // indices offset
                 5, // instance count
-                1, // base vertex
+                2, // base vertex
                 5); // base instance
 
         return true;

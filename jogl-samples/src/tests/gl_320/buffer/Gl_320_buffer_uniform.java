@@ -192,7 +192,7 @@ public class Gl_320_buffer_uniform extends Test {
             program.link(gl3, System.out);
         }
         if (validated) {
-            
+
             uniformPerDraw = gl3.glGetUniformBlockIndex(programName, "PerDraw");
             uniformPerPass = gl3.glGetUniformBlockIndex(programName, "PerPass");
             uniformPerScene = gl3.glGetUniformBlockIndex(programName, "PerScene");
