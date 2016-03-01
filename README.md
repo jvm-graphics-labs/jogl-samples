@@ -24,6 +24,8 @@ The over 230 samples illustrate almost all OpenGL features ranging from ES 2.0 u
 
 Reminder, you need to add "-ea" in VM options in run config for the `assert`s to work
 
+You can find the results inside the [`templates` directory](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/templates).
+
 Ps: Hello Triangle and Hello Texture have been moved into a stand-alone [project](https://github.com/elect86/helloTriangle)
 
 Pps: I need some amd volunteer to test the amd-only extensions :octocat:
