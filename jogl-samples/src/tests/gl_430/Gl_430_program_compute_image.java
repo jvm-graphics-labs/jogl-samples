@@ -233,31 +233,28 @@ public class Gl_430_program_compute_image extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
+        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        FloatBuffer texCoordBuffer = GLBuffers.newDirectFloatBuffer(texCoordData);
+        FloatBuffer colorBuffer = GLBuffers.newDirectFloatBuffer(colorData);
+
         gl4.glGenBuffers(Buffer.MAX, bufferName);
 
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
-        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.POSITION_INPUT));
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize * 2, null, GL_STATIC_DRAW);
-        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl4.glBufferSubData(GL_ARRAY_BUFFER, 0, positionSize, positionBuffer);
-        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.TEXCOORD_INPUT));
-        FloatBuffer texCoordBuffer = GLBuffers.newDirectFloatBuffer(texCoordData);
         gl4.glBufferData(GL_ARRAY_BUFFER, texCoordSize * 2, texCoordBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(texCoordBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.COLOR_INPUT));
-        FloatBuffer colorBuffer = GLBuffers.newDirectFloatBuffer(colorData);
         gl4.glBufferData(GL_ARRAY_BUFFER, colorSize * 2, colorBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(colorBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.POSITION_OUTPUT));
@@ -272,15 +269,21 @@ public class Gl_430_program_compute_image extends Test {
         gl4.glBufferData(GL_ARRAY_BUFFER, colorSize * 2, null, GL_STATIC_COPY);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int[] uniformBufferOffset = {0};
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
         gl4.glGetIntegerv(
                 GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT,
-                uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
+                uniformBufferOffset);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
+        BufferUtils.destroyDirectBuffer(texCoordBuffer);
+        BufferUtils.destroyDirectBuffer(colorBuffer);
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
 
         return checkError(gl4, "initBuffer");
     }
