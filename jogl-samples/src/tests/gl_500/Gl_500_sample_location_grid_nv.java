@@ -241,7 +241,7 @@ public class Gl_500_sample_location_grid_nv extends Test {
 
         boolean validated = true;
 
-        Vec2i windowSize_ = new Vec2i(this.windowSize).shiftR(framebufferScale);
+        Vec2i windowSizeF = new Vec2i(windowSize).shiftR(framebufferScale);
 
         textureName.position(Texture.COLORBUFFER);
         gl4.glCreateTextures(GL_TEXTURE_2D, 1, textureName);
@@ -249,14 +249,14 @@ public class Gl_500_sample_location_grid_nv extends Test {
         gl4.glTextureParameteri(textureName.get(Texture.COLORBUFFER), GL_TEXTURE_MAX_LEVEL, 0);
         gl4.glTextureParameteri(textureName.get(Texture.COLORBUFFER), GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gl4.glTextureParameteri(textureName.get(Texture.COLORBUFFER), GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl4.glTextureStorage2D(textureName.get(Texture.COLORBUFFER), 1, GL_RGBA8, windowSize_.x, windowSize_.y);
+        gl4.glTextureStorage2D(textureName.get(Texture.COLORBUFFER), 1, GL_RGBA8, windowSizeF.x, windowSizeF.y);
 
         textureName.position(Texture.RENDERBUFFER);
         gl4.glCreateTextures(GL_TEXTURE_2D_MULTISAMPLE, 1, textureName);
         gl4.glTextureParameteri(textureName.get(Texture.RENDERBUFFER), GL_TEXTURE_BASE_LEVEL, 0);
         gl4.glTextureParameteri(textureName.get(Texture.RENDERBUFFER), GL_TEXTURE_MAX_LEVEL, 0);
-        gl4.glTextureStorage2DMultisample(textureName.get(Texture.RENDERBUFFER), 4, GL_RGBA8, windowSize_.x,
-                windowSize_.y, true);
+        gl4.glTextureStorage2DMultisample(textureName.get(Texture.RENDERBUFFER), 4, GL_RGBA8, windowSizeF.x,
+                windowSizeF.y, true);
 
         textureName.rewind();
 

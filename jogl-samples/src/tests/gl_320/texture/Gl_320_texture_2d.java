@@ -42,7 +42,7 @@ public class Gl_320_texture_2d extends Test {
 
     private final String SHADERS_SOURCE = "texture-2d";
     private final String SHADERS_ROOT = "src/data/gl_320/texture";
-    private final String TEXTURE_DIFFUSE = "kueken7_rgb8_srgb.ktx";
+    private final String TEXTURE_DIFFUSE = "kueken7_rg11b10_ufloat.ktx";
 
     private int vertexCount = 4;
     private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZE;

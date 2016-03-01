@@ -6,6 +6,7 @@
 package tests.gl_500;
 
 import com.jogamp.opengl.GL;
+import static com.jogamp.opengl.GL.GL_FLOAT;
 import static com.jogamp.opengl.GL.GL_TRIANGLES;
 import static com.jogamp.opengl.GL.GL_TRUE;
 import static com.jogamp.opengl.GL2.GL_SM_COUNT_NV;
@@ -26,6 +27,9 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.glm;
+import glm.mat._4.Mat4;
+import glm.vec._2.Vec2;
 import glm.vec._2.i.Vec2i;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -50,13 +54,16 @@ public class Gl_500_shader_invocation_nv extends Test {
     private class Buffer {
 
         public static final int CONSTANT = 0;
-        public static final int MAX = 1;
+        public static final int TRANSFORM = 1;
+        public static final int VERTEX = 2;
+        public static final int MAX = 3;
     }
 
     private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(1), vertexArrayName = GLBuffers.newDirectIntBuffer(1),
             bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX);
     private int programName;
     private FloatBuffer white = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 1.0f, 1.0f, 1.0f});
+    private int quadOverlapCount = 1, vertexCount;
     /**
      * https://jogamp.org/bugzilla/show_bug.cgi?id=1287
      */
@@ -116,12 +123,34 @@ public class Gl_500_shader_invocation_nv extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
+        int bindingIndex = 0;
+
         gl4.glCreateVertexArrays(1, vertexArrayName);
+
+        gl4.glVertexArrayAttribBinding(vertexArrayName.get(0), Semantic.Attr.POSITION, bindingIndex);
+        gl4.glVertexArrayAttribFormat(vertexArrayName.get(0), Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0);
+        gl4.glEnableVertexArrayAttrib(vertexArrayName.get(0), Semantic.Attr.POSITION);
+
+        gl4.glVertexArrayVertexBuffer(vertexArrayName.get(0), bindingIndex, bufferName.get(Buffer.VERTEX), 0, Vec2.SIZE);
 
         return true;
     }
 
     private boolean initBuffer(GL4 gl4) {
+
+        gl4.glCreateBuffers(Buffer.MAX, bufferName);
+
+        Mat4 mvp = glm.ortho_(0.0f, windowSize.x * 1.0f, 0.0f, windowSize.y * 1f);
+
+        FloatBuffer mvpBuffer = GLBuffers.newDirectFloatBuffer(mvp.toFa_());
+        if (!bug1287) {
+            gl4.glNamedBufferStorage(bufferName.get(Buffer.TRANSFORM), mvp.SIZE, mvpBuffer, 0);
+        } else {
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.CONSTANT));
+            gl4.glBufferStorage(GL_UNIFORM_BUFFER, mvp.SIZE, mvpBuffer, 0);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+        BufferUtils.destroyDirectBuffer(mvpBuffer);
 
         IntBuffer constants = GLBuffers.newDirectIntBuffer(3);
         gl4.glGetIntegerv(GL_WARP_SIZE_NV, constants);
@@ -135,8 +164,6 @@ public class Gl_500_shader_invocation_nv extends Test {
         System.out.println("GL_WARPS_PER_SM_NV: " + constants.get(1));
         System.out.println("GL_SM_COUNT_NV: " + constants.get(2));
 
-        gl4.glCreateBuffers(Buffer.MAX, bufferName);
-
         if (!bug1287) {
             gl4.glNamedBufferStorage(bufferName.get(Buffer.CONSTANT), constants.capacity() * Integer.BYTES, constants, 0);
         } else {
@@ -144,8 +171,38 @@ public class Gl_500_shader_invocation_nv extends Test {
             gl4.glBufferStorage(GL_UNIFORM_BUFFER, constants.capacity() * Integer.BYTES, constants, 0);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
-
         BufferUtils.destroyDirectBuffer(constants);
+
+        int windowDiv = 1;
+        vertexCount = (windowSize.x / windowDiv) * (windowSize.y / windowDiv) * 6 * quadOverlapCount;
+        float[] vertexPosition = new float[vertexCount];
+
+        for (int quadCoordIndexY = 0, quadCoordCountY = windowSize.y / windowDiv; quadCoordIndexY < quadCoordCountY;
+                quadCoordIndexY++) {
+
+            for (int quadCoordIndexX = 0, quadCoordCountX = windowSize.x / windowDiv; quadCoordIndexX < quadCoordCountX;
+                    quadCoordIndexX++) {
+
+                for (int quadOverlapIndex = 0; quadOverlapIndex < quadOverlapCount; quadOverlapIndex++) {
+
+                    int quadIndex = (quadCoordIndexX + quadCoordCountX * quadCoordIndexY) * quadOverlapCount
+                            + quadOverlapIndex;
+
+                    vertexPosition[quadIndex * 6 * 2 + 0 + 0] = quadCoordIndexX * 1 + 0;
+                    vertexPosition[quadIndex * 6 * 2 + 0 + 1] = quadCoordIndexY * 1 + 0;
+                    vertexPosition[quadIndex * 6 * 2 + 1 + 0] = quadCoordIndexX * 1 + 1;
+                    vertexPosition[quadIndex * 6 * 2 + 1 + 1] = quadCoordIndexY * 1 + 0;
+                    vertexPosition[quadIndex * 6 * 2 + 2 + 0] = quadCoordIndexX * 1 + 1;
+                    vertexPosition[quadIndex * 6 * 2 + 2 + 1] = quadCoordIndexY * 1 + 1;
+                    vertexPosition[quadIndex * 6 * 2 + 3 + 0] = quadCoordIndexX * 1 + 0;
+                    vertexPosition[quadIndex * 6 * 2 + 3 + 1] = quadCoordIndexY * 1 + 0;
+                    vertexPosition[quadIndex * 6 * 2 + 4 + 0] = quadCoordIndexX * 1 + 0;
+                    vertexPosition[quadIndex * 6 * 2 + 4 + 1] = quadCoordIndexY * 1 + 0;
+                }
+
+            }
+
+        }
 
         return true;
     }

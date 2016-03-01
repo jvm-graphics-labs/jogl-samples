@@ -127,9 +127,12 @@ public class Gl_320_primitive_point extends Test {
             //Data[i].Position = glm::vec4(glm::circularRand(1.0f), 0, 1);
             //Data[i].Position = glm::vec4(glm::diskRand(1.0f), 0, 1);
             //Data[i].Position = glm::vec4(glm::ballRand(1.0f), 1);
-            data.put((float) (Math.cos((float) i / vertexCount * Math.PI * 2f) * 1f))
-                    .put((float) (Math.sin((float) i / vertexCount * Math.PI * 2f) * 1f)).put(0.0f).put(1.0f)
-                    .put(new Vec4(1).toFA_());
+            data
+                    .put((float) (Math.cos((float) i / vertexCount * Math.PI * 2f) * 1f))
+                    .put((float) (Math.sin((float) i / vertexCount * Math.PI * 2f) * 1f))
+                    .put(0.0f)
+                    .put(1.0f)
+                    .put(new float[]{1, 1, 1, 1});
         }
         data.rewind();
 

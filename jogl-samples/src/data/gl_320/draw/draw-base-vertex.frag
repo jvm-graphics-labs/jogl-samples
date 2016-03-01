@@ -14,6 +14,5 @@ out vec4 color;
 
 void main()
 {
-    vec4 temp = + vec4(0.1);
-    color = inBlock.color * luminance[inBlock.index] + temp;
+    color = inBlock.color * luminance[inBlock.index];
 }

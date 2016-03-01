@@ -6,7 +6,6 @@
 package framework;
 
 import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SEVERITY_HIGH;
-import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SEVERITY_MEDIUM;
 import com.jogamp.opengl.GLDebugListener;
 import com.jogamp.opengl.GLDebugMessage;
 

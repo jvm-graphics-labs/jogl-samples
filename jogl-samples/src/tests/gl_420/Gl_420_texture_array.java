@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import dev.Vec4u8;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.BufferUtils;
@@ -19,6 +20,7 @@ import framework.Semantic;
 import framework.Test;
 import glf.Vertex_v2fv2f;
 import glm.vec._2.Vec2;
+import glm.vec._4.Vec4;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import jgli.Texture2dArray;
@@ -141,13 +143,10 @@ public class Gl_420_texture_array extends Test {
         gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[0]);
 
         jgli.Texture2dArray texture = new Texture2dArray(jgli.Format.FORMAT_RGBA8_UNORM_PACK32, new int[]{4, 4}, 15, 1);
-        for (int layerIndex = 0; layerIndex < texture.layers(); ++layerIndex) {
-            byte[] color = {
-                (byte) (glm.linearRand(0, 1) * 255.f),
-                (byte) (glm.linearRand(0, 1) * 255.f),
-                (byte) (glm.linearRand(0, 1) * 255.f),
-                (byte) (glm.linearRand(0, 1) * 255.f)};
-            texture.clear(layerIndex, 0, 0, color);
+        for (int layerIndex = 0, layerCount = texture.layers(); layerIndex < layerCount; layerIndex++) {
+            float progress = (float) layerIndex / layerCount;
+            Vec4u8 color = new Vec4u8(new Vec4(progress, 0.5f + progress * 0.5f, 1f - progress, 1f).mul(255f));
+            texture.clear(layerIndex, 0, 0, color.toBa_());
         }
 
         jgli.Gl.Format format = jgli.Gl.translate(texture.format());
@@ -155,7 +154,7 @@ public class Gl_420_texture_array extends Test {
         gl4.glTexStorage3D(GL_TEXTURE_2D_ARRAY, texture.levels(),
                 format.internal.value,
                 texture.dimensions()[0], texture.dimensions()[1], texture.layers());
-//
+
         for (int array = 0; array < texture.layers(); ++array) {
             for (int level = 0; level < texture.levels(); ++level) {
                 gl4.glTexSubImage3D(GL_TEXTURE_2D_ARRAY, level,

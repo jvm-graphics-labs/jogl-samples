@@ -99,16 +99,16 @@ public class Gl_450_texture_barrier extends Test {
 
         boolean validated = checkExtension(gl4, "GL_ARB_texture_barrier");
 
-        Vec2 windowRange = new Vec2(windowSize.x * 3.f, windowSize.y * 3.f);
+        Vec2 windowSizeF = new Vec2(windowSize);
+        Vec2 windowRange = new Vec2(windowSize.mul_(3f));
 
         viewports = new Vec4[1000];
         for (int i = 0; i < viewports.length; ++i) {
 
             Vec2 viewportPos = new Vec2(i % 17, i % 13);
             Vec2 viewportSize = new Vec2(i % 11);
-            viewports[i] = new Vec4(viewportPos.div(new Vec2(17, 13)).mul(windowRange)
-                    .sub(new Vec2(windowSize.x, windowSize.y)), 
-                    new Vec2(windowSize.x, windowSize.y).mul(viewportSize).div(new Vec2(11)));
+            viewports[i] = new Vec4(viewportPos.div(new Vec2(17, 13)).mul(windowRange).sub(windowSizeF),
+                    windowSizeF.mul_(viewportSize).div(new Vec2(11)));
         }
         /*
 		glm::vec2 WindowSize(this->getWindowSize());

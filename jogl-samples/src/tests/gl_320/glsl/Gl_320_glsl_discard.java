@@ -123,7 +123,7 @@ public class Gl_320_glsl_discard extends Test {
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        return checkError(gl3, "initArrayBuffer");
+        return checkError(gl3, "initBuffer");
     }
 
     protected boolean initTexture(GL3 gl3) {

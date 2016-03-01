@@ -149,12 +149,12 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
             gl3.glTexImage2D(GL_TEXTURE_2D, 0,
-//                    format.internal.value,
-                    Gl.InternalFormat.INTERNAL_RGB10A2U.value,
+                    format.internal.value,
+//                    Gl.InternalFormat.INTERNAL_RGB10A2U.value,
                     texture.dimensions(0)[0], texture.dimensions(0)[1],
                     0,
-//                    format.external.value,
-                    Gl.ExternalFormat.EXTERNAL_RGBA_INTEGER.value,
+                    format.external.value,
+//                    Gl.ExternalFormat.EXTERNAL_RGBA_INTEGER.value,
 //                                        format.type.value,
                     GL_UNSIGNED_INT_10_10_10_2,
                     texture.data(0));

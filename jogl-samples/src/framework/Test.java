@@ -50,7 +50,7 @@ public class Test implements GLEventListener, KeyListener {
     private final int major, minor;
     private final Vec2 translationOrigin, translationCurrent, rotationOrigin, rotationCurrent;
     private boolean glDebug;
-    protected final String TEXTURE_ROOT = "/data";
+    protected final String TEXTURE_ROOT = "/data/textures";
     private Success success;
 
     public Test(String title, Profile profile, int major, int minor, Vec2 orientation, boolean glDebug) {
