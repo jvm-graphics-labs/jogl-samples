@@ -182,7 +182,7 @@ public class Gl_320_buffer_update extends Test {
         }
 
         {
-            float[] diffuse = new float[]{1.0f, 0.5f, 0.0f, 1.0f};
+            FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 0.5f, 0.0f, 1.0f});
 
             gl3.glGetActiveUniformBlockiv(
                     programName,
@@ -191,10 +191,10 @@ public class Gl_320_buffer_update extends Test {
                     uniformBlockSize, 0);
 
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.MATERIAL));
-            FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(diffuse);
             gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize[0], diffuseBuffer, GL_DYNAMIC_DRAW);
-            BufferUtils.destroyDirectBuffer(diffuseBuffer);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+            BufferUtils.destroyDirectBuffer(diffuseBuffer);
         }
 
         return checkError(gl3, "initBuffer");

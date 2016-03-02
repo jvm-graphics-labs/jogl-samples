@@ -314,7 +314,9 @@ public class Gl_430_program_compute_variable_group_size extends Test {
         }
 
         gl4.glBindProgramPipeline(pipelineName.get(Program.COMPUTE));
-        gl4.glBindImageTexture(ImageUnit.INPUT, textureName.get(Texture.INPUT), 0, false, 0, GL_READ_ONLY, GL_RGBA8);
+        gl4.glActiveTexture(GL_TEXTURE0 + Semantic.Image.DIFFUSE);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.INPUT));
+//        gl4.glBindImageTexture(ImageUnit.INPUT, textureName.get(Texture.INPUT), 0, false, 0, GL_READ_ONLY, GL_RGBA8);
         gl4.glBindImageTexture(ImageUnit.OUTPUT, textureName.get(Texture.OUTPUT), 0, false, 0, GL_WRITE_ONLY, GL_RGBA8);
         gl4.glDispatchComputeGroupSizeARB(
                 1, 256, 1,

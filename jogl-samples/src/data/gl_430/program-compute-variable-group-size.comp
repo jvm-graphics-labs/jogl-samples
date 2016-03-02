@@ -14,16 +14,19 @@ layout(std140, column_major) uniform;
 layout(std430, column_major) buffer;
 layout (local_size_variable) in;
 
-layout (binding = INPUT, rgba8) readonly uniform image2D input;
+layout(binding = INPUT) uniform sampler2D input;
+//layout (binding = INPUT, rgba8) readonly uniform image2D input;
 layout (binding = OUTPUT, rgba8) writeonly uniform image2D output;
 
 void main()
 {	
     ivec2 index = ivec2(gl_GlobalInvocationID.xy);
+    vec2 coord = gl_GlobalInvocationID.xy / 256;
 
-    vec4 texel = imageLoad(input, index);
+    //vec4 texel = imageLoad(input, index);
+    vec4 texel = texture(input, coord);
 
-    vec4 inverted = vec4(1.0 - texel.rgb, texel.a);
+    //vec4 inverted = vec4(1.0 - texel.rgb, texel.a);
 
     //imageStore(output, index, inverted);
     imageStore(output, index, texel);
