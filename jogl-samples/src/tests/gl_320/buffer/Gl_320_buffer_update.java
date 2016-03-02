@@ -20,6 +20,7 @@ import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -57,7 +58,8 @@ public class Gl_320_buffer_update extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0};
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1);
     private int programName, uniformTransform, uniformMaterial;
 
     @Override
@@ -104,7 +106,7 @@ public class Gl_320_buffer_update extends Test {
         }
         // Get variables locations
         if (validated) {
-            
+
             uniformTransform = gl3.glGetUniformBlockIndex(programName, "Transform");
             uniformMaterial = gl3.glGetUniformBlockIndex(programName, "Material");
 
@@ -117,12 +119,12 @@ public class Gl_320_buffer_update extends Test {
 
     // Buffer update using glMapBufferRange
     private boolean initBuffer(GL3 gl3) {
-        
+
         // Generate a buffer object
-        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
+        gl3.glGenBuffers(Buffer.MAX, bufferName);
 
         // Bind the buffer for use
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.ARRAY]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.ARRAY));
 
         // Reserve buffer memory but don't copy the values
         gl3.glBufferData(
@@ -150,12 +152,12 @@ public class Gl_320_buffer_update extends Test {
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         // Copy buffer
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COPY]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.COPY));
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, null, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_COPY_READ_BUFFER, bufferName[Buffer.ARRAY]);
-        gl3.glBindBuffer(GL_COPY_WRITE_BUFFER, bufferName[Buffer.COPY]);
+        gl3.glBindBuffer(GL_COPY_READ_BUFFER, bufferName.get(Buffer.ARRAY));
+        gl3.glBindBuffer(GL_COPY_WRITE_BUFFER, bufferName.get(Buffer.COPY));
 
         gl3.glCopyBufferSubData(
                 GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER,
@@ -174,7 +176,7 @@ public class Gl_320_buffer_update extends Test {
                     GL_UNIFORM_BLOCK_DATA_SIZE,
                     uniformBlockSize, 0);
 
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize[0], null, GL_DYNAMIC_DRAW);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
@@ -188,7 +190,7 @@ public class Gl_320_buffer_update extends Test {
                     GL_UNIFORM_BLOCK_DATA_SIZE,
                     uniformBlockSize, 0);
 
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.MATERIAL));
             FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(diffuse);
             gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize[0], diffuseBuffer, GL_DYNAMIC_DRAW);
             BufferUtils.destroyDirectBuffer(diffuseBuffer);
@@ -200,10 +202,10 @@ public class Gl_320_buffer_update extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.COPY]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.COPY));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vec2.SIZE, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -220,7 +222,7 @@ public class Gl_320_buffer_update extends Test {
         GL3 gl3 = (GL3) gl;
 
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             ByteBuffer transformBuffer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -242,11 +244,11 @@ public class Gl_320_buffer_update extends Test {
         gl3.glUseProgram(programName);
 
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
         // Attach the buffer to UBO binding point semantic::uniform::MATERIAL
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName.get(Buffer.MATERIAL));
 
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
 
         return true;
@@ -257,9 +259,12 @@ public class Gl_320_buffer_update extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName);
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return true;
     }

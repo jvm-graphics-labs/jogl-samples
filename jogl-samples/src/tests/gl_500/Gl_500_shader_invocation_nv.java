@@ -138,21 +138,23 @@ public class Gl_500_shader_invocation_nv extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
+        
+        IntBuffer constants = GLBuffers.newDirectIntBuffer(3);
+        
+        
         gl4.glCreateBuffers(Buffer.MAX, bufferName);
 
         Mat4 mvp = glm.ortho_(0.0f, windowSize.x * 1.0f, 0.0f, windowSize.y * 1f);
-
         FloatBuffer mvpBuffer = GLBuffers.newDirectFloatBuffer(mvp.toFa_());
+
         if (!bug1287) {
             gl4.glNamedBufferStorage(bufferName.get(Buffer.TRANSFORM), mvp.SIZE, mvpBuffer, 0);
         } else {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.CONSTANT));
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             gl4.glBufferStorage(GL_UNIFORM_BUFFER, mvp.SIZE, mvpBuffer, 0);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
-        BufferUtils.destroyDirectBuffer(mvpBuffer);
 
-        IntBuffer constants = GLBuffers.newDirectIntBuffer(3);
         gl4.glGetIntegerv(GL_WARP_SIZE_NV, constants);
         constants.position(1);
         gl4.glGetIntegerv(GL_WARPS_PER_SM_NV, constants);
@@ -171,11 +173,10 @@ public class Gl_500_shader_invocation_nv extends Test {
             gl4.glBufferStorage(GL_UNIFORM_BUFFER, constants.capacity() * Integer.BYTES, constants, 0);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
-        BufferUtils.destroyDirectBuffer(constants);
 
         int windowDiv = 1;
         vertexCount = (windowSize.x / windowDiv) * (windowSize.y / windowDiv) * 6 * quadOverlapCount;
-        float[] vertexPosition = new float[vertexCount];
+        float[] vertexPosition = new float[vertexCount * 2];
 
         for (int quadCoordIndexY = 0, quadCoordCountY = windowSize.y / windowDiv; quadCoordIndexY < quadCoordCountY;
                 quadCoordIndexY++) {
@@ -196,13 +197,26 @@ public class Gl_500_shader_invocation_nv extends Test {
                     vertexPosition[quadIndex * 6 * 2 + 2 + 1] = quadCoordIndexY * 1 + 1;
                     vertexPosition[quadIndex * 6 * 2 + 3 + 0] = quadCoordIndexX * 1 + 0;
                     vertexPosition[quadIndex * 6 * 2 + 3 + 1] = quadCoordIndexY * 1 + 0;
-                    vertexPosition[quadIndex * 6 * 2 + 4 + 0] = quadCoordIndexX * 1 + 0;
-                    vertexPosition[quadIndex * 6 * 2 + 4 + 1] = quadCoordIndexY * 1 + 0;
+                    vertexPosition[quadIndex * 6 * 2 + 4 + 0] = quadCoordIndexX * 1 + 1;
+                    vertexPosition[quadIndex * 6 * 2 + 4 + 1] = quadCoordIndexY * 1 + 1;
+                    vertexPosition[quadIndex * 6 * 2 + 5 + 0] = quadCoordIndexX * 1 + 0;
+                    vertexPosition[quadIndex * 6 * 2 + 5 + 1] = quadCoordIndexY * 1 + 1;
                 }
-
             }
-
         }
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexPosition);
+        if (!bug1287) {
+            gl4.glNamedBufferStorage(bufferName.get(Buffer.VERTEX), vertexPosition.length * Float.BYTES, vertexBuffer, 0);
+        } else {
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.VERTEX));
+            gl4.glBufferStorage(GL_UNIFORM_BUFFER, vertexBuffer.capacity() * Float.BYTES, vertexBuffer, 0);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+        }
+        BufferUtils.destroyDirectBuffer(constants);
+        
+        
+        BufferUtils.destroyDirectBuffer(mvpBuffer);
+        BufferUtils.destroyDirectBuffer(constants);
 
         return true;
     }
@@ -217,9 +231,10 @@ public class Gl_500_shader_invocation_nv extends Test {
 
         gl4.glBindProgramPipeline(pipelineName.get(0));
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.CONSTANT, bufferName.get(Buffer.CONSTANT));
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
         gl4.glBindVertexArray(vertexArrayName.get(0));
 
-        gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
+        gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 6 * vertexCount, 1, 0);
 
         return true;
     }

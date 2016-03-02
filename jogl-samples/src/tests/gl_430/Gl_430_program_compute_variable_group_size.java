@@ -6,6 +6,10 @@
 package tests.gl_430;
 
 import com.jogamp.opengl.GL;
+import static com.jogamp.opengl.GL.GL_TEXTURE0;
+import static com.jogamp.opengl.GL.GL_TEXTURE_2D;
+import static com.jogamp.opengl.GL2ES2.GL_FRAGMENT_SHADER;
+import static com.jogamp.opengl.GL2ES2.GL_VERTEX_SHADER;
 import static com.jogamp.opengl.GL3ES3.*;
 import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
@@ -69,6 +73,20 @@ public class Gl_430_program_compute_variable_group_size extends Test {
         public static final int MAX = 2;
     }
 
+    private class Texture {
+
+        public static final int INPUT = 0;
+        public static final int OUTPUT = 1;
+        public static final int MAX = 2;
+    }
+
+    private class ImageUnit {
+
+        public static final int INPUT = 0;
+        public static final int OUTPUT = 1;
+        public static final int MAX = 2;
+    }
+
     private class Buffer {
 
         public static final int ELEMENT = 0;
@@ -78,9 +96,11 @@ public class Gl_430_program_compute_variable_group_size extends Test {
     }
 
     private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(Program.MAX),
-            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), textureName = GLBuffers.newDirectIntBuffer(1),
-            vertexArrayName = GLBuffers.newDirectIntBuffer(1), framebufferName = GLBuffers.newDirectIntBuffer(1);
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1);
     private FloatBuffer white = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 1.0f, 1.0f, 1.0f});
+    private FloatBuffer clear = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 0.5f, 0.0f, 1.0f});
     private int[] programName = new int[Program.MAX];
 
     @Override
@@ -127,14 +147,12 @@ public class Gl_430_program_compute_variable_group_size extends Test {
         // Create program
         if (validated) {
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
-            ShaderCode compShaderCode = ShaderCode.create(gl4, GL_COMPUTE_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "comp", null, true);
-
             if (validated) {
+
+                ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                        null, SHADERS_SOURCE, "vert", null, true);
+                ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT,
+                        null, SHADERS_SOURCE, "frag", null, true);
 
                 ShaderProgram shaderProgram = new ShaderProgram();
                 shaderProgram.init(gl4);
@@ -150,6 +168,9 @@ public class Gl_430_program_compute_variable_group_size extends Test {
             }
 
             if (validated) {
+
+                ShaderCode compShaderCode = ShaderCode.create(gl4, GL_COMPUTE_SHADER, this.getClass(), SHADERS_ROOT, 
+                        null, SHADERS_SOURCE, "comp", null, true);
 
                 ShaderProgram shaderProgram = new ShaderProgram();
                 shaderProgram.init(gl4);
@@ -215,9 +236,9 @@ public class Gl_430_program_compute_variable_group_size extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glGenTextures(1, textureName);
+            gl4.glGenTextures(Texture.MAX, textureName);
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.INPUT));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_GREEN);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_BLUE);
@@ -237,6 +258,9 @@ public class Gl_430_program_compute_variable_group_size extends Test {
             }
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.OUTPUT));
+            gl4.glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, texture.dimensions()[0], texture.dimensions()[1]);
 
         } catch (IOException ex) {
             Logger.getLogger(Gl_430_program_compute.class.getName()).log(Level.SEVERE, null, ex);
@@ -269,15 +293,6 @@ public class Gl_430_program_compute_variable_group_size extends Test {
         return true;
     }
 
-    private boolean initFramebuffer(GL4 gl4) {
-
-        gl4.glGenFramebuffers(1, framebufferName);
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName.get(0), 0);
-
-        return isFramebufferComplete(gl4, framebufferName.get(0));
-    }
-
     @Override
     protected boolean render(GL gl) {
 
@@ -298,15 +313,22 @@ public class Gl_430_program_compute_variable_group_size extends Test {
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
 
-//        gl4.glBindProgramPipeline(pipelineName.get(Program.COMPUTE));
-//        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
-//        gl4.glDispatchCompute(vertexCount, 1, 1);
+        gl4.glBindProgramPipeline(pipelineName.get(Program.COMPUTE));
+        gl4.glBindImageTexture(ImageUnit.INPUT, textureName.get(Texture.INPUT), 0, false, 0, GL_READ_ONLY, GL_RGBA8);
+        gl4.glBindImageTexture(ImageUnit.OUTPUT, textureName.get(Texture.OUTPUT), 0, false, 0, GL_WRITE_ONLY, GL_RGBA8);
+        gl4.glDispatchComputeGroupSizeARB(
+                1, 256, 1,
+                256, 1, 1);
+        
+        gl4.glMemoryBarrierByRegion((int) GL_ALL_BARRIER_BITS);
+//        gl4.glClearTexImage(textureName.get(Texture.OUTPUT), 0, GL_RGBA, GL_FLOAT, clear);
+        
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
         gl4.glClearBufferfv(GL_COLOR, 0, white);
 
         gl4.glBindProgramPipeline(pipelineName.get(Program.GRAPHICS));
-        gl4.glActiveTexture(GL_TEXTURE0 + Semantic.Sampler.DIFFUSE);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
+        gl4.glActiveTexture(GL_TEXTURE0 + Semantic.Image.DIFFUSE);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.OUTPUT));
         gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
 

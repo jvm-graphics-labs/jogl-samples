@@ -5,8 +5,8 @@
 
 #define TRANSFORM0		1
 
-#define BUFFER_INPUT	0
-#define BUFFER_OUTPUT	1
+#define INPUT	0
+#define OUTPUT	1
 
 precision highp float;
 precision highp int;
@@ -14,32 +14,18 @@ layout(std140, column_major) uniform;
 layout(std430, column_major) buffer;
 layout (local_size_variable) in;
 
-layout(binding = TRANSFORM0) uniform Transform
-{
-    mat4 mvp;
-} transform;
-
-struct Vertex
-{
-    vec4 position;
-    vec4 texCoord;
-    vec4 color;
-};
-
-layout(binding = BUFFER_INPUT) readonly buffer iBuffer
-{
-    Vertex input[];
-} inBuffer;
-
-layout(binding = BUFFER_OUTPUT) writeonly buffer oBuffer
-{
-    Vertex ouput[];
-} outBuffer;
+layout (binding = INPUT, rgba8) readonly uniform image2D input;
+layout (binding = OUTPUT, rgba8) writeonly uniform image2D output;
 
 void main()
 {	
-    outBuffer.ouput[gl_LocalInvocationIndex].position = inBuffer.input[gl_LocalInvocationIndex].position;
-    //Out.Ouput[gl_LocalInvocationIndex].Position = Transform.MVP * In.Input[gl_LocalInvocationIndex].Position;
-    outBuffer.ouput[gl_LocalInvocationIndex].texCoord = inBuffer.input[gl_LocalInvocationIndex].texCoord;
-    outBuffer.ouput[gl_LocalInvocationIndex].color = inBuffer.input[gl_LocalInvocationIndex].color;
+    ivec2 index = ivec2(gl_GlobalInvocationID.xy);
+
+    vec4 texel = imageLoad(input, index);
+
+    vec4 inverted = vec4(1.0 - texel.rgb, texel.a);
+
+    //imageStore(output, index, inverted);
+    imageStore(output, index, texel);
+    //imageStore(output, index, vec4(1,0.5,0,1));
 }
