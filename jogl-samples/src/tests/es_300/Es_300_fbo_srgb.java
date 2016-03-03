@@ -135,10 +135,10 @@ public class Es_300_fbo_srgb extends Test {
 
         if (validated) {
 
-            shaderCodes[Shader.VERT_TEXTURE] = ShaderCode.create(gl3es3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "vert", null, true);
-            shaderCodes[Shader.FRAG_TEXTURE] = ShaderCode.create(gl3es3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "frag", null, true);
+            shaderCodes[Shader.VERT_TEXTURE] = ShaderCode.create(gl3es3, GL_VERTEX_SHADER, this.getClass(), 
+                    SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "vert", null, true);
+            shaderCodes[Shader.FRAG_TEXTURE] = ShaderCode.create(gl3es3, GL_FRAGMENT_SHADER, this.getClass(), 
+                    SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.add(shaderCodes[Shader.VERT_TEXTURE]);
@@ -153,10 +153,10 @@ public class Es_300_fbo_srgb extends Test {
 
         if (validated) {
 
-            shaderCodes[Shader.VERT_SPLASH] = ShaderCode.create(gl3es3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPASH, "vert", null, true);
-            shaderCodes[Shader.FRAG_SPLASH] = ShaderCode.create(gl3es3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPASH, "frag", null, true);
+            shaderCodes[Shader.VERT_SPLASH] = ShaderCode.create(gl3es3, GL_VERTEX_SHADER, this.getClass(), 
+                    SHADERS_ROOT, null, SHADERS_SOURCE_SPASH, "vert", null, true);
+            shaderCodes[Shader.FRAG_SPLASH] = ShaderCode.create(gl3es3, GL_FRAGMENT_SHADER, this.getClass(), 
+                    SHADERS_ROOT, null, SHADERS_SOURCE_SPASH, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.add(shaderCodes[Shader.VERT_SPLASH]);

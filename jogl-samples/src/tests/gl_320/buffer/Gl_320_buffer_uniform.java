@@ -173,10 +173,10 @@ public class Gl_320_buffer_uniform extends Test {
         boolean validated = true;
 
         if (validated) {
-            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null, 
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(vertShader);
@@ -285,7 +285,7 @@ public class Gl_320_buffer_uniform extends Test {
         GL3 gl3 = (GL3) gl;
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.PER_DRAW));
-            ByteBuffer transform = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Transform.SIZE, GL_MAP_WRITE_BIT 
+            ByteBuffer transform = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Transform.SIZE, GL_MAP_WRITE_BIT
                     | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = new Mat4().perspective((float) Math.PI * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f);
@@ -325,7 +325,7 @@ public class Gl_320_buffer_uniform extends Test {
         gl3.glDeleteVertexArrays(1, vertexArrayName);
         gl3.glDeleteBuffers(Buffer.MAX, bufferName);
         gl3.glDeleteProgram(programName);
-        
+
         BufferUtils.destroyDirectBuffer(vertexArrayName);
         BufferUtils.destroyDirectBuffer(bufferName);
 

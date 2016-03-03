@@ -113,10 +113,10 @@ public class Gl_300_fbo_multisample extends Test {
 
         if (validated) {
 
-            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(vertShader);
@@ -215,7 +215,7 @@ public class Gl_300_fbo_multisample extends Test {
         gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.RESOLVE));
         gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl3.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, 0, GL_RGBA, 
+        gl3.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, 0, GL_RGBA,
                 GL_UNSIGNED_BYTE, null);
 
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.RESOLVE));
@@ -314,7 +314,7 @@ public class Gl_300_fbo_multisample extends Test {
         gl3.glDeleteRenderbuffers(1, colorRenderbufferName);
         gl3.glDeleteFramebuffers(Framebuffer.MAX, framebufferName);
         gl3.glDeleteVertexArrays(1, vertexArrayName);
-        
+
         BufferUtils.destroyDirectBuffer(bufferName);
         BufferUtils.destroyDirectBuffer(textureName);
         BufferUtils.destroyDirectBuffer(colorRenderbufferName);

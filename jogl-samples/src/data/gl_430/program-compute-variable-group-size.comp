@@ -3,8 +3,6 @@
 #extension GL_ARB_shader_storage_buffer_object : require
 #extension GL_ARB_compute_variable_group_size : require
 
-#define TRANSFORM0		1
-
 #define INPUT	0
 #define OUTPUT	1
 
@@ -15,20 +13,18 @@ layout(std430, column_major) buffer;
 layout (local_size_variable) in;
 
 layout(binding = INPUT) uniform sampler2D input;
-//layout (binding = INPUT, rgba8) readonly uniform image2D input;
-layout (binding = OUTPUT, rgba8) writeonly uniform image2D output;
+layout (binding = OUTPUT) writeonly uniform image2D output;
 
 void main()
 {	
-    ivec2 index = ivec2(gl_GlobalInvocationID.xy);
-    vec2 coord = gl_GlobalInvocationID.xy / 256;
+    vec2 size = vec2(textureSize(input, 0));
+    vec2 index = gl_GlobalInvocationID.xy;
+    vec2 texCoord = index / size;
 
-    //vec4 texel = imageLoad(input, index);
-    vec4 texel = texture(input, coord);
+    vec4 texel = texture(input, texCoord);
 
-    //vec4 inverted = vec4(1.0 - texel.rgb, texel.a);
+    vec4 inverted = vec4(1.0 - texel.rgb, texel.a);
 
-    //imageStore(output, index, inverted);
-    imageStore(output, index, texel);
-    //imageStore(output, index, vec4(1,0.5,0,1));
+    vec4 color = (gl_WorkGroupID.x + gl_WorkGroupID.y) % 2 == 0 ? texel : inverted;
+    imageStore(output, ivec2(index), color);
 }

@@ -101,10 +101,10 @@ public class Gl_320_buffer_uniform_shared extends Test {
         ShaderCode[] shaderName = new ShaderCode[Shader.MAX];
 
         if (validated) {
-            shaderName[Shader.VERT] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            shaderName[Shader.FRAG] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            shaderName[Shader.VERT] = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            shaderName[Shader.FRAG] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null, 
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(shaderName[Shader.VERT]);
@@ -227,7 +227,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
         gl3.glUniformBlockBinding(programName, uniformMaterial, Semantic.Uniform.MATERIAL);
 
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
-        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.UNIFORM), 0, 
+        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.UNIFORM), 0,
                 uniformBlockSizeTransform.get(0));
         // Attach the buffer to UBO binding point semantic::uniform::MATERIAL 
         gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName.get(Buffer.UNIFORM),
@@ -247,7 +247,7 @@ public class Gl_320_buffer_uniform_shared extends Test {
         gl3.glDeleteVertexArrays(1, vertexArrayName);
         gl3.glDeleteBuffers(Buffer.MAX, bufferName);
         gl3.glDeleteProgram(programName);
-        
+
         BufferUtils.destroyDirectBuffer(bufferName);
         BufferUtils.destroyDirectBuffer(uniformBlockSizeMaterial);
         BufferUtils.destroyDirectBuffer(uniformBlockSizeTransform);

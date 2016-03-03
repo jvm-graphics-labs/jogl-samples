@@ -83,7 +83,7 @@ public class Gl_320_draw_base_vertex extends Test {
         public static final int MAX = 4;
     }
 
-    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), 
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
             vertexArrayName = GLBuffers.newDirectIntBuffer(1);
     private int programName, uniformTransform;
 
@@ -114,10 +114,10 @@ public class Gl_320_draw_base_vertex extends Test {
         boolean validated = true;
         // Create program
         if (validated) {
-            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null, 
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(vertShader);
@@ -144,12 +144,11 @@ public class Gl_320_draw_base_vertex extends Test {
     }
 
     private boolean initBuffer(GL3 gl3) {
-        
-        
+
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         ByteBuffer colorBuffer = GLBuffers.newDirectByteBuffer(colorData);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
-        
+
         gl3.glGenBuffers(Buffer.MAX, bufferName);
 
         gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.POSITION));
@@ -169,11 +168,10 @@ public class Gl_320_draw_base_vertex extends Test {
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize[0], null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        
-        BufferUtils.destroyDirectBuffer(positionBuffer);        
+        BufferUtils.destroyDirectBuffer(positionBuffer);
         BufferUtils.destroyDirectBuffer(colorBuffer);
         BufferUtils.destroyDirectBuffer(elementBuffer);
-        
+
         return checkError(gl3, "initBuffer");
     }
 
@@ -204,7 +202,7 @@ public class Gl_320_draw_base_vertex extends Test {
         GL3 gl3 = (GL3) gl;
         {
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
-            ByteBuffer pointer = gl.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE, GL_MAP_WRITE_BIT 
+            ByteBuffer pointer = gl.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE, GL_MAP_WRITE_BIT
                     | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
@@ -243,7 +241,7 @@ public class Gl_320_draw_base_vertex extends Test {
 
         BufferUtils.destroyDirectBuffer(bufferName);
         BufferUtils.destroyDirectBuffer(vertexArrayName);
-        
+
         return true;
     }
 }

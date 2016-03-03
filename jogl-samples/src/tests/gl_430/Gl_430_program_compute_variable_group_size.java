@@ -24,6 +24,7 @@ import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._2.Vec2;
 import glm.vec._2.i.Vec2i;
+import glm.vec._3.i.Vec3i;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -102,6 +103,7 @@ public class Gl_430_program_compute_variable_group_size extends Test {
     private FloatBuffer white = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 1.0f, 1.0f, 1.0f});
     private FloatBuffer clear = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 0.5f, 0.0f, 1.0f});
     private int[] programName = new int[Program.MAX];
+    private Vec2i textureSize;
 
     @Override
     protected boolean begin(GL gl) {
@@ -261,6 +263,8 @@ public class Gl_430_program_compute_variable_group_size extends Test {
 
             gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.OUTPUT));
             gl4.glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, texture.dimensions()[0], texture.dimensions()[1]);
+            
+            textureSize = new Vec2i(texture.dimensions()[0], texture.dimensions()[1]);
 
         } catch (IOException ex) {
             Logger.getLogger(Gl_430_program_compute.class.getName()).log(Level.SEVERE, null, ex);
@@ -316,14 +320,14 @@ public class Gl_430_program_compute_variable_group_size extends Test {
         gl4.glBindProgramPipeline(pipelineName.get(Program.COMPUTE));
         gl4.glActiveTexture(GL_TEXTURE0 + Semantic.Image.DIFFUSE);
         gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.INPUT));
-//        gl4.glBindImageTexture(ImageUnit.INPUT, textureName.get(Texture.INPUT), 0, false, 0, GL_READ_ONLY, GL_RGBA8);
         gl4.glBindImageTexture(ImageUnit.OUTPUT, textureName.get(Texture.OUTPUT), 0, false, 0, GL_WRITE_ONLY, GL_RGBA8);
+        Vec2i workGroupSize = new Vec2i(32);
+        Vec2i ndRange = textureSize.div_(workGroupSize); 
         gl4.glDispatchComputeGroupSizeARB(
-                1, 256, 1,
-                256, 1, 1);
+                ndRange.x, ndRange.y, 1, // (8, 8, 1)
+                workGroupSize.x, workGroupSize.y, 1); // (32, 32, 1)
         
-        gl4.glMemoryBarrierByRegion((int) GL_ALL_BARRIER_BITS);
-//        gl4.glClearTexImage(textureName.get(Texture.OUTPUT), 0, GL_RGBA, GL_FLOAT, clear);
+        gl4.glMemoryBarrier(GL_TEXTURE_FETCH_BARRIER_BIT);
         
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
         gl4.glClearBufferfv(GL_COLOR, 0, white);
@@ -336,6 +340,26 @@ public class Gl_430_program_compute_variable_group_size extends Test {
 
         gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
 
+        return true;
+    }
+    
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+     
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        gl4.glDeleteProgramPipelines(Program.MAX, pipelineName);
+        gl4.glDeleteTextures(Texture.MAX, textureName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(white);
+        BufferUtils.destroyDirectBuffer(clear);
+        
         return true;
     }
 }

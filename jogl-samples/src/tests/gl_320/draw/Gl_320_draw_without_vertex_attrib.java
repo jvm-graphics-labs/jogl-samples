@@ -8,14 +8,18 @@ package tests.gl_320.draw;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL3;
+import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -35,7 +39,9 @@ public class Gl_320_draw_without_vertex_attrib extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/draw";
 
     private int programName, uniformTransform;
-    private int[] bufferName = {0}, vertexArrayName = {0};
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(1), vertexArrayName = GLBuffers.newDirectIntBuffer(1);
+    private FloatBuffer clearDepth = GLBuffers.newDirectFloatBuffer(new float[]{1.0f});
+    private FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(new float[]{0.0f, 0.0f, 0.0f, 1.0f});
 
     @Override
     protected boolean begin(GL gl) {
@@ -64,10 +70,10 @@ public class Gl_320_draw_without_vertex_attrib extends Test {
         // Create program
         if (validated) {
 
-            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(vertShader);
@@ -93,25 +99,27 @@ public class Gl_320_draw_without_vertex_attrib extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(1, bufferName, 0);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
 
-        int[] uniformBufferOffset = {0};
+        gl3.glGenBuffers(1, bufferName);
 
-        gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
+        gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
 
-        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[0]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(0));
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
+        
         return checkError(gl3, "initBuffer");
     }
 
     private Boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         gl3.glBindVertexArray(0);
 
         return checkError(gl3, "initVertexArray");
@@ -123,7 +131,7 @@ public class Gl_320_draw_without_vertex_attrib extends Test {
         GL3 gl3 = (GL3) gl;
 
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[0]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(0));
             ByteBuffer pointer = gl3.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -139,13 +147,12 @@ public class Gl_320_draw_without_vertex_attrib extends Test {
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
 
-        float[] depth = {1.0f};
-        gl3.glClearBufferfv(GL_DEPTH, 0, depth, 0);
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+        gl3.glClearBufferfv(GL_DEPTH, 0, clearDepth);
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor);
 
         gl3.glUseProgram(programName);
-        gl3.glBindVertexArray(vertexArrayName[0]);
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[0]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(0));
 
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, 6, 1);
 
@@ -157,7 +164,13 @@ public class Gl_320_draw_without_vertex_attrib extends Test {
 
         GL3 gl3 = (GL3) gl;
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+        gl3.glDeleteBuffers(1, bufferName);
+        
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(clearColor);
+        BufferUtils.destroyDirectBuffer(clearDepth);
 
         return true;
     }
