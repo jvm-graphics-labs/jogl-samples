@@ -256,7 +256,7 @@ another one and then use them to render a diffuse texture
 * [`ARB_compute_variable_group_size`](https://www.opengl.org/registry/specs/ARB/compute_variable_group_size.txt)
 * `glDispatchComputeGroupSizeARB`
 * `layout (local_size_variable) in;`
-* if an image is declared as `writeonly` the memory qualifier (`rgba8`) is not needed
+* if an image is declared as `writeonly` the memory qualifier (`rgba8`) is not necessary because it only specifies the format for read operations
 
 ### [gl-430-program-subroutine](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_program_subroutine.java):
 
