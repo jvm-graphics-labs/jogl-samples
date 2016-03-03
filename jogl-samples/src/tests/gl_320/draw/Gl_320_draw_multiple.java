@@ -103,9 +103,9 @@ public class Gl_320_draw_multiple extends Test {
 
         if (validated) {
 
-            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null, 
+            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
                     SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null, 
+            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
                     SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
@@ -214,7 +214,6 @@ public class Gl_320_draw_multiple extends Test {
                 indices,
                 2,
                 baseVertex);
-
         return true;
     }
 
@@ -233,6 +232,7 @@ public class Gl_320_draw_multiple extends Test {
         BufferUtils.destroyDirectBuffer(baseVertex);
         BufferUtils.destroyDirectBuffer(clearColor);
         BufferUtils.destroyDirectBuffer(clearDepth);
+        BufferUtils.destroyDirectBuffer(indices.getBuffer());
 
         return true;
     }
