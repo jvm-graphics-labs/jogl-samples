@@ -245,10 +245,18 @@ starts to shine: OpenGL 4.3 enables Programmable Vertex Pulling and some forms o
 * uses a compute program to copy the vertex attributes from one ssbo to another one and then use them to render a diffuse
 texture
 
-### [gl-430-program-compute](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_program_compute.java):
+### [gl-430-program-compute-image](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_program_compute_image.java):
 
 * uses a compute program to copy the vertex attributes (multiplying the positions by the mvp matrix) from one ssbo to 
 another one and then use them to render a diffuse texture
+
+### [gl-430-program-compute-variable-group-size](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_program_compute_variable_group_size.java):
+
+* loads a diffuse texture and uses a compute shader to invert some of the pixel. The pixel inverting is coherent within a workgroup and it will be alternated beween adjacent workgroups.
+* [`ARB_compute_variable_group_size`](https://www.opengl.org/registry/specs/ARB/compute_variable_group_size.txt)
+* `glDispatchComputeGroupSizeARB`
+* `layout (local_size_variable) in;`
+* if an image is declared as `writeonly` the memory qualifier (`rgba8`) is not necessary because it only specifies the format for read operations
 
 ### [gl-430-program-subroutine](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_program_subroutine.java):
 
