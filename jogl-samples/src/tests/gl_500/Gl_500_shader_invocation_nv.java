@@ -138,10 +138,8 @@ public class Gl_500_shader_invocation_nv extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        
         IntBuffer constants = GLBuffers.newDirectIntBuffer(3);
-        
-        
+
         gl4.glCreateBuffers(Buffer.MAX, bufferName);
 
         Mat4 mvp = glm.ortho_(0.0f, windowSize.x * 1.0f, 0.0f, windowSize.y * 1f);
@@ -189,18 +187,18 @@ public class Gl_500_shader_invocation_nv extends Test {
                     int quadIndex = (quadCoordIndexX + quadCoordCountX * quadCoordIndexY) * quadOverlapCount
                             + quadOverlapIndex;
 
-                    vertexPosition[quadIndex * 6 * 2 + 0 + 0] = quadCoordIndexX * 1 + 0;
-                    vertexPosition[quadIndex * 6 * 2 + 0 + 1] = quadCoordIndexY * 1 + 0;
-                    vertexPosition[quadIndex * 6 * 2 + 1 + 0] = quadCoordIndexX * 1 + 1;
-                    vertexPosition[quadIndex * 6 * 2 + 1 + 1] = quadCoordIndexY * 1 + 0;
-                    vertexPosition[quadIndex * 6 * 2 + 2 + 0] = quadCoordIndexX * 1 + 1;
-                    vertexPosition[quadIndex * 6 * 2 + 2 + 1] = quadCoordIndexY * 1 + 1;
-                    vertexPosition[quadIndex * 6 * 2 + 3 + 0] = quadCoordIndexX * 1 + 0;
-                    vertexPosition[quadIndex * 6 * 2 + 3 + 1] = quadCoordIndexY * 1 + 0;
-                    vertexPosition[quadIndex * 6 * 2 + 4 + 0] = quadCoordIndexX * 1 + 1;
-                    vertexPosition[quadIndex * 6 * 2 + 4 + 1] = quadCoordIndexY * 1 + 1;
-                    vertexPosition[quadIndex * 6 * 2 + 5 + 0] = quadCoordIndexX * 1 + 0;
-                    vertexPosition[quadIndex * 6 * 2 + 5 + 1] = quadCoordIndexY * 1 + 1;
+                    vertexPosition[(quadIndex * 6 + 0) * 2 + 0] = quadCoordIndexX * 1 + 0;
+                    vertexPosition[(quadIndex * 6 + 0) * 2 + 1] = quadCoordIndexY * 1 + 0;
+                    vertexPosition[(quadIndex * 6 + 1) * 2 + 0] = quadCoordIndexX * 1 + 1;
+                    vertexPosition[(quadIndex * 6 + 1) * 2 + 1] = quadCoordIndexY * 1 + 0;
+                    vertexPosition[(quadIndex * 6 + 2) * 2 + 0] = quadCoordIndexX * 1 + 1;
+                    vertexPosition[(quadIndex * 6 + 2) * 2 + 1] = quadCoordIndexY * 1 + 1;
+                    vertexPosition[(quadIndex * 6 + 3) * 2 + 0] = quadCoordIndexX * 1 + 0;
+                    vertexPosition[(quadIndex * 6 + 3) * 2 + 1] = quadCoordIndexY * 1 + 0;
+                    vertexPosition[(quadIndex * 6 + 4) * 2 + 0] = quadCoordIndexX * 1 + 1;
+                    vertexPosition[(quadIndex * 6 + 4) * 2 + 1] = quadCoordIndexY * 1 + 1;
+                    vertexPosition[(quadIndex * 6 + 5) * 2 + 0] = quadCoordIndexX * 1 + 0;
+                    vertexPosition[(quadIndex * 6 + 5) * 2 + 1] = quadCoordIndexY * 1 + 1;
                 }
             }
         }
@@ -213,8 +211,7 @@ public class Gl_500_shader_invocation_nv extends Test {
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
         BufferUtils.destroyDirectBuffer(constants);
-        
-        
+
         BufferUtils.destroyDirectBuffer(mvpBuffer);
         BufferUtils.destroyDirectBuffer(constants);
 
