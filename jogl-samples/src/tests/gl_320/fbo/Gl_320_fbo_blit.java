@@ -22,6 +22,7 @@ import framework.Test;
 import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
@@ -69,8 +70,10 @@ public class Gl_320_fbo_blit extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] textureName = new int[Texture.MAX], framebufferName = new int[Framebuffer.MAX], vertexArrayName = {0},
-            bufferName = {0}, colorRenderbufferName = {0};
+    private IntBuffer textureName = GLBuffers.newDirectIntBuffer(Texture.MAX),
+            framebufferName = GLBuffers.newDirectIntBuffer(Framebuffer.MAX),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1), bufferName = GLBuffers.newDirectIntBuffer(1),
+            colorRenderbufferName = GLBuffers.newDirectIntBuffer(1);
     private int programName, uniformMvp, uniformDiffuse;
     private Vec2i FRAMEBUFFER_SIZE = new Vec2i(512, 512);
 
@@ -107,10 +110,10 @@ public class Gl_320_fbo_blit extends Test {
         // Create program
         if (validated) {
 
-            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShader = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShader = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(vertShader);
@@ -135,13 +138,15 @@ public class Gl_320_fbo_blit extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(1, bufferName, 0);
-
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+
+        gl3.glGenBuffers(1, bufferName);
+
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return checkError(gl3, "initBuffer");
     }
@@ -151,9 +156,9 @@ public class Gl_320_fbo_blit extends Test {
         try {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
-            gl3.glGenTextures(Texture.MAX, textureName, 0);
+            gl3.glGenTextures(Texture.MAX, textureName);
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -172,7 +177,7 @@ public class Gl_320_fbo_blit extends Test {
             }
             gl3.glGenerateMipmap(GL_TEXTURE_2D); // Allocate all mipmaps memory
 
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -190,23 +195,22 @@ public class Gl_320_fbo_blit extends Test {
 
     private boolean initFramebuffer(GL3 gl3) {
 
-        gl3.glGenFramebuffers(Framebuffer.MAX, framebufferName, 0);
+        gl3.glGenFramebuffers(Framebuffer.MAX, framebufferName);
 
-        gl3.glGenRenderbuffers(1, colorRenderbufferName, 0);
-        gl3.glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbufferName[0]);
+        gl3.glGenRenderbuffers(1, colorRenderbufferName);
+        gl3.glBindRenderbuffer(GL_RENDERBUFFER, colorRenderbufferName.get(0));
         gl3.glRenderbufferStorage(GL_RENDERBUFFER, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
 
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RENDER]);
-        gl3.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-                GL_RENDERBUFFER, colorRenderbufferName[0]);
-        if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.RENDER])) {
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.RENDER));
+        gl3.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbufferName.get(0));
+        if (!isFramebufferComplete(gl3, framebufferName.get(Framebuffer.RENDER))) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RESOLVE]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
-        if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.RESOLVE])) {
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.RESOLVE));
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName.get(Texture.COLORBUFFER), 0);
+        if (!isFramebufferComplete(gl3, framebufferName.get(Framebuffer.RESOLVE))) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -216,10 +220,10 @@ public class Gl_320_fbo_blit extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -241,7 +245,7 @@ public class Gl_320_fbo_blit extends Test {
         gl3.glUniform1i(uniformDiffuse, 0);
 
         // Pass 1
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RENDER]);
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.RENDER));
         gl3.glViewport(0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.5f, 1.0f, 1.0f}, 0);
         renderFBO(gl3);
@@ -250,15 +254,15 @@ public class Gl_320_fbo_blit extends Test {
 
         // Generate FBO mipmaps
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
         gl3.glGenerateMipmap(GL_TEXTURE_2D);
         gl3.glBindTexture(GL_TEXTURE_2D, 0);
 
         // Blit framebuffers
         int border = 2;
         int tile = 4;
-        gl3.glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferName[Framebuffer.RENDER]);
-        gl3.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferName[Framebuffer.RESOLVE]);
+        gl3.glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferName.get(Framebuffer.RENDER));
+        gl3.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferName.get(Framebuffer.RESOLVE));
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
         for (int j = 0; j < tile; ++j) {
@@ -294,8 +298,8 @@ public class Gl_320_fbo_blit extends Test {
         gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
+        gl3.glBindVertexArray(vertexArrayName.get(0));
 
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
     }
@@ -310,8 +314,8 @@ public class Gl_320_fbo_blit extends Test {
         gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
+        gl3.glBindVertexArray(vertexArrayName.get(0));
 
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
     }
@@ -322,11 +326,17 @@ public class Gl_320_fbo_blit extends Test {
         GL3 gl3 = (GL3) gl;
 
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteBuffers(1, bufferName, 0);
-        gl3.glDeleteTextures(Texture.MAX, textureName, 0);
-        gl3.glDeleteRenderbuffers(1, colorRenderbufferName, 0);
-        gl3.glDeleteFramebuffers(Framebuffer.MAX, framebufferName, 0);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteBuffers(1, bufferName);
+        gl3.glDeleteTextures(Texture.MAX, textureName);
+        gl3.glDeleteRenderbuffers(1, colorRenderbufferName);
+        gl3.glDeleteFramebuffers(Framebuffer.MAX, framebufferName);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(colorRenderbufferName);
+        BufferUtils.destroyDirectBuffer(framebufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return true;
     }

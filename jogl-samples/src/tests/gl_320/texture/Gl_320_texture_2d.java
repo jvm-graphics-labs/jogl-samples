@@ -42,7 +42,7 @@ public class Gl_320_texture_2d extends Test {
 
     private final String SHADERS_SOURCE = "texture-2d";
     private final String SHADERS_ROOT = "src/data/gl_320/texture";
-    private final String TEXTURE_DIFFUSE = "kueken7_rg11b10_ufloat.ktx";
+    private final String TEXTURE_DIFFUSE = "kueken7_rgba8_unorm.dds";
 
     private int vertexCount = 4;
     private int vertexSize = vertexCount * glf.Vertex_v2fv2f.SIZE;
@@ -194,11 +194,9 @@ public class Gl_320_texture_2d extends Test {
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
             for (int level = 0; level < texture.levels(); ++level) {
                 gl3.glTexImage2D(GL_TEXTURE_2D, level,
-//                        jgli.Gl.InternalFormat.INTERNAL_SRGB8.value,
                         format.internal.value,
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         0,
-//                        jgli.Gl.ExternalFormat.EXTERNAL_RGB.value, jgli.Gl.TypeFormat.TYPE_U8.value,
                         format.external.value, format.type.value,
                         texture.data(level));
             }
