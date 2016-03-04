@@ -5,7 +5,7 @@
  */
 package framework;
 
-import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SEVERITY_HIGH;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SEVERITY_LOW;
 import com.jogamp.opengl.GLDebugListener;
 import com.jogamp.opengl.GLDebugMessage;
 
@@ -47,10 +47,10 @@ public class GlDebugOutput implements GLDebugListener {
     @Override
     public void messageSent(GLDebugMessage event) {
 
-        if (event.getDbgSeverity() == GL_DEBUG_SEVERITY_HIGH) {
-            System.err.println("GlDebugOutput.messageSent(): " + event);
-        } else {
+        if (event.getDbgSeverity() == GL_DEBUG_SEVERITY_LOW) {
             System.out.println("GlDebugOutput.messageSent(): " + event);
+        } else {
+            System.err.println("GlDebugOutput.messageSent(): " + event);
         }
         if (null != message && message.equals(event.getDbgMsg()) && id == event.getDbgId()) {
             received = true;
