@@ -31,7 +31,7 @@ You can find the results inside the [`templates` directory](https://github.com/e
 
 Ps: Hello Triangle and Hello Texture have been moved into a stand-alone [project](https://github.com/elect86/helloTriangle)
 
-Pps: I need some amd volunteer to test the amd-only extensions :octocat:
+Pps: I need some amd volunteer to test the amd-only and intel-only extensions :octocat:
 
 ## Changelog:
 - 03-03-16, [`gl-430-program-compute-variable-group-size`](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_program_compute_variable_group_size.java) added
