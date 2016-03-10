@@ -6,9 +6,12 @@
 package tests.gl_430;
 
 import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GL4;
+import com.jogamp.opengl.GLES2;
 import framework.Profile;
 import framework.Test;
+import glf.Vertex_v2fv2f;
 import glm.vec._2.Vec2;
 import glm.vec._2.i.Vec2i;
 
@@ -32,12 +35,12 @@ public class Gl_430_perf_monitor_amd extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba_dxt1_unorm.dds";
 
     private int vertexCount = 4;
-    private int vertexSize = vertexCount * 2 * 2 * Float.BYTES;
+    private int vertexSize = vertexCount * Vertex_v2fv2f.SIZE;
     private float[] vertexData = {
-        -1.0f, -1.0f, 0.0f, 1.0f,
-        +1.0f, -1.0f, 1.0f, 1.0f,
-        +1.0f, +1.0f, 1.0f, 0.0f,
-        -1.0f, +1.0f, 0.0f, 0.0f};
+        -1.0f, -1.0f,/**/ 0.0f, 1.0f,
+        +1.0f, -1.0f,/**/ 1.0f, 1.0f,
+        +1.0f, +1.0f,/**/ 1.0f, 0.0f,
+        -1.0f, +1.0f,/**/ 0.0f, 0.0f};
 
     private int elementCount = 6;
     private int elementSize = elementCount * Short.BYTES;
@@ -78,7 +81,8 @@ public class Gl_430_perf_monitor_amd extends Test {
 
         boolean validated = true;
         validated = validated && checkExtension(gl4, "GL_AMD_performance_monitor");
-
+        GL2 gles2 = (GL2)gl;
+//        gles2.glgeet
 //		if(validated)
 //		{
 //			this->Monitor.reset(new monitor());
