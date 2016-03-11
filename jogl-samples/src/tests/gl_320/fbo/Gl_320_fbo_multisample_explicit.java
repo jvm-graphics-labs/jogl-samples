@@ -124,13 +124,13 @@ public class Gl_320_fbo_multisample_explicit extends Test {
 
         ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
 
-        shaderCodes[Shader.VERT] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                this.getClass(), SHADERS_ROOT, null, VERT_SHADER_SOURCE, "vert", null, true);
+        shaderCodes[Shader.VERT] = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null, 
+                VERT_SHADER_SOURCE, "vert", null, true);
 
         for (int i = 0; i < Program.MAX; i++) {
 
-            shaderCodes[Shader.FRAG_TEXTURE + i] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, FRAG_SHADER_SOURCE[i], "frag", null, true);
+            shaderCodes[Shader.FRAG_TEXTURE + i] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), 
+                    SHADERS_ROOT, null, FRAG_SHADER_SOURCE[i], "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(shaderCodes[Shader.VERT]);
