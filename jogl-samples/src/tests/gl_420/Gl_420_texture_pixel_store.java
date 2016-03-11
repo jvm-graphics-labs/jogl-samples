@@ -76,7 +76,7 @@ public class Gl_420_texture_pixel_store extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_EXT_texture_compression_s3tc");
+        validated = validated && gl4.isExtensionAvailable("GL_EXT_texture_compression_s3tc");
 
         if (validated) {
             validated = initTexture(gl4);

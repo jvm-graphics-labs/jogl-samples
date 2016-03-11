@@ -83,7 +83,7 @@ public class Gl_450_clip_control extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_clip_control");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_clip_control");
 
         if (validated) {
             validated = initProgram(gl4);

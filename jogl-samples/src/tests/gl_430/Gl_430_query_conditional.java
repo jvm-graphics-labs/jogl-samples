@@ -69,7 +69,7 @@ public class Gl_430_query_conditional extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_ES3_compatibility");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_ES3_compatibility");
 
         if (validated) {
             validated = initQuery(gl4);

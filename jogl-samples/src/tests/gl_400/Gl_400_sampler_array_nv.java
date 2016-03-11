@@ -82,7 +82,7 @@ public class Gl_400_sampler_array_nv extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_NV_gpu_shader5");
+        validated = validated && gl4.isExtensionAvailable("GL_NV_gpu_shader5");
 
         if (validated) {
             validated = initProgram(gl4);

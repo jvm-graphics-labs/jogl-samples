@@ -86,9 +86,9 @@ public class Gl_430_texture_view extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_texture_query_levels");
-        validated = validated && checkExtension(gl4, "GL_ARB_texture_view");
-        validated = validated && checkExtension(gl4, "GL_ARB_fragment_layer_viewport");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_texture_query_levels");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_texture_view");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_fragment_layer_viewport");
 
         if (validated) {
             validated = initProgram(gl4);

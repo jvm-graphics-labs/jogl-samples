@@ -86,7 +86,7 @@ public class Gl_430_texture_storage extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_internalformat_query2");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_internalformat_query2");
 
         long[] query_COMPRESSED_RGB8_ETC2 = {0};
         gl4.glGetInternalformati64v(GL_TEXTURE_2D, GL_RGB4, GL_INTERNALFORMAT_PREFERRED,

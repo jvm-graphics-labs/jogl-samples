@@ -74,7 +74,7 @@ public class Gl_430_atomic_counter extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_clear_buffer_object");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_clear_buffer_object");
 
         if (validated) {
             validated = initBuffer(gl4);

@@ -74,7 +74,7 @@ public class Gl_500_shader_invocation_nv extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_NV_shader_thread_group");
+        boolean validated = gl4.isExtensionAvailable("GL_NV_shader_thread_group");
 
         if (validated) {
             validated = initBuffer(gl4);

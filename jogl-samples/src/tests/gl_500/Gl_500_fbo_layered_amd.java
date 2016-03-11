@@ -36,8 +36,8 @@ public class Gl_500_fbo_layered_amd extends Test {
 
         boolean validated = true;
 
-        validated = validated && checkExtension(gl4, "GL_AMD_vertex_shader_viewport_index");
-        validated = validated && checkExtension(gl4, "GL_AMD_vertex_shader_layer");
+        validated = validated && gl4.isExtensionAvailable("GL_AMD_vertex_shader_viewport_index");
+        validated = validated && gl4.isExtensionAvailable("GL_AMD_vertex_shader_layer");
 
 //		if(validated)
 //			validated = initProgram();

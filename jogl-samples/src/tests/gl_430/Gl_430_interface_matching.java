@@ -75,8 +75,8 @@ public class Gl_430_interface_matching extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_arrays_of_arrays");
-        validated = validated && checkExtension(gl4, "GL_ARB_program_interface_query");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_arrays_of_arrays");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_program_interface_query");
 
         if (validated) {
             validated = initMax(gl4);

@@ -83,7 +83,7 @@ public class Gl_500_texture_bindless_arb extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_bindless_texture");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_bindless_texture");
 
 //		this->sync(test::ASYNC);
         if (validated) {

@@ -85,7 +85,7 @@ public class Gl_500_buffer_sparse_arb extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_sparse_buffer");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_sparse_buffer");
 
         if (validated) {
             validated = initProgram(gl4);

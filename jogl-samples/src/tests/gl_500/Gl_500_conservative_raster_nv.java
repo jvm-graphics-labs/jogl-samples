@@ -105,7 +105,7 @@ public class Gl_500_conservative_raster_nv extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_NV_conservative_raster");
+        boolean validated = gl4.isExtensionAvailable("GL_NV_conservative_raster");
 
         Caps caps = new Caps(gl4, Profile.CORE);
 

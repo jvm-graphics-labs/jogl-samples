@@ -98,7 +98,7 @@ public class Gl_430_program_compute extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_compute_shader");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_compute_shader");
 
         logImplementationDependentLimit(gl4, GL_MAX_COMPUTE_UNIFORM_BLOCKS,
                 "GL_MAX_COMPUTE_UNIFORM_BLOCKS");

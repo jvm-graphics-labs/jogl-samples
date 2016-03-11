@@ -90,7 +90,7 @@ public class Gl_320_texture_compressed_ext extends Test {
         viewport[Texture.BC5] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
 
         boolean validated = true;
-        validated = validated && checkExtension(gl3, "GL_EXT_texture_compression_s3tc");
+        validated = validated && gl3.isExtensionAvailable("GL_EXT_texture_compression_s3tc");
 
         if (validated) {
             validated = initProgram(gl3);

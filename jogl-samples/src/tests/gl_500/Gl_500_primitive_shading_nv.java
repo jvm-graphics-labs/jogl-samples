@@ -84,7 +84,7 @@ public class Gl_500_primitive_shading_nv extends Test {
 
         boolean validated = true;
 
-        validated = validated && checkExtension(gl4, "GL_NV_geometry_shader_passthrough");
+        validated = validated && gl4.isExtensionAvailable("GL_NV_geometry_shader_passthrough");
         
         if (validated) {
             validated = initQuery(gl4);

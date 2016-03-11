@@ -80,7 +80,7 @@ public class Gl_430_perf_monitor_amd extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_AMD_performance_monitor");
+        validated = validated && gl4.isExtensionAvailable("GL_AMD_performance_monitor");
         GL2 gles2 = (GL2)gl;
 //        gles2.glgeet
 //		if(validated)

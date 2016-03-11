@@ -104,7 +104,7 @@ public class Gl_440_sampler_wrap extends Test {
                 viewportSize.y * 1.0f);
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_texture_mirror_clamp_to_edge");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_texture_mirror_clamp_to_edge");
 
         if (validated) {
             validated = initProgram(gl4);
@@ -203,7 +203,7 @@ public class Gl_440_sampler_wrap extends Test {
         gl4.glSamplerParameteri(samplerName.get(Viewport._2), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
         gl4.glSamplerParameteri(samplerName.get(Viewport._3), GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
         gl4.glSamplerParameteri(samplerName.get(Viewport._4), GL_TEXTURE_WRAP_S, GL_MIRROR_CLAMP_TO_EDGE);
-        if (checkExtension(gl4, "GL_EXT_texture_mirror_clamp")) {
+        if (gl4.isExtensionAvailable("GL_EXT_texture_mirror_clamp")) {
             gl4.glSamplerParameteri(samplerName.get(Viewport._5), GL_TEXTURE_WRAP_S, GL_MIRROR_CLAMP_TO_BORDER_EXT);
         } else {
             gl4.glSamplerParameteri(samplerName.get(Viewport._5), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
@@ -214,7 +214,7 @@ public class Gl_440_sampler_wrap extends Test {
         gl4.glSamplerParameteri(samplerName.get(Viewport._2), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
         gl4.glSamplerParameteri(samplerName.get(Viewport._3), GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
         gl4.glSamplerParameteri(samplerName.get(Viewport._4), GL_TEXTURE_WRAP_T, GL_MIRROR_CLAMP_TO_EDGE);
-        if (checkExtension(gl4, "GL_EXT_texture_mirror_clamp")) {
+        if (gl4.isExtensionAvailable("GL_EXT_texture_mirror_clamp")) {
             gl4.glSamplerParameteri(samplerName.get(Viewport._5), GL_TEXTURE_WRAP_T, GL_MIRROR_CLAMP_TO_BORDER_EXT);
         } else {
             gl4.glSamplerParameteri(samplerName.get(Viewport._5), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);

@@ -12,6 +12,10 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
+import static com.jogamp.opengl.GL.GL_DONT_CARE;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SEVERITY_LOW;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SOURCE_APPLICATION;
+import static com.jogamp.opengl.GL2ES2.GL_DEBUG_TYPE_OTHER;
 import com.jogamp.opengl.GL2ES3;
 import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.GL4;
@@ -35,6 +39,7 @@ import javax.imageio.ImageIO;
 import glm.vec._2.Vec2;
 import glm.vec._2.i.Vec2i;
 import glm.vec._3.Vec3;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -270,17 +275,11 @@ public class Test implements GLEventListener, KeyListener {
 
         int majorVersionContext = GLContext.getMaxMajor(GLContext.CONTEXT_CURRENT);
         int minorVersionContext = GLContext.getMaxMinor(GLContext.CONTEXT_CURRENT, majorVersionContext);
-//        gl.glGetIntegerv(GL_MAJOR_VERSION, majorVersionContext, 0);
-//        gl.glGetIntegerv(GL_MINOR_VERSION, minorVersionContext, 0);
         System.out.println("OpenGL Version Needed " + major + "." + minor
                 + " ( " + majorVersionContext + "," + minorVersionContext + " found)");
 //        return version(majorVersionContext[0], minorVersionContext[0])
 //                >= version(major, minor);
-        return GLContext.isValidGLVersion(GLContext.CONTEXT_CURRENT, 4, 3);
-    }
-
-    private int version(int major, int minor) {
-        return major * 100 + minor * 10;
+        return GLContext.isValidGLVersion(GLContext.CONTEXT_CURRENT, major, minor);
     }
 
     protected boolean checkError(GL gl, String title) {
@@ -311,19 +310,6 @@ public class Test implements GLEventListener, KeyListener {
             System.out.println("OpenGL Error(" + errorString + "): " + title);
         }
         return error == GL_NO_ERROR;
-    }
-
-    protected boolean checkExtension(GL3 gl3, String extensionName) {
-        return gl3.isExtensionAvailable(extensionName);
-//        int[] extensionCount = {0};
-//        gl3.glGetIntegerv(GL_NUM_EXTENSIONS, extensionCount, 0);
-//        for (int i = 0; i < extensionCount[0]; i++) {
-//            if (gl3.glGetStringi(GL_EXTENSIONS, i).equals(extensionName)) {
-//                return true;
-//            }
-//        }
-//        System.out.println("Failed to find Extension: " + extensionName);
-//        return false;
     }
 
     protected boolean isFramebufferComplete(GL gl, int framebufferName) {
@@ -366,18 +352,21 @@ public class Test implements GLEventListener, KeyListener {
 
     protected void logImplementationDependentLimit(GL4 gl4, int value, String string) {
 
-        int[] result = {0};
-        gl4.glGetIntegerv(value, result, 0);
-        System.out.println(value + "(" + string + "): " + result[0]);
-        if (checkExtension(gl4, "GL_ARB_debug_output")) {
-            gl4.glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 1,
-                    GL_DEBUG_SEVERITY_LOW, string.length(), string);
+        IntBuffer result = GLBuffers.newDirectIntBuffer(1);
+        gl4.glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, GL_DEBUG_SEVERITY_LOW, 0, null, true);
+        gl4.glGetIntegerv(value, result);
+        String limit = string + ": " + result.get(0);
+        if (gl4.isExtensionAvailable("GL_KHR_debug")) {
+            gl4.glDebugMessageInsert(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, 1, GL_DEBUG_SEVERITY_LOW,
+                    limit.length(), limit);
         }
+        gl4.glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_OTHER, GL_DEBUG_SEVERITY_LOW, 0, null, false);
+        BufferUtils.destroyDirectBuffer(result);
     }
 
     protected boolean validate(GL2ES3 gl4, int vertexArrayName, VertexAttrib[] expected) {
 
-        boolean success = true;
+        boolean success_ = true;
 
         int[] maxVertexAttrib = {0};
         gl4.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, maxVertexAttrib, 0);
@@ -411,12 +400,12 @@ public class Test implements GLEventListener, KeyListener {
                 vertexAttrib.divisor = value[0];
             }
 //            gl4.glGetVertexAttribPointerv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_POINTER,  value,0);
-            success = success && (vertexAttrib.isEqual(expected[attribLocation]));
-            assert (success);
+            success_ = success_ && (vertexAttrib.isEqual(expected[attribLocation]));
+            assert (success_);
         }
         gl4.glBindVertexArray(0);
 
-        return success;
+        return success_;
     }
 
     protected float cameraDistance() {

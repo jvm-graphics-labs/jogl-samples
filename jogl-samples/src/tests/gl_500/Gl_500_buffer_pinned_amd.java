@@ -83,7 +83,7 @@ public class Gl_500_buffer_pinned_amd extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_AMD_pinned_memory");
+        validated = validated && gl4.isExtensionAvailable("GL_AMD_pinned_memory");
 
         if (validated) {
             validated = initTexture(gl4);

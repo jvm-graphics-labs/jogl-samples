@@ -108,7 +108,7 @@ public class Gl_440_fbo_depth_stencil extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_texture_stencil8");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_texture_stencil8");
 
         if (validated) {
             validated = initProgram(gl4);

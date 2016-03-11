@@ -101,10 +101,10 @@ public class Gl_500_texture_cube_arb extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_seamless_cubemap_per_texture");
-        validated = validated && checkExtension(gl4, "GL_ARB_shader_storage_buffer_object");
-        validated = validated && checkExtension(gl4, "GL_ARB_buffer_storage");
-        validated = validated && checkExtension(gl4, "GL_ARB_multi_bind");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_seamless_cubemap_per_texture");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_shader_storage_buffer_object");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_buffer_storage");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_multi_bind");
 
         if (validated) {
             validated = initProgram(gl4);

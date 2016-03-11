@@ -74,7 +74,7 @@ public class Gl_420_debug_output extends Test {
 
         boolean validated = true;
 
-        if (validated && checkExtension(gl4, "GL_ARB_debug_output")) {
+        if (validated && gl4.isExtensionAvailable("GL_ARB_debug_output")) {
             validated = initDebugOutput(gl4);
         }
         if (validated) {

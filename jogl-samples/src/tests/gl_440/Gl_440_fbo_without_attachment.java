@@ -93,9 +93,9 @@ public class Gl_440_fbo_without_attachment extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_framebuffer_no_attachments");
-        validated = validated && checkExtension(gl4, "GL_ARB_clear_texture");
-        validated = validated && checkExtension(gl4, "GL_ARB_shader_storage_buffer_object");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_framebuffer_no_attachments");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_clear_texture");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_shader_storage_buffer_object");
 
         if (validated) {
             validated = initProgram(gl4);

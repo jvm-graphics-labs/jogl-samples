@@ -91,7 +91,7 @@ public class Gl_440_query_occlusion extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_query_buffer_object");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_query_buffer_object");
 
         int[] queryCounter = {0};
         gl4.glGetQueryiv(GL_ANY_SAMPLES_PASSED_CONSERVATIVE, GL_QUERY_COUNTER_BITS, queryCounter, 0);

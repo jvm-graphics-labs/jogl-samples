@@ -97,7 +97,7 @@ public class Gl_450_texture_barrier extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_texture_barrier");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_texture_barrier");
 
         Vec2 windowSizeF = new Vec2(windowSize);
         Vec2 windowRange = new Vec2(windowSize.mul_(3f));

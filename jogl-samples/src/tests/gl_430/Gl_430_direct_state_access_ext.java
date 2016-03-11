@@ -105,7 +105,7 @@ public class Gl_430_direct_state_access_ext extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_EXT_direct_state_access");
+        boolean validated = gl4.isExtensionAvailable("GL_EXT_direct_state_access");
 
         if (validated) {
             validated = initProgram(gl4);

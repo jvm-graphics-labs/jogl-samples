@@ -85,7 +85,7 @@ public class Gl_430_fbo_invalidate extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_invalidate_subdata");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_invalidate_subdata");
 
         if (validated) {
             validated = initState(gl4);

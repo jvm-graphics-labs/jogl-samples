@@ -53,7 +53,7 @@ public class Gl_430_image_store extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_shader_image_size");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_shader_image_size");
 
         logImplementationDependentLimit(gl4, GL_MAX_TEXTURE_IMAGE_UNITS, "GL_MAX_TEXTURE_IMAGE_UNITS");
 

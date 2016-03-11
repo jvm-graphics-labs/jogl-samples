@@ -35,7 +35,7 @@ public class Gl_500_fbo_multisample_position_amd extends Test{
 
         boolean validated = true;
 
-        validated = validated && checkExtension(gl4, "GL_AMD_sample_positions");
+        validated = validated && gl4.isExtensionAvailable("GL_AMD_sample_positions");
         
 //		if(validated)
 //			validated = initProgram();
