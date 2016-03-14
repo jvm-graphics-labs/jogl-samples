@@ -22,6 +22,7 @@ import glm.vec._4.Vec4;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -92,10 +93,13 @@ public class Gl_320_fbo_srgb extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX],
-            framebufferName = {0};
+    private int[] programName = new int[Program.MAX], uniformDiffuse = new int[Program.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(Program.MAX),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX), framebufferName = GLBuffers.newDirectIntBuffer(1);
     private int framebufferScale = 2, uniformTransform;
+    private FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 0.5f, 0.0f, 1.0f}),
+            clearDepth = GLBuffers.newDirectFloatBuffer(new float[]{1.0f});
 
     @Override
     protected boolean begin(GL gl) {
@@ -135,10 +139,10 @@ public class Gl_320_fbo_srgb extends Test {
 
         if (validated) {
 
-            shaderCodes[Shader.VERT_TEXTURE] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADER_SOURCE_TEXTURE, "vert", null, true);
-            shaderCodes[Shader.FRAG_TEXTURE] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADER_SOURCE_TEXTURE, "frag", null, true);
+            shaderCodes[Shader.VERT_TEXTURE] = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADER_SOURCE_TEXTURE, "vert", null, true);
+            shaderCodes[Shader.FRAG_TEXTURE] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADER_SOURCE_TEXTURE, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             programName[Program.TEXTURE] = program.program();
@@ -159,10 +163,10 @@ public class Gl_320_fbo_srgb extends Test {
 
         if (validated) {
 
-            shaderCodes[Shader.VERT_SPLASH] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADER_SOURCE_SPLASH, "vert", null, true);
-            shaderCodes[Shader.FRAG_SPLASH] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADER_SOURCE_SPLASH, "frag", null, true);
+            shaderCodes[Shader.VERT_SPLASH] = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADER_SOURCE_SPLASH, "vert", null, true);
+            shaderCodes[Shader.FRAG_SPLASH] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADER_SOURCE_SPLASH, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             programName[Program.SPLASH] = program.program();
@@ -182,15 +186,12 @@ public class Gl_320_fbo_srgb extends Test {
         if (validated) {
 
             uniformTransform = gl3.glGetUniformBlockIndex(programName[Program.TEXTURE], "Transform");
-            uniformDiffuse[Program.TEXTURE]
-                    = gl3.glGetUniformLocation(programName[Program.TEXTURE], "diffuse");
-            uniformDiffuse[Program.SPLASH]
-                    = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
+            uniformDiffuse[Program.TEXTURE] = gl3.glGetUniformLocation(programName[Program.TEXTURE], "diffuse");
+            uniformDiffuse[Program.SPLASH] = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
 
             gl3.glUseProgram(programName[Program.TEXTURE]);
             gl3.glUniform1i(uniformDiffuse[Program.TEXTURE], 0);
-            gl3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform,
-                    Semantic.Uniform.TRANSFORM0);
+            gl3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform, Semantic.Uniform.TRANSFORM0);
 
             gl3.glUseProgram(programName[Program.SPLASH]);
             gl3.glUniform1i(uniformDiffuse[Program.SPLASH], 0);
@@ -201,27 +202,29 @@ public class Gl_320_fbo_srgb extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+
+        gl3.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int[] uniformBufferOffset = {0};
-        gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
+        gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return true;
     }
@@ -240,10 +243,10 @@ public class Gl_320_fbo_srgb extends Test {
 
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl3.glGenTextures(Texture.MAX, textureName, 0);
+            gl3.glGenTextures(Texture.MAX, textureName);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, swizzles.r.value);
@@ -265,7 +268,7 @@ public class Gl_320_fbo_srgb extends Test {
             BufferUtils.destroyDirectBuffer(dataBuffer);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -274,7 +277,7 @@ public class Gl_320_fbo_srgb extends Test {
                     windowSize.y * framebufferScale, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RENDERBUFFER]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.RENDERBUFFER));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl3.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, windowSize.x * framebufferScale,
@@ -290,10 +293,10 @@ public class Gl_320_fbo_srgb extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
+        gl3.glGenVertexArrays(Program.MAX, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(Program.TEXTURE));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -301,11 +304,11 @@ public class Gl_320_fbo_srgb extends Test {
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl3.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         }
         gl3.glBindVertexArray(0);
 
-        gl3.glBindVertexArray(vertexArrayName[Program.SPLASH]);
+        gl3.glBindVertexArray(vertexArrayName.get(Program.SPLASH));
         gl3.glBindVertexArray(0);
 
         return true;
@@ -313,12 +316,12 @@ public class Gl_320_fbo_srgb extends Test {
 
     private boolean initFramebuffer(GL3 gl3) {
 
-        gl3.glGenFramebuffers(1, framebufferName, 0);
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.RENDERBUFFER], 0);
+        gl3.glGenFramebuffers(1, framebufferName);
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName.get(Texture.COLORBUFFER), 0);
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName.get(Texture.RENDERBUFFER), 0);
 
-        if (!isFramebufferComplete(gl3, framebufferName[0])) {
+        if (!isFramebufferComplete(gl3, framebufferName.get(0))) {
             return false;
         }
 
@@ -339,7 +342,7 @@ public class Gl_320_fbo_srgb extends Test {
 
         GL3 gl3 = (GL3) gl;
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, Mat4.SIZE, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -358,21 +361,20 @@ public class Gl_320_fbo_srgb extends Test {
 
             gl3.glViewport(0, 0, windowSize.x * framebufferScale, windowSize.y * framebufferScale);
 
-            gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
+            gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
             // Explicitly convert linear pixel color to sRGB color space, as FramebufferName is an sRGB FBO
             // Shader execution is done with linear color to get correct linear algebra working.
             gl3.glEnable(GL_FRAMEBUFFER_SRGB);
 
-            float[] depth = {1.0f};
-            gl3.glClearBufferfv(GL_DEPTH, 0, depth, 0);
-            gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+            gl3.glClearBufferfv(GL_DEPTH, 0, clearDepth);
+            gl3.glClearBufferfv(GL_COLOR, 0, clearColor);
 
             gl3.glUseProgram(programName[Program.TEXTURE]);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
-            gl3.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
-            gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
+            gl3.glBindVertexArray(vertexArrayName.get(Program.TEXTURE));
+            gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
 
             gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 2, 0);
         }
@@ -390,8 +392,8 @@ public class Gl_320_fbo_srgb extends Test {
             gl3.glUseProgram(programName[Program.SPLASH]);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindVertexArray(vertexArrayName[Program.SPLASH]);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+            gl3.glBindVertexArray(vertexArrayName.get(Program.SPLASH));
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
 
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 1);
         }
@@ -404,13 +406,21 @@ public class Gl_320_fbo_srgb extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteFramebuffers(1, framebufferName, 0);
+        gl3.glDeleteFramebuffers(1, framebufferName);
         gl3.glDeleteProgram(programName[Program.SPLASH]);
         gl3.glDeleteProgram(programName[Program.TEXTURE]);
 
-        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
-        gl3.glDeleteTextures(Texture.MAX, textureName, 0);
-        gl3.glDeleteVertexArrays(Program.MAX, vertexArrayName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName);
+        gl3.glDeleteTextures(Texture.MAX, textureName);
+        gl3.glDeleteVertexArrays(Program.MAX, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(framebufferName);
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(clearColor);
+        BufferUtils.destroyDirectBuffer(clearDepth);
 
         return true;
     }
