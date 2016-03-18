@@ -65,6 +65,7 @@ dimension. Before rendering, it enables shading for each sample with `glEnable(G
 `glEnable(GL_SAMPLE_SHADING)` and `glMinSampleShading(1.0f)`. It renders the diffuse texture to the 
 multisample fbo, blits the content to the other fbo and then render the final result to screen.
 * `glMinSampleShading(1f)` _is super sampling_ (SSAA), [related](http://stackoverflow.com/questions/36036861/pure-ssaa-vs-per-sample-multisampling/36037173#)
+* small tip, if you mix texture and renderbuffer with multisampling, you must use fixed sample location for textures..
 * given a `interpolateAtSample` bug in the nvidia [glsl compiler](https://devtalk.nvidia.com/default/topic/914874/opengl/glsl-compiler-bug-on-interpolateatsample-/) I had to find a trick and I was told to use `sample` identifier instead in the fragment shader to get the sample coordinates.
 * [issue 7](https://github.com/elect86/jogl-samples/issues/7)
 

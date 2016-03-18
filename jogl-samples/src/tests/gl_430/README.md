@@ -82,6 +82,8 @@ In jogl, to enable Debug Output you have to pass it at the context creation, thi
 so that we get a fully programmable texture filtering. The sampler object is no longer useful. It allows to 
 gather any component of a 2x2 footprint. It allows to use an arbitrary offset to select the footprint and even 
 extend this functionality to a per-component offset. Finally, it allows to perform a per-sample depth comparison.
+* small tip, I found DSA working perfectly so far, on contrary on many keep saying it's broken. What does not work is, instead, the Debug Output with DSA, that's really broken. So, whenever you got problems or crashing, you have to switch to not-dsa, check the dbg error and then switch back to dsa. 
+* small tip2, also `glCheckNamedFramebufferStatus` is bugged, when I was using wrongly multisampling with a different number of samples for the color and depth attachments, it was returning `GL_FRAMEBUFFER_COMPLETE` when it was not.
 
 ### [gl-430-vertex-attrib-binding](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_vertex_attrib_binding.java):
 
