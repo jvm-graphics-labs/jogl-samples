@@ -10,8 +10,10 @@ import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL3;
 import static com.jogamp.opengl.GL3.GL_PROGRAM_POINT_SIZE;
 import static com.jogamp.opengl.GL3ES3.*;
+import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import glm.vec._3.Vec3;
@@ -20,6 +22,8 @@ import framework.Semantic;
 import framework.Test;
 import glm.vec._4.Vec4;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -39,7 +43,9 @@ public class Gl_320_primitive_point_quad extends Test {
     private final String SHADERS_ROOT = "src/data/gl_320/primitive";
 
     private int vertexCount, programName, uniformMvp, uniformMv, uniformCameraPosition;
-    private int[] vertexArrayName = {0}, bufferName = {0};
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), bufferName = GLBuffers.newDirectIntBuffer(1);
+    private FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(new float[]{0.0f, 0.0f, 0.0f, 0.0f}),
+            clearDepth = GLBuffers.newDirectFloatBuffer(new float[]{1.0f});
 
     @Override
     protected boolean begin(GL gl) {
@@ -74,12 +80,12 @@ public class Gl_320_primitive_point_quad extends Test {
 
         if (validated) {
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode geomShaderCode = ShaderCode.create(gl3, GL_GEOMETRY_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "geom", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode geomShaderCode = ShaderCode.create(gl3, GL_GEOMETRY_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "geom", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.add(vertShaderCode);
@@ -110,10 +116,10 @@ public class Gl_320_primitive_point_quad extends Test {
     private boolean initBuffer(GL3 gl3) {
 
         // Generate a buffer object
-        gl3.glGenBuffers(1, bufferName, 0);
+        gl3.glGenBuffers(1, bufferName);
 
         // Bind the buffer for use
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
 
         vertexCount = 5;
 
@@ -149,10 +155,10 @@ public class Gl_320_primitive_point_quad extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 4, GL_FLOAT, false, glf.Vertex_v4fc4f.SIZE, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, glf.Vertex_v4fc4f.SIZE, Vec4.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -176,10 +182,9 @@ public class Gl_320_primitive_point_quad extends Test {
         Mat4 mvp = projection.mul(view).mul(model);
         Mat4 mv = view.mul(model);
 
-        float[] depth = {1.0f};
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
-        gl3.glClearBufferfv(GL_DEPTH, 0, depth, 0);
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor);
+        gl3.glClearBufferfv(GL_DEPTH, 0, clearDepth);
 
         gl3.glDisable(GL_SCISSOR_TEST);
         Vec3 cameraPosition = cameraPosition().negate();
@@ -190,7 +195,7 @@ public class Gl_320_primitive_point_quad extends Test {
         gl3.glUniformMatrix4fv(uniformMv, 1, false, mv.toFa_(), 0);
         gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
 
         gl3.glDrawArraysInstanced(GL_POINTS, 0, vertexCount, 1);
 
@@ -202,9 +207,15 @@ public class Gl_320_primitive_point_quad extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(1, bufferName, 0);
+        gl3.glDeleteBuffers(1, bufferName);
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(clearColor);
+        BufferUtils.destroyDirectBuffer(clearDepth);
 
         return checkError(gl3, "end");
     }
