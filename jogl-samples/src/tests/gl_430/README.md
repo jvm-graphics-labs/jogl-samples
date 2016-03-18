@@ -214,7 +214,7 @@ We can image that a computer shader can select in advance which parts of a mesh 
 generates the multi draw indirect buffer, which will be used to pull specific draws from shader storage buffers that store
 a larger mesh. This method will be demonstrated in my GPU Pro article to be released."
 
-### [gl-430-perf-monitor-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_perf_monitor_amd.java): to finish
+### [gl-430-perf-monitor-amd](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_perf_monitor_amd.java): to finish/test
 
 ### [gl-430-program-compute](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_program_compute.java):
 
