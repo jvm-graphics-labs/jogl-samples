@@ -7,7 +7,11 @@ package tests.gl_450;
 
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL.GL_ARRAY_BUFFER;
+import static com.jogamp.opengl.GL.GL_FRAMEBUFFER;
 import static com.jogamp.opengl.GL.GL_MAP_WRITE_BIT;
+import static com.jogamp.opengl.GL.GL_TRIANGLES;
+import static com.jogamp.opengl.GL.GL_UNSIGNED_SHORT;
+import static com.jogamp.opengl.GL2ES3.GL_COLOR;
 import static com.jogamp.opengl.GL2ES3.GL_UNIFORM_BUFFER;
 import com.jogamp.opengl.GL4;
 import static com.jogamp.opengl.GL4.*;
@@ -44,7 +48,8 @@ public class Gl_450_direct_state_access extends Test {
     }
 
     public Gl_450_direct_state_access() {
-        super("gl-450-direct-state-access", Profile.CORE, 4, 5, new Vec2i(640, 480), new Vec2(Math.PI * 0.2f));
+//        super("gl-450-direct-state-access", Profile.CORE, 4, 5, new Vec2i(640, 480), new Vec2(Math.PI * 0.2f));
+        super("gl-450-direct-state-access", Profile.CORE, 4, 5);
     }
 
     private final String SHADERS_SOURCE = "direct-state-access";
@@ -112,7 +117,7 @@ public class Gl_450_direct_state_access extends Test {
             validated = initProgram(gl4);
         }
         if (validated) {
-            validated = initSampler(gl4);
+//            validated = initSampler(gl4);
         }
         if (validated) {
             validated = initBuffer(gl4);
@@ -121,10 +126,10 @@ public class Gl_450_direct_state_access extends Test {
             validated = initVertexArray(gl4);
         }
         if (validated) {
-            validated = initTexture(gl4);
+//            validated = initTexture(gl4);
         }
         if (validated) {
-            validated = initFramebuffer(gl4);
+//            validated = initFramebuffer(gl4);
         }
 
         //glEnable(GL_SAMPLE_MASK);
@@ -138,10 +143,10 @@ public class Gl_450_direct_state_access extends Test {
 
         if (validated) {
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.init(gl4);
@@ -166,13 +171,14 @@ public class Gl_450_direct_state_access extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        int[] uniformBufferOffset = {0};
-        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
-
-        gl4.glCreateBuffers(Buffer.MAX, bufferName);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementSize);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+
+        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
+        uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
+
+        gl4.glCreateBuffers(Buffer.MAX, bufferName);
 
         if (!bug1287) {
 
@@ -184,25 +190,26 @@ public class Gl_450_direct_state_access extends Test {
 
             gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
             gl4.glBufferStorage(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, 0);
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl4.glBufferStorage(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, 0);
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             gl4.glBufferStorage(GL_UNIFORM_BUFFER, uniformBlockSize * 2, null, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT
                     | GL_MAP_COHERENT_BIT);
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
-        BufferUtils.destroyDirectBuffer(elementBuffer);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         uniformPointer = gl4.glMapNamedBufferRange(bufferName.get(Buffer.TRANSFORM), 0, uniformBlockSize * 2,
                 GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
 
         return true;
     }
 
     private boolean initSampler(GL4 gl4) {
+
+        FloatBuffer borderColorBuffer = GLBuffers.newDirectFloatBuffer(new float[]{0.0f, 0.0f, 0.0f, 0.0f});
 
         gl4.glCreateSamplers(1, samplerName);
         gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
@@ -210,21 +217,20 @@ public class Gl_450_direct_state_access extends Test {
         gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        FloatBuffer borderColorBuffer = GLBuffers.newDirectFloatBuffer(new float[]{0.0f, 0.0f, 0.0f, 0.0f});
         gl4.glSamplerParameterfv(samplerName.get(0), GL_TEXTURE_BORDER_COLOR, borderColorBuffer);
-        BufferUtils.destroyDirectBuffer(borderColorBuffer);
         gl4.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_MIN_LOD, -1000.f);
         gl4.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_MAX_LOD, 1000.f);
         gl4.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_LOD_BIAS, 0.0f);
         gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_COMPARE_MODE, GL_NONE);
         gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
 
+        BufferUtils.destroyDirectBuffer(borderColorBuffer);
+
         return true;
     }
 
     private boolean initTexture(GL4 gl4) {
 
-        //        textureName.put(Texture.TEXTURE, createTexture(gl4, TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
         try {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             if (texture.empty()) {
@@ -270,7 +276,7 @@ public class Gl_450_direct_state_access extends Test {
 
         return true;
     }
-    
+
     private boolean initFramebuffer(GL4 gl4) {
 
         gl4.glCreateFramebuffers(Framebuffer.MAX, framebufferName);
@@ -279,10 +285,12 @@ public class Gl_450_direct_state_access extends Test {
         gl4.glNamedFramebufferTexture(framebufferName.get(Framebuffer.RESOLVE), GL_COLOR_ATTACHMENT0,
                 textureName.get(Texture.COLORBUFFER), 0);
 
-        if (!isFramebufferComplete(gl4, framebufferName.get(Framebuffer.RENDER))) {
+        if (gl4.glCheckNamedFramebufferStatus(framebufferName.get(Framebuffer.RENDER), GL_FRAMEBUFFER)
+                != GL_FRAMEBUFFER_COMPLETE) {
             return false;
         }
-        if (!isFramebufferComplete(gl4, framebufferName.get(Framebuffer.RESOLVE))) {
+        if (gl4.glCheckNamedFramebufferStatus(framebufferName.get(Framebuffer.RESOLVE), GL_FRAMEBUFFER)
+                != GL_FRAMEBUFFER_COMPLETE) {
             return false;
         }
 
@@ -291,6 +299,7 @@ public class Gl_450_direct_state_access extends Test {
         int samples = params.get(0);
         BufferUtils.destroyDirectBuffer(params);
         return samples == 4;
+
     }
 
     private boolean initVertexArray(GL4 gl4) {
@@ -312,38 +321,71 @@ public class Gl_450_direct_state_access extends Test {
         return true;
     }
 
+//    @Override
+//    protected boolean render(GL gl) {
+//
+//        GL4 gl4 = (GL4) gl;
+//
+//        {
+//            Mat4 projectionA = glm.perspective_((float) Math.PI * 0.25f, (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y,
+//                    0.1f, 100.0f).scale(new Vec3(1, -1, 1));
+//            uniformPointer.asFloatBuffer().put(projectionA.mul(viewMat4()).mul(new Mat4(1)).toFa_());
+//
+//            Mat4 projectionB = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
+//            uniformPointer.position(uniformBlockSize);
+//            uniformPointer.asFloatBuffer().put(projectionB.mul(viewMat4()).scale(new Vec3(2), new Mat4(1)).toFa_());
+//            uniformPointer.rewind();
+//        }
+//
+//        // Step 1, render the scene in a multisampled framebuffer
+//        gl4.glBindProgramPipeline(pipelineName.get(0));
+//
+//        renderFBO(gl4);
+//
+//        // Step 2: blit
+//        gl4.glBlitNamedFramebuffer(framebufferName.get(Framebuffer.RENDER), framebufferName.get(Framebuffer.RESOLVE),
+//                0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
+//                0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
+//                GL_COLOR_BUFFER_BIT, GL_NEAREST);
+//
+//        int[] maxColorAttachment = {GL_COLOR_ATTACHMENT0};
+//        gl4.glInvalidateNamedFramebufferData(framebufferName.get(Framebuffer.RENDER), 1, maxColorAttachment, 0);
+//
+//        // Step 3, render the colorbuffer from the multisampled framebuffer
+//        renderFB(gl4);
+//
+//        return true;
+//    }
     @Override
     protected boolean render(GL gl) {
 
         GL4 gl4 = (GL4) gl;
 
         {
-            Mat4 projectionA = glm.perspective_((float) Math.PI * 0.25f, (float) FRAMEBUFFER_SIZE.x / FRAMEBUFFER_SIZE.y,
-                    0.1f, 100.0f).scale(new Vec3(1, -1, 1));
-            uniformPointer.asFloatBuffer().put(projectionA.mul(viewMat4()).mul(new Mat4(1)).toFa_());
-
-            Mat4 projectionB = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
-            uniformPointer.position(uniformBlockSize);
-            uniformPointer.asFloatBuffer().put(projectionB.mul(viewMat4()).scale(new Vec3(2), new Mat4(1)).toFa_());
-            uniformPointer.rewind();
+            Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y,
+                    0.1f, 100.0f);
+            viewMat4().print("view");
+            uniformPointer.asFloatBuffer().put(viewMat4().toFa_());
+            //uniformPointer.asFloatBuffer().put(new Mat4().toFa_());
         }
 
-        // Step 1, render the scene in a multisampled framebuffer
-        gl4.glBindProgramPipeline(pipelineName.get(0));
+        gl4.glViewport(0, 0, windowSize.x, windowSize.y);
+        
+        gl4.glUseProgram(programName);
 
-        renderFBO(gl4);
 
-        // Step 2: blit
-        gl4.glBlitNamedFramebuffer(framebufferName.get(Framebuffer.RENDER), framebufferName.get(Framebuffer.RESOLVE),
-                0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
-                0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
-                GL_COLOR_BUFFER_BIT, GL_NEAREST);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);        
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor);
+        
+        gl4.glBindBufferRange(GL_UNIFORM_BUFFER, 
+                Semantic.Uniform.TRANSFORM0, 
+                bufferName.get(Buffer.TRANSFORM), 
+                0,
+                Mat4.SIZE);
+        
+        gl4.glBindVertexArray(vertexArrayName.get(0));
 
-        int[] maxColorAttachment = {GL_COLOR_ATTACHMENT0};
-        gl4.glInvalidateNamedFramebufferData(framebufferName.get(Framebuffer.RENDER), 1, maxColorAttachment, 0);
-
-        // Step 3, render the colorbuffer from the multisampled framebuffer
-        renderFB(gl4);
+        gl4.glDrawArrays(GL_TRIANGLES, 0, 3);
 
         return true;
     }
