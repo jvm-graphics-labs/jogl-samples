@@ -76,7 +76,7 @@ public class Gl_500_texture_sparse_arb extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_sparse_texture");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_sparse_texture");
 
         if (validated) {
             validated = initProgram(gl4);

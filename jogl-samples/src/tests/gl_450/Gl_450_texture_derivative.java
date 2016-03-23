@@ -75,7 +75,7 @@ public class Gl_450_texture_derivative extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_derivative_control");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_derivative_control");
 
         if (validated) {
             validated = initBuffer(gl4);

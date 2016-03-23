@@ -84,7 +84,7 @@ public class Gl_430_draw_vertex_attrib_binding extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_vertex_attrib_binding");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_vertex_attrib_binding");
 
         if (validated) {
             validated = initProgram(gl4);

@@ -75,8 +75,8 @@ public class Gl_500_primitive_bindless_nv extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_NV_shader_buffer_load");
-        validated = validated && checkExtension(gl4, "GL_NV_vertex_buffer_unified_memory");
+        validated = validated && gl4.isExtensionAvailable("GL_NV_shader_buffer_load");
+        validated = validated && gl4.isExtensionAvailable("GL_NV_vertex_buffer_unified_memory");
 
         /*for (int i = 0; i < 100 * 100; i++) {
 			glCreateBuffers(1, &BufferName[0]);

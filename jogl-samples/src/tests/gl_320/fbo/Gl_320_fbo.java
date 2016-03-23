@@ -134,10 +134,10 @@ public class Gl_320_fbo extends Test {
 
         if (validated) {
 
-            shaderCode[Shader.VERT_TEXTURE] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT_TEXTURE, null, SHADERS_SOURCE_TEXTURE, "vert", null, true);
-            shaderCode[Shader.FRAG_TEXTURE] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT_TEXTURE, null, SHADERS_SOURCE_TEXTURE, "frag", null, true);
+            shaderCode[Shader.VERT_TEXTURE] = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
+                    SHADERS_ROOT_TEXTURE, null, SHADERS_SOURCE_TEXTURE, "vert", null, true);
+            shaderCode[Shader.FRAG_TEXTURE] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(),
+                    SHADERS_ROOT_TEXTURE, null, SHADERS_SOURCE_TEXTURE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.add(shaderCode[Shader.VERT_TEXTURE]);
@@ -155,10 +155,10 @@ public class Gl_320_fbo extends Test {
         }
         if (validated) {
 
-            shaderCode[Shader.VERT_SPLASH] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT_SPLASH, null, SHADERS_SOURCE_SPLASH, "vert", null, true);
-            shaderCode[Shader.FRAG_SPLASH] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT_SPLASH, null, SHADERS_SOURCE_SPLASH, "frag", null, true);
+            shaderCode[Shader.VERT_SPLASH] = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(),
+                    SHADERS_ROOT_SPLASH, null, SHADERS_SOURCE_SPLASH, "vert", null, true);
+            shaderCode[Shader.FRAG_SPLASH] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(),
+                    SHADERS_ROOT_SPLASH, null, SHADERS_SOURCE_SPLASH, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.add(shaderCode[Shader.VERT_SPLASH]);
@@ -175,15 +175,12 @@ public class Gl_320_fbo extends Test {
         if (validated) {
 
             uniformTransform = gl3.glGetUniformBlockIndex(programName[Program.TEXTURE], "Transform");
-            uniformDiffuse[Program.TEXTURE]
-                    = gl3.glGetUniformLocation(programName[Program.TEXTURE], "diffuse");
-            uniformDiffuse[Program.SPLASH]
-                    = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
+            uniformDiffuse[Program.TEXTURE] = gl3.glGetUniformLocation(programName[Program.TEXTURE], "diffuse");
+            uniformDiffuse[Program.SPLASH] = gl3.glGetUniformLocation(programName[Program.SPLASH], "diffuse");
 
             gl3.glUseProgram(programName[Program.TEXTURE]);
             gl3.glUniform1i(uniformDiffuse[Program.TEXTURE], 0);
-            gl3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform,
-                    Semantic.Uniform.TRANSFORM0);
+            gl3.glUniformBlockBinding(programName[Program.TEXTURE], uniformTransform, Semantic.Uniform.TRANSFORM0);
 
             gl3.glUseProgram(programName[Program.SPLASH]);
             gl3.glUniform1i(uniformDiffuse[Program.SPLASH], 0);

@@ -22,13 +22,16 @@ The over 230 samples illustrate almost all OpenGL features ranging from ES 2.0 u
 * [gl-500](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/tests/gl_500)
 * [micro]
 
-Reminder, you need to add "-ea" in VM options in run config for the `assert`s to work
+## Quick setup:
+
+- you need to add "-ea" in VM options in run config for the `assert`s to work
+- add all the jars you find under [`dependencies`](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/dependencies)
 
 You can find the results inside the [`templates` directory](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/templates).
 
 Ps: Hello Triangle and Hello Texture have been moved into a stand-alone [project](https://github.com/elect86/helloTriangle)
 
-Pps: I need some amd volunteer to test the amd-only extensions :octocat:
+Pps: I'd need some guinea pigs (aka: volunteers, but don't worry, it won't hurt :smirk:) to test the amd-only and intel-only extensions :octocat:
 
-## 03-03-16:
-- [`gl-430-program-compute-variable-group-size`](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_program_compute_variable_group_size.java) added
+## Changelog:
+- 03-03-16, [`gl-430-program-compute-variable-group-size`](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_430/Gl_430_program_compute_variable_group_size.java) added

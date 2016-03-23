@@ -28,6 +28,8 @@ out gl_PerVertex
 void main()
 {	
 	Vert.Texcoord = Texcoord;
-	gl_Position = Transform.MVP * vec4(Position, 0.0, 1.0);
+	gl_Position = Transform.MVP * vec4(Position, 3.0, 1.0);
+	//gl_Position = vec4(Position, 0.0, 1.0);
+	//gl_Position = vec4(1.0 * float(gl_VertexID % 2) - 1.0, 1.0 * float(gl_VertexID / 2) - 1.0, 0.0, 1.0);
 }
 

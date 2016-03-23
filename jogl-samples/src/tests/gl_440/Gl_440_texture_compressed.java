@@ -96,7 +96,7 @@ public class Gl_440_texture_compressed extends Test {
         viewport[Texture.BC1] = new Vec4i(windowSize.x >> 1, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
         viewport[Texture.BC3] = new Vec4i(0, windowSize.y >> 1, windowSize.x >> 1, windowSize.y >> 1);
 
-        boolean validated = checkExtension(gl4, "GL_ARB_multi_bind");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_multi_bind");
 
         if (validated) {
             validated = initProgram(gl4);

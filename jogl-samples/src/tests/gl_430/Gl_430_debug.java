@@ -88,7 +88,7 @@ public class Gl_430_debug extends Test {
 
         boolean validated = true;
 
-        if (validated && checkExtension(gl4, "GL_KHR_debug")) {
+        if (validated && gl4.isExtensionAvailable("GL_KHR_debug")) {
             validated = initDebug(gl4);
         }
         if (validated) {

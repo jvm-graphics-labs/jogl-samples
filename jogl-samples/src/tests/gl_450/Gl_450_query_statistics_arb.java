@@ -101,7 +101,7 @@ public class Gl_450_query_statistics_arb extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_pipeline_statistics_query");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_pipeline_statistics_query");
 
         if (validated) {
             validated = initQuery(gl4);

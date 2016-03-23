@@ -70,7 +70,7 @@ public class Gl_430_draw_without_vertex_attrib extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_shader_storage_buffer_object");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_shader_storage_buffer_object");
 
         if (validated) {
             validated = initBuffer(gl4);

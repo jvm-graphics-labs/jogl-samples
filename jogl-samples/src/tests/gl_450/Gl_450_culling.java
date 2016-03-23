@@ -76,7 +76,7 @@ public class Gl_450_culling extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_cull_distance");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_cull_distance");
 
         if (validated) {
             validated = initTexture(gl4);

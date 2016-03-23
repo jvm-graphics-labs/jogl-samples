@@ -102,7 +102,7 @@ public class Gl_500_shader_group_nv extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_NV_shader_thread_group");
+        boolean validated = gl4.isExtensionAvailable("GL_NV_shader_thread_group");
 
         Caps caps = new Caps(gl4, Profile.CORE);
 

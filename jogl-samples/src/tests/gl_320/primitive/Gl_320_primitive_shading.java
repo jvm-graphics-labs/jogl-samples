@@ -12,6 +12,7 @@ import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
 import dev.Vec4u8;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
@@ -21,6 +22,7 @@ import glf.Vertex_v2fc4ub;
 import glm.vec._2.Vec2;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 /**
@@ -71,7 +73,9 @@ public class Gl_320_primitive_shading extends Test {
     }
 
     private int programName;
-    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX], queryName = {0};
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), queryName = GLBuffers.newDirectIntBuffer(1);
+    private FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(new float[]{0.0f, 0.0f, 0.0f, 1.0f});
 
     @Override
     protected boolean begin(GL gl) {
@@ -102,12 +106,12 @@ public class Gl_320_primitive_shading extends Test {
 
         if (validated) {
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode geomShaderCode = ShaderCode.create(gl3, GL_GEOMETRY_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "geom", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode geomShaderCode = ShaderCode.create(gl3, GL_GEOMETRY_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "geom", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.add(vertShaderCode);
@@ -139,17 +143,17 @@ public class Gl_320_primitive_shading extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fc4ub.SIZE, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_UNSIGNED_BYTE, true, Vertex_v2fc4ub.SIZE, Vec2.SIZE);
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl3.glEnableVertexAttribArray(Semantic.Attr.COLOR);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         }
         gl3.glBindVertexArray(0);
 
@@ -158,15 +162,18 @@ public class Gl_320_primitive_shading extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+        FloatBuffer colorBuffer = GLBuffers.newDirectFloatBuffer(colorData);
+
+        gl3.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         for (int i = 0; i < vertexCount; i++) {
             vertexData[i].toBb(vertexBuffer, i);
         }
@@ -174,25 +181,28 @@ public class Gl_320_primitive_shading extends Test {
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int[] uniformBufferOffset = {0};
-        gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
+        gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.CONSTANT]);
-        FloatBuffer colorBuffer = GLBuffers.newDirectFloatBuffer(colorData);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.CONSTANT));
         gl3.glBufferData(GL_UNIFORM_BUFFER, colorSize, colorBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
+        BufferUtils.destroyDirectBuffer(colorBuffer);
 
         return checkError(gl3, "initBuffer");
     }
 
     private boolean initQuery(GL3 gl3) {
 
-        gl3.glGenQueries(1, queryName, 0);
+        gl3.glGenQueries(1, queryName);
 
         int[] queryBits = {0};
         gl3.glGetQueryiv(GL_PRIMITIVES_GENERATED, GL_QUERY_COUNTER_BITS, queryBits, 0);
@@ -208,7 +218,7 @@ public class Gl_320_primitive_shading extends Test {
         GL3 gl3 = (GL3) gl;
 
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             ByteBuffer pointer = gl3.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -223,22 +233,22 @@ public class Gl_320_primitive_shading extends Test {
         }
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor);
 
         gl3.glUseProgram(programName);
 
-        gl3.glBindVertexArray(vertexArrayName[0]);
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.CONSTANT, bufferName[Buffer.CONSTANT]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.CONSTANT, bufferName.get(Buffer.CONSTANT));
 
-        gl3.glBeginQuery(GL_PRIMITIVES_GENERATED, queryName[0]);
+        gl3.glBeginQuery(GL_PRIMITIVES_GENERATED, queryName.get(0));
         {
             gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
         }
         gl3.glEndQuery(GL_PRIMITIVES_GENERATED);
 
         long[] primitivesGenerated = {0};
-        gl3.glGetQueryObjectui64v(queryName[0], GL_QUERY_RESULT, primitivesGenerated, 0);
+        gl3.glGetQueryObjectui64v(queryName.get(0), GL_QUERY_RESULT, primitivesGenerated, 0);
 
         return primitivesGenerated[0] > 0;
     }
@@ -248,9 +258,16 @@ public class Gl_320_primitive_shading extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
         gl3.glDeleteProgram(programName);
+        gl3.glDeleteQueries(1, queryName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(queryName);
+
+        BufferUtils.destroyDirectBuffer(clearColor);
 
         return checkError(gl3, "end");
     }

@@ -35,7 +35,7 @@ public class Gl_500_fbo_layered_nv extends Test{
 
         boolean validated = true;
 
-        validated = validated && checkExtension(gl4, "GL_NV_viewport_array2");
+        validated = validated && gl4.isExtensionAvailable("GL_NV_viewport_array2");
 
 //		if(validated)
 //			validated = initProgram();

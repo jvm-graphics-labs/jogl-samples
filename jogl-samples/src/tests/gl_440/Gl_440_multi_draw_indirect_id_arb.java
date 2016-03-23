@@ -114,10 +114,10 @@ public class Gl_440_multi_draw_indirect_id_arb extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_multi_draw_indirect");
-        validated = validated && checkExtension(gl4, "GL_ARB_shader_draw_parameters");
-        validated = validated && checkExtension(gl4, "GL_ARB_shader_storage_buffer_object");
-        validated = validated && checkExtension(gl4, "GL_ARB_buffer_storage");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_multi_draw_indirect");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_shader_draw_parameters");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_shader_storage_buffer_object");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_buffer_storage");
 
         if (validated) {
             validated = initProgram(gl4);

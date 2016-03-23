@@ -35,7 +35,7 @@ public class Gl_500_fill_rectangle_nv extends Test{
 
         boolean validated = true;
 
-        validated = validated && checkExtension(gl4, "GL_NV_fill_rectangle");
+        validated = validated && gl4.isExtensionAvailable("GL_NV_fill_rectangle");
         
 //		if(validated)
 //			validated = initProgram();

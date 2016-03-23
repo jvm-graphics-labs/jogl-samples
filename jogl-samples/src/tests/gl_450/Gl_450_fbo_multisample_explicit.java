@@ -116,7 +116,7 @@ public class Gl_450_fbo_multisample_explicit extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_shader_texture_image_samples");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_shader_texture_image_samples");
 
         if (validated) {
             validated = initProgram(gl4);

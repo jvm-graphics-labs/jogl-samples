@@ -24,6 +24,8 @@ import framework.Semantic;
 import framework.Test;
 import glf.Vertex_v3fv4u8;
 import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 /**
@@ -87,10 +89,14 @@ public class Gl_320_fbo_shadow extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] framebufferName = {0}, programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], textureName = {0}, uniformTransform = new int[Program.MAX];
+    private IntBuffer framebufferName = GLBuffers.newDirectIntBuffer(1),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(Program.MAX),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), textureName = GLBuffers.newDirectIntBuffer(1);
+    private int[] programName = new int[Program.MAX], uniformTransform = new int[Program.MAX];
     private int uniformShadow;
     private Vec2i shadowSize = new Vec2i(64, 64);
+    private FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(new float[]{0.0f, 0.0f, 0.0f, 1.0f}),
+            clearDepth = GLBuffers.newDirectFloatBuffer(new float[]{1.0f});
 
     @Override
     protected boolean begin(GL gl) {
@@ -126,10 +132,10 @@ public class Gl_320_fbo_shadow extends Test {
 
         if (validated) {
 
-            shaderCodes[Shader.VERT_RENDER] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADER_SOURCE_RENDER, "vert", null, true);
-            shaderCodes[Shader.FRAG_RENDER] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADER_SOURCE_RENDER, "frag", null, true);
+            shaderCodes[Shader.VERT_RENDER] = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADER_SOURCE_RENDER, "vert", null, true);
+            shaderCodes[Shader.FRAG_RENDER] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADER_SOURCE_RENDER, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
 
@@ -149,15 +155,14 @@ public class Gl_320_fbo_shadow extends Test {
 
         if (validated) {
 
-            uniformTransform[Program.RENDER]
-                    = gl3.glGetUniformBlockIndex(programName[Program.RENDER], "Transform");
+            uniformTransform[Program.RENDER] = gl3.glGetUniformBlockIndex(programName[Program.RENDER], "Transform");
             uniformShadow = gl3.glGetUniformLocation(programName[Program.RENDER], "shadow");
         }
 
         if (validated) {
 
-            shaderCodes[Shader.VERT_DEPTH] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADER_SOURCE_DEPTH, "vert", null, true);
+            shaderCodes[Shader.VERT_DEPTH] = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADER_SOURCE_DEPTH, "vert", null, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(shaderCodes[Shader.VERT_DEPTH]);
@@ -173,8 +178,7 @@ public class Gl_320_fbo_shadow extends Test {
 
         if (validated) {
 
-            uniformTransform[Program.DEPTH]
-                    = gl3.glGetUniformBlockIndex(programName[Program.DEPTH], "Transform");
+            uniformTransform[Program.DEPTH] = gl3.glGetUniformBlockIndex(programName[Program.DEPTH], "Transform");
         }
 
         return validated & checkError(gl3, "initProgram");
@@ -182,31 +186,33 @@ public class Gl_320_fbo_shadow extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
+
+        gl3.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         for (int i = 0; i < vertexCount; i++) {
             vertexData[i].toBb(vertexBuffer, i);
         }
         vertexBuffer.rewind();
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         int[] uniformBufferOffset = {0};
         gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
         int uniformBlockSize = Math.max(Mat4.SIZE * 3, uniformBufferOffset[0]);
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return true;
     }
@@ -217,10 +223,10 @@ public class Gl_320_fbo_shadow extends Test {
 
         gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        gl3.glGenTextures(1, textureName, 0);
+        gl3.glGenTextures(1, textureName);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
         gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -239,10 +245,10 @@ public class Gl_320_fbo_shadow extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[Program.RENDER]);
+        gl3.glGenVertexArrays(Program.MAX, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(Program.RENDER));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, Vertex_v3fv4u8.SIZE, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_UNSIGNED_BYTE, true, Vertex_v3fv4u8.SIZE, Vec3.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -250,7 +256,7 @@ public class Gl_320_fbo_shadow extends Test {
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl3.glEnableVertexAttribArray(Semantic.Attr.COLOR);
 
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         }
         gl3.glBindVertexArray(0);
 
@@ -259,12 +265,12 @@ public class Gl_320_fbo_shadow extends Test {
 
     private boolean initFramebuffer(GL3 gl3) {
 
-        gl3.glGenFramebuffers(1, framebufferName, 0);
+        gl3.glGenFramebuffers(1, framebufferName);
 
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[0], 0);
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName.get(0), 0);
         gl3.glDrawBuffer(GL_NONE);
-        if (!isFramebufferComplete(gl3, framebufferName[0])) {
+        if (!isFramebufferComplete(gl3, framebufferName.get(0))) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -281,7 +287,7 @@ public class Gl_320_fbo_shadow extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         ByteBuffer pointer = gl3.glMapBufferRange(
                 GL_UNIFORM_BUFFER, 0, Mat4.SIZE * 3,
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -316,7 +322,7 @@ public class Gl_320_fbo_shadow extends Test {
 
         gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
 
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
 
         renderShadow(gl3);
         renderFramebuffer(gl3);
@@ -331,7 +337,7 @@ public class Gl_320_fbo_shadow extends Test {
 
         gl3.glViewport(0, 0, shadowSize.x, shadowSize.y);
 
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
         float[] depth = {1.0f};
         gl3.glClearBufferfv(GL_DEPTH, 0, depth, 0);
 
@@ -340,7 +346,7 @@ public class Gl_320_fbo_shadow extends Test {
         gl3.glUniformBlockBinding(programName[Program.DEPTH], uniformTransform[Program.DEPTH],
                 Semantic.Uniform.TRANSFORM0);
 
-        gl3.glBindVertexArray(vertexArrayName[Program.RENDER]);
+        gl3.glBindVertexArray(vertexArrayName.get(Program.RENDER));
 
         checkError(gl3, "renderShadow 0");
 
@@ -361,9 +367,8 @@ public class Gl_320_fbo_shadow extends Test {
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
 
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        float[] depth = {1.0f};
-        gl3.glClearBufferfv(GL_DEPTH, 0, depth, 0);
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+        gl3.glClearBufferfv(GL_DEPTH, 0, clearDepth);
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor);
 
         gl3.glUseProgram(programName[Program.RENDER]);
         gl3.glUniform1i(uniformShadow, 0);
@@ -371,9 +376,9 @@ public class Gl_320_fbo_shadow extends Test {
                 Semantic.Uniform.TRANSFORM0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
 
-        gl3.glBindVertexArray(vertexArrayName[Program.RENDER]);
+        gl3.glBindVertexArray(vertexArrayName.get(Program.RENDER));
         gl3.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
 
         gl3.glDisable(GL_DEPTH_TEST);
@@ -390,10 +395,17 @@ public class Gl_320_fbo_shadow extends Test {
             gl3.glDeleteProgram(programName[i]);
         }
 
-        gl3.glDeleteFramebuffers(1, framebufferName, 0);
-        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
-        gl3.glDeleteTextures(1, textureName, 0);
-        gl3.glDeleteVertexArrays(Program.MAX, vertexArrayName, 0);
+        gl3.glDeleteFramebuffers(1, framebufferName);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName);
+        gl3.glDeleteTextures(1, textureName);
+        gl3.glDeleteVertexArrays(Program.MAX, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(framebufferName);
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(clearColor);
+        BufferUtils.destroyDirectBuffer(clearDepth);
 
         return checkError(gl3, "end");
     }

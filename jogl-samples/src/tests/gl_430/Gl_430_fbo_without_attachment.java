@@ -68,7 +68,7 @@ public class Gl_430_fbo_without_attachment extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_framebuffer_no_attachments");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_framebuffer_no_attachments");
 
         if (validated) {
             validated = initProgram(gl4);

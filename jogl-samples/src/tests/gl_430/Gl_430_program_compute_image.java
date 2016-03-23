@@ -157,7 +157,7 @@ public class Gl_430_program_compute_image extends Test {
 
         logImplementationDependentLimit(gl4, GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT, "GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT");
 
-        boolean validated = checkExtension(gl4, "GL_ARB_compute_shader");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_compute_shader");
 
         if (validated) {
             validated = initProgram(gl4);

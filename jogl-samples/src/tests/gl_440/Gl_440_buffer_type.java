@@ -167,7 +167,7 @@ public class Gl_440_buffer_type extends Test {
                 viewportSize.y * 1.0f), VertexFormat.RG11B10F);
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_vertex_type_10f_11f_11f_rev");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_vertex_type_10f_11f_11f_rev");
 
         if (validated) {
             validated = initProgram(gl4);

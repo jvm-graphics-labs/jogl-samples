@@ -103,7 +103,7 @@ public class Gl_330_fbo_multisample_explicit_nv extends Test {
         GL3 gl3 = (GL3) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl3, "GL_NV_explicit_multisample");
+        validated = validated && gl3.isExtensionAvailable("GL_NV_explicit_multisample");
 
         if (validated) {
             validated = initProgram(gl3);

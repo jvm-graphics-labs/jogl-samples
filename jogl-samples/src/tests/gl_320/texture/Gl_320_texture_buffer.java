@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL3;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
@@ -18,6 +19,8 @@ import framework.Semantic;
 import framework.Test;
 import java.nio.FloatBuffer;
 import glm.vec._2.Vec2;
+import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -54,9 +57,18 @@ public class Gl_320_texture_buffer extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] vertexArrayName = {0}, bufferName = new int[Buffer.MAX], displacementTextureName = {0},
-            diffuseTextureName = {0};
+    private class Texture {
+
+        public static final int DISPLACEMENT = 0;
+        public static final int DIFFUSE = 1;
+        public static final int MAX = 2;
+    }
+
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
     private int programName, uniformMvp, uniformDiffuse, uniformDisplacement;
+    private FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(4), clearDepth = GLBuffers.newDirectFloatBuffer(1);
 
     @Override
     protected boolean begin(GL gl) {
@@ -98,10 +110,10 @@ public class Gl_320_texture_buffer extends Test {
 
         if (validated) {
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.add(vertShaderCode);
@@ -128,10 +140,12 @@ public class Gl_320_texture_buffer extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
+        FloatBuffer positionDataBuffer = GLBuffers.newDirectFloatBuffer(positionData);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, GLBuffers.newDirectFloatBuffer(positionData), GL_STATIC_DRAW);
+        gl3.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
+        gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionDataBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         float[] position = {
@@ -140,9 +154,9 @@ public class Gl_320_texture_buffer extends Test {
             -0.2f, -0.2f, +0.0f, +1.0f,
             +0.3f, +0.2f, +0.5f, +1.0f,
             +0.1f, -0.3f, +1.0f, +1.0f};
-
-        gl3.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DISPLACEMENT]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(position);
+
+        gl3.glBindBuffer(GL_TEXTURE_BUFFER, bufferName.get(Buffer.DISPLACEMENT));
         gl3.glBufferData(GL_TEXTURE_BUFFER, position.length * Float.BYTES, positionBuffer, GL_STATIC_DRAW);
         gl3.glBindBuffer(GL_TEXTURE_BUFFER, 0);
 
@@ -153,28 +167,32 @@ public class Gl_320_texture_buffer extends Test {
             (byte) 0, (byte) 255, (byte) 0, (byte) 255,
             (byte) 0, (byte) 0, (byte) 255, (byte) 255};
 
-        int[] maxTextureBufferSize = {0};
-        gl3.glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, maxTextureBufferSize, 0);
+        IntBuffer maxTextureBufferSize = GLBuffers.newDirectIntBuffer(1);
+        gl3.glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, maxTextureBufferSize);
 
-        gl3.glBindBuffer(GL_TEXTURE_BUFFER, bufferName[Buffer.DIFFUSE]);
-        gl3.glBufferData(GL_TEXTURE_BUFFER, Math.min(500_000, maxTextureBufferSize[0]), null, GL_STATIC_DRAW);
+        gl3.glBindBuffer(GL_TEXTURE_BUFFER, bufferName.get(Buffer.DIFFUSE));
+        gl3.glBufferData(GL_TEXTURE_BUFFER, Math.min(500_000, maxTextureBufferSize.get(0)), null, GL_STATIC_DRAW);
         //glBufferData(GL_TEXTURE_BUFFER, sizeof(Diffuse), Diffuse, GL_STATIC_DRAW);
-        gl3.glBufferSubData(GL_TEXTURE_BUFFER, 0, diffuse.length * Byte.BYTES, GLBuffers.newDirectByteBuffer(diffuse));
+        ByteBuffer diffuseBuffer = GLBuffers.newDirectByteBuffer(diffuse);
+        gl3.glBufferSubData(GL_TEXTURE_BUFFER, 0, diffuse.length * Byte.BYTES, diffuseBuffer);
         gl3.glBindBuffer(GL_TEXTURE_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(positionDataBuffer);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
+        BufferUtils.destroyDirectBuffer(diffuseBuffer);
 
         return checkError(gl3, "initBuffer");
     }
 
     private boolean initTexture(GL3 gl3) {
 
-        gl3.glGenTextures(1, displacementTextureName, 0);
-        gl3.glBindTexture(GL_TEXTURE_BUFFER, displacementTextureName[0]);
-        gl3.glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName[Buffer.DISPLACEMENT]);
+        gl3.glGenTextures(Texture.MAX, textureName);
+        gl3.glBindTexture(GL_TEXTURE_BUFFER, textureName.get(Texture.DISPLACEMENT));
+        gl3.glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, bufferName.get(Buffer.DISPLACEMENT));
         gl3.glBindTexture(GL_TEXTURE_BUFFER, 0);
 
-        gl3.glGenTextures(1, diffuseTextureName, 0);
-        gl3.glBindTexture(GL_TEXTURE_BUFFER, diffuseTextureName[0]);
-        gl3.glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA8, bufferName[Buffer.DIFFUSE]);
+        gl3.glBindTexture(GL_TEXTURE_BUFFER, textureName.get(Texture.DIFFUSE));
+        gl3.glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA8, bufferName.get(Buffer.DIFFUSE));
         gl3.glBindTexture(GL_TEXTURE_BUFFER, 0);
 
         return checkError(gl3, "initTexture");
@@ -182,10 +200,10 @@ public class Gl_320_texture_buffer extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             {
                 gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
             }
@@ -211,9 +229,10 @@ public class Gl_320_texture_buffer extends Test {
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
 
         // Clear color buffer with black
-        float[] depth = {1.0f};
-        gl3.glClearBufferfv(GL_DEPTH, 0, depth, 0);
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+        clearDepth.put(new float[]{1.0f}).rewind();
+        gl3.glClearBufferfv(GL_DEPTH, 0, clearDepth);
+        clearColor.put(new float[]{1.0f, 1.0f, 1.0f, 1.0f}).rewind();
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor);
 
         // Bind program
         gl3.glUseProgram(programName);
@@ -222,12 +241,12 @@ public class Gl_320_texture_buffer extends Test {
         gl3.glUniform1i(uniformDiffuse, 1);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_BUFFER, displacementTextureName[0]);
+        gl3.glBindTexture(GL_TEXTURE_BUFFER, textureName.get(Texture.DISPLACEMENT));
 
         gl3.glActiveTexture(GL_TEXTURE1);
-        gl3.glBindTexture(GL_TEXTURE_BUFFER, diffuseTextureName[0]);
+        gl3.glBindTexture(GL_TEXTURE_BUFFER, textureName.get(Texture.DIFFUSE));
 
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 5);
 
         return true;
@@ -238,11 +257,17 @@ public class Gl_320_texture_buffer extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteTextures(1, diffuseTextureName, 0);
-        gl3.glDeleteTextures(1, displacementTextureName, 0);
-        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl3.glDeleteTextures(Texture.MAX, textureName);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName);
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(clearColor);
+        BufferUtils.destroyDirectBuffer(clearDepth);
 
         return checkError(gl3, "end");
     }

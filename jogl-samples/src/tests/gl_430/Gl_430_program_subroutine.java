@@ -99,7 +99,7 @@ public class Gl_430_program_subroutine extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_explicit_uniform_location");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_explicit_uniform_location");
 
         if (validated) {
             validated = initTest(gl4);

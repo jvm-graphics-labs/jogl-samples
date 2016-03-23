@@ -84,7 +84,7 @@ public class Gl_430_texture_buffer extends Test {
 
         boolean validated = true;
 
-        validated = validated && checkExtension(gl4, "GL_ARB_texture_buffer_range");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_texture_buffer_range");
 
         if (validated) {
             validated = initTest(gl4);

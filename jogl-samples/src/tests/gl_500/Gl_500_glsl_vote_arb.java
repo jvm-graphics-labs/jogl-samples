@@ -82,7 +82,7 @@ public class Gl_500_glsl_vote_arb extends Test {
 
         boolean validated = true;
 
-        validated = validated && checkExtension(gl4, "GL_ARB_shader_group_vote");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_shader_group_vote");
 
         if (validated) {
             validated = initBuffer(gl4);

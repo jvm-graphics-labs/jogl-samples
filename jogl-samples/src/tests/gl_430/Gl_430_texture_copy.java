@@ -80,7 +80,7 @@ public class Gl_430_texture_copy extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_copy_image");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_copy_image");
 
         if (validated) {
             validated = initTexture(gl4);

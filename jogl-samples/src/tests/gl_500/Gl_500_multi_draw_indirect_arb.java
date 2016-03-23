@@ -111,7 +111,7 @@ public class Gl_500_multi_draw_indirect_arb extends Test {
         GL4 gl4 = (GL4) gl;
 
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_ARB_indirect_parameters");
+        validated = validated && gl4.isExtensionAvailable("GL_ARB_indirect_parameters");
 
         if (validated) {
             validated = initProgram(gl4);

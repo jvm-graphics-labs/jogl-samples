@@ -48,8 +48,8 @@ public class Gl_440_atomic_counter extends Test {
     protected boolean begin(GL gl) {
 
         GL4 gl4 = (GL4) gl;
-
-        boolean validated = checkExtension(gl4, "GL_ARB_clear_buffer_object");
+        
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_clear_buffer_object");
 
         if (validated) {
             validated = initBuffer(gl4);

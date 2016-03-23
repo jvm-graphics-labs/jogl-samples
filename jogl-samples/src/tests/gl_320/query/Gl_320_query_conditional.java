@@ -21,6 +21,7 @@ import glm.vec._2.Vec2;
 import glm.vec._4.Vec4;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -57,9 +58,12 @@ public class Gl_320_query_conditional extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] vertexArrayName = {0}, queryName = {0}, bufferName = new int[Buffer.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), queryName = GLBuffers.newDirectIntBuffer(1),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX);
     private int programName, uniformMaterialOffset;
     private boolean toggle = true;
+    private FloatBuffer clearBlackColor = GLBuffers.newDirectFloatBuffer(new float[]{0.0f, 0.0f, 0.0f, 1.0f}),
+            clearWhiteColor = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 1.0f, 1.0f, 1.0f});
 
     @Override
     protected boolean begin(GL gl) {
@@ -68,8 +72,8 @@ public class Gl_320_query_conditional extends Test {
 
         boolean validated = true;
 
-        int[] queryCounter = {0};
-        gl3.glGetQueryiv(GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, queryCounter, 0);
+        IntBuffer queryCounter = GLBuffers.newDirectIntBuffer(1);
+        gl3.glGetQueryiv(GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, queryCounter);
 
         if (validated) {
             validated = initProgram(gl3);
@@ -84,17 +88,21 @@ public class Gl_320_query_conditional extends Test {
             validated = initQuery(gl3);
         }
 
+        BufferUtils.destroyDirectBuffer(queryCounter);
+
         return validated && checkError(gl3, "begin");
     }
 
     private boolean initQuery(GL3 gl3) {
 
-        gl3.glGenQueries(1, queryName, 0);
+        gl3.glGenQueries(1, queryName);
 
-        int[] queryBits = {0};
-        gl3.glGetQueryiv(GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, queryBits, 0);
+        IntBuffer queryBits = GLBuffers.newDirectIntBuffer(1);
+        gl3.glGetQueryiv(GL_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, queryBits);
 
-        boolean validated = queryBits[0] >= 32;
+        boolean validated = queryBits.get(0) >= 32;
+
+        BufferUtils.destroyDirectBuffer(queryBits);
 
         return validated && checkError(gl3, "initQuery");
     }
@@ -105,10 +113,10 @@ public class Gl_320_query_conditional extends Test {
 
         if (validated) {
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.add(vertShaderCode);
@@ -140,37 +148,37 @@ public class Gl_320_query_conditional extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        int[] uniformBufferOffset = {0};
-        gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-
-        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+
+        gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
+
+        gl3.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int uniformTransformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
+        int uniformTransformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformTransformBlockSize, null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
-        uniformMaterialOffset = Math.max(Vec4.SIZE, uniformBufferOffset[0]);
+        uniformMaterialOffset = Math.max(Vec4.SIZE, uniformBufferOffset.get(0));
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.MATERIAL));
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformMaterialOffset * 2, null, GL_STATIC_DRAW);
 
         {
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0,
                     uniformMaterialOffset * 2, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
-
+            
             float[][] materials = {new float[]{0.0f, 0.5f, 1.0f, 1.0f}, new float[]{1.0f, 0.5f, 0.0f, 1.0f}};
 
-            for (int material = 0; material < materials.length; material++) {
-                for (int i = 0; i < materials[0].length; i++) {
-                    pointer.putFloat(material * uniformMaterialOffset, materials[material][i]);
+            for (int i = 0; i < materials.length; i++) {
+                for (int j = 0; j < materials[0].length; j++) {
+                    pointer.putFloat(i * uniformMaterialOffset + j * Float.BYTES, materials[i][j]);
                 }
             }
             pointer.rewind();
@@ -179,15 +187,18 @@ public class Gl_320_query_conditional extends Test {
         }
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
+
         return checkError(gl3, "initBuffer");
     }
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -204,7 +215,7 @@ public class Gl_320_query_conditional extends Test {
         GL3 gl3 = (GL3) gl;
 
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
@@ -218,23 +229,22 @@ public class Gl_320_query_conditional extends Test {
 
         // Set the display viewport
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
 
         // Clear color buffer with black
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+        gl3.glClearBufferfv(GL_COLOR, 0, clearBlackColor);
 
         // Bind program
         gl3.glUseProgram(programName);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
 
-        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL,
-                bufferName[Buffer.MATERIAL], 0, Mat4.SIZE);
+        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName.get(Buffer.MATERIAL), 0, Mat4.SIZE);
 
         // The first orange quad is not written in the framebuffer.
         gl3.glColorMaski(0, false, false, false, false);
 
         // Beginning of the samples count query
-        gl3.glBeginQuery(GL_SAMPLES_PASSED, queryName[0]);
+        gl3.glBeginQuery(GL_SAMPLES_PASSED, queryName.get(0));
         {
             // Added a boolean flag to trigger the conditional rendering without commenting anything
             if (toggle) {
@@ -248,15 +258,15 @@ public class Gl_320_query_conditional extends Test {
         // The second blue quad is written in the framebuffer only if a sample pass the occlusion query.
         gl3.glColorMaski(0, true, true, true, true);
 
-        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL,
-                bufferName[Buffer.MATERIAL], uniformMaterialOffset, Mat4.SIZE);
+        gl3.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName.get(Buffer.MATERIAL),
+                uniformMaterialOffset, Mat4.SIZE);
 
         // Draw only if one sample went through the tests, 
         // we don't need to get the query result which prevent the rendering pipeline to stall.
-        gl3.glBeginConditionalRender(queryName[0], GL_QUERY_WAIT);
+        gl3.glBeginConditionalRender(queryName.get(0), GL_QUERY_WAIT);
         {
             // Clear color buffer with white
-            gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+            gl3.glClearBufferfv(GL_COLOR, 0, clearWhiteColor);
 
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
@@ -273,8 +283,16 @@ public class Gl_320_query_conditional extends Test {
         GL3 gl3 = (GL3) gl;
 
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+        gl3.glDeleteQueries(1, queryName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(queryName);
+
+        BufferUtils.destroyDirectBuffer(clearWhiteColor);
+        BufferUtils.destroyDirectBuffer(clearBlackColor);
 
         return checkError(gl3, "end");
     }

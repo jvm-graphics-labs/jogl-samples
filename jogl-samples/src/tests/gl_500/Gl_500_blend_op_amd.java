@@ -34,7 +34,7 @@ public class Gl_500_blend_op_amd extends Test {
 //		Viewport[texture::G] = glm::ivec4(WindowSize.x >> 1, WindowSize.y >> 1, WindowSize >> 1);
 //		Viewport[texture::B] = glm::ivec4(0, WindowSize.y >> 1, WindowSize >> 1);
         boolean validated = true;
-        validated = validated && checkExtension(gl4, "GL_AMD_blend_minmax_factor");
+        validated = validated && gl4.isExtensionAvailable("GL_AMD_blend_minmax_factor");
 
 //		if(validated)
 //			validated = initBlend();

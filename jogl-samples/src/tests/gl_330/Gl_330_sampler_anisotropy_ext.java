@@ -80,7 +80,7 @@ public class Gl_330_sampler_anisotropy_ext extends Test {
         viewport[Viewport.V01] = new Vec4i(1, windowSize.y / 2 + 1, windowSize.x / 2 - 1, windowSize.y / 2 - 1);
 
         boolean validated = true;
-        validated = validated && checkExtension(gl3, "GL_EXT_texture_filter_anisotropic");
+        validated = validated && gl3.isExtensionAvailable("GL_EXT_texture_filter_anisotropic");
 
         if (validated) {
             validated = initProgram(gl3);

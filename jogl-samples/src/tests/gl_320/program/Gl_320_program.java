@@ -20,6 +20,7 @@ import framework.Test;
 import glm.vec._2.Vec2;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 /**
@@ -68,8 +69,11 @@ public class Gl_320_program extends Test {
         public static final int MAX = 1;
     }
 
-    private int[] programName = new int[Program.MAX], bufferName = new int[Buffer.MAX], vertexArrayName = {0};
+    private int[] programName = new int[Program.MAX];
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1);
     private int uniformTransform, uniformMaterial;
+    private FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 1.0f, 1.0f, 1.0f});
 
     @Override
     protected boolean begin(GL gl) {
@@ -97,10 +101,10 @@ public class Gl_320_program extends Test {
 
         if (validated) {
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.add(vertShaderCode);
@@ -121,18 +125,24 @@ public class Gl_320_program extends Test {
             uniformTransform = gl3.glGetUniformBlockIndex(programName[Program.USED], "Transform");
         }
 
-        int[] activeUniformBlocks = {0};
-        gl3.glGetProgramiv(programName[Program.USED], GL_ACTIVE_UNIFORM_BLOCKS, activeUniformBlocks, 0);
+        IntBuffer activeUniformBlocks = GLBuffers.newDirectIntBuffer(1);
+        gl3.glGetProgramiv(programName[Program.USED], GL_ACTIVE_UNIFORM_BLOCKS, activeUniformBlocks);
 
-        for (int i = 0; i < activeUniformBlocks[0]; ++i) {
-            int[] length = {0};
-            byte[] name = new byte[128];
+        for (int i = 0; i < activeUniformBlocks.get(0); ++i) {
 
-            gl3.glGetActiveUniformBlockName(programName[Program.USED], i, name.length, length, 0, name, 0);
+            IntBuffer length = GLBuffers.newDirectIntBuffer(1);
+            byte[] bytes = new byte[128];
+            ByteBuffer name = GLBuffers.newDirectByteBuffer(bytes);
 
-            String stringName = new String(name);
+            gl3.glGetActiveUniformBlockName(programName[Program.USED], i, name.capacity(), length, name);
+
+            name.get(bytes);
+            String stringName = new String(bytes);
             //remove the empty padding spaces at the end
             stringName = stringName.trim();
+
+            BufferUtils.destroyDirectBuffer(length);
+            BufferUtils.destroyDirectBuffer(name);
 
             validated = validated && (stringName.equals("Material") || stringName.equals("Transform"));
         }
@@ -140,34 +150,41 @@ public class Gl_320_program extends Test {
         int[] activeUniform = {0};
         gl3.glGetProgramiv(programName[Program.USED], GL_ACTIVE_UNIFORMS, activeUniform, 0);
 
-        for (int i = 0; i < activeUniformBlocks[0]; ++i) {
+        for (int i = 0; i < activeUniformBlocks.get(0); ++i) {
 
-            int[] length = {0};
-            byte[] name = new byte[128];
+            IntBuffer length = GLBuffers.newDirectIntBuffer(1);
+            byte[] bytes = new byte[128];
+            ByteBuffer name = GLBuffers.newDirectByteBuffer(bytes);
 
-            gl3.glGetActiveUniformName(programName[Program.USED], i, name.length, length, 0, name, 0);
+            gl3.glGetActiveUniformName(programName[Program.USED], i, name.capacity(), length, name);
 
-            String stringName = new String(name);
+            name.get(bytes);
+            String stringName = new String(bytes);
             //remove the empty padding spaces at the end
             stringName = stringName.trim();
 
+            BufferUtils.destroyDirectBuffer(length);
+            BufferUtils.destroyDirectBuffer(name);
+
             validated = validated && (stringName.equals("Material.diffuse") || stringName.equals("Transform.mvp"));
         }
+
+        BufferUtils.destroyDirectBuffer(activeUniformBlocks);
 
         return validated & checkError(gl3, "initProgram");
     }
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
 
             gl3.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+            gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         }
         gl3.glBindVertexArray(0);
 
@@ -176,43 +193,45 @@ public class Gl_320_program extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        IntBuffer uniformBlockSize = GLBuffers.newDirectIntBuffer(1);
+
+        gl3.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl3.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl3.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int[] uniformBlockSize = {0};
-
         {
-            gl3.glGetActiveUniformBlockiv(programName[Program.USED], uniformTransform,
-                    GL_UNIFORM_BLOCK_DATA_SIZE, uniformBlockSize, 0);
+            gl3.glGetActiveUniformBlockiv(programName[Program.USED], uniformTransform, GL_UNIFORM_BLOCK_DATA_SIZE,
+                    uniformBlockSize);
 
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
-            gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize[0], null, GL_DYNAMIC_DRAW);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
+            gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize.get(0), null, GL_DYNAMIC_DRAW);
             gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
         {
-            float[] diffuse = {1.0f, 0.5f, 0.0f, 1.0f};
 
-            gl3.glGetActiveUniformBlockiv(programName[Program.USED], uniformMaterial,
-                    GL_UNIFORM_BLOCK_DATA_SIZE, uniformBlockSize, 0);
+            FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(new float[]{1.0f, 0.5f, 0.0f, 1.0f});
 
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.MATERIAL]);
-            FloatBuffer diffuseBuffer = GLBuffers.newDirectFloatBuffer(diffuse);
-            gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize[0], diffuseBuffer, GL_DYNAMIC_DRAW);
+            gl3.glGetActiveUniformBlockiv(programName[Program.USED], uniformMaterial, GL_UNIFORM_BLOCK_DATA_SIZE,
+                    uniformBlockSize);
+
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.MATERIAL));
+            gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize.get(0), diffuseBuffer, GL_DYNAMIC_DRAW);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
             BufferUtils.destroyDirectBuffer(diffuseBuffer);
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(positionBuffer);
 
         return checkError(gl3, "initBuffer");
     }
@@ -223,7 +242,7 @@ public class Gl_320_program extends Test {
         GL3 gl3 = (GL3) gl;
 
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             ByteBuffer pointer = gl3.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -240,19 +259,19 @@ public class Gl_320_program extends Test {
         }
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor);
 
         gl3.glUseProgram(programName[Program.USED]);
         gl3.glUniformBlockBinding(programName[Program.USED], uniformTransform, Semantic.Uniform.TRANSFORM0);
         gl3.glUniformBlockBinding(programName[Program.USED], uniformMaterial, Semantic.Uniform.MATERIAL);
 
         // Attach the buffer to UBO binding point semantic::uniform::TRANSFORM0
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
 
         // Attach the buffer to UBO binding point semantic::uniform::MATERIAL
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName[Buffer.MATERIAL]);
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.MATERIAL, bufferName.get(Buffer.MATERIAL));
 
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         gl3.glDrawElementsInstanced(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1);
 
         return true;
@@ -263,9 +282,14 @@ public class Gl_320_program extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName);
         gl3.glDeleteProgram(programName[Program.USED]);
+
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(bufferName);
+
+        BufferUtils.destroyDirectBuffer(clearColor);
 
         return checkError(gl3, "end");
     }

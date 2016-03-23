@@ -77,7 +77,7 @@ public class Gl_450_transform_feedback_arb extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_transform_feedback_overflow_query");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_transform_feedback_overflow_query");
 
         if (validated) {
             validated = initQuery(gl4);

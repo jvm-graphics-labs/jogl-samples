@@ -22,6 +22,7 @@ import framework.Semantic;
 import framework.Test;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
@@ -86,8 +87,10 @@ public class Gl_320_fbo_multisample_explicit extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] vertexArrayName = {0}, bufferName = {0}, framebufferRenderName = {0},
-            programName = new int[Program.MAX], textureName = new int[Texture.MAX], uniformMvp = new int[Program.MAX],
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), bufferName = GLBuffers.newDirectIntBuffer(1),
+            framebufferRenderName = GLBuffers.newDirectIntBuffer(1),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
+    private int[] programName = new int[Program.MAX], uniformMvp = new int[Program.MAX],
             uniformDiffuse = new int[Program.MAX];
 
     @Override
@@ -121,13 +124,13 @@ public class Gl_320_fbo_multisample_explicit extends Test {
 
         ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
 
-        shaderCodes[Shader.VERT] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                this.getClass(), SHADERS_ROOT, null, VERT_SHADER_SOURCE, "vert", null, true);
+        shaderCodes[Shader.VERT] = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null, 
+                VERT_SHADER_SOURCE, "vert", null, true);
 
         for (int i = 0; i < Program.MAX; i++) {
 
-            shaderCodes[Shader.FRAG_TEXTURE + i] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, FRAG_SHADER_SOURCE[i], "frag", null, true);
+            shaderCodes[Shader.FRAG_TEXTURE + i] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), 
+                    SHADERS_ROOT, null, FRAG_SHADER_SOURCE[i], "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(shaderCodes[Shader.VERT]);
@@ -156,12 +159,14 @@ public class Gl_320_fbo_multisample_explicit extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(1, bufferName, 0);
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+
+        gl3.glGenBuffers(1, bufferName);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return checkError(gl3, "initBuffer");
     }
@@ -171,10 +176,10 @@ public class Gl_320_fbo_multisample_explicit extends Test {
         try {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
-            gl3.glGenTextures(Texture.MAX, textureName, 0);
+            gl3.glGenTextures(Texture.MAX, textureName);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -190,15 +195,15 @@ public class Gl_320_fbo_multisample_explicit extends Test {
                         texture.data(level));
             }
 
-            gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName[Texture.MULTISAMPLE_COLORBUFFER]);
+            gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName.get(Texture.MULTISAMPLE_COLORBUFFER));
             gl3.glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y,
                     true);
-            gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName[Texture.MULTISAMPLE_DEPTHBUFFER]);
+            gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName.get(Texture.MULTISAMPLE_DEPTHBUFFER));
             gl3.glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 4, GL_DEPTH_COMPONENT24, FRAMEBUFFER_SIZE.x,
                     FRAMEBUFFER_SIZE.y, true);
             gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, 0);
 
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
             gl3.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, 0, GL_RGBA,
                     GL_UNSIGNED_BYTE, null);
             gl3.glBindTexture(GL_TEXTURE_2D, 0);
@@ -211,12 +216,14 @@ public class Gl_320_fbo_multisample_explicit extends Test {
 
     private boolean initFramebuffer(GL3 gl3) {
 
-        gl3.glGenFramebuffers(1, framebufferRenderName, 0);
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferRenderName[0]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.MULTISAMPLE_COLORBUFFER], 0);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.MULTISAMPLE_DEPTHBUFFER], 0);
+        gl3.glGenFramebuffers(1, framebufferRenderName);
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferRenderName.get(0));
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName.get(Texture.MULTISAMPLE_COLORBUFFER),
+                0);
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName.get(Texture.MULTISAMPLE_DEPTHBUFFER),
+                0);
 
-        if (!isFramebufferComplete(gl3, framebufferRenderName[0])) {
+        if (!isFramebufferComplete(gl3, framebufferRenderName.get(0))) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -226,10 +233,10 @@ public class Gl_320_fbo_multisample_explicit extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -254,7 +261,7 @@ public class Gl_320_fbo_multisample_explicit extends Test {
         // Pass 1
         // Render the scene in a multisampled framebuffer
         gl3.glEnable(GL_MULTISAMPLE);
-        renderFBO(gl3, framebufferRenderName[0]);
+        renderFBO(gl3, framebufferRenderName.get(0));
         gl3.glDisable(GL_MULTISAMPLE);
 
         // Pass 2
@@ -285,8 +292,8 @@ public class Gl_320_fbo_multisample_explicit extends Test {
         gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
+        gl3.glBindVertexArray(vertexArrayName.get(0));
 
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 5);
 
@@ -305,9 +312,9 @@ public class Gl_320_fbo_multisample_explicit extends Test {
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName[Texture.MULTISAMPLE_COLORBUFFER]);
+        gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName.get(Texture.MULTISAMPLE_COLORBUFFER));
 
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
 
         gl3.glEnable(GL_SCISSOR_TEST);
 
@@ -345,10 +352,15 @@ public class Gl_320_fbo_multisample_explicit extends Test {
             gl3.glDeleteProgram(programName[i]);
         }
 
-        gl3.glDeleteBuffers(1, bufferName, 0);
-        gl3.glDeleteTextures(Texture.MAX, textureName, 0);
-        gl3.glDeleteFramebuffers(1, framebufferRenderName, 0);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteBuffers(1, bufferName);
+        gl3.glDeleteTextures(Texture.MAX, textureName);
+        gl3.glDeleteFramebuffers(1, framebufferRenderName);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(framebufferRenderName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return checkError(gl3, "end");
     }

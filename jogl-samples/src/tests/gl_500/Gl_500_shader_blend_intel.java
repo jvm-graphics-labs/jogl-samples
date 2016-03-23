@@ -33,7 +33,7 @@ public class Gl_500_shader_blend_intel extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_INTEL_fragment_shader_ordering");
+        boolean validated = gl4.isExtensionAvailable("GL_INTEL_fragment_shader_ordering");
 
         /*
 		glm::vec2 const WindowSize(this->getWindowSize());

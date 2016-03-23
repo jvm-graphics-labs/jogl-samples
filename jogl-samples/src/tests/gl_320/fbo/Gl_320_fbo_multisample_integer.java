@@ -22,6 +22,7 @@ import framework.Test;
 import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
@@ -90,9 +91,11 @@ public class Gl_320_fbo_multisample_integer extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] vertexArrayName = {0}, bufferName = {0}, shaderName = new int[Shader.MAX],
-            textureName = new int[Texture.MAX], framebufferName = new int[Framebuffer.MAX],
-            programName = new int[Program.MAX], uniformMvp = new int[Program.MAX], uniformDiffuse = new int[Program.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), bufferName = GLBuffers.newDirectIntBuffer(1),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX),
+            framebufferName = GLBuffers.newDirectIntBuffer(Framebuffer.MAX);
+    private int[] programName = new int[Program.MAX], uniformMvp = new int[Program.MAX],
+            uniformDiffuse = new int[Program.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -131,10 +134,10 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
         if (validated) {
 
-            shaderCodes[Shader.VERT1] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT_SOURCE1, null, SHADERS_SOURCE1, "vert", null, true);
-            shaderCodes[Shader.FRAG1] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT_SOURCE1, null, SHADERS_SOURCE1, "frag", null, true);
+            shaderCodes[Shader.VERT1] = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT_SOURCE1,
+                    null, SHADERS_SOURCE1, "vert", null, true);
+            shaderCodes[Shader.FRAG1] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT_SOURCE1,
+                    null, SHADERS_SOURCE1, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(shaderCodes[Shader.VERT1]);
@@ -153,10 +156,10 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
         if (validated) {
 
-            shaderCodes[Shader.VERT2] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT_SOURCE2, null, SHADERS_SOURCE2, "vert", null, true);
-            shaderCodes[Shader.FRAG2] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT_SOURCE2, null, SHADERS_SOURCE2, "frag", null, true);
+            shaderCodes[Shader.VERT2] = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT_SOURCE2,
+                    null, SHADERS_SOURCE2, "vert", null, true);
+            shaderCodes[Shader.FRAG2] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT_SOURCE2,
+                    null, SHADERS_SOURCE2, "frag", null, true);
 
             ShaderProgram program = new ShaderProgram();
             program.add(shaderCodes[Shader.VERT2]);
@@ -186,12 +189,14 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(1, bufferName, 0);
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+
+        gl3.glGenBuffers(1, bufferName);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return checkError(gl3, "initBuffer");
     }
@@ -211,9 +216,9 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
-            gl3.glGenTextures(Texture.MAX, textureName, 0);
+            gl3.glGenTextures(Texture.MAX, textureName);
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -231,11 +236,11 @@ public class Gl_320_fbo_multisample_integer extends Test {
             }
             gl3.glBindTexture(GL_TEXTURE_2D, 0);
 
-            gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName[Texture.MULTISAMPLE]);
+            gl3.glBindTexture(GL_TEXTURE_2D_MULTISAMPLE, textureName.get(Texture.MULTISAMPLE));
             gl3.glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, maxIntegerSamples[0], GL_RGBA8UI,
                     windowSize.x / framebufferSize, windowSize.y / framebufferSize, true);
 
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
@@ -253,18 +258,18 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
     private boolean initFramebuffer(GL3 gl3) {
 
-        gl3.glGenFramebuffers(Framebuffer.MAX, framebufferName, 0);
+        gl3.glGenFramebuffers(Framebuffer.MAX, framebufferName);
 
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RENDER]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.MULTISAMPLE], 0);
-        if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.RENDER])) {
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.RENDER));
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName.get(Texture.MULTISAMPLE), 0);
+        if (!isFramebufferComplete(gl3, framebufferName.get(Framebuffer.RENDER))) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.RESOLVE]);
-        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
-        if (!isFramebufferComplete(gl3, framebufferName[Framebuffer.RESOLVE])) {
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.RESOLVE));
+        gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName.get(Texture.COLORBUFFER), 0);
+        if (!isFramebufferComplete(gl3, framebufferName.get(Framebuffer.RESOLVE))) {
             return false;
         }
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
@@ -274,10 +279,10 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -302,12 +307,12 @@ public class Gl_320_fbo_multisample_integer extends Test {
         // Pass 1
         // Render the scene in a multisampled framebuffer
         gl3.glEnable(GL_MULTISAMPLE);
-        renderFBO(gl3, framebufferName[Framebuffer.RENDER]);
+        renderFBO(gl3, framebufferName.get(Framebuffer.RENDER));
         gl3.glDisable(GL_MULTISAMPLE);
 
         // Resolved multisampling
-        gl3.glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferName[Framebuffer.RENDER]);
-        gl3.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferName[Framebuffer.RESOLVE]);
+        gl3.glBindFramebuffer(GL_READ_FRAMEBUFFER, framebufferName.get(Framebuffer.RENDER));
+        gl3.glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebufferName.get(Framebuffer.RESOLVE));
         gl3.glBlitFramebuffer(
                 0, 0, windowSize.x / framebufferSize, windowSize.y / framebufferSize,
                 0, 0, windowSize.x / framebufferSize, windowSize.y / framebufferSize,
@@ -316,7 +321,7 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
         // Pass 2
         // Render the colorbuffer from the multisampled framebuffer
-        renderFB(gl3, textureName[Texture.COLORBUFFER]);
+        renderFB(gl3, textureName.get(Texture.COLORBUFFER));
 
         return checkError(gl3, "render");
     }
@@ -337,8 +342,8 @@ public class Gl_320_fbo_multisample_integer extends Test {
         gl3.glClearBufferuiv(GL_COLOR, 0, new int[]{0, 128, 255, 255}, 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
+        gl3.glBindVertexArray(vertexArrayName.get(0));
 
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
 
@@ -360,7 +365,7 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
         gl3.glActiveTexture(GL_TEXTURE0);
         gl3.glBindTexture(GL_TEXTURE_2D, textureName);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
 
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
 
@@ -372,12 +377,17 @@ public class Gl_320_fbo_multisample_integer extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(1, bufferName, 0);
+        gl3.glDeleteBuffers(1, bufferName);
         gl3.glDeleteProgram(programName[Program.RENDER]);
         gl3.glDeleteProgram(programName[Program.SPLASH]);
-        gl3.glDeleteTextures(Texture.MAX, textureName, 0);
-        gl3.glDeleteFramebuffers(Framebuffer.MAX, framebufferName, 0);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteTextures(Texture.MAX, textureName);
+        gl3.glDeleteFramebuffers(Framebuffer.MAX, framebufferName);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(framebufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return checkError(gl3, "end");
     }

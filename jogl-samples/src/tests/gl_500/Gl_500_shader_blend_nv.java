@@ -33,7 +33,7 @@ public class Gl_500_shader_blend_nv extends Test{
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_NV_fragment_shader_interlock");
+        boolean validated = gl4.isExtensionAvailable("GL_NV_fragment_shader_interlock");
 
         /*
 		glm::vec2 const WindowSize(this->getWindowSize());

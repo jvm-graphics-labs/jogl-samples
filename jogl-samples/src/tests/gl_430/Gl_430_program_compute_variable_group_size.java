@@ -110,7 +110,7 @@ public class Gl_430_program_compute_variable_group_size extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        boolean validated = checkExtension(gl4, "GL_ARB_compute_variable_group_size");
+        boolean validated = gl4.isExtensionAvailable("GL_ARB_compute_variable_group_size");
 
         if (validated) {
             validated = initProgram(gl4);
