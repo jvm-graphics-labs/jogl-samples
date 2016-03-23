@@ -48,4 +48,10 @@ public class Check_Amd_Extensions extends Test {
 
         return validated;
     }
+    
+    @Override
+    protected boolean render(GL gl) {
+        animator.stop();
+        return true;
+    }
 }
