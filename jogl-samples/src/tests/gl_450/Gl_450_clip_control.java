@@ -106,7 +106,7 @@ public class Gl_450_clip_control extends Test {
         boolean validated = true;
 
         if (validated) {
-
+            
             ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
                     this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
             ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
