@@ -20,6 +20,7 @@ import framework.Test;
 import jgli.TextureCube;
 import glm.vec._2.Vec2;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -56,8 +57,11 @@ public class Gl_320_texture_cube extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] shaderName = new int[Shader.MAX], vertexArrayName = {0}, bufferName = {0}, textureName = {0};
+    private int[] shaderName = new int[Shader.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), bufferName = GLBuffers.newDirectIntBuffer(1),
+            textureName = GLBuffers.newDirectIntBuffer(1);
     private int programName, uniformMv, uniformMvp, uniformEnvironment, uniformCamera;
+    private FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(4);
 
     @Override
     protected boolean begin(GL gl) {
@@ -88,10 +92,8 @@ public class Gl_320_texture_cube extends Test {
 
         if (validated) {
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.add(vertShaderCode);
@@ -119,12 +121,14 @@ public class Gl_320_texture_cube extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(1, bufferName, 0);
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+
+        gl3.glGenBuffers(1, bufferName);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return true;
     }
@@ -142,8 +146,8 @@ public class Gl_320_texture_cube extends Test {
         texture.clearFace(5, new byte[]{(byte) 0, (byte) 0, (byte) 255, (byte) 255});
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glGenTextures(1, textureName, 0);
-        gl3.glBindTexture(GL_TEXTURE_CUBE_MAP, textureName[0]);
+        gl3.glGenTextures(1, textureName);
+        gl3.glBindTexture(GL_TEXTURE_CUBE_MAP, textureName.get(0));
         gl3.glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_BASE_LEVEL, 0);
         gl3.glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAX_LEVEL, 0);
         gl3.glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -175,10 +179,10 @@ public class Gl_320_texture_cube extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vec2.SIZE, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -200,7 +204,8 @@ public class Gl_320_texture_cube extends Test {
         Mat4 mvp = projection.mul(view).mul(model);
         Mat4 mv = view.mul(model);
 
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+        clearColor.put(new float[]{1.0f, 1.0f, 1.0f, 1.0f}).rewind();
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor);
 
         gl3.glUseProgram(programName);
         gl3.glUniformMatrix4fv(uniformMv, 1, false, mv.toFa_(), 0);
@@ -208,10 +213,10 @@ public class Gl_320_texture_cube extends Test {
         gl3.glUniform1i(uniformEnvironment, 0);
         gl3.glUniform3fv(uniformCamera, 1, new float[]{0.0f, 0.0f, -cameraDistance()}, 0);
 
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_CUBE_MAP, textureName[0]);
+        gl3.glBindTexture(GL_TEXTURE_CUBE_MAP, textureName.get(0));
 
         gl3.glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
         gl3.glViewport(0, 0, windowSize.x >> 1, windowSize.y);
@@ -231,10 +236,16 @@ public class Gl_320_texture_cube extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(1, bufferName, 0);
+        gl3.glDeleteBuffers(1, bufferName);
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteTextures(1, textureName, 0);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteTextures(1, textureName);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(clearColor);
 
         return true;
     }

@@ -21,6 +21,7 @@ import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
@@ -71,9 +72,11 @@ public class Gl_320_texture_fetch extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] bufferName = new int[Buffer.MAX], textureName = {0}, vertexArrayName = {0};
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            textureName = GLBuffers.newDirectIntBuffer(1), vertexArrayName = GLBuffers.newDirectIntBuffer(1);
     private int programName, uniformTransform, uniformDiffuse;
     private Vec4i[] viewport = new Vec4i[Viewport.MAX];
+    private FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(4);
 
     @Override
     protected boolean begin(GL gl) {
@@ -104,10 +107,10 @@ public class Gl_320_texture_fetch extends Test {
 
         if (validated) {
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.add(vertShaderCode);
@@ -134,21 +137,24 @@ public class Gl_320_texture_fetch extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+
+        gl3.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int[] uniformBufferOffset = {0};
-        gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
+        gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
 
         return checkError(gl3, "initBuffer");
     }
@@ -156,10 +162,10 @@ public class Gl_320_texture_fetch extends Test {
     private boolean initTexture(GL3 gl3) {
 
         try {
-            gl3.glGenTextures(1, textureName, 0);
+            gl3.glGenTextures(1, textureName);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
 
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             assert (!texture.empty());
@@ -185,10 +191,10 @@ public class Gl_320_texture_fetch extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, glf.Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -207,7 +213,7 @@ public class Gl_320_texture_fetch extends Test {
         GL3 gl3 = (GL3) gl;
 
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             ByteBuffer pointer = gl3.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -222,7 +228,8 @@ public class Gl_320_texture_fetch extends Test {
         }
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.5f, 1.0f, 1.0f}, 0);
+        clearColor.put(new float[]{0.0f, 0.5f, 1.0f, 1.0f}).rewind();
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor);
 
         // Bind the program for use
         gl3.glUseProgram(programName);
@@ -230,9 +237,9 @@ public class Gl_320_texture_fetch extends Test {
         gl3.glUniformBlockBinding(programName, uniformTransform, Semantic.Uniform.TRANSFORM0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
+        gl3.glBindVertexArray(vertexArrayName.get(0));
 
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
 
@@ -244,10 +251,16 @@ public class Gl_320_texture_fetch extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName);
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteTextures(1, textureName, 0);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteTextures(1, textureName);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(clearColor);
 
         return checkError(gl3, "end");
     }
