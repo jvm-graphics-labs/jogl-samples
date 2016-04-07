@@ -273,7 +273,7 @@ public class Test implements GLEventListener, KeyListener {
 
     private boolean checkGLVersion() {
 
-        GLProfile glp = GLProfile.getMaximum(true);
+        GLProfile glp = GLProfile.getMaxProgrammableCore(true);
 //        int majorVersionContext = GLContext.getMaxMajor(GLContext.CONTEXT_CURRENT);
 //        int minorVersionContext = GLContext.getMaxMinor(GLContext.CONTEXT_CURRENT, majorVersionContext);
 //        System.out.println("OpenGL Version Needed " + major + "." + minor

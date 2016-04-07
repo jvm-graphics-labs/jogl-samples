@@ -21,6 +21,7 @@ import glf.Vertex_v2fv2f;
 import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
@@ -71,10 +72,12 @@ public class Gl_320_texture_lod extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] shaderName = new int[Shader.MAX], vertexArrayName = {0}, bufferName = {0},
-            textureName = new int[Texture.MAX];
+    private int[] shaderName = new int[Shader.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), bufferName = GLBuffers.newDirectIntBuffer(1),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
     private int programName, uniformMvp, uniformDiffuse;
     private Vec4i[] viewport = new Vec4i[Texture.MAX];
+    private FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(4);
 
     @Override
     protected boolean begin(GL gl) {
@@ -111,10 +114,10 @@ public class Gl_320_texture_lod extends Test {
 
         if (validated) {
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             ShaderProgram shaderProgram = new ShaderProgram();
             shaderProgram.add(vertShaderCode);
@@ -142,12 +145,14 @@ public class Gl_320_texture_lod extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(1, bufferName, 0);
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+
+        gl3.glGenBuffers(1, bufferName);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return true;
     }
@@ -158,13 +163,13 @@ public class Gl_320_texture_lod extends Test {
             gl3.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glGenTextures(Texture.MAX, textureName, 0);
+            gl3.glGenTextures(Texture.MAX, textureName);
 
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             {
-                gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.ZERO]);
+                gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName.get(Texture.ZERO));
                 gl3.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
                 gl3.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
                 gl3.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -184,7 +189,7 @@ public class Gl_320_texture_lod extends Test {
             }
 
             {
-                gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.ONE]);
+                gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName.get(Texture.ONE));
                 gl3.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
                 gl3.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
                 gl3.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -204,7 +209,7 @@ public class Gl_320_texture_lod extends Test {
             }
 
             {
-                gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.TWO]);
+                gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName.get(Texture.TWO));
                 gl3.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
                 gl3.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
                 gl3.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -224,7 +229,7 @@ public class Gl_320_texture_lod extends Test {
             }
 
             {
-                gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[Texture.THREE]);
+                gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName.get(Texture.THREE));
                 gl3.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
                 gl3.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
                 gl3.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -254,10 +259,10 @@ public class Gl_320_texture_lod extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -279,19 +284,20 @@ public class Gl_320_texture_lod extends Test {
         Mat4 model = new Mat4(1.0f);
         Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+        clearColor.put(new float[]{1.0f, 0.5f, 0.0f, 1.0f}).rewind();
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor);
 
         // Bind the program for use
         gl3.glUseProgram(programName);
         gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
         gl3.glUniform1i(uniformDiffuse, 0);
 
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
 
         gl3.glActiveTexture(GL_TEXTURE0);
         for (int index = 0; index < Texture.MAX; ++index) {
             gl3.glViewport(viewport[index].x, viewport[index].y, viewport[index].z, viewport[index].w);
-            gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[index]);
+            gl3.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName.get(index));
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
 
@@ -303,10 +309,16 @@ public class Gl_320_texture_lod extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(1, bufferName, 0);
+        gl3.glDeleteBuffers(1, bufferName);
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteTextures(Texture.MAX, textureName, 0);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteTextures(Texture.MAX, textureName);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(clearColor);
 
         return true;
     }
