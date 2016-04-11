@@ -24,7 +24,7 @@ The over 230 samples illustrate almost all OpenGL features ranging from ES 2.0 u
 
 ## Quick setup:
 
-- you need to add "-ea" in VM options in run config for the `assert`s to work
+- add "-ea" in VM options in run config for the `assert`s to work
 - add all the jars you find under [`dependencies`](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/dependencies)
 
 You can find the results inside the [`templates` directory](https://github.com/elect86/jogl-samples/tree/master/jogl-samples/src/templates).
