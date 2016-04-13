@@ -66,7 +66,7 @@ the sample for the left half.
 * [`GL_ARB_conditional_render_inverted`](https://www.opengl.org/registry/specs/ARB/conditional_render_inverted.txt) adds 
 new modes to BeginConditionalRender which invert the condition used to determine whether to draw or not.
  
-### [gl-450-query-statistics-arb](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_query_statistic_arb.java):
+### [gl-450-query-statistics-arb](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_450/Gl_450_query_statistics_arb.java):
 
 * [`GL_ARB_pipeline_statistics_query`](https://www.opengl.org/registry/specs/ARB/pipeline_statistics_query.txt) introduces 
 new query types that allow applications to get statistics information about different parts of the pipeline:
