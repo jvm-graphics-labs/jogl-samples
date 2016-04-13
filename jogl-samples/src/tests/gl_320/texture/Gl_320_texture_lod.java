@@ -77,7 +77,6 @@ public class Gl_320_texture_lod extends Test {
             textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
     private int programName, uniformMvp, uniformDiffuse;
     private Vec4i[] viewport = new Vec4i[Texture.MAX];
-    private FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(4);
 
     @Override
     protected boolean begin(GL gl) {
@@ -317,8 +316,6 @@ public class Gl_320_texture_lod extends Test {
         BufferUtils.destroyDirectBuffer(bufferName);
         BufferUtils.destroyDirectBuffer(textureName);
         BufferUtils.destroyDirectBuffer(vertexArrayName);
-
-        BufferUtils.destroyDirectBuffer(clearColor);
 
         return true;
     }

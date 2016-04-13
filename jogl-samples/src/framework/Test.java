@@ -39,6 +39,8 @@ import javax.imageio.ImageIO;
 import glm.vec._2.Vec2;
 import glm.vec._2.i.Vec2i;
 import glm.vec._3.Vec3;
+import glm.vec._4.Vec4;
+import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 /**
@@ -57,6 +59,8 @@ public class Test implements GLEventListener, KeyListener {
     private boolean glDebug;
     protected final String TEXTURE_ROOT = "/data/textures";
     private Success success;
+    protected FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(4),
+            clearDepth = GLBuffers.newDirectFloatBuffer(1);
 
     public Test(String title, Profile profile, int major, int minor, Vec2 orientation, boolean glDebug) {
         this(title, profile, major, minor, new Vec2i(640, 480), orientation, new Vec2(0, 4), glDebug, Success.RUN_ONLY);
@@ -233,6 +237,8 @@ public class Test implements GLEventListener, KeyListener {
 
         GL gl = getGl(drawable);
         assert end(gl);
+        BufferUtils.destroyDirectBuffer(clearColor);
+        BufferUtils.destroyDirectBuffer(clearDepth);
         System.exit(0);
     }
 
