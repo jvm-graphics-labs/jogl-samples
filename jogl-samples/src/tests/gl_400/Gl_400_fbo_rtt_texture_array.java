@@ -8,10 +8,13 @@ package tests.gl_400;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2ES3.*;
 import com.jogamp.opengl.GL4;
+import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Test;
+import java.nio.IntBuffer;
 import jglm.Vec2i;
 import jglm.Vec4;
 
@@ -43,7 +46,8 @@ public class Gl_400_fbo_rtt_texture_array extends Test {
         public static final int MAX = 3;
     };
 
-    private int[] framebufferName = {0}, vertexArrayName = {0}, textureName = {0};
+    private IntBuffer framebufferName = GLBuffers.newDirectIntBuffer(1),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1), textureName = GLBuffers.newDirectIntBuffer(1);
     private int programName, uniformDiffuse, uniformLayer;
     private Vec4[] viewport = new Vec4[Texture.MAX];
 
@@ -85,10 +89,10 @@ public class Gl_400_fbo_rtt_texture_array extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl4);
 
@@ -112,9 +116,9 @@ public class Gl_400_fbo_rtt_texture_array extends Test {
     private boolean initTexture(GL4 gl4) {
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glGenTextures(1, textureName, 0);
+        gl4.glGenTextures(1, textureName);
 
-        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[0]);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName.get(0));
         gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_BASE_LEVEL, 0);
         gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LEVEL, 0);
         gl4.glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_SWIZZLE_R, GL_RED);
@@ -140,20 +144,21 @@ public class Gl_400_fbo_rtt_texture_array extends Test {
 
     private boolean initFramebuffer(GL4 gl4) {
 
-        gl4.glGenFramebuffers(1, framebufferName, 0);
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
-        gl4.glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[0], 0, 0);
-        gl4.glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, textureName[0], 0, 1);
-        gl4.glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, textureName[0], 0, 2);
-        int[] drawBuffers = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
-        gl4.glDrawBuffers(3, drawBuffers, 0);
-        if (!isFramebufferComplete(gl4, framebufferName[0])) {
+        gl4.glGenFramebuffers(1, framebufferName);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
+        gl4.glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName.get(0), 0, 0);
+        gl4.glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, textureName.get(0), 0, 1);
+        gl4.glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, textureName.get(0), 0, 2);
+        IntBuffer drawBuffers = GLBuffers.newDirectIntBuffer(new int[]{GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1,
+            GL_COLOR_ATTACHMENT2});
+        gl4.glDrawBuffers(3, drawBuffers);
+        if (!isFramebufferComplete(gl4, framebufferName.get(0))) {
             return false;
         }
 
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
         gl4.glDrawBuffer(GL_BACK);
-        if (!isFramebufferComplete(gl4, framebufferName[0])) {
+        if (!isFramebufferComplete(gl4, framebufferName.get(0))) {
             return false;
         }
 
@@ -162,8 +167,8 @@ public class Gl_400_fbo_rtt_texture_array extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glBindVertexArray(0);
 
         return checkError(gl4, "initVertexArray");
@@ -177,24 +182,24 @@ public class Gl_400_fbo_rtt_texture_array extends Test {
         Vec2i framebufferSize = new Vec2i(windowSize.x / FRAMEBUFFER_SIZE, windowSize.y / FRAMEBUFFER_SIZE);
 
         // Pass 1
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
         gl4.glViewport(0, 0, framebufferSize.x, framebufferSize.y);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.0f, 0.0f, 1.0f}, 0);
-        gl4.glClearBufferfv(GL_COLOR, 1, new float[]{0.0f, 1.0f, 0.0f, 1.0f}, 0);
-        gl4.glClearBufferfv(GL_COLOR, 2, new float[]{0.0f, 0.0f, 1.0f, 1.0f}, 0);
-        gl4.glClearBufferfv(GL_COLOR, 3, new float[]{1.0f, 1.0f, 0.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 1).put(1, 0).put(2, 0).put(3, 1));
+        gl4.glClearBufferfv(GL_COLOR, 1, clearColor.put(0, 0).put(1, 1).put(2, 0).put(3, 1));
+        gl4.glClearBufferfv(GL_COLOR, 2, clearColor.put(0, 0).put(1, 0).put(2, 1).put(3, 1));
+        gl4.glClearBufferfv(GL_COLOR, 3, clearColor.put(0, 1).put(1, 1).put(2, 0).put(3, 1));
 
         // Pass 2
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 1).put(1, .5f).put(2, 0).put(3, 1));
 
         gl4.glUseProgram(programName);
         gl4.glUniform1i(uniformDiffuse, 0);
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName[0]);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glBindTexture(GL_TEXTURE_2D_ARRAY, textureName.get(0));
+        gl4.glBindVertexArray(vertexArrayName.get(0));
 
         for (int i = 0; i < Texture.MAX; ++i) {
             gl4.glViewport((int) viewport[i].x, (int) viewport[i].y, (int) viewport[i].z, (int) viewport[i].w);
@@ -212,8 +217,13 @@ public class Gl_400_fbo_rtt_texture_array extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glDeleteProgram(programName);
-        gl4.glDeleteTextures(1, textureName, 0);
-        gl4.glDeleteFramebuffers(1, framebufferName, 0);
+        gl4.glDeleteTextures(1, textureName);
+        gl4.glDeleteFramebuffers(1, framebufferName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(framebufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return true;
     }

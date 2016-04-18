@@ -20,6 +20,7 @@ import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 
 /**
@@ -61,8 +62,16 @@ public class Gl_400_primitive_smooth_shading extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] programName = {0, 0}, elementBufferName = {0}, arrayBufferName = {0}, vertexArrayName = {0},
-            uniformMvp = new int[Program.MAX];
+    private class Buffer {
+
+        public static final int ARRAY = 0;
+        public static final int ELEMENT = 1;
+        public static final int MAX = 2;
+    }
+
+    private int[] programName = new int[Program.MAX], uniformMvp = new int[Program.MAX];
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1);
 
     @Override
     protected boolean begin(GL gl) {
@@ -92,16 +101,16 @@ public class Gl_400_primitive_smooth_shading extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE1, "vert", null, true);
-            ShaderCode contShaderCode = ShaderCode.create(gl4, GL_TESS_CONTROL_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE1, "cont", null, true);
-            ShaderCode evalShaderCode = ShaderCode.create(gl4, GL_TESS_EVALUATION_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE1, "eval", null, true);
-            ShaderCode geomShaderCode = ShaderCode.create(gl4, GL_GEOMETRY_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE1, "geom", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE1, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE1, "vert", null, true);
+            ShaderCode contShaderCode = ShaderCode.create(gl4, GL_TESS_CONTROL_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE1, "cont", null, true);
+            ShaderCode evalShaderCode = ShaderCode.create(gl4, GL_TESS_EVALUATION_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE1, "eval", null, true);
+            ShaderCode geomShaderCode = ShaderCode.create(gl4, GL_GEOMETRY_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE1, "geom", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE1, "frag", null, true);
 
             shaderProgram.init(gl4);
 
@@ -120,12 +129,12 @@ public class Gl_400_primitive_smooth_shading extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE2, "vert", null, true);
-            ShaderCode geomShaderCode = ShaderCode.create(gl4, GL_GEOMETRY_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE2, "geom", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE2, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE2, "vert", null, true);
+            ShaderCode geomShaderCode = ShaderCode.create(gl4, GL_GEOMETRY_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE2, "geom", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE2, "frag", null, true);
 
             shaderProgram.init(gl4);
             programName[Program.SMOOTH] = shaderProgram.program();
@@ -149,10 +158,10 @@ public class Gl_400_primitive_smooth_shading extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.ARRAY));
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, glf.Vertex_v2fc4ub.SIZE, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_UNSIGNED_BYTE, true, glf.Vertex_v2fc4ub.SIZE, Vec2.SIZE);
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
@@ -166,23 +175,24 @@ public class Gl_400_primitive_smooth_shading extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(1, elementBufferName, 0);
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferName[0]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
+
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glGenBuffers(1, arrayBufferName, 0);
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
-        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.ARRAY));
         for (int i = 0; i < vertexCount; i++) {
             vertexData[i].toBb(vertexBuffer, i);
         }
         vertexBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return checkError(gl4, "initBuffer");
     }
@@ -197,10 +207,10 @@ public class Gl_400_primitive_smooth_shading extends Test {
         Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 1));
 
-        gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferName[0]);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
 
         gl4.glViewport(0, 0, (int) (windowSize.x * 0.5f), windowSize.y);
         gl4.glUseProgram(programName[Program.TESS]);
@@ -223,11 +233,13 @@ public class Gl_400_primitive_smooth_shading extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteBuffers(1, arrayBufferName, 0);
-        gl4.glDeleteBuffers(1, elementBufferName, 0);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
         gl4.glDeleteProgram(programName[0]);
         gl4.glDeleteProgram(programName[1]);
+
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(bufferName);
 
         return checkError(gl4, "end");
     }

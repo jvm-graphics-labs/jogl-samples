@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 import jgli.Texture2d;
 import glm.vec._2.Vec2;
 import glm.vec._3.Vec3;
+import java.nio.IntBuffer;
 import jglm.Vec2i;
 
 /**
@@ -100,9 +101,11 @@ public class Gl_400_fbo_shadow extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] framebufferName = new int[Framebuffer.MAX], programName = new int[Program.MAX],
-            vertexArrayName = new int[Program.MAX], bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX],
-            uniformTransform = new int[Program.MAX];
+    private IntBuffer framebufferName = GLBuffers.newDirectIntBuffer(Framebuffer.MAX),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(Program.MAX),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
+    private int[] programName = new int[Program.MAX], uniformTransform = new int[Program.MAX];
     private int uniformShadow;
     private Vec2i shadowSize = new Vec2i(64, 64);
 
@@ -141,10 +144,10 @@ public class Gl_400_fbo_shadow extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_RENDER, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_RENDER, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE_RENDER, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE_RENDER, "frag", null, true);
 
             shaderProgram.init(gl4);
 
@@ -170,8 +173,8 @@ public class Gl_400_fbo_shadow extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_DEPTH, "vert", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE_DEPTH, "vert", null, true);
 
             shaderProgram.init(gl4);
 
@@ -194,33 +197,35 @@ public class Gl_400_fbo_shadow extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         for (int i = 0; i < vertexCount; i++) {
             vertexData[i].toBb(vertexBuffer, i);
         }
         vertexBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int[] uniformBufferOffset = {0};
+        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
 
-        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
+        int uniformBlockSize = Math.max(Mat4.SIZE * 3, uniformBufferOffset.get(0));
 
-        int uniformBlockSize = Math.max(Mat4.SIZE * 3, uniformBufferOffset[0]);
-
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
 
         return checkError(gl4, "initBuffer");
     }
@@ -233,10 +238,10 @@ public class Gl_400_fbo_shadow extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glGenTextures(Texture.MAX, textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
@@ -257,20 +262,20 @@ public class Gl_400_fbo_shadow extends Test {
             }
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl4.glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, windowSize.x, windowSize.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, null);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RENDERBUFFER]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.RENDERBUFFER));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl4.glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, windowSize.x, windowSize.y, 0, GL_DEPTH_COMPONENT,
                     GL_FLOAT, null);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.SHADOWMAP]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.SHADOWMAP));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -292,10 +297,10 @@ public class Gl_400_fbo_shadow extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[Program.RENDER]);
+        gl4.glGenVertexArrays(Program.MAX, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(Program.RENDER));
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 3, GL_FLOAT, false, Vertex_v3fv4u8.SIZE, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_UNSIGNED_BYTE, true, Vertex_v3fv4u8.SIZE, Vec3.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -303,7 +308,7 @@ public class Gl_400_fbo_shadow extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.COLOR);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         }
         gl4.glBindVertexArray(0);
 
@@ -314,21 +319,22 @@ public class Gl_400_fbo_shadow extends Test {
 
         boolean validated = true;
 
-        gl4.glGenFramebuffers(Framebuffer.MAX, framebufferName, 0);
+        IntBuffer buffersRender = GLBuffers.newDirectIntBuffer(new int[]{GL_COLOR_ATTACHMENT0});
 
-        int[] buffersRender = {GL_COLOR_ATTACHMENT0};
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.FRAMEBUFFER]);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.RENDERBUFFER], 0);
-        gl4.glDrawBuffers(1, buffersRender, 0);
-        if (!isFramebufferComplete(gl4, framebufferName[Framebuffer.FRAMEBUFFER])) {
+        gl4.glGenFramebuffers(Framebuffer.MAX, framebufferName);
+
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.FRAMEBUFFER));
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName.get(Texture.COLORBUFFER), 0);
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName.get(Texture.RENDERBUFFER), 0);
+        gl4.glDrawBuffers(1, buffersRender);
+        if (!isFramebufferComplete(gl4, framebufferName.get(Framebuffer.FRAMEBUFFER))) {
             return false;
         }
 
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.SHADOW]);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.SHADOWMAP], 0);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.SHADOW));
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName.get(Texture.SHADOWMAP), 0);
         gl4.glDrawBuffer(GL_NONE);
-        if (!isFramebufferComplete(gl4, framebufferName[Framebuffer.SHADOW])) {
+        if (!isFramebufferComplete(gl4, framebufferName.get(Framebuffer.SHADOW))) {
             return false;
         }
 
@@ -338,6 +344,8 @@ public class Gl_400_fbo_shadow extends Test {
             return false;
         }
 
+        BufferUtils.destroyDirectBuffer(buffersRender);
+
         return validated && checkError(gl4, "initFramebuffer");
     }
 
@@ -346,7 +354,7 @@ public class Gl_400_fbo_shadow extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         ByteBuffer pointer = gl4.glMapBufferRange(
                 GL_UNIFORM_BUFFER, 0, Mat4.SIZE * 3,
                 GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -355,7 +363,8 @@ public class Gl_400_fbo_shadow extends Test {
         {
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.01f, 5.0f);
             Mat4 model = new Mat4(1.0f);
-            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
+            
+            projection.mul(viewMat4()).mul(model).toDbb(pointer);
         }
 
         // Update of the MVP matrix for the depth pass
@@ -365,8 +374,7 @@ public class Gl_400_fbo_shadow extends Test {
             Mat4 model = new Mat4(1.0f);
             Mat4 depthMVP = projection.mul(view).mul(model);
 
-            pointer.position(Mat4.SIZE);
-            pointer.asFloatBuffer().put(depthMVP.toFa_());
+            depthMVP.toDbb(pointer, Mat4.SIZE);
 
             Mat4 biasMatrix = new Mat4(
                     0.5f, 0.0f, 0.0f, 0.0f,
@@ -374,18 +382,14 @@ public class Gl_400_fbo_shadow extends Test {
                     0.0f, 0.0f, 0.5f, 0.0f,
                     0.5f, 0.5f, 0.5f, 1.0f);
 
-            pointer.position(Mat4.SIZE * 2);
-            pointer.asFloatBuffer().put(biasMatrix.mul(depthMVP).toFa_());
+            biasMatrix.mul(depthMVP).toDbb(pointer, Mat4.SIZE * 2);
         }
-
-        pointer.rewind();
         gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
 
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
 
         renderShadow(gl4);
         renderFramebuffer(gl4);
-        //renderSplash();
 
         return checkError(gl4, "render");
     }
@@ -397,16 +401,15 @@ public class Gl_400_fbo_shadow extends Test {
 
         gl4.glViewport(0, 0, shadowSize.x, shadowSize.y);
 
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[Framebuffer.SHADOW]);
-        float[] depth = {1.0f};
-        gl4.glClearBufferfv(GL_DEPTH, 0, depth, 0);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.SHADOW));
+        gl4.glClearBufferfv(GL_DEPTH, 0, clearDepth.put(0, 1));
 
         // Bind rendering objects
         gl4.glUseProgram(programName[Program.DEPTH]);
         gl4.glUniformBlockBinding(programName[Program.DEPTH], uniformTransform[Program.DEPTH],
                 Semantic.Uniform.TRANSFORM0);
 
-        gl4.glBindVertexArray(vertexArrayName[Program.RENDER]);
+        gl4.glBindVertexArray(vertexArrayName.get(Program.RENDER));
         gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
 
         gl4.glDisable(GL_DEPTH_TEST);
@@ -422,9 +425,8 @@ public class Gl_400_fbo_shadow extends Test {
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
 
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        float[] depth = {1.0f};
-        gl4.glClearBufferfv(GL_DEPTH, 0, depth, 0);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(GL_DEPTH, 0, clearDepth);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 1));
 
         gl4.glUseProgram(programName[Program.RENDER]);
         gl4.glUniform1i(uniformShadow, 0);
@@ -432,9 +434,9 @@ public class Gl_400_fbo_shadow extends Test {
                 Semantic.Uniform.TRANSFORM0);
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.SHADOWMAP]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.SHADOWMAP));
 
-        gl4.glBindVertexArray(vertexArrayName[Program.RENDER]);
+        gl4.glBindVertexArray(vertexArrayName.get(Program.RENDER));
         gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
 
         gl4.glDisable(GL_DEPTH_TEST);
@@ -447,13 +449,18 @@ public class Gl_400_fbo_shadow extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteFramebuffers(Framebuffer.MAX, framebufferName, 0);
+        gl4.glDeleteFramebuffers(Framebuffer.MAX, framebufferName);
         for (int i = 0; i < Program.MAX; ++i) {
             gl4.glDeleteProgram(programName[i]);
         }
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
-        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
-        gl4.glDeleteVertexArrays(Program.MAX, vertexArrayName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        gl4.glDeleteTextures(Texture.MAX, textureName);
+        gl4.glDeleteVertexArrays(Program.MAX, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(framebufferName);
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return checkError(gl4, "end");
     }

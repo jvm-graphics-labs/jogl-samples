@@ -207,7 +207,7 @@ public class Gl_330_query_conditional extends Test {
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
             Mat4 model = new Mat4(1.0f);
 
-            projection.mul(viewMat4()).mul(model).toFb(pointer);
+            projection.mul(viewMat4()).mul(model).toDbb(pointer);
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
