@@ -95,7 +95,16 @@ public class Gl_400_draw_indirect extends Test {
         }
     };
 
-    private int[] vertexArrayName = {0}, arrayBufferName = {0}, indirectBufferName = {0}, elementBufferName = {0};
+    private class Buffer {
+
+        public static final int ARRAY = 0;
+        public static final int ELEMENT = 1;
+        public static final int INDIRECT = 2;
+        public static final int MAX = 3;
+    }
+
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX);
     private int programName, uniformMvp, uniformDiffuse;
     private DrawElementsIndirectCommand command;
     private boolean useIndirect = false;
@@ -111,10 +120,7 @@ public class Gl_400_draw_indirect extends Test {
             validated = initProgram(gl4);
         }
         if (validated) {
-            validated = initArrayBuffer(gl4);
-        }
-        if (validated) {
-            validated = initIndirectBuffer(gl4);
+            validated = initBuffers(gl4);
         }
         if (validated) {
             validated = initVertexArray(gl4);
@@ -130,10 +136,10 @@ public class Gl_400_draw_indirect extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl4);
 
@@ -155,45 +161,40 @@ public class Gl_400_draw_indirect extends Test {
         return validated & checkError(gl4, "initProgram");
     }
 
-    private boolean initIndirectBuffer(GL4 gl4) {
+    private boolean initBuffers(GL4 gl4) {
 
         command = new DrawElementsIndirectCommand(elementCount, 1, 0, 0, 0);
-
-        gl4.glGenBuffers(1, indirectBufferName, 0);
-        gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBufferName[0]);
         IntBuffer commandBuffer = GLBuffers.newDirectIntBuffer(command.toIa_());
+        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
+
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName.get(Buffer.INDIRECT));
         gl4.glBufferData(GL_DRAW_INDIRECT_BUFFER, command.SIZE, commandBuffer, GL_STATIC_READ);
-        BufferUtils.destroyDirectBuffer(commandBuffer);
         gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
 
-        return checkError(gl4, "initIndirectBuffer");
-    }
-
-    private boolean initArrayBuffer(GL4 gl4) {
-
-        gl4.glGenBuffers(1, arrayBufferName, 0);
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
-        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.ARRAY));
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glGenBuffers(1, elementBufferName, 0);
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferName[0]);
-        IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        return checkError(gl4, "initArrayBuffer");
+        BufferUtils.destroyDirectBuffer(positionBuffer);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(commandBuffer);
+
+        return checkError(gl4, "initBuffers");
     }
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.ARRAY));
             {
                 gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
             }
@@ -201,7 +202,7 @@ public class Gl_400_draw_indirect extends Test {
 
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferName[0]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         }
         gl4.glBindVertexArray(0);
 
@@ -218,14 +219,14 @@ public class Gl_400_draw_indirect extends Test {
         Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 0));
 
         gl4.glUseProgram(programName);
         gl4.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
-        gl4.glUniform4fv(uniformDiffuse, 1, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+        gl4.glUniform4f(uniformDiffuse, 1.0f, 0.5f, 0.0f, 1.0f);
 
-        gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, indirectBufferName[0]);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
+        gl4.glBindBuffer(GL_DRAW_INDIRECT_BUFFER, bufferName.get(Buffer.INDIRECT));
 
         if (useIndirect) {
             gl4.glDrawElementsIndirect(
@@ -251,11 +252,12 @@ public class Gl_400_draw_indirect extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(1, arrayBufferName, 0);
-        gl4.glDeleteBuffers(1, indirectBufferName, 0);
-        gl4.glDeleteBuffers(1, elementBufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
         gl4.glDeleteProgram(programName);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return checkError(gl4, "end");
     }

@@ -21,6 +21,7 @@ import glf.Vertex_v2fv2f;
 import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
@@ -71,8 +72,9 @@ public class Gl_330_blend_rtt extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] framebufferName = {0}, vertexArrayName = {0}, bufferName = {0}, texture2dName = new int[Texture.MAX],
-            samplerName = {0};
+    private IntBuffer framebufferName = GLBuffers.newDirectIntBuffer(1),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1), bufferName = GLBuffers.newDirectIntBuffer(1),
+            texture2dName = GLBuffers.newDirectIntBuffer(Texture.MAX), samplerName = GLBuffers.newDirectIntBuffer(1);
     private int programNameSingle, uniformMvpSingle, uniformDiffuseSingle;
     private Vec4i[] viewport = new Vec4i[Texture.MAX];
 
@@ -119,10 +121,10 @@ public class Gl_330_blend_rtt extends Test {
 
         ShaderCode[] shaderCodes = new ShaderCode[Shader.MAX];
 
-        shaderCodes[Shader.VERT] = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-        shaderCodes[Shader.FRAG] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+        shaderCodes[Shader.VERT] = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                SHADERS_SOURCE, "vert", null, true);
+        shaderCodes[Shader.FRAG] = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                SHADERS_SOURCE, "frag", null, true);
 
         if (validated) {
 
@@ -149,31 +151,37 @@ public class Gl_330_blend_rtt extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(1, bufferName, 0);
-
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+
+        gl3.glGenBuffers(1, bufferName);
+
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return checkError(gl3, "initBuffer");
     }
 
     private boolean initSampler(GL3 gl3) {
 
-        gl3.glGenSamplers(1, samplerName, 0);
-        gl3.glSamplerParameteri(samplerName[0], GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        gl3.glSamplerParameteri(samplerName[0], GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        gl3.glSamplerParameteri(samplerName[0], GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        gl3.glSamplerParameteri(samplerName[0], GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        gl3.glSamplerParameteri(samplerName[0], GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        gl3.glSamplerParameterfv(samplerName[0], GL_TEXTURE_BORDER_COLOR, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
-        gl3.glSamplerParameterf(samplerName[0], GL_TEXTURE_MIN_LOD, -1000.f);
-        gl3.glSamplerParameterf(samplerName[0], GL_TEXTURE_MAX_LOD, 1000.f);
-        gl3.glSamplerParameterf(samplerName[0], GL_TEXTURE_LOD_BIAS, 0.0f);
-        gl3.glSamplerParameteri(samplerName[0], GL_TEXTURE_COMPARE_MODE, GL_NONE);
-        gl3.glSamplerParameteri(samplerName[0], GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        FloatBuffer borderColor = GLBuffers.newDirectFloatBuffer(new float[]{0.0f, 0.0f, 0.0f, 0.0f});
+
+        gl3.glGenSamplers(1, samplerName);
+        gl3.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        gl3.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        gl3.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        gl3.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        gl3.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+        gl3.glSamplerParameterfv(samplerName.get(0), GL_TEXTURE_BORDER_COLOR, borderColor);
+        gl3.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_MIN_LOD, -1000.f);
+        gl3.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_MAX_LOD, 1000.f);
+        gl3.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_LOD_BIAS, 0.0f);
+        gl3.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_COMPARE_MODE, GL_NONE);
+        gl3.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+
+        BufferUtils.destroyDirectBuffer(borderColor);
 
         return checkError(gl3, "initSampler");
     }
@@ -185,9 +193,9 @@ public class Gl_330_blend_rtt extends Test {
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glGenTextures(Texture.MAX, texture2dName, 0);
+            gl3.glGenTextures(Texture.MAX, texture2dName);
 
-            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[Texture.RGB8]);
+            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName.get(Texture.RGB8));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
             gl3.glTexImage2D(GL_TEXTURE_2D, 0,
@@ -197,26 +205,26 @@ public class Gl_330_blend_rtt extends Test {
                     format.external.value, format.type.value,
                     texture.data());
 
-            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[Texture.R]);
+            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName.get(Texture.R));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_ZERO);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_ZERO);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ZERO);
 
-            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[Texture.G]);
+            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName.get(Texture.G));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_ZERO);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_RED);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_ZERO);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ZERO);
 
-            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[Texture.B]);
+            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName.get(Texture.B));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_ZERO);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_G, GL_ZERO);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_B, GL_RED);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_A, GL_ZERO);
 
             for (int i = Texture.R; i <= Texture.B; ++i) {
-                gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[i]);
+                gl3.glBindTexture(GL_TEXTURE_2D, texture2dName.get(i));
                 gl3.glTexImage2D(GL_TEXTURE_2D, 0,
                         GL_R8,
                         texture.dimensions()[0], texture.dimensions()[1],
@@ -233,11 +241,11 @@ public class Gl_330_blend_rtt extends Test {
 
     private boolean initFramebuffer(GL3 gl3) {
 
-        gl3.glGenFramebuffers(1, framebufferName, 0);
-        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
+        gl3.glGenFramebuffers(1, framebufferName);
+        gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
 
         for (int i = Texture.R; i <= Texture.B; ++i) {
-            gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + (i - Texture.R), texture2dName[i], 0);
+            gl3.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + (i - Texture.R), texture2dName.get(i), 0);
         }
 
         int[] drawBuffers = new int[3];
@@ -247,7 +255,7 @@ public class Gl_330_blend_rtt extends Test {
 
         gl3.glDrawBuffers(3, drawBuffers, 0);
 
-        if (!isFramebufferComplete(gl3, framebufferName[0])) {
+        if (!isFramebufferComplete(gl3, framebufferName.get(0))) {
             return false;
         }
 
@@ -256,10 +264,10 @@ public class Gl_330_blend_rtt extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -273,7 +281,7 @@ public class Gl_330_blend_rtt extends Test {
     }
 
     private boolean initBlend(GL3 gl3) {
-        
+
         gl3.glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
         gl3.glBlendFuncSeparate(GL_ONE, GL_ONE, GL_ONE, GL_ONE);
 
@@ -297,17 +305,17 @@ public class Gl_330_blend_rtt extends Test {
 
         // Pass 1
         {
-            gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
+            gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
             gl3.glViewport(0, 0, windowSize.x >> 1, windowSize.y >> 1);
-            gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
-            gl3.glClearBufferfv(GL_COLOR, 1, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
-            gl3.glClearBufferfv(GL_COLOR, 2, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
-            gl3.glClearBufferfv(GL_COLOR, 3, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+            gl3.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 1).put(1, 1).put(2, 1).put(3, 1));
+            gl3.glClearBufferfv(GL_COLOR, 1, clearColor);
+            gl3.glClearBufferfv(GL_COLOR, 2, clearColor);
+            gl3.glClearBufferfv(GL_COLOR, 3, clearColor);
         }
 
         // Pass 2
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 0));
 
         gl3.glUseProgram(programNameSingle);
 
@@ -322,13 +330,13 @@ public class Gl_330_blend_rtt extends Test {
         }
 
         for (int i = 0; i < Texture.MAX; ++i) {
-            
+
             gl3.glViewport(viewport[i].x, viewport[i].y, viewport[i].z, viewport[i].w);
 
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName[i]);
-            gl3.glBindSampler(0, samplerName[0]);
-            gl3.glBindVertexArray(vertexArrayName[0]);
+            gl3.glBindTexture(GL_TEXTURE_2D, texture2dName.get(i));
+            gl3.glBindSampler(0, samplerName.get(0));
+            gl3.glBindVertexArray(vertexArrayName.get(0));
 
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
@@ -341,12 +349,17 @@ public class Gl_330_blend_rtt extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(1, bufferName, 0);
+        gl3.glDeleteBuffers(1, bufferName);
         gl3.glDeleteProgram(programNameSingle);
-        gl3.glDeleteTextures(Texture.MAX, texture2dName, 0);
-        gl3.glDeleteFramebuffers(1, framebufferName, 0);
-        gl3.glDeleteSamplers(1, samplerName, 0);
+        gl3.glDeleteTextures(Texture.MAX, texture2dName);
+        gl3.glDeleteFramebuffers(1, framebufferName);
+        gl3.glDeleteSamplers(1, samplerName);
 
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(texture2dName);
+        BufferUtils.destroyDirectBuffer(framebufferName);
+        BufferUtils.destroyDirectBuffer(samplerName);
+        
         return checkError(gl3, "end");
     }
 }

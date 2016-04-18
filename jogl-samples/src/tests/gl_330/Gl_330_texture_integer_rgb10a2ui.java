@@ -22,6 +22,7 @@ import framework.Test;
 import glm.vec._2.Vec2;
 import java.io.IOException;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Gl;
@@ -57,7 +58,8 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
         -1.0f, +1.0f,/**/ 0.0f, 0.0f,
         -1.0f, -1.0f,/**/ 0.0f, 1.0f};
 
-    private int[] bufferName = {0}, textureName = {0}, vertexArrayName = {0};
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(1), textureName = GLBuffers.newDirectIntBuffer(1),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1);
     private int programName, uniformMvp, uniformDiffuse;
 
     @Override
@@ -91,10 +93,10 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, VERT_SHADER_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, FRAG_SHADER_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null, 
+                    VERT_SHADER_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null, 
+                    FRAG_SHADER_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl3);
 
@@ -118,14 +120,18 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(1, bufferName, 0);
-
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+        
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        
+        gl3.glGenBuffers(1, bufferName);
+
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
         gl3.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+        
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        
         return true;
     }
 
@@ -139,10 +145,10 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
 
             jgli.Gl.Format format = jgli.Gl.translate(texture.format());
 
-            gl3.glGenTextures(1, textureName, 0);
+            gl3.glGenTextures(1, textureName);
             // Default unpack alignment of 4 is ok, we have 32 bit per pixel.
             gl3.glActiveTexture(GL_TEXTURE0);
-            gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
+            gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
             gl3.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -150,12 +156,12 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
 
             gl3.glTexImage2D(GL_TEXTURE_2D, 0,
                     format.internal.value,
-//                    Gl.InternalFormat.INTERNAL_RGB10A2U.value,
+                    //                    Gl.InternalFormat.INTERNAL_RGB10A2U.value,
                     texture.dimensions(0)[0], texture.dimensions(0)[1],
                     0,
                     format.external.value,
-//                    Gl.ExternalFormat.EXTERNAL_RGBA_INTEGER.value,
-//                                        format.type.value,
+                    //                    Gl.ExternalFormat.EXTERNAL_RGBA_INTEGER.value,
+                    //                                        format.type.value,
                     GL_UNSIGNED_INT_10_10_10_2,
                     texture.data(0));
 
@@ -167,10 +173,10 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 2 * Vec2.SIZE, 0);
             gl3.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, 2 * Vec2.SIZE, Vec2.SIZE);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -193,15 +199,15 @@ public class Gl_330_texture_integer_rgb10a2ui extends Test {
         Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 1).put(1, .5f).put(2, 0).put(3, 1));
 
         gl3.glUseProgram(programName);
         gl3.glUniform1i(uniformDiffuse, 0);
         gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
         gl3.glActiveTexture(GL_TEXTURE0);
-        gl3.glBindTexture(GL_TEXTURE_2D, textureName[0]);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
+        gl3.glBindVertexArray(vertexArrayName.get(0));
 
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
 

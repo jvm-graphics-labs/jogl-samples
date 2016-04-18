@@ -20,6 +20,7 @@ import framework.Test;
 import glm.vec._2.Vec2;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -55,7 +56,9 @@ public class Gl_330_query_occlusion extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] bufferName = new int[Buffer.MAX], vertexArrayName = {0}, queryName = {0};
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1), queryName = GLBuffers.newDirectIntBuffer(1),
+            samplesCount = GLBuffers.newDirectIntBuffer(1);
     private int programName;
 
     @Override
@@ -65,9 +68,9 @@ public class Gl_330_query_occlusion extends Test {
 
         boolean validated = true;
 
-        int[] queryCounter = {0};
-        gl3.glGetQueryiv(GL_ANY_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, queryCounter, 0);
-        assert (queryCounter[0] > 0);
+        IntBuffer queryCounter = GLBuffers.newDirectIntBuffer(1);
+        gl3.glGetQueryiv(GL_ANY_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, queryCounter);
+        assert (queryCounter.get(0) > 0);
 
         if (validated) {
             validated = initProgram(gl3);
@@ -87,12 +90,12 @@ public class Gl_330_query_occlusion extends Test {
 
     private boolean initQuery(GL3 gl3) {
 
-        gl3.glGenQueries(1, queryName, 0);
+        gl3.glGenQueries(1, queryName);
 
-        int[] queryBits = {0};
-        gl3.glGetQueryiv(GL_ANY_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, queryBits, 0);
+        IntBuffer queryBits = GLBuffers.newDirectIntBuffer(1);
+        gl3.glGetQueryiv(GL_ANY_SAMPLES_PASSED, GL_QUERY_COUNTER_BITS, queryBits);
 
-        boolean validated = queryBits[0] >= 1;
+        boolean validated = queryBits.get(0) >= 1;
 
         return validated && checkError(gl3, "initQuery");
     }
@@ -105,10 +108,10 @@ public class Gl_330_query_occlusion extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl3, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl3, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl3);
 
@@ -123,7 +126,8 @@ public class Gl_330_query_occlusion extends Test {
         // Get variables locations
         if (validated) {
 
-            gl3.glUniformBlockBinding(programName, gl3.glGetUniformBlockIndex(programName, "Transform"), Semantic.Uniform.TRANSFORM0);
+            gl3.glUniformBlockBinding(programName, gl3.glGetUniformBlockIndex(programName, "Transform"),
+                    Semantic.Uniform.TRANSFORM0);
         }
 
         return validated & checkError(gl3, "initProgram");
@@ -131,31 +135,34 @@ public class Gl_330_query_occlusion extends Test {
 
     private boolean initBuffer(GL3 gl3) {
 
-        gl3.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+
+        gl3.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(positionBuffer);
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int[] uniformBufferOffset = {0};
-        gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
+        gl3.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
 
-        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl3.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl3.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(positionBuffer);
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
 
         return checkError(gl3, "initBuffer");
     }
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -172,14 +179,14 @@ public class Gl_330_query_occlusion extends Test {
         GL3 gl3 = (GL3) gl;
 
         {
-            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl3.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             ByteBuffer pointer = gl3.glMapBufferRange(GL_UNIFORM_BUFFER,
                     0, Mat4.SIZE, GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
             Mat4 model = new Mat4(1.0f);
 
-            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
+            projection.mul(viewMat4()).mul(model).toFb(pointer);
 
             gl3.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
@@ -188,14 +195,14 @@ public class Gl_330_query_occlusion extends Test {
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
 
         // Clear color buffer with black
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 1));
 
         gl3.glUseProgram(programName);
-        gl3.glBindVertexArray(vertexArrayName[0]);
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
+        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
 
         // Samples count query
-        gl3.glBeginQuery(GL_ANY_SAMPLES_PASSED, queryName[0]);
+        gl3.glBeginQuery(GL_ANY_SAMPLES_PASSED, queryName.get(0));
         {
             gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, vertexCount, 1);
         }
@@ -203,9 +210,8 @@ public class Gl_330_query_occlusion extends Test {
 
         // Get the count of samples. 
         // If the result of the query isn't here yet, we wait here...
-        int[] samplesCount = {0};
-        gl3.glGetQueryObjectuiv(queryName[0], GL_QUERY_RESULT, samplesCount, 0);
-        System.out.println("any samples passed: " + (samplesCount[0] == GL_TRUE));
+        gl3.glGetQueryObjectuiv(queryName.get(0), GL_QUERY_RESULT, samplesCount);
+        System.out.println("any samples passed: " + (samplesCount.get(0) == GL_TRUE));
 
         return true;
     }
@@ -215,9 +221,16 @@ public class Gl_330_query_occlusion extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl3.glDeleteBuffers(Buffer.MAX, bufferName);
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+        gl3.glDeleteQueries(1, queryName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(queryName);
+
+        BufferUtils.destroyDirectBuffer(samplesCount);
 
         return checkError(gl3, "end");
     }

@@ -14,7 +14,6 @@ import com.jogamp.opengl.util.glsl.ShaderProgram;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
-import glm.vec._2.i.Vec2i;
 import framework.BufferUtils;
 import java.nio.IntBuffer;
 

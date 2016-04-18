@@ -19,6 +19,8 @@ import framework.Semantic;
 import framework.Test;
 import glm.vec._2.Vec2;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.nio.LongBuffer;
 
 /**
  *
@@ -54,7 +56,10 @@ public class Gl_330_query_counter extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, bufferName = {0}, queryName = new int[Query.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), bufferName = GLBuffers.newDirectIntBuffer(1),
+            queryName = GLBuffers.newDirectIntBuffer(Query.MAX), availableBegin = GLBuffers.newDirectIntBuffer(1),
+            availableEnd = GLBuffers.newDirectIntBuffer(1);
+    private LongBuffer timeBegin = GLBuffers.newDirectLongBuffer(1), timeEnd = GLBuffers.newDirectLongBuffer(1);
     private int programName, uniformMvp;
 
     @Override
@@ -82,13 +87,15 @@ public class Gl_330_query_counter extends Test {
 
     private boolean initQuery(GL3 gl3) {
 
-        int[] queryBits = {0};
-        gl3.glGetQueryiv(GL_TIMESTAMP, GL_QUERY_COUNTER_BITS, queryBits, 0);
+        IntBuffer queryBits = GLBuffers.newDirectIntBuffer(1);
+        gl3.glGetQueryiv(GL_TIMESTAMP, GL_QUERY_COUNTER_BITS, queryBits);
 
-        boolean validated = queryBits[0] >= 30;
+        boolean validated = queryBits.get(0) >= 30;
         if (validated) {
-            gl3.glGenQueries(queryName.length, queryName, 0);
+            gl3.glGenQueries(queryName.capacity(), queryName);
         }
+
+        BufferUtils.destroyDirectBuffer(queryBits);
 
         return validated && checkError(gl3, "initQuery");
     }
@@ -121,7 +128,7 @@ public class Gl_330_query_counter extends Test {
 
             uniformMvp = gl3.glGetUniformLocation(programName, "mvp");
             gl3.glUseProgram(programName);
-            gl3.glUniform4fv(gl3.glGetUniformLocation(programName, "diffuse"), 1, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+            gl3.glUniform4f(gl3.glGetUniformLocation(programName, "diffuse"), 1.0f, 0.5f, 0.0f, 1.0f);
             gl3.glUseProgram(0);
         }
 
@@ -131,29 +138,31 @@ public class Gl_330_query_counter extends Test {
     // Buffer update using glBufferSubData
     protected boolean initBuffer(GL3 gl3) {
 
+        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
+
         // Generate a buffer object
-        gl3.glGenBuffers(1, bufferName, 0);
+        gl3.glGenBuffers(1, bufferName);
 
         // Bind the buffer for use
-        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+        gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
 
         // Reserve buffer memory but and copy the values
-        FloatBuffer positionBuffer = GLBuffers.newDirectFloatBuffer(positionData);
         gl3.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(positionBuffer);
 
         // Unbind the buffer
         gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(positionBuffer);
 
         return checkError(gl3, "initBuffer");
     }
 
     private boolean initVertexArray(GL3 gl3) {
 
-        gl3.glGenVertexArrays(1, vertexArrayName, 0);
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glGenVertexArrays(1, vertexArrayName);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+            gl3.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
             gl3.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, 0, 0);
             gl3.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -173,37 +182,36 @@ public class Gl_330_query_counter extends Test {
         Mat4 model = new Mat4(1.0f);
         Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
-        gl3.glQueryCounter(queryName[Query.BEGIN], GL_TIMESTAMP);
+        gl3.glQueryCounter(queryName.get(Query.BEGIN), GL_TIMESTAMP);
 
         gl3.glViewport(0, 0, windowSize.x, windowSize.y);
 
-        gl3.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+        gl3.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 1));
 
         gl3.glUseProgram(programName);
         gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
-        gl3.glBindVertexArray(vertexArrayName[0]);
+        gl3.glBindVertexArray(vertexArrayName.get(0));
         gl3.glDrawArrays(GL_TRIANGLES, 0, vertexCount);
 
-        gl3.glQueryCounter(queryName[Query.END], GL_TIMESTAMP);
+        gl3.glQueryCounter(queryName.get(Query.END), GL_TIMESTAMP);
 
-        int[] availableBegin = {GL_FALSE};
-        gl3.glGetQueryObjectiv(queryName[Query.BEGIN], GL_QUERY_RESULT_AVAILABLE, availableBegin, 0);
+        availableBegin.put(0, GL_FALSE);
+        gl3.glGetQueryObjectiv(queryName.get(Query.BEGIN), GL_QUERY_RESULT_AVAILABLE, availableBegin);
 
-        int[] availableEnd = {GL_FALSE};
-        gl3.glGetQueryObjectiv(queryName[Query.END], GL_QUERY_RESULT_AVAILABLE, availableEnd, 0);
+        availableEnd.put(0, GL_FALSE);
+        gl3.glGetQueryObjectiv(queryName.get(Query.END), GL_QUERY_RESULT_AVAILABLE, availableEnd);
 
         // The OpenGL implementations will wait for the query if it's not available
-        long[] timeBegin = {0}, timeEnd = {0};
-        gl3.glGetQueryObjecti64v(queryName[Query.BEGIN], GL_QUERY_RESULT, timeBegin, 0);
-        gl3.glGetQueryObjecti64v(queryName[Query.END], GL_QUERY_RESULT, timeEnd, 0);
+        gl3.glGetQueryObjecti64v(queryName.get(Query.BEGIN), GL_QUERY_RESULT, timeBegin);
+        gl3.glGetQueryObjecti64v(queryName.get(Query.END), GL_QUERY_RESULT, timeEnd);
 
         //glGetInteger64v(GL_TIMESTAMP, &TimeBegin);
         //glGetInteger64v(GL_TIMESTAMP, &TimeEnd);
-        System.out.println(availableBegin[0] + ", " + availableEnd[0] + " / Time stamp: " 
-                + (timeEnd[0] - timeBegin[0]) / 1_000_000f + " ms");
+        System.out.println(availableBegin.get(0) + ", " + availableEnd.get(0) + " / Time stamp: "
+                + (timeEnd.get(0) - timeBegin.get(0)) / 1_000_000f + " ms");
 
-        return (timeEnd[0] - timeBegin[0]) > 0;
+        return (timeEnd.get(0) - timeBegin.get(0)) > 0;
     }
 
     @Override
@@ -211,9 +219,19 @@ public class Gl_330_query_counter extends Test {
 
         GL3 gl3 = (GL3) gl;
 
-        gl3.glDeleteBuffers(1, bufferName, 0);
+        gl3.glDeleteBuffers(1, bufferName);
         gl3.glDeleteProgram(programName);
-        gl3.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl3.glDeleteVertexArrays(1, vertexArrayName);
+        gl3.glDeleteQueries(1, queryName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(queryName);
+
+        BufferUtils.destroyDirectBuffer(availableBegin);
+        BufferUtils.destroyDirectBuffer(availableEnd);
+        BufferUtils.destroyDirectBuffer(timeBegin);
+        BufferUtils.destroyDirectBuffer(timeEnd);
 
         return checkError(gl3, "end");
     }
