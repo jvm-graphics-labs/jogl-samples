@@ -452,7 +452,7 @@ public class Test implements GLEventListener, KeyListener {
 
             ByteBuffer buffer = GLBuffers.newDirectByteBuffer(width * height * 4);
 
-            gl3.glReadBuffer(GL3.GL_COLOR_ATTACHMENT0);
+            gl3.glReadBuffer(GL_BACK);
             gl3.glReadPixels(0, 0, width, height, GL3.GL_RGBA, GL3.GL_UNSIGNED_BYTE, buffer);
 
             for (int h = 0; h < height; h++) {
@@ -466,8 +466,8 @@ public class Test implements GLEventListener, KeyListener {
                     graphics.setColor(new Color((buffer.get() & 0xff), (buffer.get() & 0xff),
                             (buffer.get() & 0xff)));
                     buffer.get();   // alpha
-//                    graphics.drawRect(w, height - h, 1, 1); // height - h is for flipping the image
-                    graphics.drawRect(w, h, 1, 1); // height - h is for flipping the image
+                    graphics.drawRect(w, height - h, 1, 1); // height - h is for flipping the image
+//                    graphics.drawRect(w, h, 1, 1); // height - h is for flipping the image
                 }
             }
             BufferUtils.destroyDirectBuffer(buffer);
