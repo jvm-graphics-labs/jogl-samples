@@ -23,6 +23,7 @@ import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
 import jgli.Texture2d;
 import glm.vec._2.Vec2;
+import java.nio.IntBuffer;
 import jglm.Vec2i;
 
 /**
@@ -91,8 +92,11 @@ public class Gl_400_texture_derivative extends Test {
         public static final int MAX = 4;
     }
 
-    private int[] framebufferName = {0}, programName = new int[Program.MAX], vertexArrayName = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], uniformDiffuse = new int[Program.MAX];
+    private int[] programName = new int[Program.MAX], uniformDiffuse = new int[Program.MAX];
+    private IntBuffer framebufferName = GLBuffers.newDirectIntBuffer(1),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(Program.MAX),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
     private int uniformTransform, uniformUseGrad, uniformFramebufferSize;
 
     @Override
@@ -102,12 +106,14 @@ public class Gl_400_texture_derivative extends Test {
 
         boolean validated = true;
 
-        float[] minFragmentInterpolationOffset = {0};
-        float[] maxFragmentInterpolationOffset = {0};
-        float[] fragmentInterpolationOffsetBits = {0};
-        gl4.glGetFloatv(GL_MIN_FRAGMENT_INTERPOLATION_OFFSET, minFragmentInterpolationOffset, 0);
-        gl4.glGetFloatv(GL_MAX_FRAGMENT_INTERPOLATION_OFFSET, maxFragmentInterpolationOffset, 0);
-        gl4.glGetFloatv(GL_FRAGMENT_INTERPOLATION_OFFSET_BITS, fragmentInterpolationOffsetBits, 0);
+        FloatBuffer data = GLBuffers.newDirectFloatBuffer(1);
+        gl4.glGetFloatv(GL_MIN_FRAGMENT_INTERPOLATION_OFFSET, data);
+        System.out.println("GL_MIN_FRAGMENT_INTERPOLATION_OFFSET: " + data.get(0));
+        gl4.glGetFloatv(GL_MAX_FRAGMENT_INTERPOLATION_OFFSET, data);
+        System.out.println("GL_MAX_FRAGMENT_INTERPOLATION_OFFSET: " + data.get(0));
+        gl4.glGetFloatv(GL_FRAGMENT_INTERPOLATION_OFFSET_BITS, data);
+        System.out.println("GL_FRAGMENT_INTERPOLATION_OFFSET_BITS: " + data.get(0));
+        BufferUtils.destroyDirectBuffer(data);
 
         if (validated) {
             validated = initProgram(gl4);
@@ -139,10 +145,10 @@ public class Gl_400_texture_derivative extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            shaderCodes[Shader.VERT_TEXTURE] = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "vert", null, true);
-            shaderCodes[Shader.FRAG_TEXTURE] = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "frag", null, true);
+            shaderCodes[Shader.VERT_TEXTURE] = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE_TEXTURE, "vert", null, true);
+            shaderCodes[Shader.FRAG_TEXTURE] = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE_TEXTURE, "frag", null, true);
 
             shaderProgram.init(gl4);
 
@@ -159,8 +165,7 @@ public class Gl_400_texture_derivative extends Test {
         if (validated) {
 
             uniformTransform = gl4.glGetUniformBlockIndex(programName[Program.TEXTURE], "transform");
-            uniformDiffuse[Program.TEXTURE]
-                    = gl4.glGetUniformLocation(programName[Program.TEXTURE], "Diffuse");
+            uniformDiffuse[Program.TEXTURE] = gl4.glGetUniformLocation(programName[Program.TEXTURE], "Diffuse");
             uniformUseGrad = gl4.glGetUniformLocation(programName[Program.TEXTURE], "UseGrad");
         }
         // Create program
@@ -168,10 +173,10 @@ public class Gl_400_texture_derivative extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            shaderCodes[Shader.VERT_SPLASH] = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "vert", null, true);
-            shaderCodes[Shader.FRAG_SPLASH] = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "frag", null, true);
+            shaderCodes[Shader.VERT_SPLASH] = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE_SPLASH, "vert", null, true);
+            shaderCodes[Shader.FRAG_SPLASH] = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE_SPLASH, "frag", null, true);
 
             shaderProgram.init(gl4);
 
@@ -196,31 +201,33 @@ public class Gl_400_texture_derivative extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        int[] uniformBufferOffset = {0};
 
         gl4.glGetIntegerv(
                 GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT,
-                uniformBufferOffset, 0);
+                uniformBufferOffset);
 
-        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
 
         return true;
     }
@@ -246,10 +253,10 @@ public class Gl_400_texture_derivative extends Test {
 
         gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-        gl4.glGenTextures(Texture.MAX, textureName, 0);
+        gl4.glGenTextures(Texture.MAX, textureName);
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 2);
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -271,7 +278,7 @@ public class Gl_400_texture_derivative extends Test {
         }
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -280,7 +287,7 @@ public class Gl_400_texture_derivative extends Test {
                 GL_RGBA, GL_UNSIGNED_BYTE, null);
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RENDERBUFFER]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.RENDERBUFFER));
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0);
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -295,10 +302,10 @@ public class Gl_400_texture_derivative extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(Program.MAX, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
+        gl4.glGenVertexArrays(Program.MAX, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(Program.TEXTURE));
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -306,11 +313,11 @@ public class Gl_400_texture_derivative extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         }
         gl4.glBindVertexArray(0);
 
-        gl4.glBindVertexArray(vertexArrayName[Program.SPLASH]);
+        gl4.glBindVertexArray(vertexArrayName.get(Program.SPLASH));
         gl4.glBindVertexArray(0);
 
         return true;
@@ -318,12 +325,12 @@ public class Gl_400_texture_derivative extends Test {
 
     private boolean initFramebuffer(GL4 gl4) {
 
-        gl4.glGenFramebuffers(1, framebufferName, 0);
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName[Texture.COLORBUFFER], 0);
-        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName[Texture.RENDERBUFFER], 0);
+        gl4.glGenFramebuffers(1, framebufferName);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get());
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureName.get(Texture.COLORBUFFER), 0);
+        gl4.glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, textureName.get(Texture.RENDERBUFFER), 0);
 
-        if (!isFramebufferComplete(gl4, framebufferName[0])) {
+        if (!isFramebufferComplete(gl4, framebufferName.get(0))) {
             return false;
         }
 
@@ -340,7 +347,7 @@ public class Gl_400_texture_derivative extends Test {
 
         // Update of the uniform buffer
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             ByteBuffer pointer = gl4.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -358,10 +365,10 @@ public class Gl_400_texture_derivative extends Test {
         gl4.glDepthFunc(GL_LESS);
 
         gl4.glViewport(0, 0, framebufferSize.x, framebufferSize.y);
-        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName[0]);
-        float[] depth = {1.0f};
-        gl4.glClearBufferfv(GL_DEPTH, 0, depth, 0);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+        gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
+        
+        gl4.glClearBufferfv(GL_DEPTH, 0, clearDepth.put(0,1));
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 1));
 
         gl4.glUseProgram(programName[Program.TEXTURE]);
         gl4.glUniform1i(uniformDiffuse[Program.TEXTURE], 0);
@@ -369,9 +376,9 @@ public class Gl_400_texture_derivative extends Test {
                 Semantic.Uniform.TRANSFORM0);
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
-        gl4.glBindVertexArray(vertexArrayName[Program.TEXTURE]);
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
+        gl4.glBindVertexArray(vertexArrayName.get(Program.TEXTURE));
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
 
         gl4.glEnable(GL_SCISSOR_TEST);
         {
@@ -393,8 +400,8 @@ public class Gl_400_texture_derivative extends Test {
         gl4.glUniform1f(uniformFramebufferSize, FRAMEBUFFER_SIZE);
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindVertexArray(vertexArrayName[Program.SPLASH]);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.COLORBUFFER]);
+        gl4.glBindVertexArray(vertexArrayName.get(Program.SPLASH));
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.COLORBUFFER));
 
         gl4.glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 1);
 

@@ -170,9 +170,8 @@ public class Gl_410_buffer_uniform_array extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         ByteBuffer positionBuffer = GLBuffers.newDirectByteBuffer(positionSize);
         for (int i = 0; i < vertexCount; i++) {
-            positionData[i].toBb(positionBuffer, i);
+            positionData[i].toDbb(positionBuffer, i * Vec2.SIZE);
         }
-        positionBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(positionBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);

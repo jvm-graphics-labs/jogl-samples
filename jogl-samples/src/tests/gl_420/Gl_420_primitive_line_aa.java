@@ -183,9 +183,8 @@ public class Gl_420_primitive_line_aa extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexData.length * Vec2.SIZE);
         for (int i = 0; i < vertexData.length; i++) {
-            vertexData[i].toBb(vertexBuffer, i);
+            vertexData[i].toDbb(vertexBuffer, i * Vec2.SIZE);
         }
-        vertexBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexData.length * Vec2.SIZE, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);

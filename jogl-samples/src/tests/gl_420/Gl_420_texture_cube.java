@@ -152,9 +152,8 @@ public class Gl_420_texture_cube extends Test {
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
         for (int i = 0; i < vertexCount; i++) {
-            vertexData[i].toBb(vertexBuffer, i);
+            vertexData[i].toDbb(vertexBuffer, i * Vec2.SIZE);
         }
-        vertexBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);

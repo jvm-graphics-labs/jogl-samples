@@ -166,10 +166,9 @@ public class Gl_400_buffer_uniform_array extends Test {
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
-        for (Vec2 vec2 : positionData) {
-            positionBuffer.put(vec2.toFa_());
+        for (int i = 0; i < positionData.length; i++) {
+            positionData[i].toDfb(positionBuffer, i * 2);
         }
-        positionBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, positionSize, positionBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 

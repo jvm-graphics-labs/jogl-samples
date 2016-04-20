@@ -52,6 +52,8 @@ public class Gl_400_transform_feedback_object extends Test {
     private class Buffer {
 
         public static final int TRANSFORM = 0;
+        public static final int FEEDBACK = 0;
+//        public static final int FEEDBACK = 0;
         public static final int MAX = 1;
     }
 
