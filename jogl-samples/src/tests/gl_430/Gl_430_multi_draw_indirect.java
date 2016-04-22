@@ -30,6 +30,7 @@ import glm.vec._2.Vec2;
 import glm.vec._2.i.Vec2i;
 import glf.Vertex_v2fv2f;
 import glm.vec._3.Vec3;
+import java.nio.LongBuffer;
 import jglm.Vec4i;
 
 /**
@@ -442,17 +443,16 @@ public class Gl_430_multi_draw_indirect extends Test {
 
         validate(gl4);
 
+//        LongBuffer buffer = GLBuffers.newDirectLongBuffer(1);
         for (int i = 0; i < indirectBufferCount; ++i) {
 
             gl4.glViewportIndexedfv(0, viewport[i].toFloatArray(), 0);
-//            IntBuffer buffer = GLBuffers.newDirectIntBuffer();
-//            IntBuffer buffer = GLBuffers.newDirectIntBuffer(new int[]{drawOffset.get(i)});
-//            ByteBuffer buffer = GLBuffers.newDirectByteBuffer(Integer.BYTES);
-//            ShortBuffer buffer = GLBuffers.newDirectShortBuffer(new short[]{(short) drawOffset.get(i)});
 //            buffer.put(5 * Integer.BYTES * drawOffset[i]).rewind();
 //            buffer.asIntBuffer().put(0).rewind();
 //            buffer.rewind();
-            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT, null, drawCount[i],
+            gl4.glMultiDrawElementsIndirect(GL_TRIANGLES, GL_UNSIGNED_SHORT,
+                    null,
+                    drawCount[i],
                     DrawElementsIndirectCommand.SIZE);
         }
 

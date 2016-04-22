@@ -234,7 +234,6 @@ public class Test implements GLEventListener, KeyListener {
 
     @Override
     public final void dispose(GLAutoDrawable drawable) {
-
         GL gl = getGl(drawable);
         assert end(gl);
         BufferUtils.destroyDirectBuffer(clearColor);
@@ -242,7 +241,7 @@ public class Test implements GLEventListener, KeyListener {
         System.exit(0);
     }
 
-    protected boolean end(GL gl) {
+    protected boolean end(GL gl) {        
         return true;
     }
 
@@ -424,13 +423,8 @@ public class Test implements GLEventListener, KeyListener {
         return new Vec3(0.0f, 0.0f, -translationCurrent.y);
     }
 
-    protected final String getDataDirectory() {
-        return "/data/";
-    }
-
     @Override
     public void keyPressed(KeyEvent e) {
-
     }
 
     @Override
@@ -439,7 +433,7 @@ public class Test implements GLEventListener, KeyListener {
         switch (e.getKeyCode()) {
             case KeyEvent.VK_ESCAPE:
                 animator.stop();
-//                glWindow.destroy();
+                glWindow.destroy();
                 break;
         }
     }
