@@ -12,7 +12,6 @@ import com.jogamp.newt.event.KeyEvent;
 import com.jogamp.newt.event.KeyListener;
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.GL;
-import static com.jogamp.opengl.GL.GL_DONT_CARE;
 import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SEVERITY_LOW;
 import static com.jogamp.opengl.GL2ES2.GL_DEBUG_SOURCE_APPLICATION;
 import static com.jogamp.opengl.GL2ES2.GL_DEBUG_TYPE_OTHER;
@@ -39,7 +38,6 @@ import javax.imageio.ImageIO;
 import glm.vec._2.Vec2;
 import glm.vec._2.i.Vec2i;
 import glm.vec._3.Vec3;
-import glm.vec._4.Vec4;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
