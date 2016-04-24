@@ -95,9 +95,8 @@ public class Gl_410_glsl_block extends Test {
         public static final int MAX = 3;
     }
 
-    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX);
-    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1);
-    private IntBuffer textureName = GLBuffers.newDirectIntBuffer(1);
+    private IntBuffer bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1), textureName = GLBuffers.newDirectIntBuffer(1);
     private int programName, uniformTransform, uniformDiffuse;
 
     @Override
@@ -132,12 +131,12 @@ public class Gl_410_glsl_block extends Test {
 
             ShaderProgram program = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, VERT_SHADER_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode1 = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, FRAG_SHADER_SOURCE1, "frag", null, true);
-            ShaderCode fragShaderCode2 = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, FRAG_SHADER_SOURCE2, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    VERT_SHADER_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode1 = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    FRAG_SHADER_SOURCE1, "frag", null, true);
+            ShaderCode fragShaderCode2 = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    FRAG_SHADER_SOURCE2, "frag", null, true);
 
             program.init(gl4);
             programName = program.program();
@@ -165,21 +164,19 @@ public class Gl_410_glsl_block extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
+        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+
         gl4.glGenBuffers(Buffer.MAX, bufferName);
 
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
-        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
 
         gl4.glGetIntegerv(
                 GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT,
@@ -190,6 +187,10 @@ public class Gl_410_glsl_block extends Test {
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
 
         return checkError(gl4, "initBuffer");
     }
@@ -273,7 +274,7 @@ public class Gl_410_glsl_block extends Test {
         }
 
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 1).put(1, 1).put(2, 1).put(3, 1));
 
         gl4.glUseProgram(programName);
         gl4.glUniform1i(uniformDiffuse, 0);

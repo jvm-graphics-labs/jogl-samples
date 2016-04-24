@@ -75,8 +75,10 @@ public class Gl_410_program_separate extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, separateProgramName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
-            vertexArrayName = {0}, textureName = {0};
+    private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(1),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            textureName = GLBuffers.newDirectIntBuffer(1);
+    private int[] separateProgramName = new int[Program.MAX];
     private int separateUniformMvp, separateUniformDiffuse, unifiedProgramName, unifiedUniformMvp, unifiedUniformDiffuse;
 
     @Override
@@ -114,10 +116,10 @@ public class Gl_410_program_separate extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl4);
 
@@ -168,9 +170,9 @@ public class Gl_410_program_separate extends Test {
             }
             if (validated) {
 
-                gl4.glGenProgramPipelines(1, pipelineName, 0);
-                gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT, separateProgramName[Program.VERTEX]);
-                gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, separateProgramName[Program.FRAGMENT]);
+                gl4.glGenProgramPipelines(1, pipelineName);
+                gl4.glUseProgramStages(pipelineName.get(0), GL_VERTEX_SHADER_BIT, separateProgramName[Program.VERTEX]);
+                gl4.glUseProgramStages(pipelineName.get(0), GL_FRAGMENT_SHADER_BIT, separateProgramName[Program.FRAGMENT]);
             }
             if (validated) {
 
@@ -190,10 +192,10 @@ public class Gl_410_program_separate extends Test {
         try {
             jgli.Texture2d texture = new Texture2d(jgli.Load.load(TEXTURE_ROOT + "/" + TEXTURE_DIFFUSE));
 
-            gl4.glGenTextures(1, textureName, 0);
+            gl4.glGenTextures(1, textureName);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[0]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
@@ -221,29 +223,31 @@ public class Gl_410_program_separate extends Test {
 
     private boolean initVertexBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
+
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
-        IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        BufferUtils.destroyDirectBuffer(elementBuffer);
 
         return checkError(gl4, "initArrayBuffer");
     }
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -266,24 +270,25 @@ public class Gl_410_program_separate extends Test {
         Mat4 model = new Mat4(1.0f);
         Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 0));
 
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[0]);
-        gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
+        gl4.glBindVertexArray(vertexArrayName.get(0));
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
 
         // Render with the separate programs
-        gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x / 2, windowSize.y}, 0);
+        gl4.glViewportIndexedfv(0, viewport.put(0, 0).put(1, 0).put(2, windowSize.x / 2).put(3, windowSize.y));
         gl4.glProgramUniformMatrix4fv(separateProgramName[Program.VERTEX], separateUniformMvp, 1, false, mvp.toFa_(), 0);
         gl4.glProgramUniform1i(separateProgramName[Program.FRAGMENT], separateUniformDiffuse, 0);
-        gl4.glBindProgramPipeline(pipelineName[0]);
+        gl4.glBindProgramPipeline(pipelineName.get(0));
         {
             gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 0, 1, 0);
         }
         gl4.glBindProgramPipeline(0);
 
         // Render with the unified programs
-        gl4.glViewportIndexedfv(0, new float[]{windowSize.x / 2, 0, windowSize.x / 2, windowSize.y}, 0);
+        gl4.glViewportIndexedfv(0, viewport.put(0, windowSize.x / 2).put(1, 0).put(2, windowSize.x / 2)
+                .put(3, windowSize.y));
         gl4.glProgramUniformMatrix4fv(unifiedProgramName, unifiedUniformMvp, 1, false, mvp.toFa_(), 0);
         gl4.glProgramUniform1i(unifiedProgramName, unifiedUniformDiffuse, 0);
         gl4.glUseProgram(unifiedProgramName);
@@ -300,13 +305,18 @@ public class Gl_410_program_separate extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteTextures(1, textureName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        gl4.glDeleteTextures(1, textureName);
         gl4.glDeleteProgram(separateProgramName[Program.VERTEX]);
         gl4.glDeleteProgram(separateProgramName[Program.FRAGMENT]);
         gl4.glDeleteProgram(unifiedProgramName);
-        gl4.glDeleteProgramPipelines(1, pipelineName, 0);
+        gl4.glDeleteProgramPipelines(1, pipelineName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
 
         return true;
     }

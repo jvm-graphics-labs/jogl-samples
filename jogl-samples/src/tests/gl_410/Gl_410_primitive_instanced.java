@@ -22,6 +22,7 @@ import glf.Vertex_v2fc4ub;
 import java.nio.ByteBuffer;
 import java.nio.ShortBuffer;
 import glm.vec._2.Vec2;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -68,8 +69,9 @@ public class Gl_410_primitive_instanced extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, programName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
-            vertexArrayName = {0};
+    private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(1),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), vertexArrayName = GLBuffers.newDirectIntBuffer(1);
+    private int[] programName = new int[Program.MAX];
     private int uniformMvp, uniformDiffuse;
 
     @Override
@@ -98,7 +100,7 @@ public class Gl_410_primitive_instanced extends Test {
 
         boolean validated = true;
 
-        gl4.glGenProgramPipelines(1, pipelineName, 0);
+        gl4.glGenProgramPipelines(1, pipelineName);
 
         // Create program
         if (validated) {
@@ -106,12 +108,12 @@ public class Gl_410_primitive_instanced extends Test {
             ShaderProgram vertProgram = new ShaderProgram();
             ShaderProgram fragProgram = new ShaderProgram();
 
-            ShaderCode vertexShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode geometryShaderCode = ShaderCode.create(gl4, GL_GEOMETRY_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "geom", null, true);
-            ShaderCode fragmentShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertexShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "vert", null, true);
+            ShaderCode geometryShaderCode = ShaderCode.create(gl4, GL_GEOMETRY_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "geom", null, true);
+            ShaderCode fragmentShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "frag", null, true);
 
             vertProgram.init(gl4);
             fragProgram.init(gl4);
@@ -132,9 +134,9 @@ public class Gl_410_primitive_instanced extends Test {
 
         if (validated) {
 
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT | GL_GEOMETRY_SHADER_BIT,
+            gl4.glUseProgramStages(pipelineName.get(0), GL_VERTEX_SHADER_BIT | GL_GEOMETRY_SHADER_BIT,
                     programName[Program.VERT]);
-            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
 
         }
 
@@ -150,10 +152,10 @@ public class Gl_410_primitive_instanced extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fc4ub.SIZE, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_UNSIGNED_BYTE, true, Vertex_v2fc4ub.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -168,23 +170,25 @@ public class Gl_410_primitive_instanced extends Test {
 
     private boolean initVertexBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
+
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        ByteBuffer vertexBuffer = GLBuffers.newDirectByteBuffer(vertexSize);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         for (int i = 0; i < vertexCount; i++) {
             vertexData[i].toBb(vertexBuffer, i);
         }
         vertexBuffer.rewind();
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return checkError(gl4, "initArrayBuffer");
     }
@@ -205,20 +209,19 @@ public class Gl_410_primitive_instanced extends Test {
                 uniformDiffuse, 1, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
         // Set the display viewport
-        gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x, windowSize.y}, 0);
+        gl4.glViewportIndexedfv(0, viewport.put(0, 0).put(1, 0).put(2, windowSize.x).put(3, windowSize.y));
 
         // Clear color buffer with white
-        float[] depth = {1.0f};
-        gl4.glClearBufferfv(GL_DEPTH, 0, depth, 0);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(GL_DEPTH, 0, clearDepth.put(0, 1));
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 1).put(1, 1).put(2, 1).put(3, 1));
 
         // Bind program
-        gl4.glBindProgramPipeline(pipelineName[0]);
+        gl4.glBindProgramPipeline(pipelineName.get(0));
 
         // Bind vertex array & draw 
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         // Must be called after glBindVertexArray
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0);
 
         return true;
@@ -229,11 +232,15 @@ public class Gl_410_primitive_instanced extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
         gl4.glDeleteProgram(programName[Program.VERT]);
         gl4.glDeleteProgram(programName[Program.FRAG]);
-        gl4.glDeleteProgramPipelines(1, pipelineName, 0);
+        gl4.glDeleteProgramPipelines(1, pipelineName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
 
         return true;
     }

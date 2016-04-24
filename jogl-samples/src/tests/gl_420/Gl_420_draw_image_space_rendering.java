@@ -20,6 +20,7 @@ import glf.Vertex_v2fv2f;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -76,8 +77,11 @@ public class Gl_420_draw_image_space_rendering extends Test {
         public static final int MAX = 1;
     }
 
-    private int[] programName = new int[Pipeline.MAX], vertexArrayName = {0}, samplerName = {0},
-            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX], pipelineName = new int[Pipeline.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), samplerName = GLBuffers.newDirectIntBuffer(1),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX),
+            pipelineName = GLBuffers.newDirectIntBuffer(Pipeline.MAX);
+    private int[] programName = new int[Pipeline.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -114,10 +118,10 @@ public class Gl_420_draw_image_space_rendering extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl4);
             programName[Pipeline.SPLASH] = shaderProgram.program();
@@ -132,8 +136,8 @@ public class Gl_420_draw_image_space_rendering extends Test {
 
         if (validated) {
 
-            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+            gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
                     programName[Pipeline.SPLASH]);
         }
 
@@ -142,37 +146,43 @@ public class Gl_420_draw_image_space_rendering extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return true;
     }
 
     private boolean initSampler(GL4 gl4) {
 
-        gl4.glGenSamplers(1, samplerName, 0);
-        gl4.glSamplerParameteri(samplerName[0], GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        gl4.glSamplerParameteri(samplerName[0], GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        FloatBuffer borderColor = GLBuffers.newDirectFloatBuffer(new float[]{0.0f, 0.0f, 0.0f, 0.0f});
+
+        gl4.glGenSamplers(1, samplerName);
+        gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         //glSamplerParameteri(SamplerName, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         //glSamplerParameteri(SamplerName, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         //glSamplerParameteri(SamplerName, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        gl4.glSamplerParameterfv(samplerName[0], GL_TEXTURE_BORDER_COLOR, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
-        gl4.glSamplerParameterf(samplerName[0], GL_TEXTURE_MIN_LOD, -1000.f);
-        gl4.glSamplerParameterf(samplerName[0], GL_TEXTURE_MAX_LOD, 1000.f);
-        gl4.glSamplerParameterf(samplerName[0], GL_TEXTURE_LOD_BIAS, 0.0f);
-        gl4.glSamplerParameteri(samplerName[0], GL_TEXTURE_COMPARE_MODE, GL_NONE);
-        gl4.glSamplerParameteri(samplerName[0], GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+        gl4.glSamplerParameterfv(samplerName.get(0), GL_TEXTURE_BORDER_COLOR, borderColor);
+        gl4.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_MIN_LOD, -1000.f);
+        gl4.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_MAX_LOD, 1000.f);
+        gl4.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_LOD_BIAS, 0.0f);
+        gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_COMPARE_MODE, GL_NONE);
+        gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+
+        BufferUtils.destroyDirectBuffer(borderColor);
 
         return checkError(gl4, "initSampler");
     }
@@ -185,9 +195,9 @@ public class Gl_420_draw_image_space_rendering extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glGenTextures(Texture.MAX, textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName);
 
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
@@ -222,8 +232,8 @@ public class Gl_420_draw_image_space_rendering extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glBindVertexArray(0);
 
         return true;
@@ -235,11 +245,11 @@ public class Gl_420_draw_image_space_rendering extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        gl4.glBindProgramPipeline(pipelineName[Pipeline.SPLASH]);
+        gl4.glBindProgramPipeline(pipelineName.get(Pipeline.SPLASH));
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.DIFFUSE]);
-        gl4.glBindSampler(0, samplerName[0]);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.DIFFUSE));
+        gl4.glBindSampler(0, samplerName.get(0));
 
         gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
 
@@ -253,12 +263,18 @@ public class Gl_420_draw_image_space_rendering extends Test {
 
         boolean validated = true;
 
-        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName, 0);
+        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName);
         gl4.glDeleteProgram(programName[Pipeline.SPLASH]);
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
-        gl4.glDeleteSamplers(1, samplerName, 0);
-        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        gl4.glDeleteSamplers(1, samplerName);
+        gl4.glDeleteTextures(Texture.MAX, textureName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(pipelineName);
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(samplerName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return validated;
     }

@@ -11,6 +11,7 @@ import com.jogamp.opengl.GL4;
 import com.jogamp.opengl.util.GLBuffers;
 import com.jogamp.opengl.util.glsl.ShaderCode;
 import com.jogamp.opengl.util.glsl.ShaderProgram;
+import framework.BufferUtils;
 import glm.glm;
 import glm.mat._4.Mat4;
 import framework.Profile;
@@ -75,8 +76,10 @@ public class Gl_410_program_binary extends Test {
         public static final int MAX = 3;
     }
 
-    private int[] pipelineName = {0}, programName = new int[Program.MAX], bufferName = new int[Buffer.MAX],
-            vertexArrayName = {0}, texture2dName = {0};
+    private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(1),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX), vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            texture2dName = GLBuffers.newDirectIntBuffer(1);
+    private int[] programName = new int[Program.MAX];
     private int uniformMvp, uniformDiffuse;
 
     @Override
@@ -106,7 +109,7 @@ public class Gl_410_program_binary extends Test {
 
         boolean validated = true;
 
-        gl4.glGenProgramPipelines(1, pipelineName, 0);
+        gl4.glGenProgramPipelines(1, pipelineName);
 
         programName[Program.VERT] = gl4.glCreateProgram();
         gl4.glProgramParameteri(programName[Program.VERT], GL_PROGRAM_SEPARABLE, GL_TRUE);
@@ -130,11 +133,17 @@ public class Gl_410_program_binary extends Test {
 
         try {
 
-            validated = validated && loadVertexShader(gl4);
+            validated = validated && loadShader(gl4, GL_VERTEX_SHADER);
 
-            validated = validated && loadGeometryShader(gl4);
+            validated = validated && loadShader(gl4, GL_GEOMETRY_SHADER);
 
-            validated = validated && loadFragmentShader(gl4);
+            validated = validated && loadShader(gl4, GL_FRAGMENT_SHADER);
+            
+//            validated = validated && loadVertexShader(gl4);
+//
+//            validated = validated && loadGeometryShader(gl4);
+//
+//            validated = validated && loadFragmentShader(gl4);
 
         } catch (IOException ex) {
             Logger.getLogger(Gl_410_program_binary.class.getName()).log(Level.SEVERE, null, ex);
@@ -142,9 +151,9 @@ public class Gl_410_program_binary extends Test {
 
         if (validated) {
 
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT, programName[Program.VERT]);
-            gl4.glUseProgramStages(pipelineName[0], GL_GEOMETRY_SHADER_BIT, programName[Program.GEOM]);
-            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_VERTEX_SHADER_BIT, programName[Program.VERT]);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_GEOMETRY_SHADER_BIT, programName[Program.GEOM]);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
             validated = validated && checkError(gl4, "initProgram - stage");
         }
 
@@ -158,141 +167,97 @@ public class Gl_410_program_binary extends Test {
     }
 
     /**
-     * We will first create the shader in the old-way, then save them
-     * as binary and finally load them as binary.
-     * In this way you can also still modify them if you want.
+     * We will first create the shader in the old-way, then save them as binary
+     * and finally load them as binary. In this way you can also still modify
+     * them if you want.
      */
-    private boolean loadVertexShader(GL4 gl4) throws IOException {
+    private boolean loadShader(GL4 gl4, int shaderType) throws IOException {
 
-        int[] success = {0};
+        IntBuffer success = GLBuffers.newDirectIntBuffer(1);
 
-        ShaderCode vertexShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(),
-                SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
+        String extension = "";
+        switch (shaderType) {
+            case GL_VERTEX_SHADER:
+                extension = "vert";
+                break;
+            case GL_GEOMETRY_SHADER:
+                extension = "geom";
+                break;
+            case GL_FRAGMENT_SHADER:
+                extension = "frag";
+                break;
+        }
+
+        ShaderCode vertexShaderCode = ShaderCode.create(gl4, shaderType, this.getClass(), SHADERS_ROOT, null,
+                SHADERS_SOURCE, extension, null, true);
         ShaderProgram shaderProgram = new ShaderProgram();
         shaderProgram.init(gl4);
         /**
-         * We need to set always the same parameters otherwise we won't
-         * get GL_LINK_STATUS == GL_TRUE.
+         * We need to set always the same parameters otherwise we won't get
+         * GL_LINK_STATUS == GL_TRUE.
          */
         gl4.glProgramParameteri(shaderProgram.program(), GL_PROGRAM_SEPARABLE, GL_TRUE);
         gl4.glProgramParameteri(shaderProgram.program(), GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
         shaderProgram.add(vertexShaderCode);
         shaderProgram.link(gl4, System.out);
-        gl4.glGetProgramiv(shaderProgram.program(), GL_LINK_STATUS, success, 0);
+        gl4.glGetProgramiv(shaderProgram.program(), GL_LINK_STATUS, success);
 
-        if (success[0] != GL_TRUE) {
+        if (success.get(0) != GL_TRUE) {
             return false;
         }
 
-        int[] length = {0};
-        gl4.glGetProgramiv(shaderProgram.program(), GL_PROGRAM_BINARY_LENGTH, length, 0);
+        IntBuffer length = GLBuffers.newDirectIntBuffer(1);
+        gl4.glGetProgramiv(shaderProgram.program(), GL_PROGRAM_BINARY_LENGTH, length);
 
-        ByteBuffer buffer = GLBuffers.newDirectByteBuffer(length[0]);
-        int[] binaryFormat = {0};
-        gl4.glGetProgramBinary(shaderProgram.program(), length[0], length, 0, binaryFormat, 0, buffer);
+        ByteBuffer buffer = GLBuffers.newDirectByteBuffer(length.get(0));
+        IntBuffer binaryFormat = GLBuffers.newDirectIntBuffer(1);
+        gl4.glGetProgramBinary(shaderProgram.program(), length.get(0), length, binaryFormat, buffer);
 
-        byte[] data = new byte[length[0]];
+        byte[] data = new byte[length.get(0)];
         for (int i = 0; i < buffer.capacity(); i++) {
             data[i] = buffer.get(i);
         }
 
-        String path = SHADERS_ROOT + "/" + SHADERS_SOURCE + ".vert.bin";
+        String path = SHADERS_ROOT + "/" + SHADERS_SOURCE + "." + extension + ".bin";
         Files.write(Paths.get(path), data);
         data = Files.readAllBytes(Paths.get(path));
 
-        gl4.glProgramBinary(programName[Program.VERT], binaryFormat[0], GLBuffers.newDirectByteBuffer(data), length[0]);
-        gl4.glGetProgramiv(programName[Program.VERT], GL_LINK_STATUS, success, 0);
+        ByteBuffer dataBuffer = GLBuffers.newDirectByteBuffer(data);
 
-        return success[0] == GL_TRUE;
-    }
-
-    private boolean loadGeometryShader(GL4 gl4) throws IOException {
-
-        int[] success = {0};
-
-        ShaderCode geometryShaderCode = ShaderCode.create(gl4, GL_GEOMETRY_SHADER, this.getClass(),
-                SHADERS_ROOT, null, SHADERS_SOURCE, "geom", null, true);
-        ShaderProgram shaderProgram = new ShaderProgram();
-        shaderProgram.init(gl4);
-        gl4.glProgramParameteri(shaderProgram.program(), GL_PROGRAM_SEPARABLE, GL_TRUE);
-        gl4.glProgramParameteri(shaderProgram.program(), GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
-        shaderProgram.add(geometryShaderCode);
-        shaderProgram.link(gl4, System.out);
-        gl4.glGetProgramiv(shaderProgram.program(), GL_LINK_STATUS, success, 0);
-
-        if (success[0] != GL_TRUE) {
-            return false;
+        int program = 0;
+        switch (shaderType) {
+            case GL_VERTEX_SHADER:
+                program = programName[Program.VERT];
+                break;
+            case GL_GEOMETRY_SHADER:
+                program = programName[Program.GEOM];
+                break;
+            case GL_FRAGMENT_SHADER:
+                program = programName[Program.FRAG];
+                break;
         }
+        
+        gl4.glProgramBinary(program, binaryFormat.get(0), dataBuffer, length.get(0));
+        gl4.glGetProgramiv(program, GL_LINK_STATUS, success);
 
-        int[] length = {0};
-        gl4.glGetProgramiv(shaderProgram.program(), GL_PROGRAM_BINARY_LENGTH, length, 0);
+        boolean validated = success.get(0) == GL_TRUE;
 
-        ByteBuffer buffer = GLBuffers.newDirectByteBuffer(length[0]);
-        int[] binaryFormat = {0};
-        gl4.glGetProgramBinary(shaderProgram.program(), length[0], length, 0, binaryFormat, 0, buffer);
+        BufferUtils.destroyDirectBuffer(success);
+        BufferUtils.destroyDirectBuffer(length);
+        BufferUtils.destroyDirectBuffer(buffer);
+        BufferUtils.destroyDirectBuffer(binaryFormat);
+        BufferUtils.destroyDirectBuffer(dataBuffer);
 
-        byte[] data = new byte[length[0]];
-        for (int i = 0; i < buffer.capacity(); i++) {
-            data[i] = buffer.get(i);
-        }
-
-        String path = SHADERS_ROOT + "/" + SHADERS_SOURCE + ".geom.bin";
-        Files.write(Paths.get(path), data);
-        data = Files.readAllBytes(Paths.get(path));
-
-        gl4.glProgramBinary(programName[Program.GEOM], binaryFormat[0], GLBuffers.newDirectByteBuffer(data), length[0]);
-        gl4.glGetProgramiv(programName[Program.GEOM], GL_LINK_STATUS, success, 0);
-
-        return success[0] == GL_TRUE;
-    }
-
-    private boolean loadFragmentShader(GL4 gl4) throws IOException {
-
-        int[] success = {0};
-
-        ShaderCode fragmentShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(),
-                SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
-        ShaderProgram shaderProgram = new ShaderProgram();
-        shaderProgram.init(gl4);
-        gl4.glProgramParameteri(shaderProgram.program(), GL_PROGRAM_SEPARABLE, GL_TRUE);
-        gl4.glProgramParameteri(shaderProgram.program(), GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE);
-        shaderProgram.add(fragmentShaderCode);
-        shaderProgram.link(gl4, System.out);
-        gl4.glGetProgramiv(shaderProgram.program(), GL_LINK_STATUS, success, 0);
-
-        if (success[0] != GL_TRUE) {
-            return false;
-        }
-
-        int[] length = {0};
-        gl4.glGetProgramiv(shaderProgram.program(), GL_PROGRAM_BINARY_LENGTH, length, 0);
-
-        ByteBuffer buffer = GLBuffers.newDirectByteBuffer(length[0]);
-        int[] binaryFormat = {0};
-        gl4.glGetProgramBinary(shaderProgram.program(), length[0], length, 0, binaryFormat, 0, buffer);
-
-        byte[] data = new byte[length[0]];
-        for (int i = 0; i < buffer.capacity(); i++) {
-            data[i] = buffer.get(i);
-        }
-
-        String path = SHADERS_ROOT + "/" + SHADERS_SOURCE + ".frag.bin";
-        Files.write(Paths.get(path), data);
-        data = Files.readAllBytes(Paths.get(path));
-
-        gl4.glProgramBinary(programName[Program.FRAG], binaryFormat[0], GLBuffers.newDirectByteBuffer(data), length[0]);
-        gl4.glGetProgramiv(programName[Program.FRAG], GL_LINK_STATUS, success, 0);
-
-        return success[0] == GL_TRUE;
+        return validated;
     }
 
     private boolean initTexture(GL4 gl4) {
 
         try {
-            gl4.glGenTextures(1, texture2dName, 0);
+            gl4.glGenTextures(1, texture2dName);
 
             gl4.glActiveTexture(GL_TEXTURE0);
-            gl4.glBindTexture(GL_TEXTURE_2D, texture2dName[0]);
+            gl4.glBindTexture(GL_TEXTURE_2D, texture2dName.get(0));
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1000);
             gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
@@ -322,28 +287,32 @@ public class Gl_410_program_binary extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         IntBuffer elementBuffer = GLBuffers.newDirectIntBuffer(elementData);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return checkError(gl4, "initBuffer");
     }
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
+        gl4.glGenVertexArrays(1, vertexArrayName);
 
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -368,17 +337,17 @@ public class Gl_410_program_binary extends Test {
         gl4.glProgramUniformMatrix4fv(programName[Program.VERT], uniformMvp, 1, false, mvp.toFa_(), 0);
         gl4.glProgramUniform1i(programName[Program.FRAG], uniformDiffuse, 0);
 
-        gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x, windowSize.y}, 0);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
+        gl4.glViewportIndexedfv(0, viewport.put(0, 0).put(1, 0).put(2, windowSize.x).put(3, windowSize.y));
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 0));
 
-        gl4.glBindProgramPipeline(pipelineName[0]);
+        gl4.glBindProgramPipeline(pipelineName.get(0));
 
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, texture2dName[0]);
+        gl4.glBindTexture(GL_TEXTURE_2D, texture2dName.get(0));
 
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         //!\ Need to be called after glBindVertexArray
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl4.glDrawElementsInstancedBaseVertex(GL_TRIANGLES, elementCount, GL_UNSIGNED_INT, 0, 1, 0);
 
         return true;
@@ -389,13 +358,17 @@ public class Gl_410_program_binary extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteTextures(1, texture2dName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        gl4.glDeleteTextures(1, texture2dName);
         for (int i = 0; i < Program.MAX; ++i) {
             gl4.glDeleteProgram(programName[i]);
         }
-        gl4.glDeleteProgramPipelines(1, pipelineName, 0);
+        gl4.glDeleteProgramPipelines(1, pipelineName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
 
         return true;
     }

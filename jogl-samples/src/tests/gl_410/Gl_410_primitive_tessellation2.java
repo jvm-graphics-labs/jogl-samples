@@ -21,6 +21,7 @@ import framework.Test;
 import glf.Vertex_v2fc4f;
 import glm.vec._2.Vec2;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -54,7 +55,9 @@ public class Gl_410_primitive_tessellation2 extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, programName = new int[Program.MAX], arrayBufferName = {0}, vertexArrayName = {0};
+    private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(1), arrayBufferName = GLBuffers.newDirectIntBuffer(1),
+            vertexArrayName = GLBuffers.newDirectIntBuffer(1);
+    private int[] programName = new int[Program.MAX];
     private int uniformMvp;
 
     @Override
@@ -87,16 +90,16 @@ public class Gl_410_primitive_tessellation2 extends Test {
             ShaderProgram vertProgram = new ShaderProgram();
             ShaderProgram fragProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode contShaderCode = ShaderCode.create(gl4, GL_TESS_CONTROL_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "cont", null, true);
-            ShaderCode evalShaderCode = ShaderCode.create(gl4, GL_TESS_EVALUATION_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "eval", null, true);
-            ShaderCode geomShaderCode = ShaderCode.create(gl4, GL_GEOMETRY_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "geom", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "vert", null, true);
+            ShaderCode contShaderCode = ShaderCode.create(gl4, GL_TESS_CONTROL_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "cont", null, true);
+            ShaderCode evalShaderCode = ShaderCode.create(gl4, GL_TESS_EVALUATION_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "eval", null, true);
+            ShaderCode geomShaderCode = ShaderCode.create(gl4, GL_GEOMETRY_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "geom", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "frag", null, true);
 
             vertProgram.init(gl4);
             fragProgram.init(gl4);
@@ -127,10 +130,10 @@ public class Gl_410_primitive_tessellation2 extends Test {
         // Get variables locations
         if (validated) {
 
-            gl4.glGenProgramPipelines(1, pipelineName, 0);
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT | GL_TESS_CONTROL_SHADER_BIT
+            gl4.glGenProgramPipelines(1, pipelineName);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_VERTEX_SHADER_BIT | GL_TESS_CONTROL_SHADER_BIT
                     | GL_TESS_EVALUATION_SHADER_BIT | GL_GEOMETRY_SHADER_BIT, programName[Program.VERT]);
-            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -138,10 +141,10 @@ public class Gl_410_primitive_tessellation2 extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName.get(0));
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fc4f.SIZE, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, Vertex_v2fc4f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -156,13 +159,15 @@ public class Gl_410_primitive_tessellation2 extends Test {
 
     private boolean initArrayBuffer(GL4 gl4) {
 
-        // Generate a buffer object
-        gl4.glGenBuffers(1, arrayBufferName, 0);
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName[0]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+
+        // Generate a buffer object
+        gl4.glGenBuffers(1, arrayBufferName);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, arrayBufferName.get(0));
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return checkError(gl4, "initArrayBuffer");
     }
@@ -180,12 +185,12 @@ public class Gl_410_primitive_tessellation2 extends Test {
 
         gl4.glProgramUniformMatrix4fv(programName[Program.VERT], uniformMvp, 1, false, mvp.toFa_(), 0);
 
-        gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x, windowSize.y}, 0);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
+        gl4.glViewportIndexedfv(0, viewport.put(0, 0).put(1, 0).put(2, windowSize.x).put(3, windowSize.y));
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 0));
 
-        gl4.glBindProgramPipeline(pipelineName[0]);
+        gl4.glBindProgramPipeline(pipelineName.get(0));
 
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glPatchParameteri(GL_PATCH_VERTICES, vertexCount);
         gl4.glDrawArraysInstancedBaseInstance(GL_PATCHES, 0, vertexCount, 1, 0);
 
@@ -197,11 +202,16 @@ public class Gl_410_primitive_tessellation2 extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteBuffers(1, arrayBufferName, 0);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        gl4.glDeleteBuffers(1, arrayBufferName);
         for (int i = 0; i < Program.MAX; ++i) {
             gl4.glDeleteProgram(programName[i]);
         }
+        gl4.glDeleteProgramPipelines(1, pipelineName);
+
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(arrayBufferName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
 
         return checkError(gl4, "end");
     }

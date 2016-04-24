@@ -58,7 +58,7 @@ public class Test implements GLEventListener, KeyListener {
     protected final String TEXTURE_ROOT = "/data/textures";
     private Success success;
     protected FloatBuffer clearColor = GLBuffers.newDirectFloatBuffer(4),
-            clearDepth = GLBuffers.newDirectFloatBuffer(1);
+            clearDepth = GLBuffers.newDirectFloatBuffer(1), viewport = GLBuffers.newDirectFloatBuffer(4);
 
     public Test(String title, Profile profile, int major, int minor, Vec2 orientation, boolean glDebug) {
         this(title, profile, major, minor, new Vec2i(640, 480), orientation, new Vec2(0, 4), glDebug, Success.RUN_ONLY);
