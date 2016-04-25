@@ -8,11 +8,14 @@ package tests.gl_420;
 import com.jogamp.opengl.GL;
 import static com.jogamp.opengl.GL2GL3.*;
 import com.jogamp.opengl.GL4;
+import com.jogamp.opengl.util.GLBuffers;
+import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.IntBuffer;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -51,8 +54,9 @@ public class Gl_420_image_store extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] vertexArrayName = {0}, textureName = {0}, programName = new int[Program.MAX],
-            pipelineName = new int[Pipeline.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), textureName = GLBuffers.newDirectIntBuffer(1),
+            pipelineName = GLBuffers.newDirectIntBuffer(Pipeline.MAX);
+    private int[] programName = new int[Program.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -64,7 +68,7 @@ public class Gl_420_image_store extends Test {
         logImplementationDependentLimit(gl4, GL_MAX_IMAGE_UNITS, "GL_MAX_IMAGE_UNITS");
         logImplementationDependentLimit(gl4, GL_MAX_VERTEX_IMAGE_UNIFORMS, "GL_MAX_VERTEX_IMAGE_UNIFORMS");
         logImplementationDependentLimit(gl4, GL_MAX_TESS_CONTROL_IMAGE_UNIFORMS, "GL_MAX_TESS_CONTROL_IMAGE_UNIFORMS");
-        logImplementationDependentLimit(gl4, GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS, 
+        logImplementationDependentLimit(gl4, GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS,
                 "GL_MAX_TESS_EVALUATION_IMAGE_UNIFORMS");
         logImplementationDependentLimit(gl4, GL_MAX_GEOMETRY_IMAGE_UNIFORMS, "GL_MAX_GEOMETRY_IMAGE_UNIFORMS");
         logImplementationDependentLimit(gl4, GL_MAX_FRAGMENT_IMAGE_UNIFORMS, "GL_MAX_FRAGMENT_IMAGE_UNIFORMS");
@@ -133,11 +137,15 @@ public class Gl_420_image_store extends Test {
 
             if (validated) {
 
-                gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName, 0);
-                gl4.glUseProgramStages(pipelineName[Pipeline.READ], GL_VERTEX_SHADER_BIT, programName[Program.VERT_READ]);
-                gl4.glUseProgramStages(pipelineName[Pipeline.READ], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG_READ]);
-                gl4.glUseProgramStages(pipelineName[Pipeline.SAVE], GL_VERTEX_SHADER_BIT, programName[Program.VERT_SAVE]);
-                gl4.glUseProgramStages(pipelineName[Pipeline.SAVE], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG_SAVE]);
+                gl4.glGenProgramPipelines(Pipeline.MAX, pipelineName);
+                gl4.glUseProgramStages(pipelineName.get(Pipeline.READ), GL_VERTEX_SHADER_BIT,
+                        programName[Program.VERT_READ]);
+                gl4.glUseProgramStages(pipelineName.get(Pipeline.READ), GL_FRAGMENT_SHADER_BIT,
+                        programName[Program.FRAG_READ]);
+                gl4.glUseProgramStages(pipelineName.get(Pipeline.SAVE), GL_VERTEX_SHADER_BIT,
+                        programName[Program.VERT_SAVE]);
+                gl4.glUseProgramStages(pipelineName.get(Pipeline.SAVE), GL_FRAGMENT_SHADER_BIT,
+                        programName[Program.FRAG_SAVE]);
             }
 
         } catch (FileNotFoundException ex) {
@@ -149,9 +157,9 @@ public class Gl_420_image_store extends Test {
 
     private boolean initTexture(GL4 gl4) {
 
-        gl4.glGenTextures(1, textureName, 0);
+        gl4.glGenTextures(1, textureName);
         gl4.glActiveTexture(GL_TEXTURE0);
-        gl4.glBindTexture(GL_TEXTURE_2D, textureName[0]);
+        gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 1);
         gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_SWIZZLE_R, GL_RED);
@@ -168,8 +176,8 @@ public class Gl_420_image_store extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glBindVertexArray(0);
 
         return true;
@@ -182,15 +190,15 @@ public class Gl_420_image_store extends Test {
 
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
         gl4.glDrawBuffer(GL_BACK);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.5f, 1.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0.5f).put(2, 1).put(3, 1));
 
         // Renderer to image
         {
             gl4.glDrawBuffer(GL_NONE);
 
-            gl4.glBindProgramPipeline(pipelineName[Pipeline.SAVE]);
-            gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[0], 0, false, 0, GL_WRITE_ONLY, GL_RGBA8);
-            gl4.glBindVertexArray(vertexArrayName[0]);
+            gl4.glBindProgramPipeline(pipelineName.get(Pipeline.SAVE));
+            gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName.get(0), 0, false, 0, GL_WRITE_ONLY, GL_RGBA8);
+            gl4.glBindVertexArray(vertexArrayName.get(0));
             gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
         }
 
@@ -202,9 +210,9 @@ public class Gl_420_image_store extends Test {
 
             gl4.glDrawBuffer(GL_BACK);
 
-            gl4.glBindProgramPipeline(pipelineName[Pipeline.READ]);
-            gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName[0], 0, false, 0, GL_READ_ONLY, GL_RGBA8);
-            gl4.glBindVertexArray(vertexArrayName[0]);
+            gl4.glBindProgramPipeline(pipelineName.get(Pipeline.READ));
+            gl4.glBindImageTexture(Semantic.Image.DIFFUSE, textureName.get(0), 0, false, 0, GL_READ_ONLY, GL_RGBA8);
+            gl4.glBindVertexArray(vertexArrayName.get(0));
             gl4.glDrawArraysInstancedBaseInstance(GL_TRIANGLES, 0, 3, 1, 0);
 
             gl4.glDisable(GL_SCISSOR_TEST);
@@ -218,13 +226,17 @@ public class Gl_420_image_store extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteTextures(1, textureName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
+        gl4.glDeleteTextures(1, textureName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
         gl4.glDeleteProgram(programName[Program.VERT_SAVE]);
         gl4.glDeleteProgram(programName[Program.FRAG_SAVE]);
         gl4.glDeleteProgram(programName[Program.VERT_READ]);
         gl4.glDeleteProgram(programName[Program.FRAG_READ]);
-        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName, 0);
+        gl4.glDeleteProgramPipelines(Pipeline.MAX, pipelineName);
+
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
 
         return true;
     }
