@@ -23,7 +23,9 @@ import framework.Test;
 import framework.VertexAttrib;
 import glf.Vertex_v2fc4f;
 import glm.vec._2.Vec2;
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -57,7 +59,9 @@ public class Gl_420_interface_matching extends Test {
         public static final int MAX = 2;
     }
 
-    private int[] pipelineName = {0}, vertexArrayName = {0}, bufferName = {0}, programName = new int[Program.MAX];
+    private IntBuffer pipelineName = GLBuffers.newDirectIntBuffer(1), vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            bufferName = GLBuffers.newDirectIntBuffer(1);
+    private int[] programName = new int[Program.MAX];
     private int uniformMvp;
 
     @Override
@@ -87,7 +91,7 @@ public class Gl_420_interface_matching extends Test {
 
         boolean validated = true;
 
-        gl4.glGenProgramPipelines(1, pipelineName, 0);
+        gl4.glGenProgramPipelines(1, pipelineName);
 
         // Create program
         if (validated) {
@@ -97,16 +101,16 @@ public class Gl_420_interface_matching extends Test {
                 shaderPrograms[i] = new ShaderProgram();
             }
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode contShaderCode = ShaderCode.create(gl4, GL_TESS_CONTROL_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "cont", null, true);
-            ShaderCode evalShaderCode = ShaderCode.create(gl4, GL_TESS_EVALUATION_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "eval", null, true);
-            ShaderCode geomShaderCode = ShaderCode.create(gl4, GL_GEOMETRY_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "geom", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "vert", null, true);
+            ShaderCode contShaderCode = ShaderCode.create(gl4, GL_TESS_CONTROL_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "cont", null, true);
+            ShaderCode evalShaderCode = ShaderCode.create(gl4, GL_TESS_EVALUATION_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "eval", null, true);
+            ShaderCode geomShaderCode = ShaderCode.create(gl4, GL_GEOMETRY_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "geom", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE, "frag", null, true);
 
             shaderPrograms[Program.VERT].init(gl4);
             shaderPrograms[Program.FRAG].init(gl4);
@@ -128,9 +132,9 @@ public class Gl_420_interface_matching extends Test {
 
         if (validated) {
 
-            gl4.glUseProgramStages(pipelineName[0], GL_VERTEX_SHADER_BIT | GL_TESS_CONTROL_SHADER_BIT
+            gl4.glUseProgramStages(pipelineName.get(0), GL_VERTEX_SHADER_BIT | GL_TESS_CONTROL_SHADER_BIT
                     | GL_TESS_EVALUATION_SHADER_BIT | GL_GEOMETRY_SHADER_BIT, programName[Program.VERT]);
-            gl4.glUseProgramStages(pipelineName[0], GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
+            gl4.glUseProgramStages(pipelineName.get(0), GL_FRAGMENT_SHADER_BIT, programName[Program.FRAG]);
         }
 
         return validated & checkError(gl4, "initProgram");
@@ -138,10 +142,10 @@ public class Gl_420_interface_matching extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION + 0, 2, GL_FLOAT, false, Vertex_v2fc4f.SIZE, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION + 1, 2, GL_FLOAT, false, Vertex_v2fc4f.SIZE, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.COLOR, 4, GL_FLOAT, false, (2 + 4) * Float.BYTES, 2 * Float.BYTES);
@@ -163,47 +167,54 @@ public class Gl_420_interface_matching extends Test {
                 GL_FALSE, GL_FALSE, 0, 0);
         valid[Semantic.Attr.COLOR] = new VertexAttrib(GL_TRUE, 0, 4, Vertex_v2fc4f.SIZE, GL_FLOAT, false, GL_FALSE,
                 GL_FALSE, 0, Vec2.SIZE);
-        validate(gl4, vertexArrayName[0], valid);
+        validate(gl4, vertexArrayName.get(0), valid);
 
         return true;
     }
 
     private boolean initBuffer(GL4 gl4) {
 
-        gl4.glGenBuffers(1, bufferName, 0);
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[0]);
         FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+
+        gl4.glGenBuffers(1, bufferName);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(0));
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return true;
     }
 
     private boolean initMax(GL4 gl4) {
 
-        int[] maxVertexAttribs = {0};
-        gl4.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, maxVertexAttribs, 0);
+        final int maxVertexAttribs = 0, maxVertexOutput = 1, maxControlInput = 2, maxControlOutput = 3,
+                maxControlTotalOutput = 4, maxEvaluationInput = 5, maxEvaluationOutput = 6, maxGeometryInput = 7,
+                maxGeometryOutput = 8, maxFragmentInput = 9, max = 10;
+        IntBuffer data = GLBuffers.newDirectIntBuffer(max);
+
+        data.position(maxVertexAttribs);
+        gl4.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, data);
         //GL_MAX_DRAW_BUFFERS 8
         //GL_MAX_COLOR_ATTACHMENTS 8
-        int[] maxVertexOutput = {0};
-        gl4.glGetIntegerv(GL_MAX_VERTEX_OUTPUT_COMPONENTS, maxVertexOutput, 0);
-        int[] maxControlInput = {0};
-        gl4.glGetIntegerv(GL_MAX_TESS_CONTROL_INPUT_COMPONENTS, maxControlInput, 0);
-        int[] maxControlOutput = {0};
-        gl4.glGetIntegerv(GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS, maxControlOutput, 0);
-        int[] maxControlTotalOutput = {0};
-        gl4.glGetIntegerv(GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS, maxControlTotalOutput, 0);
-        int[] maxEvaluationInput = {0};
-        gl4.glGetIntegerv(GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS, maxEvaluationInput, 0);
-        int[] maxEvaluationOutput = {0};
-        gl4.glGetIntegerv(GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS, maxEvaluationOutput, 0);
-        int[] maxGeometryInput = {0};
-        gl4.glGetIntegerv(GL_MAX_GEOMETRY_INPUT_COMPONENTS, maxGeometryInput, 0);
-        int[] maxGeometryOutput = {0};
-        gl4.glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS, maxGeometryOutput, 0);
-        int[] maxFragmentInput = {0};
-        gl4.glGetIntegerv(GL_MAX_FRAGMENT_INPUT_COMPONENTS, maxFragmentInput, 0);
+        data.position(maxVertexOutput);
+        gl4.glGetIntegerv(GL_MAX_VERTEX_OUTPUT_COMPONENTS, data);
+        data.position(maxControlInput);
+        gl4.glGetIntegerv(GL_MAX_TESS_CONTROL_INPUT_COMPONENTS, data);
+        data.position(maxControlOutput);
+        gl4.glGetIntegerv(GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS, data);
+        data.position(maxControlTotalOutput);
+        gl4.glGetIntegerv(GL_MAX_TESS_CONTROL_TOTAL_OUTPUT_COMPONENTS, data);
+        data.position(maxEvaluationInput);
+        gl4.glGetIntegerv(GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS, data);
+        data.position(maxEvaluationOutput);
+        gl4.glGetIntegerv(GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS, data);
+        data.position(maxGeometryInput);
+        gl4.glGetIntegerv(GL_MAX_GEOMETRY_INPUT_COMPONENTS, data);
+        data.position(maxGeometryOutput);
+        gl4.glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS, data);
+        data.position(maxFragmentInput);
+        gl4.glGetIntegerv(GL_MAX_FRAGMENT_INPUT_COMPONENTS, data);
 
         return true;
     }
@@ -221,12 +232,12 @@ public class Gl_420_interface_matching extends Test {
 
         gl4.glProgramUniformMatrix4fv(programName[Program.VERT], uniformMvp, 1, false, mvp.toFa_(), 0);
 
-        gl4.glViewportIndexedfv(0, new float[]{0, 0, windowSize.x, windowSize.y}, 0);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
+        gl4.glViewportIndexedfv(0, viewport.put(0, 0).put(1, 0).put(2, windowSize.x).put(3, windowSize.y));
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 0));
 
-        gl4.glBindProgramPipeline(pipelineName[0]);
+        gl4.glBindProgramPipeline(pipelineName.get(0));
 
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glPatchParameteri(GL_PATCH_VERTICES, vertexCount);
 
         assert (!validate(gl4, programName[Program.VERT]));
@@ -241,68 +252,72 @@ public class Gl_420_interface_matching extends Test {
 
         // Pipeline object validation
         {
-            int[] status = {0};
-            int[] lengthMax = {0};
-            gl4.glValidateProgramPipeline(pipelineName[0]);
-            gl4.glGetProgramPipelineiv(pipelineName[0], GL_VALIDATE_STATUS, status, 0);
-            gl4.glGetProgramPipelineiv(pipelineName[0], GL_INFO_LOG_LENGTH, lengthMax, 0);
+            IntBuffer status = GLBuffers.newDirectIntBuffer(1);
+            IntBuffer lengthMax = GLBuffers.newDirectIntBuffer(1);
+            gl4.glValidateProgramPipeline(pipelineName.get(0));
+            gl4.glGetProgramPipelineiv(pipelineName.get(0), GL_VALIDATE_STATUS, status);
+            gl4.glGetProgramPipelineiv(pipelineName.get(0), GL_INFO_LOG_LENGTH, lengthMax);
 
-            int[] lengthQuery = {0};
-            byte[] infoLog = new byte[lengthMax[0] + 1];
-            gl4.glGetProgramPipelineInfoLog(pipelineName[0], infoLog.length, lengthQuery, 0, infoLog, 0);
+            IntBuffer lengthQuery = GLBuffers.newDirectIntBuffer(1);
+            ByteBuffer infoLog = GLBuffers.newDirectByteBuffer(lengthMax.get(0) + 1);
+            gl4.glGetProgramPipelineInfoLog(pipelineName.get(0), infoLog.capacity(), lengthQuery, infoLog);
+
+            byte[] buf = new byte[infoLog.capacity()];
+            infoLog.get(buf);
 
             gl4.glDebugMessageInsert(
                     GL_DEBUG_SOURCE_APPLICATION,
                     GL_DEBUG_TYPE_OTHER, 76,
                     GL_DEBUG_SEVERITY_LOW,
-                    lengthQuery[0],
-                    new String(infoLog));
+                    lengthQuery.get(0),
+                    new String(buf));
         }
 
-        int[] activeAttributeMaxLength = {0};
-        int[] activeAttribute = {0};
-        gl4.glGetProgramiv(programName, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, activeAttributeMaxLength, 0);
-        gl4.glGetProgramiv(programName, GL_ACTIVE_ATTRIBUTES, activeAttribute, 0);
+        IntBuffer activeAttributeMaxLength = GLBuffers.newDirectIntBuffer(1);
+        IntBuffer activeAttribute = GLBuffers.newDirectIntBuffer(1);
+        gl4.glGetProgramiv(programName, GL_ACTIVE_ATTRIBUTE_MAX_LENGTH, activeAttributeMaxLength);
+        gl4.glGetProgramiv(programName, GL_ACTIVE_ATTRIBUTES, activeAttribute);
 
-        int[] attribLength = {0};
-        int[] attribSize = {0};
-        int[] attribType = {0};
-        byte[] attribName = new byte[activeAttributeMaxLength[0]];
+        IntBuffer attribLength = GLBuffers.newDirectIntBuffer(1);
+        IntBuffer attribSize = GLBuffers.newDirectIntBuffer(1);
+        IntBuffer attribType = GLBuffers.newDirectIntBuffer(1);
+        ByteBuffer attribName = GLBuffers.newDirectByteBuffer(activeAttributeMaxLength.get(0));
 
-        for (int i = 0; i < activeAttribute[0]; ++i) {
+        for (int i = 0; i < activeAttribute.get(0); ++i) {
 
             gl4.glGetActiveAttrib(programName,
                     i,
-                    activeAttributeMaxLength[0],
-                    attribLength, 0,
-                    attribSize, 0,
-                    attribType, 0,
-                    attribName, 0);
+                    activeAttributeMaxLength.get(0),
+                    attribLength,
+                    attribSize,
+                    attribType,
+                    attribName);
 
-            String nameString;
-            nameString = new String(attribName);
+            byte[] nameByte = new byte[attribName.capacity()];
+            attribName.get(nameByte).position(0);
+            String nameString = new String(nameByte);
             // remove spaces at the end
             nameString = nameString.trim();
 
             int attribLocation = gl4.glGetAttribLocation(programName, nameString);
 
             VertexAttrib vertexAttrib = new VertexAttrib();
-            int[] value = {0};
-            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_ENABLED, value, 0);
-            vertexAttrib.enabled = value[0];
+            IntBuffer value = GLBuffers.newDirectIntBuffer(1);
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_ENABLED, value);
+            vertexAttrib.enabled = value.get(0);
             //glGetVertexAttribiv(AttribLocation, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &VertexAttrib.Binding);
-            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_SIZE, value, 0);
-            vertexAttrib.size = value[0];
-            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_STRIDE, value, 0);
-            vertexAttrib.stride = value[0];
-            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_TYPE, value, 0);
-            vertexAttrib.type = value[0];
-            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, value, 0);
-            vertexAttrib.normalized = value[0] == GL_TRUE;
-            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_INTEGER, value, 0);
-            vertexAttrib.integer = value[0];
-            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_DIVISOR, value, 0);
-            vertexAttrib.divisor = value[0];
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_SIZE, value);
+            vertexAttrib.size = value.get(0);
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_STRIDE, value);
+            vertexAttrib.stride = value.get(0);
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_TYPE, value);
+            vertexAttrib.type = value.get(0);
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, value);
+            vertexAttrib.normalized = value.get(0) == GL_TRUE;
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_INTEGER, value);
+            vertexAttrib.integer = value.get(0);
+            gl4.glGetVertexAttribiv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_DIVISOR, value);
+            vertexAttrib.divisor = value.get(0);
 
 //			gl4.glGetVertexAttribPointerv(attribLocation, GL_VERTEX_ATTRIB_ARRAY_POINTER, vertexAttrib.Pointer);
             if (GL_VERTEX_ATTRIB_ARRAY_INTEGER == GL_TRUE) {
@@ -347,7 +362,8 @@ public class Gl_420_interface_matching extends Test {
                         return true;
                     }
                 } else// if((VertexAttrib.Normalized == GL_TRUE) || (GL_VERTEX_ATTRIB_ARRAY_FLOAT == GL_TRUE))
-                 if (!(vertexAttrib.type == GL_FLOAT
+                {
+                    if (!(vertexAttrib.type == GL_FLOAT
                             || vertexAttrib.type == GL_FLOAT_VEC2
                             || vertexAttrib.type == GL_FLOAT_VEC3
                             || vertexAttrib.type == GL_FLOAT_VEC4
@@ -362,12 +378,27 @@ public class Gl_420_interface_matching extends Test {
                             || vertexAttrib.type == GL_FLOAT_MAT4x3)) {
                         return true;
                     } // It could be any vertex array attribute type
+                }
             }
 
-            System.out.println("glGetActiveAttrib(" + i + ", " + attribLocation + ", " + attribLength[0]
-                    + ", " + attribSize[0] + ", " + attribType[0] + ", " + nameString + ")");
+            System.out.println("glGetActiveAttrib(" + i + ", " + attribLocation + ", " + attribLength.get(0)
+                    + ", " + attribSize.get(0) + ", " + attribType.get(0) + ", " + nameString + ")");
         }
 
         return error;
+    }
+
+    @Override
+    protected boolean end(GL gl) {
+
+        GL4 gl4 = (GL4) gl;
+
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        gl4.glDeleteBuffers(1, bufferName);
+        for (int i = 0; i < Program.MAX; i++) {
+            gl4.glDeleteProgram(programName[i]);
+        }
+
+        return true;
     }
 }
