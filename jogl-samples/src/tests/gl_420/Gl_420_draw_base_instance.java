@@ -51,8 +51,8 @@ public class Gl_420_draw_base_instance extends Test {
     private int vertexCount = 6;
     private int positionSize = vertexCount * Vec2.SIZE;
     private float[] positionData = {
-        +0.0f, +0.0f, // will be skipper
-        +0.0f, +0.0f, // will be skipper
+        +0.0f, +0.0f, // will be skipped
+        +0.0f, +0.0f, // will be skipped
         -1.0f, -1.0f,
         +1.0f, -1.0f,
         +1.0f, +1.0f,
