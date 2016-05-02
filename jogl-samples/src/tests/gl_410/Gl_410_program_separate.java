@@ -277,7 +277,7 @@ public class Gl_410_program_separate extends Test {
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
 
         // Render with the separate programs
-        gl4.glViewportIndexedfv(0, viewport.put(0, 0).put(1, 0).put(2, windowSize.x / 2).put(3, windowSize.y));
+        gl4.glViewportIndexedfv(0, viewportBuffer.put(0, 0).put(1, 0).put(2, windowSize.x / 2).put(3, windowSize.y));
         gl4.glProgramUniformMatrix4fv(separateProgramName[Program.VERTEX], separateUniformMvp, 1, false, mvp.toFa_(), 0);
         gl4.glProgramUniform1i(separateProgramName[Program.FRAGMENT], separateUniformDiffuse, 0);
         gl4.glBindProgramPipeline(pipelineName.get(0));
@@ -287,7 +287,7 @@ public class Gl_410_program_separate extends Test {
         gl4.glBindProgramPipeline(0);
 
         // Render with the unified programs
-        gl4.glViewportIndexedfv(0, viewport.put(0, windowSize.x / 2).put(1, 0).put(2, windowSize.x / 2)
+        gl4.glViewportIndexedfv(0, viewportBuffer.put(0, windowSize.x / 2).put(1, 0).put(2, windowSize.x / 2)
                 .put(3, windowSize.y));
         gl4.glProgramUniformMatrix4fv(unifiedProgramName, unifiedUniformMvp, 1, false, mvp.toFa_(), 0);
         gl4.glProgramUniform1i(unifiedProgramName, unifiedUniformDiffuse, 0);

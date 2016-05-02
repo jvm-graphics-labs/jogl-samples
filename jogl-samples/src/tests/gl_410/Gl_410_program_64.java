@@ -193,7 +193,7 @@ public class Gl_410_program_64 extends Test {
         gl4.glProgramUniformMatrix4dv(programName[Program.VERT], uniformMvp, 1, false, mvp.toDa_(), 0);
         gl4.glProgramUniform4dv(programName[Program.FRAG], uniformDiffuse, 1, new double[]{1.0, 0.5, 0.0, 1.0}, 0);
 
-        gl4.glViewportIndexedfv(0, viewport.put(0, 0).put(1, 0).put(2, windowSize.x).put(3, windowSize.y));
+        gl4.glViewportIndexedfv(0, viewportBuffer.put(0, 0).put(1, 0).put(2, windowSize.x).put(3, windowSize.y));
         gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 0));
 
         gl4.glBindProgramPipeline(pipelineName.get(0));

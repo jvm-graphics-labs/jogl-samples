@@ -185,7 +185,7 @@ public class Gl_410_primitive_tessellation2 extends Test {
 
         gl4.glProgramUniformMatrix4fv(programName[Program.VERT], uniformMvp, 1, false, mvp.toFa_(), 0);
 
-        gl4.glViewportIndexedfv(0, viewport.put(0, 0).put(1, 0).put(2, windowSize.x).put(3, windowSize.y));
+        gl4.glViewportIndexedfv(0, viewportBuffer.put(0, 0).put(1, 0).put(2, windowSize.x).put(3, windowSize.y));
         gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 0));
 
         gl4.glBindProgramPipeline(pipelineName.get(0));

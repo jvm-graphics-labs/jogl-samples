@@ -318,7 +318,7 @@ public class Gl_410_fbo_layered extends Test {
         // Pass 1
         {
             gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(0));
-            gl4.glViewportIndexedfv(0, viewport.put(0, 0).put(1, 0).put(2, FRAMEBUFFER_SIZE.x).put(3, FRAMEBUFFER_SIZE.y));
+            gl4.glViewportIndexedfv(0, viewportBuffer.put(0, 0).put(1, 0).put(2, FRAMEBUFFER_SIZE.x).put(3, FRAMEBUFFER_SIZE.y));
 
             gl4.glUseProgram(programName[Program.LAYERING]);
 
@@ -334,13 +334,13 @@ public class Gl_410_fbo_layered extends Test {
 
             gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0).put(1, 0).put(2, 0).put(3, 0));
 
-            gl4.glViewportIndexedfv(0, viewport.put(0, border).put(1, border).put(2, windowSize.x * 0.5f - 2.0f * border)
+            gl4.glViewportIndexedfv(0, viewportBuffer.put(0, border).put(1, border).put(2, windowSize.x * 0.5f - 2.0f * border)
                     .put(3, windowSize.y * 0.5f - 2.0f * border));
-            gl4.glViewportIndexedfv(1, viewport.put(0, windowSize.x * 0.5f + border).put(1, border)
+            gl4.glViewportIndexedfv(1, viewportBuffer.put(0, windowSize.x * 0.5f + border).put(1, border)
                     .put(2, windowSize.x * 0.5f - 2.0f * border).put(3, windowSize.y * 0.5f - 2.0f * border));
-            gl4.glViewportIndexedfv(2, viewport.put(0, windowSize.x * 0.5f + border).put(1, windowSize.y * 0.5f + 1)
+            gl4.glViewportIndexedfv(2, viewportBuffer.put(0, windowSize.x * 0.5f + border).put(1, windowSize.y * 0.5f + 1)
                     .put(2, windowSize.x * 0.5f - 2.0f * border).put(3, windowSize.y * 0.5f - 2.0f * border));
-            gl4.glViewportIndexedfv(3, viewport.put(0, border).put(1, windowSize.y * 0.5f + border)
+            gl4.glViewportIndexedfv(3, viewportBuffer.put(0, border).put(1, windowSize.y * 0.5f + border)
                     .put(2, windowSize.x * 0.5f - 2.0f * border).put(3, windowSize.y * 0.5f - 2.0f * border));
 
             gl4.glUseProgram(programName[Program.VIEWPORT]);

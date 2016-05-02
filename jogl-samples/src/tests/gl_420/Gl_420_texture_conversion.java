@@ -19,14 +19,15 @@ import framework.Semantic;
 import framework.Test;
 import glf.Vertex_v2fv2f;
 import glm.vec._2.Vec2;
+import glm.vec._4.i.Vec4i;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import jgli.Texture2d;
-import jglm.Vec4i;
 
 /**
  *
@@ -106,8 +107,11 @@ public class Gl_420_texture_conversion extends Test {
         new Vec4i(320, 240, 320, 240),
         new Vec4i(0, 240, 320, 240)};
 
-    private int[] vertexArrayName = {0}, pipelineName = new int[Program.MAX], programName = new int[Program.MAX],
-            bufferName = new int[Buffer.MAX], textureName = new int[Texture.MAX];
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1),
+            pipelineName = GLBuffers.newDirectIntBuffer(Program.MAX),
+            bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX),
+            textureName = GLBuffers.newDirectIntBuffer(Texture.MAX);
+    private int[] programName = new int[Program.MAX];
 
     @Override
     protected boolean begin(GL gl) {
@@ -136,14 +140,14 @@ public class Gl_420_texture_conversion extends Test {
 
         boolean validated = true;
 
-        gl4.glGenProgramPipelines(Program.MAX, pipelineName, 0);
+        gl4.glGenProgramPipelines(Program.MAX, pipelineName);
 
-        ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                this.getClass(), SHADERS_ROOT, null, VERT_SHADER_SOURCE, "vert", null, true);
-        ShaderCode fragShaderCodeNorm = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                this.getClass(), SHADERS_ROOT, null, FRAG_SHADERS_SOURCE[Program.NORM], "frag", null, true);
-        ShaderCode fragShaderCodeUint = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                this.getClass(), SHADERS_ROOT, null, FRAG_SHADERS_SOURCE[Program.UINT], "frag", null, true);
+        ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                VERT_SHADER_SOURCE, "vert", null, true);
+        ShaderCode fragShaderCodeNorm = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                FRAG_SHADERS_SOURCE[Program.NORM], "frag", null, true);
+        ShaderCode fragShaderCodeUint = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                FRAG_SHADERS_SOURCE[Program.UINT], "frag", null, true);
 
         if (validated) {
 
@@ -175,9 +179,9 @@ public class Gl_420_texture_conversion extends Test {
 
         if (validated) {
 
-            gl4.glUseProgramStages(pipelineName[Program.NORM], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+            gl4.glUseProgramStages(pipelineName.get(Program.NORM), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
                     programName[Program.NORM]);
-            gl4.glUseProgramStages(pipelineName[Program.UINT], GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
+            gl4.glUseProgramStages(pipelineName.get(Program.UINT), GL_VERTEX_SHADER_BIT | GL_FRAGMENT_SHADER_BIT,
                     programName[Program.UINT]);
         }
 
@@ -188,27 +192,29 @@ public class Gl_420_texture_conversion extends Test {
 
         boolean validated = true;
 
-        gl4.glGenBuffers(Buffer.MAX, bufferName, 0);
-
-        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
         ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+
+        gl4.glGenBuffers(Buffer.MAX, bufferName);
+
+        gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int[] uniformBufferOffset = {0};
-        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
+        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
 
-        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         return validated;
     }
@@ -221,16 +227,16 @@ public class Gl_420_texture_conversion extends Test {
 
             gl4.glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-            gl4.glGenTextures(Texture.MAX, textureName, 0);
+            gl4.glGenTextures(Texture.MAX, textureName);
             gl4.glActiveTexture(GL_TEXTURE0);
 
             for (int i = 0; i < Texture.MAX; ++i) {
-                gl4.glBindTexture(GL_TEXTURE_2D, textureName[i]);
+                gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(i));
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_BASE_LEVEL, 0);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, texture.levels() - 1);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
                 gl4.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-                gl4.glTexStorage2D(GL_TEXTURE_2D, texture.levels(), textureInternalFormat[i], texture.dimensions(0)[0], 
+                gl4.glTexStorage2D(GL_TEXTURE_2D, texture.levels(), textureInternalFormat[i], texture.dimensions(0)[0],
                         texture.dimensions(0)[1]);
 
                 for (int level = 0; level < texture.levels(); ++level) {
@@ -253,10 +259,10 @@ public class Gl_420_texture_conversion extends Test {
 
     private boolean initVertexArray(GL4 gl4) {
 
-        gl4.glGenVertexArrays(1, vertexArrayName, 0);
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glGenVertexArrays(1, vertexArrayName);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         {
-            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX]);
+            gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
             gl4.glVertexAttribPointer(Semantic.Attr.POSITION, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, 0);
             gl4.glVertexAttribPointer(Semantic.Attr.TEXCOORD, 2, GL_FLOAT, false, Vertex_v2fv2f.SIZE, Vec2.SIZE);
             gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -264,7 +270,7 @@ public class Gl_420_texture_conversion extends Test {
             gl4.glEnableVertexAttribArray(Semantic.Attr.POSITION);
             gl4.glEnableVertexAttribArray(Semantic.Attr.TEXCOORD);
 
-            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT]);
+            gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
         }
         gl4.glBindVertexArray(0);
 
@@ -276,10 +282,10 @@ public class Gl_420_texture_conversion extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 1.0f).put(1, 0.5f).put(2, 0.0f).put(3, 1.0f));
 
         {
-            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName[Buffer.TRANSFORM]);
+            gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
             ByteBuffer pointer = gl4.glMapBufferRange(
                     GL_UNIFORM_BUFFER, 0, Mat4.SIZE,
                     GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
@@ -287,39 +293,39 @@ public class Gl_420_texture_conversion extends Test {
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
             Mat4 model = new Mat4(1.0f);
 
-            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
+            projection.mul(viewMat4()).mul(model).toDbb(pointer);
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
 
-        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName[Buffer.TRANSFORM]);
+        gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM));
 
-        gl4.glBindVertexArray(vertexArrayName[0]);
+        gl4.glBindVertexArray(vertexArrayName.get(0));
         gl4.glActiveTexture(GL_TEXTURE0);
 
-        gl4.glBindProgramPipeline(pipelineName[Program.UINT]);
+        gl4.glBindProgramPipeline(pipelineName.get(Program.UINT));
         {
-            gl4.glViewportIndexedfv(0, viewport[Texture.RGBA8UI].toFloatArray(), 0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA8UI]);
+            gl4.glViewportIndexedfv(0, viewport[Texture.RGBA8UI].toDfb(viewportBuffer));
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.RGBA8UI));
 
             gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
         }
 
-        gl4.glBindProgramPipeline(pipelineName[Program.NORM]);
+        gl4.glBindProgramPipeline(pipelineName.get(Program.NORM));
         {
-            gl4.glViewportIndexedfv(0, viewport[Texture.RGBA32F].toFloatArray(), 0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA32F]);
+            gl4.glViewportIndexedfv(0, viewport[Texture.RGBA32F].toDfb(viewportBuffer));
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.RGBA32F));
 
             gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
 
-            gl4.glViewportIndexedfv(0, viewport[Texture.RGBA8].toFloatArray(), 0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA8]);
+            gl4.glViewportIndexedfv(0, viewport[Texture.RGBA8].toDfb(viewportBuffer));
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.RGBA8));
 
             gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
 
-            gl4.glViewportIndexedfv(0, viewport[Texture.RGBA8_SNORM].toFloatArray(), 0);
-            gl4.glBindTexture(GL_TEXTURE_2D, textureName[Texture.RGBA8_SNORM]);
+            gl4.glViewportIndexedfv(0, viewport[Texture.RGBA8_SNORM].toDfb(viewportBuffer));
+            gl4.glBindTexture(GL_TEXTURE_2D, textureName.get(Texture.RGBA8_SNORM));
 
             gl4.glDrawElementsInstancedBaseVertexBaseInstance(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0, 1, 0, 0);
         }
@@ -332,13 +338,18 @@ public class Gl_420_texture_conversion extends Test {
 
         GL4 gl4 = (GL4) gl;
 
-        gl4.glDeleteBuffers(Buffer.MAX, bufferName, 0);
+        gl4.glDeleteBuffers(Buffer.MAX, bufferName);
         for (int i = 0; i < Program.MAX; ++i) {
             gl4.glDeleteProgram(programName[i]);
         }
-        gl4.glDeleteTextures(Texture.MAX, textureName, 0);
-        gl4.glDeleteVertexArrays(1, vertexArrayName, 0);
-        gl4.glDeleteProgramPipelines(Program.MAX, pipelineName, 0);
+        gl4.glDeleteTextures(Texture.MAX, textureName);
+        gl4.glDeleteVertexArrays(1, vertexArrayName);
+        gl4.glDeleteProgramPipelines(Program.MAX, pipelineName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
 
         return true;
     }

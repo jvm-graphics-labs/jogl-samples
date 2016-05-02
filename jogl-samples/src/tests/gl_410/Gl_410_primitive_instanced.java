@@ -209,7 +209,7 @@ public class Gl_410_primitive_instanced extends Test {
                 uniformDiffuse, 1, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
 
         // Set the display viewport
-        gl4.glViewportIndexedfv(0, viewport.put(0, 0).put(1, 0).put(2, windowSize.x).put(3, windowSize.y));
+        gl4.glViewportIndexedfv(0, viewportBuffer.put(0, 0).put(1, 0).put(2, windowSize.x).put(3, windowSize.y));
 
         // Clear color buffer with white
         gl4.glClearBufferfv(GL_DEPTH, 0, clearDepth.put(0, 1));
