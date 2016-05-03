@@ -162,6 +162,8 @@ public class Test implements GLEventListener, KeyListener {
                         return GLProfile.get(GLProfile.GL2ES2);
                     case 3:
                         return GLProfile.get(GLProfile.GL4ES3);
+                    default:
+                        return GLProfile.getDefault();
                 }
             case CORE:
                 switch (major) {
@@ -239,7 +241,7 @@ public class Test implements GLEventListener, KeyListener {
         System.exit(0);
     }
 
-    protected boolean end(GL gl) {        
+    protected boolean end(GL gl) {
         return true;
     }
 
