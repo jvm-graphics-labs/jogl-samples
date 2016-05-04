@@ -19,6 +19,8 @@ import framework.BufferUtils;
 import framework.Profile;
 import framework.Semantic;
 import framework.Test;
+import glm.vec._4.Vec4;
+import glm.vec._4.funcCommon;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
@@ -91,9 +93,14 @@ public class Gl_430_buffer_uniform extends Test {
 
         public static final int SIZE = (Vec3.SIZE + 1 * Float.BYTES) * 3;
 
-        public float[] toFa_() {
-            return new float[]{ambient.x, ambient.y, ambient.z, padding1, diffuse.x, diffuse.y, diffuse.z, padding2,
-                specular.x, specular.y, specular.z, shininess};
+        public ByteBuffer toDbb(ByteBuffer dbb) {
+            ambient.toDbb(dbb, 0);
+            dbb.putFloat(Vec3.SIZE, padding1);
+            diffuse.toDbb(dbb, Vec4.SIZE);
+            dbb.putFloat(Vec4.SIZE + Vec3.SIZE, padding2);
+            specular.toDbb(dbb, Vec4.SIZE * 2);
+            dbb.putFloat(Vec4.SIZE * 2 + Vec3.SIZE, shininess);
+            return dbb;
         }
     };
 
@@ -107,8 +114,8 @@ public class Gl_430_buffer_uniform extends Test {
 
         public static final int SIZE = Vec3.SIZE;
 
-        public float[] toFa_() {
-            return position.toFA_();
+        public ByteBuffer toDbb(ByteBuffer dbb) {
+            return position.toDbb(dbb);
         }
     };
 
@@ -123,18 +130,15 @@ public class Gl_430_buffer_uniform extends Test {
         public Transform() {
         }
 
-        public float[] toFa_() {
-            return new float[]{
-                p.m00, p.m01, p.m02, p.m03, p.m10, p.m11, p.m12, p.m13,
-                p.m20, p.m21, p.m22, p.m23, p.m30, p.m31, p.m32, p.m33,
-                mv.m00, mv.m01, mv.m02, mv.m03, mv.m10, mv.m11, mv.m12, mv.m13,
-                mv.m20, mv.m21, mv.m22, mv.m23, mv.m30, mv.m31, mv.m32, mv.m33,
-                normal.m00, normal.m01, normal.m02, normal.m10, normal.m11, normal.m12,
-                normal.m20, normal.m21, normal.m22,};
+        public ByteBuffer toDbb(ByteBuffer dbb) {
+            p.toDbb(dbb, 0);
+            mv.toDbb(dbb, Mat4.SIZE);
+            normal.toDbb(dbb, Mat4.SIZE * 2);
+            return dbb;
         }
     };
 
-    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), 
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1),
             bufferName = GLBuffers.newDirectIntBuffer(Buffer.MAX);
     private int programName, uniformPerDraw, uniformPerPass, uniformPerScene;
 
@@ -263,10 +267,10 @@ public class Gl_430_buffer_uniform extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl4);
             programName = shaderProgram.program();
@@ -293,12 +297,12 @@ public class Gl_430_buffer_uniform extends Test {
             gl4.glUniformBlockBinding(programName, uniformPerPass, Uniform.PER_SCENE);
         }
         {
-            int[] maxNameLength = {0};
-            gl4.glGetProgramInterfaceiv(programName, GL_UNIFORM_BLOCK, GL_MAX_NAME_LENGTH, maxNameLength, 0);
-            byte[] name = new byte[maxNameLength[0] + 1];
+            IntBuffer maxNameLength = GLBuffers.newDirectIntBuffer(1);
+            gl4.glGetProgramInterfaceiv(programName, GL_UNIFORM_BLOCK, GL_MAX_NAME_LENGTH, maxNameLength);
+            ByteBuffer name = GLBuffers.newDirectByteBuffer(maxNameLength.get(0) + 1);
 
-            int[] activeResources = {0};
-            gl4.glGetProgramInterfaceiv(programName, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, activeResources, 0);
+            IntBuffer activeResources = GLBuffers.newDirectIntBuffer(1);
+            gl4.glGetProgramInterfaceiv(programName, GL_UNIFORM_BLOCK, GL_ACTIVE_RESOURCES, activeResources);
 
             class Property {
 
@@ -313,10 +317,10 @@ public class Gl_430_buffer_uniform extends Test {
 //                GLint ComputeShader;
             };
 
-            for (int resourceIndex = 0; resourceIndex < activeResources[0]; ++resourceIndex) {
-                gl4.glGetProgramResourceName(programName, GL_UNIFORM_BLOCK, resourceIndex, name.length, null, 0, name, 0);
+            for (int resourceIndex = 0; resourceIndex < activeResources.get(0); ++resourceIndex) {
+                gl4.glGetProgramResourceName(programName, GL_UNIFORM_BLOCK, resourceIndex, name.capacity(), null, name);
 
-                int[] properties = {
+                IntBuffer properties = GLBuffers.newDirectIntBuffer(new int[]{
                     GL_BUFFER_BINDING,
                     GL_BUFFER_DATA_SIZE,
                     GL_NUM_ACTIVE_VARIABLES,
@@ -325,33 +329,37 @@ public class Gl_430_buffer_uniform extends Test {
                     GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
                     GL_REFERENCED_BY_GEOMETRY_SHADER,
                     GL_REFERENCED_BY_FRAGMENT_SHADER,
-                    GL_REFERENCED_BY_COMPUTE_SHADER};
+                    GL_REFERENCED_BY_COMPUTE_SHADER});
 
-                int[] params = new int[properties.length];
-                int[] length = {properties.length};
+                IntBuffer params = GLBuffers.newDirectIntBuffer(properties.capacity());
+                IntBuffer length = GLBuffers.newDirectIntBuffer(properties.capacity());
 
-                gl4.glGetProgramResourceiv(programName, GL_UNIFORM_BLOCK, resourceIndex, properties.length,
-                        properties, 0, params.length * Integer.BYTES, length, 0, params, 0);
+                gl4.glGetProgramResourceiv(programName, GL_UNIFORM_BLOCK, resourceIndex, properties.capacity(),
+                        properties, params.capacity() * Integer.BYTES, length, params);
 
-                System.out.printf("Uniform Block(binding %d, size %d, num var %d, name %s)\n", params[Property.binding],
-                        params[Property.dataSize], params[Property.numActiveVariables], new String(name).trim());
+                byte[] name_ = new byte[name.capacity()];
+                name.get(name_);
+                name.rewind();
+
+                System.out.printf("Uniform Block(binding %d, size %d, num var %d, name %s)\n",
+                        params.get(Property.binding), params.get(Property.dataSize),
+                        params.get(Property.numActiveVariables), new String(name_).trim());
                 // clean
-                for (int i = 0; i < name.length; i++) {
-                    name[i] = (byte) 0;
+                for (int i = 0; i < name.capacity(); i++) {
+                    name.put(i, (byte) 0);
                 }
             }
 
-            int[] maxNumActiveVariables = {0};
-            gl4.glGetProgramInterfaceiv(programName, GL_UNIFORM_BLOCK, GL_MAX_NUM_ACTIVE_VARIABLES,
-                    maxNumActiveVariables, 0);
+            IntBuffer maxNumActiveVariables = GLBuffers.newDirectIntBuffer(1);
+            gl4.glGetProgramInterfaceiv(programName, GL_UNIFORM_BLOCK, GL_MAX_NUM_ACTIVE_VARIABLES, maxNumActiveVariables);
         }
         {
-            int[] maxNameLength = {0};
-            gl4.glGetProgramInterfaceiv(programName, GL_UNIFORM, GL_MAX_NAME_LENGTH, maxNameLength, 0);
-            byte[] name = new byte[maxNameLength[0] + 1];
+            IntBuffer maxNameLength = GLBuffers.newDirectIntBuffer(1);
+            gl4.glGetProgramInterfaceiv(programName, GL_UNIFORM, GL_MAX_NAME_LENGTH, maxNameLength);
+            ByteBuffer name = GLBuffers.newDirectByteBuffer(maxNameLength.get(0) + 1);
 
-            int[] activeResources = {0};
-            gl4.glGetProgramInterfaceiv(programName, GL_UNIFORM, GL_ACTIVE_RESOURCES, activeResources, 0);
+            IntBuffer activeResources = GLBuffers.newDirectIntBuffer(1);
+            gl4.glGetProgramInterfaceiv(programName, GL_UNIFORM, GL_ACTIVE_RESOURCES, activeResources);
 
             class Property {
 
@@ -371,10 +379,10 @@ public class Gl_430_buffer_uniform extends Test {
 //                    public static final int ComputeShader;
             };
 
-            for (int resourceIndex = 0; resourceIndex < activeResources[0]; ++resourceIndex) {
-                gl4.glGetProgramResourceName(programName, GL_UNIFORM, resourceIndex, name.length, null, 0, name, 0);
+            for (int resourceIndex = 0; resourceIndex < activeResources.get(0); ++resourceIndex) {
+                gl4.glGetProgramResourceName(programName, GL_UNIFORM, resourceIndex, name.capacity(), null, name);
 
-                int[] properties = {
+                IntBuffer properties = GLBuffers.newDirectIntBuffer(new int[]{
                     GL_LOCATION,
                     GL_BLOCK_INDEX,
                     GL_OFFSET,
@@ -388,22 +396,25 @@ public class Gl_430_buffer_uniform extends Test {
                     GL_REFERENCED_BY_TESS_EVALUATION_SHADER,
                     GL_REFERENCED_BY_GEOMETRY_SHADER,
                     GL_REFERENCED_BY_FRAGMENT_SHADER,
-                    GL_REFERENCED_BY_COMPUTE_SHADER
-                };
+                    GL_REFERENCED_BY_COMPUTE_SHADER});
 
-                int[] params = new int[properties.length];
-                int[] length = {properties.length};
+                IntBuffer params = GLBuffers.newDirectIntBuffer(properties.capacity());
+                IntBuffer length = GLBuffers.newDirectIntBuffer(properties.capacity());
 
-                gl4.glGetProgramResourceiv(programName, GL_UNIFORM, resourceIndex, properties.length,
-                        properties, 0, params.length * Integer.BYTES, length, 0, params, 0);
+                gl4.glGetProgramResourceiv(programName, GL_UNIFORM, resourceIndex, properties.capacity(),
+                        properties, params.capacity() * Integer.BYTES, length, params);
+
+                byte[] name_ = new byte[name.capacity()];
+                name.get(name_);
+                name.rewind();
 
                 System.out.printf("Uniform %s (%s), location: %d, block: %d, offset: %d, array size %d, "
-                        + "array stride %d\n", new String(name).trim(), getTypeString(params[Property.type]),
-                        params[Property.location], params[Property.blockIndex], params[Property.offset],
-                        params[Property.arraySize], params[Property.arrayStride]);
+                        + "array stride %d\n", new String(name_).trim(), getTypeString(params.get(Property.type)),
+                        params.get(Property.location), params.get(Property.blockIndex), params.get(Property.offset),
+                        params.get(Property.arraySize), params.get(Property.arrayStride));
                 // clean
-                for (int i = 0; i < name.length; i++) {
-                    name[i] = (byte) 0;
+                for (int i = 0; i < name.capacity(); i++) {
+                    name.put(i, (byte) 0);
                 }
             }
         }
@@ -438,18 +449,19 @@ public class Gl_430_buffer_uniform extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
+        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        ByteBuffer lightBuffer = GLBuffers.newDirectByteBuffer(Light.SIZE);
+        ByteBuffer materialBuffer = GLBuffers.newDirectByteBuffer(Material.SIZE);
+
         gl4.glGenBuffers(Buffer.MAX, bufferName);
 
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
-        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         {
@@ -459,25 +471,26 @@ public class Gl_430_buffer_uniform extends Test {
         }
 
         {
-            Light light = new Light(new Vec3(0.0f, 0.0f, 100.f));
+            new Light(new Vec3(0.0f, 0.0f, 100.f)).toDbb(lightBuffer);
 
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.PER_PASS));
-            FloatBuffer lightBuffer = GLBuffers.newDirectFloatBuffer(light.toFa_());
             gl4.glBufferData(GL_UNIFORM_BUFFER, Light.SIZE, lightBuffer, GL_STATIC_DRAW);
-            BufferUtils.destroyDirectBuffer(lightBuffer);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
         {
-            Material material = new Material(new Vec3(0.7f, 0.0f, 0.0f), new Vec3(0.0f, 0.5f, 0.0f),
-                    new Vec3(0.0f, 0.0f, 0.5f), 128.0f);
+            new Material(new Vec3(0.7f, 0.0f, 0.0f), new Vec3(0.0f, 0.5f, 0.0f), new Vec3(0.0f, 0.0f, 0.5f), 128.0f)
+                    .toDbb(materialBuffer);
 
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.PER_SCENE));
-            FloatBuffer materialBuffer = GLBuffers.newDirectFloatBuffer(material.toFa_());
             gl4.glBufferData(GL_UNIFORM_BUFFER, Material.SIZE, materialBuffer, GL_STATIC_DRAW);
-            BufferUtils.destroyDirectBuffer(materialBuffer);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        BufferUtils.destroyDirectBuffer(lightBuffer);
+        BufferUtils.destroyDirectBuffer(materialBuffer);
 
         return true;
     }
@@ -501,15 +514,15 @@ public class Gl_430_buffer_uniform extends Test {
             t.p = projection;
             t.normal = new Mat3(t.mv.invTransp3_());
 
-            transform.asFloatBuffer().put(t.toFa_());
+            t.toDbb(transform);
 
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
             gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
         }
 
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.2f, 0.2f, 0.2f, 1.0f}, 0);
-        gl4.glClearBufferfv(GL_DEPTH, 0, new float[]{1.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0.2f).put(1, 0.2f).put(2, 0.2f).put(3, 1.0f));
+        gl4.glClearBufferfv(GL_DEPTH, 0, clearDepth.put(0, 1.0f));
 
         gl4.glUseProgram(programName);
         gl4.glBindBufferBase(GL_UNIFORM_BUFFER, Uniform.PER_SCENE, bufferName.get(Buffer.PER_SCENE));
@@ -528,10 +541,11 @@ public class Gl_430_buffer_uniform extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glDeleteVertexArrays(1, vertexArrayName);
-        BufferUtils.destroyDirectBuffer(vertexArrayName);
         gl4.glDeleteBuffers(Buffer.MAX, bufferName);
-        BufferUtils.destroyDirectBuffer(bufferName);
         gl4.glDeleteProgram(programName);
+
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
+        BufferUtils.destroyDirectBuffer(bufferName);
 
         return true;
     }

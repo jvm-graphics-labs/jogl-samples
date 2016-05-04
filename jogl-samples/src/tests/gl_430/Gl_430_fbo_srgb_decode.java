@@ -138,10 +138,10 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            shaderCodes[Shader.VERT_TEXTURE] = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "vert", null, true);
-            shaderCodes[Shader.FRAG_TEXTURE] = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_TEXTURE, "frag", null, true);
+            shaderCodes[Shader.VERT_TEXTURE] = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE_TEXTURE, "vert", null, true);
+            shaderCodes[Shader.FRAG_TEXTURE] = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE_TEXTURE, "frag", null, true);
 
             shaderProgram.init(gl4);
             programName[Program.TEXTURE] = shaderProgram.program();
@@ -154,10 +154,10 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            shaderCodes[Shader.VERT_SPLASH] = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "vert", null, true);
-            shaderCodes[Shader.FRAG_SPLASH] = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE_SPLASH, "frag", null, true);
+            shaderCodes[Shader.VERT_SPLASH] = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE_SPLASH, "vert", null, true);
+            shaderCodes[Shader.FRAG_SPLASH] = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT,
+                    null, SHADERS_SOURCE_SPLASH, "frag", null, true);
 
             shaderProgram.init(gl4);
             programName[Program.SPLASH] = shaderProgram.program();
@@ -185,27 +185,30 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
+        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+
         gl4.glGenBuffers(Buffer.MAX, bufferName);
 
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
-        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int[] uniformBufferOffset = {0};
-        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
+        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
 
         return true;
     }
@@ -321,7 +324,7 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
             Mat4 projection = glm.perspective_((float) Math.PI * 0.25f, (float) windowSize.x / windowSize.y, 0.1f, 100.0f);
 
-            pointer.asFloatBuffer().put(projection.mul(viewMat4()).toFa_());
+            projection.mul(viewMat4()).toDbb(pointer);
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
@@ -337,9 +340,8 @@ public class Gl_430_fbo_srgb_decode extends Test {
 
             // Convert linear clear color to sRGB color space, FramebufferName is a sRGB FBO
             gl4.glEnable(GL_FRAMEBUFFER_SRGB);
-            float[] depth = {1.0f};
-            gl4.glClearBufferfv(GL_DEPTH, 0, depth, 0);
-            gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+            gl4.glClearBufferfv(GL_DEPTH, 0, clearDepth.put(0, 1.0f));
+            gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 1.0f).put(1, 0.5f).put(2, 0.0f).put(3, 1.0f));
 
             // TextureName[texture::DIFFUSE] is a sRGB texture which sRGB conversion on fetch has been disabled
             // Hence in the shader, the value is stored as sRGB so we should not convert it to sRGB.
@@ -379,14 +381,15 @@ public class Gl_430_fbo_srgb_decode extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glDeleteFramebuffers(1, framebufferName);
-        BufferUtils.destroyDirectBuffer(framebufferName);
         gl4.glDeleteProgram(programName[Program.SPLASH]);
         gl4.glDeleteProgram(programName[Program.TEXTURE]);
         gl4.glDeleteBuffers(Buffer.MAX, bufferName);
-        BufferUtils.destroyDirectBuffer(bufferName);
         gl4.glDeleteTextures(Texture.MAX, textureName);
-        BufferUtils.destroyDirectBuffer(textureName);
         gl4.glDeleteVertexArrays(Program.MAX, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(framebufferName);
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
         BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return true;

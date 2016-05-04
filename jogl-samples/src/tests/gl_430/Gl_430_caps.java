@@ -90,7 +90,7 @@ public class Gl_430_caps extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glViewport(0, 0, windowSize.x, windowSize.y);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 1.0f).put(1, 0.5f).put(2, 0.0f).put(3, 1.0f));
 
         return true;
     }

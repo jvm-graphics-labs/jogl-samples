@@ -111,10 +111,10 @@ public class Gl_430_draw_vertex_attrib_binding extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl4);
             programName[Program.VERTEX] = shaderProgram.program();
@@ -142,29 +142,32 @@ public class Gl_430_draw_vertex_attrib_binding extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
+        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+
         boolean validated = true;
 
         gl4.glGenBuffers(Buffer.MAX, bufferName);
 
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
-        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        int[] uniformBufferOffset = {0};
-        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
+        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
+        int uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
 
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, bufferName.get(Buffer.TRANSFORM));
         gl4.glBufferData(GL_UNIFORM_BUFFER, uniformBlockSize, null, GL_DYNAMIC_DRAW);
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
 
         return validated;
     }
@@ -244,7 +247,7 @@ public class Gl_430_draw_vertex_attrib_binding extends Test {
             Mat4 projection = glm.perspectiveFov_((float) Math.PI * 0.25f, windowSize.x, windowSize.y, 0.1f, 100.0f);
             Mat4 model = new Mat4(1.0f);
 
-            pointer.asFloatBuffer().put(projection.mul(viewMat4()).mul(model).toFa_());
+            projection.mul(viewMat4()).mul(model).toDbb(pointer);
 
             // Make sure the uniform buffer is uploaded
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
@@ -252,7 +255,7 @@ public class Gl_430_draw_vertex_attrib_binding extends Test {
 
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
 
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 0.5f, 0.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 1.0f).put(1, 0.5f).put(2, 0.0f).put(3, 1.0f));
 
         gl4.glBindProgramPipeline(pipelineName.get(0));
         gl4.glActiveTexture(GL_TEXTURE0);
@@ -271,14 +274,15 @@ public class Gl_430_draw_vertex_attrib_binding extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glDeleteProgramPipelines(1, pipelineName);
-        BufferUtils.destroyDirectBuffer(pipelineName);
         gl4.glDeleteProgram(programName[Program.FRAGMENT]);
         gl4.glDeleteProgram(programName[Program.VERTEX]);
         gl4.glDeleteBuffers(Buffer.MAX, bufferName);
-        BufferUtils.destroyDirectBuffer(bufferName);
         gl4.glDeleteTextures(1, textureName);
-        BufferUtils.destroyDirectBuffer(textureName);
         gl4.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(pipelineName);
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
         BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return true;

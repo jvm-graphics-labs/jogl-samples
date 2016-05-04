@@ -100,10 +100,10 @@ public class Gl_430_atomic_counter extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl4);
             programName = shaderProgram.program();
@@ -125,19 +125,22 @@ public class Gl_430_atomic_counter extends Test {
 
         boolean validated = true;
 
-        int[] maxVertexAtomicCounterBuffers = {0};
-        int[] maxControlAtomicCounterBuffers = {0};
-        int[] maxEvaluationAtomicCounterBuffers = {0};
-        int[] maxGeometryAtomicCounterBuffers = {0};
-        int[] maxFragmentAtomicCounterBuffers = {0};
-        int[] maxCombinedAtomicCounterBuffers = {0};
+        IntBuffer data = GLBuffers.newDirectIntBuffer(1);
+        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
 
-        gl4.glGetIntegerv(GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS, maxVertexAtomicCounterBuffers, 0);
-        gl4.glGetIntegerv(GL_MAX_TESS_CONTROL_ATOMIC_COUNTER_BUFFERS, maxControlAtomicCounterBuffers, 0);
-        gl4.glGetIntegerv(GL_MAX_TESS_EVALUATION_ATOMIC_COUNTER_BUFFERS, maxEvaluationAtomicCounterBuffers, 0);
-        gl4.glGetIntegerv(GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS, maxGeometryAtomicCounterBuffers, 0);
-        gl4.glGetIntegerv(GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS, maxFragmentAtomicCounterBuffers, 0);
-        gl4.glGetIntegerv(GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS, maxCombinedAtomicCounterBuffers, 0);
+        gl4.glGetIntegerv(GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS, data);
+        System.out.println("GL_MAX_VERTEX_ATOMIC_COUNTER_BUFFERS: " + data.get(0));
+        gl4.glGetIntegerv(GL_MAX_TESS_CONTROL_ATOMIC_COUNTER_BUFFERS, data);
+        System.out.println("GL_MAX_TESS_CONTROL_ATOMIC_COUNTER_BUFFERS: " + data.get(0));
+        gl4.glGetIntegerv(GL_MAX_TESS_EVALUATION_ATOMIC_COUNTER_BUFFERS, data);
+        System.out.println("GL_MAX_TESS_EVALUATION_ATOMIC_COUNTER_BUFFERS: " + data.get(0));
+        gl4.glGetIntegerv(GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS, data);
+        System.out.println("GL_MAX_GEOMETRY_ATOMIC_COUNTER_BUFFERS: " + data.get(0));
+        gl4.glGetIntegerv(GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS, data);
+        System.out.println("GL_MAX_FRAGMENT_ATOMIC_COUNTER_BUFFERS: " + data.get(0));
+        gl4.glGetIntegerv(GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS, data);
+        System.out.println("GL_MAX_COMBINED_ATOMIC_COUNTER_BUFFERS: " + data.get(0));
 
         gl4.glGenBuffers(Buffer.MAX, bufferName);
 
@@ -146,20 +149,20 @@ public class Gl_430_atomic_counter extends Test {
         gl4.glBindBuffer(GL_UNIFORM_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName.get(Buffer.ELEMENT));
-        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
         gl4.glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
         gl4.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ARRAY_BUFFER, bufferName.get(Buffer.VERTEX));
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
         gl4.glBufferData(GL_ARRAY_BUFFER, vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
         gl4.glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, bufferName.get(Buffer.ATOMIC_COUNTER));
         gl4.glBufferData(GL_ATOMIC_COUNTER_BUFFER, Integer.BYTES, null, GL_DYNAMIC_COPY);
         gl4.glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, 0);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        BufferUtils.destroyDirectBuffer(data);
 
         return validated;
     }
@@ -206,7 +209,7 @@ public class Gl_430_atomic_counter extends Test {
             Mat4 model = new Mat4(1.0f);
             Mat4 mvp = projection.mul(viewMat4()).mul(model);
 
-            pointer.asFloatBuffer().put(mvp.toFa_());
+            mvp.toDbb(pointer);
 
             gl4.glUnmapBuffer(GL_UNIFORM_BUFFER);
         }
@@ -216,7 +219,7 @@ public class Gl_430_atomic_counter extends Test {
         gl4.glClearBufferSubData(GL_ATOMIC_COUNTER_BUFFER, GL_R8UI, 0, Integer.BYTES, GL_RGBA, GL_UNSIGNED_INT, data);
 
         gl4.glViewportIndexedf(0, 0, 0, windowSize.x, windowSize.y);
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{0.0f, 0.0f, 0.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 0.0f).put(1, 0.0f).put(2, 0.0f).put(3, 1.0f));
 
         gl4.glBindProgramPipeline(pipelineName.get(0));
         gl4.glBindVertexArray(vertexArrayName.get(0));
@@ -234,11 +237,12 @@ public class Gl_430_atomic_counter extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glDeleteBuffers(Buffer.MAX, bufferName);
-        BufferUtils.destroyDirectBuffer(bufferName);
         gl4.glDeleteProgram(programName);
         gl4.glDeleteProgramPipelines(1, pipelineName);
-        BufferUtils.destroyDirectBuffer(pipelineName);
         gl4.glDeleteVertexArrays(1, vertexArrayName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
         BufferUtils.destroyDirectBuffer(vertexArrayName);
 
         return true;

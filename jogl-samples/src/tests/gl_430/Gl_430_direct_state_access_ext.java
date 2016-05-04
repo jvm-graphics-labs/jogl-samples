@@ -140,10 +140,10 @@ public class Gl_430_direct_state_access_ext extends Test {
 
             ShaderProgram shaderProgram = new ShaderProgram();
 
-            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "vert", null, true);
-            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER,
-                    this.getClass(), SHADERS_ROOT, null, SHADERS_SOURCE, "frag", null, true);
+            ShaderCode vertShaderCode = ShaderCode.create(gl4, GL_VERTEX_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "vert", null, true);
+            ShaderCode fragShaderCode = ShaderCode.create(gl4, GL_FRAGMENT_SHADER, this.getClass(), SHADERS_ROOT, null,
+                    SHADERS_SOURCE, "frag", null, true);
 
             shaderProgram.init(gl4);
             programName = shaderProgram.program();
@@ -167,25 +167,31 @@ public class Gl_430_direct_state_access_ext extends Test {
 
     private boolean initBuffer(GL4 gl4) {
 
-        int[] uniformBufferOffset = {0};
-        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset, 0);
-        uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset[0]);
+        IntBuffer uniformBufferOffset = GLBuffers.newDirectIntBuffer(1);
+        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
+        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+
+        gl4.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, uniformBufferOffset);
+        uniformBlockSize = Math.max(Mat4.SIZE, uniformBufferOffset.get(0));
 
         gl4.glCreateBuffers(Buffer.MAX, bufferName);
-        ShortBuffer elementBuffer = GLBuffers.newDirectShortBuffer(elementData);
-        gl4.glNamedBufferData(bufferName.get(Buffer.ELEMENT), elementSize, elementBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(elementBuffer);
 
-        FloatBuffer vertexBuffer = GLBuffers.newDirectFloatBuffer(vertexData);
+        gl4.glNamedBufferData(bufferName.get(Buffer.ELEMENT), elementSize, elementBuffer, GL_STATIC_DRAW);
+
         gl4.glNamedBufferData(bufferName.get(Buffer.VERTEX), vertexSize, vertexBuffer, GL_STATIC_DRAW);
-        BufferUtils.destroyDirectBuffer(vertexBuffer);
 
         gl4.glNamedBufferData(bufferName.get(Buffer.TRANSFORM), uniformBlockSize, null, GL_DYNAMIC_DRAW);
+
+        BufferUtils.destroyDirectBuffer(elementBuffer);
+        BufferUtils.destroyDirectBuffer(vertexBuffer);
+        BufferUtils.destroyDirectBuffer(uniformBufferOffset);
 
         return true;
     }
 
     private boolean initSampler(GL4 gl4) {
+
+        FloatBuffer borderColor = GLBuffers.newDirectFloatBuffer(new float[]{0.0f, 0.0f, 0.0f, 0.0f});
 
         gl4.glCreateSamplers(1, samplerName);
         gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -193,12 +199,14 @@ public class Gl_430_direct_state_access_ext extends Test {
         gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-        gl4.glSamplerParameterfv(samplerName.get(0), GL_TEXTURE_BORDER_COLOR, new float[]{0.0f, 0.0f, 0.0f, 0.0f}, 0);
+        gl4.glSamplerParameterfv(samplerName.get(0), GL_TEXTURE_BORDER_COLOR, borderColor);
         gl4.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_MIN_LOD, -1000.f);
         gl4.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_MAX_LOD, 1000.f);
         gl4.glSamplerParameterf(samplerName.get(0), GL_TEXTURE_LOD_BIAS, 0.0f);
         gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_COMPARE_MODE, GL_NONE);
         gl4.glSamplerParameteri(samplerName.get(0), GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL);
+
+        BufferUtils.destroyDirectBuffer(borderColor);
 
         return true;
     }
@@ -341,7 +349,7 @@ public class Gl_430_direct_state_access_ext extends Test {
 
         gl4.glViewportIndexedf(0, 0, 0, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y);
         gl4.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.RENDER));
-        gl4.glClearBufferfv(GL_COLOR, 0, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, 0);
+        gl4.glClearBufferfv(GL_COLOR, 0, clearColor.put(0, 1.0f).put(1, 1.0f).put(2, 1.0f).put(3, 1.0f));
 
         gl4.glBindBufferRange(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(Buffer.TRANSFORM), 0,
                 uniformBlockSize);
@@ -360,16 +368,19 @@ public class Gl_430_direct_state_access_ext extends Test {
         GL4 gl4 = (GL4) gl;
 
         gl4.glDeleteBuffers(Buffer.MAX, bufferName);
-        BufferUtils.destroyDirectBuffer(bufferName);
         gl4.glDeleteProgram(programName);
         gl4.glDeleteTextures(Texture.MAX, textureName);
-        BufferUtils.destroyDirectBuffer(textureName);
         gl4.glDeleteFramebuffers(Framebuffer.MAX, framebufferName);
-        BufferUtils.destroyDirectBuffer(framebufferName);
         gl4.glDeleteVertexArrays(1, vertexArrayName);
-        BufferUtils.destroyDirectBuffer(vertexArrayName);
         gl4.glDeleteSamplers(1, samplerName);
+        gl4.glDeleteProgramPipelines(1, pipelineName);
+
+        BufferUtils.destroyDirectBuffer(bufferName);
+        BufferUtils.destroyDirectBuffer(textureName);
+        BufferUtils.destroyDirectBuffer(framebufferName);
+        BufferUtils.destroyDirectBuffer(vertexArrayName);
         BufferUtils.destroyDirectBuffer(samplerName);
+        BufferUtils.destroyDirectBuffer(pipelineName);
 
         return true;
     }
