@@ -73,7 +73,7 @@ public class Gl_320_buffer_uniform extends Test {
         }
 
         public float[] toFa_() {
-            return position.toFA_();
+            return position.toFa_();
         }
     }
 

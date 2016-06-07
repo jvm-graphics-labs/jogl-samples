@@ -191,7 +191,7 @@ public class Gl_320_primitive_point_quad extends Test {
         //glm::vec3 CameraPosition(glm::vec4(glm::normalize(glm::vec3(1.0)), 1.0) * this->view());
 
         gl3.glUseProgram(programName);
-        gl3.glUniform3fv(uniformCameraPosition, 1, cameraPosition.toFA_(), 0);
+        gl3.glUniform3fv(uniformCameraPosition, 1, cameraPosition.toFa_(), 0);
         gl3.glUniformMatrix4fv(uniformMv, 1, false, mv.toFa_(), 0);
         gl3.glUniformMatrix4fv(uniformMvp, 1, false, mvp.toFa_(), 0);
 
