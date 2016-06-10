@@ -45,8 +45,7 @@ public class Gl_320_draw_multiple extends Test {
     private int elementSize = elementCount * Integer.BYTES;
     private int[] elementData = new int[]{
         0, 1, 2,
-        0, 2, 3
-    };
+        0, 2, 3};
 
     private int vertexCount = 8;
     private int positionSize = vertexCount * Vec3.SIZE;
