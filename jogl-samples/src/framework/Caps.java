@@ -16,8 +16,10 @@ import com.jogamp.opengl.GL2ES3;
 import static com.jogamp.opengl.GL2ES3.GL_CONTEXT_FLAGS;
 import com.jogamp.opengl.GL4;
 import static com.jogamp.opengl.GL4.*;
+import com.jogamp.opengl.util.GLBuffers;
 import static framework.Profile.*;
 import framework.structureData.FormatsData;
+import java.nio.IntBuffer;
 
 /**
  *
@@ -30,8 +32,8 @@ public class Caps {
         initVersion(gl, profile);
         initExtensions(gl);
         if (check(4, 3) || extensi.KHR_debug) {
-            gl.glGetIntegerv(GL_CONTEXT_FLAGS, tmp, 0);
-            version.CONTEXT_FLAGS = tmp[0];
+            gl.glGetIntegerv(GL_CONTEXT_FLAGS, data);
+            version.CONTEXT_FLAGS = data.get(0);
         }
         initDebug(gl);
         initLimits(gl);
@@ -45,13 +47,13 @@ public class Caps {
     public LimitsData limits;
     public ValuesData values;
     private FormatsData formats;
-    
-    private int[] tmp = new int[1];
+
+    private IntBuffer data = GLBuffers.newDirectIntBuffer(1);
     private long[] tmp64 = new long[1];
     private float[] tmpF = new float[2];
 
     private boolean check(int majorVersionRequire, int minorVersionRequire) {
-        return (version.MAJOR_VERSION * 100 + version.MINOR_VERSION * 10)
+        return (version.MAJOR_VERSION * 100 + version.MINOR_VERSION * 10) 
                 >= (majorVersionRequire * 100 + minorVersionRequire * 10);
     }
 
@@ -59,10 +61,10 @@ public class Caps {
 
         version = new VersionData(profile);
 
-        gl.glGetIntegerv(GL_MINOR_VERSION, tmp, 0);
-        version.MINOR_VERSION = tmp[0];
-        gl.glGetIntegerv(GL_MAJOR_VERSION, tmp, 0);
-        version.MAJOR_VERSION = tmp[0];
+        gl.glGetIntegerv(GL_MINOR_VERSION, data);
+        version.MINOR_VERSION = data.get(0);
+        gl.glGetIntegerv(GL_MAJOR_VERSION, data);
+        version.MAJOR_VERSION = data.get(0);
 
         version.RENDERER = gl.glGetString(GL_RENDERER);
         version.VENDOR = gl.glGetString(GL_VENDOR);
@@ -71,15 +73,15 @@ public class Caps {
 
         if (check(3, 0)) {
 
-            gl.glGetIntegerv(GL_NUM_EXTENSIONS, tmp, 0);
-            version.NUM_EXTENSIONS = tmp[0];
+            gl.glGetIntegerv(GL_NUM_EXTENSIONS, data);
+            version.NUM_EXTENSIONS = data.get(0);
         }
         if (check(4, 3)) {
 
             GL4 gl4 = (GL4) gl;
 
-            gl.glGetIntegerv(GL_NUM_SHADING_LANGUAGE_VERSIONS, tmp, 0);
-            version.NUM_SHADING_LANGUAGE_VERSIONS = tmp[0];
+            gl.glGetIntegerv(GL_NUM_SHADING_LANGUAGE_VERSIONS, data);
+            version.NUM_SHADING_LANGUAGE_VERSIONS = data.get(0);
 
             for (int i = 0; i < version.NUM_SHADING_LANGUAGE_VERSIONS; i++) {
 
@@ -154,8 +156,8 @@ public class Caps {
 
         GL2ES3 gl2es3 = (GL2ES3) gl;
 
-        gl.glGetIntegerv(GL_NUM_EXTENSIONS, tmp, 0);
-        version.NUM_EXTENSIONS = tmp[0];
+        gl.glGetIntegerv(GL_NUM_EXTENSIONS, data);
+        version.NUM_EXTENSIONS = data.get(0);
 
         if (version.PROFILE == CORE || version.PROFILE == COMPATIBILITY) {
 
@@ -765,14 +767,14 @@ public class Caps {
 
         debug = new DebugData();
 
-        gl.glGetIntegerv(GL_CONTEXT_FLAGS, tmp, 0);
-        debug.CONTEXT_FLAGS = tmp[0];
-        gl.glGetIntegerv(GL_MAX_DEBUG_GROUP_STACK_DEPTH, tmp, 0);
-        debug.MAX_DEBUG_GROUP_STACK_DEPTH = tmp[0];
-        gl.glGetIntegerv(GL_MAX_LABEL_LENGTH, tmp, 0);
-        debug.MAX_LABEL_LENGTH = tmp[0];
-        gl.glGetIntegerv(GL_MAX_SERVER_WAIT_TIMEOUT, tmp, 0);
-        debug.MAX_SERVER_WAIT_TIMEOUT = tmp[0];
+        gl.glGetIntegerv(GL_CONTEXT_FLAGS, data);
+        debug.CONTEXT_FLAGS = data.get(0);
+        gl.glGetIntegerv(GL_MAX_DEBUG_GROUP_STACK_DEPTH, data);
+        debug.MAX_DEBUG_GROUP_STACK_DEPTH = data.get(0);
+        gl.glGetIntegerv(GL_MAX_LABEL_LENGTH, data);
+        debug.MAX_LABEL_LENGTH = data.get(0);
+        gl.glGetIntegerv(GL_MAX_SERVER_WAIT_TIMEOUT, data);
+        debug.MAX_SERVER_WAIT_TIMEOUT = data.get(0);
     }
 
     private void initLimits(GL gl) {
@@ -783,369 +785,369 @@ public class Caps {
 
             GL4 gl4 = (GL4) gl;
 
-            gl4.glGetIntegerv(GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS, tmp, 0);
-            limits.MAX_COMPUTE_TEXTURE_IMAGE_UNITS = tmp[0];
-            gl4.glGetIntegerv(GL_MAX_COMPUTE_UNIFORM_COMPONENTS, tmp, 0);
-            limits.MAX_COMPUTE_UNIFORM_COMPONENTS = tmp[0];
-            gl4.glGetIntegerv(GL_MAX_COMPUTE_SHARED_MEMORY_SIZE, tmp, 0);
-            limits.MAX_COMPUTE_SHARED_MEMORY_SIZE = tmp[0];
-            gl4.glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, tmp, 0);
-            limits.MAX_COMPUTE_WORK_GROUP_INVOCATIONS = tmp[0];
-            gl4.glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, tmp, 0);
-            limits.MAX_COMPUTE_WORK_GROUP_COUNT = tmp[0];
-            gl4.glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, tmp, 0);
-            limits.MAX_COMPUTE_WORK_GROUP_SIZE = tmp[0];
+            gl4.glGetIntegerv(GL_MAX_COMPUTE_TEXTURE_IMAGE_UNITS, data);
+            limits.MAX_COMPUTE_TEXTURE_IMAGE_UNITS = data.get(0);
+            gl4.glGetIntegerv(GL_MAX_COMPUTE_UNIFORM_COMPONENTS, data);
+            limits.MAX_COMPUTE_UNIFORM_COMPONENTS = data.get(0);
+            gl4.glGetIntegerv(GL_MAX_COMPUTE_SHARED_MEMORY_SIZE, data);
+            limits.MAX_COMPUTE_SHARED_MEMORY_SIZE = data.get(0);
+            gl4.glGetIntegerv(GL_MAX_COMPUTE_WORK_GROUP_INVOCATIONS, data);
+            limits.MAX_COMPUTE_WORK_GROUP_INVOCATIONS = data.get(0);
+            gl4.glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_COUNT, 0, data);
+            limits.MAX_COMPUTE_WORK_GROUP_COUNT = data.get(0);
+            gl4.glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, data);
+            limits.MAX_COMPUTE_WORK_GROUP_SIZE = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_compute_shader && extensi.ARB_uniform_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_COMPUTE_UNIFORM_BLOCKS, tmp, 0);
-            limits.MAX_COMPUTE_UNIFORM_BLOCKS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS, tmp, 0);
-            limits.MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_COMPUTE_UNIFORM_BLOCKS, data);
+            limits.MAX_COMPUTE_UNIFORM_BLOCKS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS, data);
+            limits.MAX_COMBINED_COMPUTE_UNIFORM_COMPONENTS = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_compute_shader && extensi.ARB_shader_image_load_store)) {
 
-            gl.glGetIntegerv(GL_MAX_COMPUTE_IMAGE_UNIFORMS, tmp, 0);
-            limits.MAX_COMPUTE_IMAGE_UNIFORMS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_COMPUTE_IMAGE_UNIFORMS, data);
+            limits.MAX_COMPUTE_IMAGE_UNIFORMS = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_compute_shader && extensi.ARB_shader_atomic_counters)) {
 
-            gl.glGetIntegerv(GL_MAX_COMPUTE_ATOMIC_COUNTERS, tmp, 0);
-            limits.MAX_COMPUTE_ATOMIC_COUNTERS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS, tmp, 0);
-            limits.MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_COMPUTE_ATOMIC_COUNTERS, data);
+            limits.MAX_COMPUTE_ATOMIC_COUNTERS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS, data);
+            limits.MAX_COMPUTE_ATOMIC_COUNTER_BUFFERS = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_compute_shader && extensi.ARB_shader_storage_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS, tmp, 0);
-            limits.MAX_COMPUTE_SHADER_STORAGE_BLOCKS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_COMPUTE_SHADER_STORAGE_BLOCKS, data);
+            limits.MAX_COMPUTE_SHADER_STORAGE_BLOCKS = data.get(0);
         }
 
         if (check(2, 1) || extensi.ARB_vertex_shader) {
 
-            gl.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, tmp, 0);
-            limits.MAX_VERTEX_ATTRIBS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_VERTEX_OUTPUT_COMPONENTS, tmp, 0);
-            limits.MAX_VERTEX_OUTPUT_COMPONENTS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, tmp, 0);
-            limits.MAX_VERTEX_TEXTURE_IMAGE_UNITS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, tmp, 0);
-            limits.MAX_VERTEX_UNIFORM_COMPONENTS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, tmp, 0);
-            limits.MAX_VERTEX_UNIFORM_VECTORS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, data);
+            limits.MAX_VERTEX_ATTRIBS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_VERTEX_OUTPUT_COMPONENTS, data);
+            limits.MAX_VERTEX_OUTPUT_COMPONENTS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_VERTEX_TEXTURE_IMAGE_UNITS, data);
+            limits.MAX_VERTEX_TEXTURE_IMAGE_UNITS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, data);
+            limits.MAX_VERTEX_UNIFORM_COMPONENTS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_VERTEX_UNIFORM_VECTORS, data);
+            limits.MAX_VERTEX_UNIFORM_VECTORS = data.get(0);
         }
 
         if (check(3, 2) || (extensi.ARB_vertex_shader && extensi.ARB_uniform_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, tmp, 0);
-            limits.MAX_VERTEX_UNIFORM_BLOCKS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS, tmp, 0);
-            limits.MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, data);
+            limits.MAX_VERTEX_UNIFORM_BLOCKS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS, data);
+            limits.MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS = data.get(0);
         }
 
         if (check(4, 2) || (extensi.ARB_vertex_shader && extensi.ARB_shader_atomic_counters)) {
 
-            gl.glGetIntegerv(GL_MAX_VERTEX_ATOMIC_COUNTERS, tmp, 0);
-            limits.MAX_VERTEX_ATOMIC_COUNTERS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_VERTEX_ATOMIC_COUNTERS, data);
+            limits.MAX_VERTEX_ATOMIC_COUNTERS = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_vertex_shader && extensi.ARB_shader_storage_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS, tmp, 0);
-            limits.MAX_VERTEX_SHADER_STORAGE_BLOCKS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_VERTEX_SHADER_STORAGE_BLOCKS, data);
+            limits.MAX_VERTEX_SHADER_STORAGE_BLOCKS = data.get(0);
         }
 
         if (check(4, 0) || extensi.ARB_tessellation_shader) {
 
-            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_INPUT_COMPONENTS, tmp, 0);
-            limits.MAX_TESS_CONTROL_INPUT_COMPONENTS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS, tmp, 0);
-            limits.MAX_TESS_CONTROL_OUTPUT_COMPONENTS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS, tmp, 0);
-            limits.MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS, tmp, 0);
-            limits.MAX_TESS_CONTROL_UNIFORM_COMPONENTS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_INPUT_COMPONENTS, data);
+            limits.MAX_TESS_CONTROL_INPUT_COMPONENTS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_OUTPUT_COMPONENTS, data);
+            limits.MAX_TESS_CONTROL_OUTPUT_COMPONENTS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS, data);
+            limits.MAX_TESS_CONTROL_TEXTURE_IMAGE_UNITS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_UNIFORM_COMPONENTS, data);
+            limits.MAX_TESS_CONTROL_UNIFORM_COMPONENTS = data.get(0);
 
-            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS, tmp, 0);
-            limits.MAX_TESS_EVALUATION_INPUT_COMPONENTS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS, tmp, 0);
-            limits.MAX_TESS_EVALUATION_OUTPUT_COMPONENTS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS, tmp, 0);
-            limits.MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS, tmp, 0);
-            limits.MAX_TESS_EVALUATION_UNIFORM_COMPONENTS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_INPUT_COMPONENTS, data);
+            limits.MAX_TESS_EVALUATION_INPUT_COMPONENTS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_OUTPUT_COMPONENTS, data);
+            limits.MAX_TESS_EVALUATION_OUTPUT_COMPONENTS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS, data);
+            limits.MAX_TESS_EVALUATION_TEXTURE_IMAGE_UNITS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_UNIFORM_COMPONENTS, data);
+            limits.MAX_TESS_EVALUATION_UNIFORM_COMPONENTS = data.get(0);
         }
 
         if (check(4, 0) || (extensi.ARB_tessellation_shader && extensi.ARB_uniform_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS, tmp, 0);
-            limits.MAX_TESS_CONTROL_UNIFORM_BLOCKS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS, tmp, 0);
-            limits.MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_UNIFORM_BLOCKS, data);
+            limits.MAX_TESS_CONTROL_UNIFORM_BLOCKS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS, data);
+            limits.MAX_COMBINED_TESS_CONTROL_UNIFORM_COMPONENTS = data.get(0);
         }
 
         if (check(4, 2) || (extensi.ARB_tessellation_shader && extensi.ARB_shader_atomic_counters)) {
 
-            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_ATOMIC_COUNTERS, tmp, 0);
-            limits.MAX_TESS_CONTROL_ATOMIC_COUNTERS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_ATOMIC_COUNTERS, data);
+            limits.MAX_TESS_CONTROL_ATOMIC_COUNTERS = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_tessellation_shader && extensi.ARB_shader_storage_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS, tmp, 0);
-            limits.MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS, data);
+            limits.MAX_TESS_CONTROL_SHADER_STORAGE_BLOCKS = data.get(0);
         }
 
         if (check(4, 0) || (extensi.ARB_tessellation_shader && extensi.ARB_uniform_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS, tmp, 0);
-            limits.MAX_TESS_EVALUATION_UNIFORM_BLOCKS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS, tmp, 0);
-            limits.MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_UNIFORM_BLOCKS, data);
+            limits.MAX_TESS_EVALUATION_UNIFORM_BLOCKS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS, data);
+            limits.MAX_COMBINED_TESS_EVALUATION_UNIFORM_COMPONENTS = data.get(0);
         }
 
         if (check(4, 2) || (extensi.ARB_tessellation_shader && extensi.ARB_shader_atomic_counters)) {
 
-            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_ATOMIC_COUNTERS, tmp, 0);
-            limits.MAX_TESS_EVALUATION_ATOMIC_COUNTERS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_ATOMIC_COUNTERS, data);
+            limits.MAX_TESS_EVALUATION_ATOMIC_COUNTERS = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_tessellation_shader && extensi.ARB_shader_storage_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS, tmp, 0);
-            limits.MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS, data);
+            limits.MAX_TESS_EVALUATION_SHADER_STORAGE_BLOCKS = data.get(0);
         }
 
         if (check(3, 2) || extensi.ARB_geometry_shader4) {
 
-            gl.glGetIntegerv(GL_MAX_GEOMETRY_INPUT_COMPONENTS, tmp, 0);
-            limits.MAX_GEOMETRY_INPUT_COMPONENTS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS, tmp, 0);
-            limits.MAX_GEOMETRY_OUTPUT_COMPONENTS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS, tmp, 0);
-            limits.MAX_GEOMETRY_TEXTURE_IMAGE_UNITS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_COMPONENTS, tmp, 0);
-            limits.MAX_GEOMETRY_UNIFORM_COMPONENTS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_GEOMETRY_INPUT_COMPONENTS, data);
+            limits.MAX_GEOMETRY_INPUT_COMPONENTS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_COMPONENTS, data);
+            limits.MAX_GEOMETRY_OUTPUT_COMPONENTS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_GEOMETRY_TEXTURE_IMAGE_UNITS, data);
+            limits.MAX_GEOMETRY_TEXTURE_IMAGE_UNITS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_COMPONENTS, data);
+            limits.MAX_GEOMETRY_UNIFORM_COMPONENTS = data.get(0);
         }
 
         if (check(3, 2) || (extensi.ARB_geometry_shader4 && extensi.ARB_uniform_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_BLOCKS, tmp, 0);
-            limits.MAX_GEOMETRY_UNIFORM_BLOCKS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS, tmp, 0);
-            limits.MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_BLOCKS, data);
+            limits.MAX_GEOMETRY_UNIFORM_BLOCKS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS, data);
+            limits.MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS = data.get(0);
         }
 
         if (check(4, 0) || (extensi.ARB_geometry_shader4 && extensi.ARB_transform_feedback3)) {
 
-            gl.glGetIntegerv(GL_MAX_VERTEX_STREAMS, tmp, 0);
-            limits.MAX_VERTEX_STREAMS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_VERTEX_STREAMS, data);
+            limits.MAX_VERTEX_STREAMS = data.get(0);
         }
         if (check(4, 2) || (extensi.ARB_geometry_shader4 && extensi.ARB_shader_atomic_counters)) {
 
-            gl.glGetIntegerv(GL_MAX_GEOMETRY_ATOMIC_COUNTERS, tmp, 0);
-            limits.MAX_GEOMETRY_ATOMIC_COUNTERS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_GEOMETRY_ATOMIC_COUNTERS, data);
+            limits.MAX_GEOMETRY_ATOMIC_COUNTERS = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_geometry_shader4 && extensi.ARB_shader_storage_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS, tmp, 0);
-            limits.MAX_GEOMETRY_SHADER_STORAGE_BLOCKS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_GEOMETRY_SHADER_STORAGE_BLOCKS, data);
+            limits.MAX_GEOMETRY_SHADER_STORAGE_BLOCKS = data.get(0);
         }
 
         if (check(2, 1)) {
 
-            gl.glGetIntegerv(GL_MAX_DRAW_BUFFERS, tmp, 0);
-            limits.MAX_DRAW_BUFFERS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_DRAW_BUFFERS, data);
+            limits.MAX_DRAW_BUFFERS = data.get(0);
         }
 
         if (check(2, 1) || extensi.ARB_fragment_shader) {
 
-            gl.glGetIntegerv(GL_MAX_FRAGMENT_INPUT_COMPONENTS, tmp, 0);
-            limits.MAX_FRAGMENT_INPUT_COMPONENTS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, tmp, 0);
-            limits.MAX_FRAGMENT_UNIFORM_COMPONENTS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, tmp, 0);
-            limits.MAX_FRAGMENT_UNIFORM_VECTORS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_FRAGMENT_INPUT_COMPONENTS, data);
+            limits.MAX_FRAGMENT_INPUT_COMPONENTS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, data);
+            limits.MAX_FRAGMENT_UNIFORM_COMPONENTS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_VECTORS, data);
+            limits.MAX_FRAGMENT_UNIFORM_VECTORS = data.get(0);
         }
 
         if (check(3, 2) || (extensi.ARB_fragment_shader && extensi.ARB_uniform_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, tmp, 0);
-            limits.MAX_FRAGMENT_UNIFORM_BLOCKS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS, tmp, 0);
-            limits.MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, data);
+            limits.MAX_FRAGMENT_UNIFORM_BLOCKS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS, data);
+            limits.MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS = data.get(0);
         }
 
         if (check(3, 3) || (extensi.ARB_blend_func_extended)) {
 
-            gl.glGetIntegerv(GL_MAX_DUAL_SOURCE_DRAW_BUFFERS, tmp, 0);
-            limits.MAX_DUAL_SOURCE_DRAW_BUFFERS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_DUAL_SOURCE_DRAW_BUFFERS, data);
+            limits.MAX_DUAL_SOURCE_DRAW_BUFFERS = data.get(0);
         }
 
         if (check(4, 2) || (extensi.ARB_fragment_shader && extensi.ARB_shader_atomic_counters)) {
 
-            gl.glGetIntegerv(GL_MAX_FRAGMENT_ATOMIC_COUNTERS, tmp, 0);
-            limits.MAX_FRAGMENT_ATOMIC_COUNTERS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_FRAGMENT_ATOMIC_COUNTERS, data);
+            limits.MAX_FRAGMENT_ATOMIC_COUNTERS = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_fragment_shader && extensi.ARB_shader_storage_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS, tmp, 0);
-            limits.MAX_FRAGMENT_SHADER_STORAGE_BLOCKS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_FRAGMENT_SHADER_STORAGE_BLOCKS, data);
+            limits.MAX_FRAGMENT_SHADER_STORAGE_BLOCKS = data.get(0);
         }
 
         if (check(3, 0) || (extensi.ARB_framebuffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, tmp, 0);
-            limits.MAX_COLOR_ATTACHMENTS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, data);
+            limits.MAX_COLOR_ATTACHMENTS = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_framebuffer_no_attachments)) {
 
-            gl.glGetIntegerv(GL_MAX_FRAMEBUFFER_HEIGHT, tmp, 0);
-            limits.MAX_FRAMEBUFFER_HEIGHT = tmp[0];
-            gl.glGetIntegerv(GL_MAX_FRAMEBUFFER_WIDTH, tmp, 0);
-            limits.MAX_FRAMEBUFFER_WIDTH = tmp[0];
-            gl.glGetIntegerv(GL_MAX_FRAMEBUFFER_LAYERS, tmp, 0);
-            limits.MAX_FRAMEBUFFER_LAYERS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_FRAMEBUFFER_SAMPLES, tmp, 0);
-            limits.MAX_FRAMEBUFFER_SAMPLES = tmp[0];
+            gl.glGetIntegerv(GL_MAX_FRAMEBUFFER_HEIGHT, data);
+            limits.MAX_FRAMEBUFFER_HEIGHT = data.get(0);
+            gl.glGetIntegerv(GL_MAX_FRAMEBUFFER_WIDTH, data);
+            limits.MAX_FRAMEBUFFER_WIDTH = data.get(0);
+            gl.glGetIntegerv(GL_MAX_FRAMEBUFFER_LAYERS, data);
+            limits.MAX_FRAMEBUFFER_LAYERS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_FRAMEBUFFER_SAMPLES, data);
+            limits.MAX_FRAMEBUFFER_SAMPLES = data.get(0);
         }
 
         if (check(4, 0) || (extensi.ARB_transform_feedback3)) {
 
-            gl.glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS, tmp, 0);
-            limits.MAX_TRANSFORM_FEEDBACK_BUFFERS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_BUFFERS, data);
+            limits.MAX_TRANSFORM_FEEDBACK_BUFFERS = data.get(0);
         }
 
         if (check(4, 2) || (extensi.ARB_map_buffer_alignment)) {
 
-            gl.glGetIntegerv(GL_MIN_MAP_BUFFER_ALIGNMENT, tmp, 0);
-            limits.MIN_MAP_BUFFER_ALIGNMENT = tmp[0];
+            gl.glGetIntegerv(GL_MIN_MAP_BUFFER_ALIGNMENT, data);
+            limits.MIN_MAP_BUFFER_ALIGNMENT = data.get(0);
         }
 
         if (extensi.NV_deep_texture3D) {
-            gl.glGetIntegerv(GL_MAX_DEEP_3D_TEXTURE_WIDTH_HEIGHT_NV, tmp, 0);
-            limits.MAX_DEEP_3D_TEXTURE_WIDTH_HEIGHT_NV = tmp[0];
-            gl.glGetIntegerv(GL_MAX_DEEP_3D_TEXTURE_DEPTH_NV, tmp, 0);
-            limits.MAX_DEEP_3D_TEXTURE_DEPTH_NV = tmp[0];
+            gl.glGetIntegerv(GL_MAX_DEEP_3D_TEXTURE_WIDTH_HEIGHT_NV, data);
+            limits.MAX_DEEP_3D_TEXTURE_WIDTH_HEIGHT_NV = data.get(0);
+            gl.glGetIntegerv(GL_MAX_DEEP_3D_TEXTURE_DEPTH_NV, data);
+            limits.MAX_DEEP_3D_TEXTURE_DEPTH_NV = data.get(0);
         }
 
         if (check(2, 1)) {
 
-            gl.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, tmp, 0);
-            limits.MAX_TEXTURE_IMAGE_UNITS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, tmp, 0);
-            limits.MAX_COMBINED_TEXTURE_IMAGE_UNITS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, tmp, 0);
-            limits.MAX_TEXTURE_MAX_ANISOTROPY_EXT = tmp[0];
+            gl.glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, data);
+            limits.MAX_TEXTURE_IMAGE_UNITS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, data);
+            limits.MAX_COMBINED_TEXTURE_IMAGE_UNITS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, data);
+            limits.MAX_TEXTURE_MAX_ANISOTROPY_EXT = data.get(0);
         }
 
         if (check(3, 0) || (extensi.ARB_texture_buffer_object)) {
 
-            gl.glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, tmp, 0);
-            limits.MAX_TEXTURE_BUFFER_SIZE = tmp[0];
+            gl.glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, data);
+            limits.MAX_TEXTURE_BUFFER_SIZE = data.get(0);
         }
 
         if (check(3, 2) || (extensi.ARB_texture_multisample)) {
 
-            gl.glGetIntegerv(GL_MAX_SAMPLE_MASK_WORDS, tmp, 0);
-            limits.MAX_SAMPLE_MASK_WORDS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, tmp, 0);
-            limits.MAX_COLOR_TEXTURE_SAMPLES = tmp[0];
-            gl.glGetIntegerv(GL_MAX_DEPTH_TEXTURE_SAMPLES, tmp, 0);
-            limits.MAX_DEPTH_TEXTURE_SAMPLES = tmp[0];
-            gl.glGetIntegerv(GL_MAX_INTEGER_SAMPLES, tmp, 0);
-            limits.MAX_INTEGER_SAMPLES = tmp[0];
+            gl.glGetIntegerv(GL_MAX_SAMPLE_MASK_WORDS, data);
+            limits.MAX_SAMPLE_MASK_WORDS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COLOR_TEXTURE_SAMPLES, data);
+            limits.MAX_COLOR_TEXTURE_SAMPLES = data.get(0);
+            gl.glGetIntegerv(GL_MAX_DEPTH_TEXTURE_SAMPLES, data);
+            limits.MAX_DEPTH_TEXTURE_SAMPLES = data.get(0);
+            gl.glGetIntegerv(GL_MAX_INTEGER_SAMPLES, data);
+            limits.MAX_INTEGER_SAMPLES = data.get(0);
         }
 
         if (check(3, 3) || (extensi.ARB_texture_rectangle)) {
 
-            gl.glGetIntegerv(GL_MAX_RECTANGLE_TEXTURE_SIZE, tmp, 0);
-            limits.MAX_RECTANGLE_TEXTURE_SIZE = tmp[0];
+            gl.glGetIntegerv(GL_MAX_RECTANGLE_TEXTURE_SIZE, data);
+            limits.MAX_RECTANGLE_TEXTURE_SIZE = data.get(0);
         }
 
         if (check(2, 2) && version.PROFILE == COMPATIBILITY) {
 
-            gl.glGetIntegerv(GL_MAX_VARYING_COMPONENTS, tmp, 0);
-            limits.MAX_VARYING_COMPONENTS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_VARYING_VECTORS, tmp, 0);
-            limits.MAX_VARYING_VECTORS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_VARYING_FLOATS, tmp, 0);
-            limits.MAX_VARYING_FLOATS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_VARYING_COMPONENTS, data);
+            limits.MAX_VARYING_COMPONENTS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_VARYING_VECTORS, data);
+            limits.MAX_VARYING_VECTORS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_VARYING_FLOATS, data);
+            limits.MAX_VARYING_FLOATS = data.get(0);
         }
 
         if (check(3, 2)) {
 
-            gl.glGetIntegerv(GL_MAX_COMBINED_UNIFORM_BLOCKS, tmp, 0);
-            limits.MAX_COMBINED_UNIFORM_BLOCKS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, tmp, 0);
-            limits.MAX_UNIFORM_BUFFER_BINDINGS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, tmp, 0);
-            limits.MAX_UNIFORM_BLOCK_SIZE = tmp[0];
-            gl.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, tmp, 0);
-            limits.UNIFORM_BUFFER_OFFSET_ALIGNMENT = tmp[0];
+            gl.glGetIntegerv(GL_MAX_COMBINED_UNIFORM_BLOCKS, data);
+            limits.MAX_COMBINED_UNIFORM_BLOCKS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, data);
+            limits.MAX_UNIFORM_BUFFER_BINDINGS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, data);
+            limits.MAX_UNIFORM_BLOCK_SIZE = data.get(0);
+            gl.glGetIntegerv(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT, data);
+            limits.UNIFORM_BUFFER_OFFSET_ALIGNMENT = data.get(0);
         }
 
         if (check(4, 0)) {
 
-            gl.glGetIntegerv(GL_MAX_PATCH_VERTICES, tmp, 0);
-            limits.MAX_PATCH_VERTICES = tmp[0];
-            gl.glGetIntegerv(GL_MAX_TESS_GEN_LEVEL, tmp, 0);
-            limits.MAX_TESS_GEN_LEVEL = tmp[0];
-            gl.glGetIntegerv(GL_MAX_SUBROUTINES, tmp, 0);
-            limits.MAX_SUBROUTINES = tmp[0];
-            gl.glGetIntegerv(GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS, tmp, 0);
-            limits.MAX_SUBROUTINE_UNIFORM_LOCATIONS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COMBINED_ATOMIC_COUNTERS, tmp, 0);
-            limits.MAX_COMBINED_ATOMIC_COUNTERS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS, tmp, 0);
-            limits.MAX_COMBINED_SHADER_STORAGE_BLOCKS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_PROGRAM_TEXEL_OFFSET, tmp, 0);
-            limits.MAX_PROGRAM_TEXEL_OFFSET = tmp[0];
-            gl.glGetIntegerv(GL_MIN_PROGRAM_TEXEL_OFFSET, tmp, 0);
-            limits.MIN_PROGRAM_TEXEL_OFFSET = tmp[0];
+            gl.glGetIntegerv(GL_MAX_PATCH_VERTICES, data);
+            limits.MAX_PATCH_VERTICES = data.get(0);
+            gl.glGetIntegerv(GL_MAX_TESS_GEN_LEVEL, data);
+            limits.MAX_TESS_GEN_LEVEL = data.get(0);
+            gl.glGetIntegerv(GL_MAX_SUBROUTINES, data);
+            limits.MAX_SUBROUTINES = data.get(0);
+            gl.glGetIntegerv(GL_MAX_SUBROUTINE_UNIFORM_LOCATIONS, data);
+            limits.MAX_SUBROUTINE_UNIFORM_LOCATIONS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COMBINED_ATOMIC_COUNTERS, data);
+            limits.MAX_COMBINED_ATOMIC_COUNTERS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COMBINED_SHADER_STORAGE_BLOCKS, data);
+            limits.MAX_COMBINED_SHADER_STORAGE_BLOCKS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_PROGRAM_TEXEL_OFFSET, data);
+            limits.MAX_PROGRAM_TEXEL_OFFSET = data.get(0);
+            gl.glGetIntegerv(GL_MIN_PROGRAM_TEXEL_OFFSET, data);
+            limits.MIN_PROGRAM_TEXEL_OFFSET = data.get(0);
         }
 
         if (check(4, 1)) {
 
-            gl.glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, tmp, 0);
-            limits.NUM_PROGRAM_BINARY_FORMATS = tmp[0];
-            gl.glGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, tmp, 0);
-            limits.NUM_SHADER_BINARY_FORMATS = tmp[0];
-            gl.glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, tmp, 0);
-            limits.PROGRAM_BINARY_FORMATS = tmp[0];
+            gl.glGetIntegerv(GL_NUM_PROGRAM_BINARY_FORMATS, data);
+            limits.NUM_PROGRAM_BINARY_FORMATS = data.get(0);
+            gl.glGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, data);
+            limits.NUM_SHADER_BINARY_FORMATS = data.get(0);
+            gl.glGetIntegerv(GL_PROGRAM_BINARY_FORMATS, data);
+            limits.PROGRAM_BINARY_FORMATS = data.get(0);
         }
 
         if (check(4, 2)) {
 
-            gl.glGetIntegerv(GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES, tmp, 0);
-            limits.MAX_COMBINED_SHADER_OUTPUT_RESOURCES = tmp[0];
-            gl.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, tmp, 0);
-            limits.MAX_SHADER_STORAGE_BUFFER_BINDINGS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, tmp, 0);
-            limits.MAX_SHADER_STORAGE_BLOCK_SIZE = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES, tmp, 0);
-            limits.MAX_COMBINED_SHADER_OUTPUT_RESOURCES = tmp[0];
-            gl.glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, tmp, 0);
-            limits.SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT = tmp[0];
+            gl.glGetIntegerv(GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES, data);
+            limits.MAX_COMBINED_SHADER_OUTPUT_RESOURCES = data.get(0);
+            gl.glGetIntegerv(GL_MAX_SHADER_STORAGE_BUFFER_BINDINGS, data);
+            limits.MAX_SHADER_STORAGE_BUFFER_BINDINGS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_SHADER_STORAGE_BLOCK_SIZE, data);
+            limits.MAX_SHADER_STORAGE_BLOCK_SIZE = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES, data);
+            limits.MAX_COMBINED_SHADER_OUTPUT_RESOURCES = data.get(0);
+            gl.glGetIntegerv(GL_SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT, data);
+            limits.SHADER_STORAGE_BUFFER_OFFSET_ALIGNMENT = data.get(0);
         }
 
         if (check(4, 3)) {
 
-            gl.glGetIntegerv(GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES, tmp, 0);
-            limits.MAX_COMBINED_SHADER_OUTPUT_RESOURCES = tmp[0];
+            gl.glGetIntegerv(GL_MAX_COMBINED_SHADER_OUTPUT_RESOURCES, data);
+            limits.MAX_COMBINED_SHADER_OUTPUT_RESOURCES = data.get(0);
         }
 
         if (check(4, 3) || extensi.ARB_explicit_uniform_location) {
 
-            gl.glGetIntegerv(GL_MAX_UNIFORM_LOCATIONS, tmp, 0);
-            limits.MAX_UNIFORM_LOCATIONS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_UNIFORM_LOCATIONS, data);
+            limits.MAX_UNIFORM_LOCATIONS = data.get(0);
         }
     }
 
@@ -1155,18 +1157,18 @@ public class Caps {
 
         if (check(2, 1)) {
 
-            gl.glGetIntegerv(GL_MAX_ELEMENTS_INDICES, tmp, 0);
-            values.MAX_ELEMENTS_INDICES = tmp[0];
-            gl.glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, tmp, 0);
-            values.MAX_ELEMENTS_VERTICES = tmp[0];
+            gl.glGetIntegerv(GL_MAX_ELEMENTS_INDICES, data);
+            values.MAX_ELEMENTS_INDICES = data.get(0);
+            gl.glGetIntegerv(GL_MAX_ELEMENTS_VERTICES, data);
+            values.MAX_ELEMENTS_VERTICES = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_vertex_attrib_binding)) {
 
-            gl.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET, tmp, 0);
-            values.MAX_VERTEX_ATTRIB_RELATIVE_OFFSET = tmp[0];
-            gl.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, tmp, 0);
-            values.MAX_VERTEX_ATTRIB_BINDINGS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_RELATIVE_OFFSET, data);
+            values.MAX_VERTEX_ATTRIB_RELATIVE_OFFSET = data.get(0);
+            gl.glGetIntegerv(GL_MAX_VERTEX_ATTRIB_BINDINGS, data);
+            values.MAX_VERTEX_ATTRIB_BINDINGS = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_ES3_compatibility)) {
@@ -1198,264 +1200,262 @@ public class Caps {
 
         if (check(2, 1)) {
 
-            gl.glGetIntegerv(GL_SUBPIXEL_BITS, tmp, 0);
-            values.SUBPIXEL_BITS = tmp[0];
+            gl.glGetIntegerv(GL_SUBPIXEL_BITS, data);
+            values.SUBPIXEL_BITS = data.get(0);
             gl.glGetFloatv(GL_MAX_VIEWPORT_DIMS, tmpF, 0);
             values.MAX_VIEWPORT_DIMS = tmpF[0];
         }
 
         if (check(3, 0)) {
 
-            gl.glGetIntegerv(GL_MAX_CLIP_DISTANCES, tmp, 0);
-            values.MAX_CLIP_DISTANCES = tmp[0];
+            gl.glGetIntegerv(GL_MAX_CLIP_DISTANCES, data);
+            values.MAX_CLIP_DISTANCES = data.get(0);
         }
 
         if (check(4, 5) || (extensi.ARB_cull_distance)) {
 
-            gl.glGetIntegerv(GL_MAX_CULL_DISTANCES, tmp, 0);
-            values.MAX_CULL_DISTANCES = tmp[0];
-            gl.glGetIntegerv(GL_MAX_COMBINED_CLIP_AND_CULL_DISTANCES, tmp, 0);
-            values.MAX_COMBINED_CLIP_AND_CULL_DISTANCES = tmp[0];
+            gl.glGetIntegerv(GL_MAX_CULL_DISTANCES, data);
+            values.MAX_CULL_DISTANCES = data.get(0);
+            gl.glGetIntegerv(GL_MAX_COMBINED_CLIP_AND_CULL_DISTANCES, data);
+            values.MAX_COMBINED_CLIP_AND_CULL_DISTANCES = data.get(0);
         }
 
         if (check(4, 1) || (extensi.ARB_viewport_array)) {
 
-            gl.glGetIntegerv(GL_MAX_VIEWPORTS, tmp, 0);
-            values.MAX_VIEWPORTS = tmp[0];
-            gl.glGetIntegerv(GL_VIEWPORT_SUBPIXEL_BITS, tmp, 0);
-            values.VIEWPORT_SUBPIXEL_BITS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_VIEWPORTS, data);
+            values.MAX_VIEWPORTS = data.get(0);
+            gl.glGetIntegerv(GL_VIEWPORT_SUBPIXEL_BITS, data);
+            values.VIEWPORT_SUBPIXEL_BITS = data.get(0);
             gl.glGetFloatv(GL_VIEWPORT_BOUNDS_RANGE, tmpF, 0);
             values.VIEWPORT_BOUNDS_RANGE[0] = tmpF[0];
-            gl.glGetIntegerv(GL_LAYER_PROVOKING_VERTEX, tmp, 0);
-            values.LAYER_PROVOKING_VERTEX = tmp[0];
-            gl.glGetIntegerv(GL_VIEWPORT_INDEX_PROVOKING_VERTEX, tmp, 0);
-            values.VIEWPORT_INDEX_PROVOKING_VERTEX = tmp[0];
+            gl.glGetIntegerv(GL_LAYER_PROVOKING_VERTEX, data);
+            values.LAYER_PROVOKING_VERTEX = data.get(0);
+            gl.glGetIntegerv(GL_VIEWPORT_INDEX_PROVOKING_VERTEX, data);
+            values.VIEWPORT_INDEX_PROVOKING_VERTEX = data.get(0);
         }
 
         if (check(4, 1) || (extensi.ARB_ES2_compatibility)) {
 
-            gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, tmp, 0);
-            values.IMPLEMENTATION_COLOR_READ_FORMAT = tmp[0];
-            gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, tmp, 0);
-            values.IMPLEMENTATION_COLOR_READ_TYPE = tmp[0];
+            gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_FORMAT, data);
+            values.IMPLEMENTATION_COLOR_READ_FORMAT = data.get(0);
+            gl.glGetIntegerv(GL_IMPLEMENTATION_COLOR_READ_TYPE, data);
+            values.IMPLEMENTATION_COLOR_READ_TYPE = data.get(0);
         }
 
         if (check(2, 1)) {
 
-            gl.glGetIntegerv(GL_MAX_TEXTURE_LOD_BIAS, tmp, 0);
-            values.MAX_TEXTURE_LOD_BIAS = tmp[0];
-            gl.glGetIntegerv(GL_MAX_TEXTURE_SIZE, tmp, 0);
-            values.MAX_TEXTURE_SIZE = tmp[0];
-            gl.glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, tmp, 0);
-            values.MAX_3D_TEXTURE_SIZE = tmp[0];
-            gl.glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, tmp, 0);
-            values.MAX_CUBE_MAP_TEXTURE_SIZE = tmp[0];
+            gl.glGetIntegerv(GL_MAX_TEXTURE_LOD_BIAS, data);
+            values.MAX_TEXTURE_LOD_BIAS = data.get(0);
+            gl.glGetIntegerv(GL_MAX_TEXTURE_SIZE, data);
+            values.MAX_TEXTURE_SIZE = data.get(0);
+            gl.glGetIntegerv(GL_MAX_3D_TEXTURE_SIZE, data);
+            values.MAX_3D_TEXTURE_SIZE = data.get(0);
+            gl.glGetIntegerv(GL_MAX_CUBE_MAP_TEXTURE_SIZE, data);
+            values.MAX_CUBE_MAP_TEXTURE_SIZE = data.get(0);
         }
 
         if (check(3, 0) || (extensi.EXT_texture_array)) {
 
-            gl.glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, tmp, 0);
-            values.MAX_ARRAY_TEXTURE_LAYERS = tmp[0];
+            gl.glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, data);
+            values.MAX_ARRAY_TEXTURE_LAYERS = data.get(0);
         }
 
         if (check(4, 3) || (extensi.ARB_texture_buffer_object)) {
 
-            gl.glGetIntegerv(GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT, tmp, 0);
-            values.TEXTURE_BUFFER_OFFSET_ALIGNMENT = tmp[0];
+            gl.glGetIntegerv(GL_TEXTURE_BUFFER_OFFSET_ALIGNMENT, data);
+            values.TEXTURE_BUFFER_OFFSET_ALIGNMENT = data.get(0);
         }
     }
-    
+
     private void initFormats(GL gl) {
-        
+
         formats = new FormatsData();
-        
-        gl.glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, tmp, 0);
 
-	int[] COMPRESSED_TEXTURE_FORMATS = new int[tmp[0]];
-	gl.glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, COMPRESSED_TEXTURE_FORMATS, 0);
+        gl.glGetIntegerv(GL_NUM_COMPRESSED_TEXTURE_FORMATS, data);
 
-	for(int i = 0; i < tmp[0]; ++i)
-	{
-		switch(COMPRESSED_TEXTURE_FORMATS[i])
-		{
-		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-			formats.COMPRESSED_RGB_S3TC_DXT1_EXT = true;
-			break;
-		case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
-			formats.COMPRESSED_RGBA_S3TC_DXT1_EXT = true;
-			break;
-		case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-			formats.COMPRESSED_RGBA_S3TC_DXT3_EXT = true;
-			break;
-		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-			formats.COMPRESSED_RGBA_S3TC_DXT5_EXT = true;
-			break;
-		case GL_COMPRESSED_SRGB_S3TC_DXT1:
-			formats.COMPRESSED_SRGB_S3TC_DXT1_EXT = true;
-			break;
-		case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1:
-			formats.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT = true;
-			break;
-		case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3:
-			formats.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT = true;
-			break;
-		case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5:
-			formats.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT = true;
-			break;
+        int[] COMPRESSED_TEXTURE_FORMATS = new int[data.get(0)];
+        gl.glGetIntegerv(GL_COMPRESSED_TEXTURE_FORMATS, COMPRESSED_TEXTURE_FORMATS, 0);
 
-		case GL_COMPRESSED_RED_RGTC1:
-			formats.COMPRESSED_RED_RGTC1 = true;
-			break;
-		case GL_COMPRESSED_SIGNED_RED_RGTC1:
-			formats.COMPRESSED_SIGNED_RED_RGTC1 = true;
-			break;
-		case GL_COMPRESSED_RG_RGTC2:
-			formats.COMPRESSED_RG_RGTC2 = true;
-			break;
-		case GL_COMPRESSED_SIGNED_RG_RGTC2:
-			formats.COMPRESSED_SIGNED_RG_RGTC2 = true;
-			break;
-		case GL_COMPRESSED_RGBA_BPTC_UNORM:
-			formats.COMPRESSED_RGBA_BPTC_UNORM = true;
-			break;
-		case GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM:
-			formats.COMPRESSED_SRGB_ALPHA_BPTC_UNORM = true;
-			break;
-		case GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT:
-			formats.COMPRESSED_RGB_BPTC_SIGNED_FLOAT = true;
-			break;
-		case GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT:
-			formats.COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT = true;
-			break;
-		case GL_COMPRESSED_R11_EAC:
-			formats.COMPRESSED_R11_EAC = true;
-			break;
-		case GL_COMPRESSED_SIGNED_R11_EAC:
-			formats.COMPRESSED_SIGNED_R11_EAC = true;
-			break;
-		case GL_COMPRESSED_RG11_EAC:
-			formats.COMPRESSED_RG11_EAC = true;
-			break;
-		case GL_COMPRESSED_SIGNED_RG11_EAC:
-			formats.COMPRESSED_SIGNED_RG11_EAC = true;
-			break;
-		case GL_COMPRESSED_RGB8_ETC2:
-			formats.COMPRESSED_RGB8_ETC2 = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ETC2:
-			formats.COMPRESSED_SRGB8_ETC2 = true;
-			break;
-		case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-			formats.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2 = true;
-			break;
-		case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
-			formats.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2 = true;
-			break;
-		case GL_COMPRESSED_RGBA8_ETC2_EAC:
-			formats.COMPRESSED_RGBA8_ETC2_EAC = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
-			formats.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC = true;
-			break;
+        for (int i = 0; i < data.get(0); ++i) {
+            switch (COMPRESSED_TEXTURE_FORMATS[i]) {
+                case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+                    formats.COMPRESSED_RGB_S3TC_DXT1_EXT = true;
+                    break;
+                case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+                    formats.COMPRESSED_RGBA_S3TC_DXT1_EXT = true;
+                    break;
+                case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
+                    formats.COMPRESSED_RGBA_S3TC_DXT3_EXT = true;
+                    break;
+                case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+                    formats.COMPRESSED_RGBA_S3TC_DXT5_EXT = true;
+                    break;
+                case GL_COMPRESSED_SRGB_S3TC_DXT1:
+                    formats.COMPRESSED_SRGB_S3TC_DXT1_EXT = true;
+                    break;
+                case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT1:
+                    formats.COMPRESSED_SRGB_ALPHA_S3TC_DXT1_EXT = true;
+                    break;
+                case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT3:
+                    formats.COMPRESSED_SRGB_ALPHA_S3TC_DXT3_EXT = true;
+                    break;
+                case GL_COMPRESSED_SRGB_ALPHA_S3TC_DXT5:
+                    formats.COMPRESSED_SRGB_ALPHA_S3TC_DXT5_EXT = true;
+                    break;
 
-		case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
-			formats.COMPRESSED_RGBA_ASTC_4x4_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
-			formats.COMPRESSED_RGBA_ASTC_5x4_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
-			formats.COMPRESSED_RGBA_ASTC_5x5_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
-			formats.COMPRESSED_RGBA_ASTC_6x5_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
-			formats.COMPRESSED_RGBA_ASTC_6x6_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
-			formats.COMPRESSED_RGBA_ASTC_8x5_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
-			formats.COMPRESSED_RGBA_ASTC_8x6_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
-			formats.COMPRESSED_RGBA_ASTC_8x8_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
-			formats.COMPRESSED_RGBA_ASTC_10x5_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
-			formats.COMPRESSED_RGBA_ASTC_10x6_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
-			formats.COMPRESSED_RGBA_ASTC_10x8_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
-			formats.COMPRESSED_RGBA_ASTC_10x10_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
-			formats.COMPRESSED_RGBA_ASTC_12x10_KHR = true;
-			break;
-		case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
-			formats.COMPRESSED_RGBA_ASTC_12x12_KHR = true;
-			break;
+                case GL_COMPRESSED_RED_RGTC1:
+                    formats.COMPRESSED_RED_RGTC1 = true;
+                    break;
+                case GL_COMPRESSED_SIGNED_RED_RGTC1:
+                    formats.COMPRESSED_SIGNED_RED_RGTC1 = true;
+                    break;
+                case GL_COMPRESSED_RG_RGTC2:
+                    formats.COMPRESSED_RG_RGTC2 = true;
+                    break;
+                case GL_COMPRESSED_SIGNED_RG_RGTC2:
+                    formats.COMPRESSED_SIGNED_RG_RGTC2 = true;
+                    break;
+                case GL_COMPRESSED_RGBA_BPTC_UNORM:
+                    formats.COMPRESSED_RGBA_BPTC_UNORM = true;
+                    break;
+                case GL_COMPRESSED_SRGB_ALPHA_BPTC_UNORM:
+                    formats.COMPRESSED_SRGB_ALPHA_BPTC_UNORM = true;
+                    break;
+                case GL_COMPRESSED_RGB_BPTC_SIGNED_FLOAT:
+                    formats.COMPRESSED_RGB_BPTC_SIGNED_FLOAT = true;
+                    break;
+                case GL_COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT:
+                    formats.COMPRESSED_RGB_BPTC_UNSIGNED_FLOAT = true;
+                    break;
+                case GL_COMPRESSED_R11_EAC:
+                    formats.COMPRESSED_R11_EAC = true;
+                    break;
+                case GL_COMPRESSED_SIGNED_R11_EAC:
+                    formats.COMPRESSED_SIGNED_R11_EAC = true;
+                    break;
+                case GL_COMPRESSED_RG11_EAC:
+                    formats.COMPRESSED_RG11_EAC = true;
+                    break;
+                case GL_COMPRESSED_SIGNED_RG11_EAC:
+                    formats.COMPRESSED_SIGNED_RG11_EAC = true;
+                    break;
+                case GL_COMPRESSED_RGB8_ETC2:
+                    formats.COMPRESSED_RGB8_ETC2 = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ETC2:
+                    formats.COMPRESSED_SRGB8_ETC2 = true;
+                    break;
+                case GL_COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+                    formats.COMPRESSED_RGB8_PUNCHTHROUGH_ALPHA1_ETC2 = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2:
+                    formats.COMPRESSED_SRGB8_PUNCHTHROUGH_ALPHA1_ETC2 = true;
+                    break;
+                case GL_COMPRESSED_RGBA8_ETC2_EAC:
+                    formats.COMPRESSED_RGBA8_ETC2_EAC = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ETC2_EAC:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ETC2_EAC = true;
+                    break;
 
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR = true;
-			break;
-		case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR:
-			formats.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR = true;
-			break;
+                case GL_COMPRESSED_RGBA_ASTC_4x4_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_4x4_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_5x4_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_5x4_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_5x5_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_5x5_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_6x5_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_6x5_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_6x6_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_6x6_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_8x5_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_8x5_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_8x6_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_8x6_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_8x8_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_8x8_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_10x5_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_10x5_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_10x6_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_10x6_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_10x8_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_10x8_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_10x10_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_10x10_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_12x10_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_12x10_KHR = true;
+                    break;
+                case GL_COMPRESSED_RGBA_ASTC_12x12_KHR:
+                    formats.COMPRESSED_RGBA_ASTC_12x12_KHR = true;
+                    break;
 
-		case GL_COMPRESSED_LUMINANCE_LATC1_EXT:
-			formats.COMPRESSED_LUMINANCE_LATC1_EXT = true;
-			break;
-		case GL_COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT:
-			formats.COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT = true;
-			break;
-		case GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT:
-			formats.COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT = true;
-			break;
-		case GL_COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT:
-			formats.COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT = true;
-			break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR = true;
+                    break;
+                case GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR:
+                    formats.COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR = true;
+                    break;
+
+                case GL_COMPRESSED_LUMINANCE_LATC1_EXT:
+                    formats.COMPRESSED_LUMINANCE_LATC1_EXT = true;
+                    break;
+                case GL_COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT:
+                    formats.COMPRESSED_SIGNED_LUMINANCE_LATC1_EXT = true;
+                    break;
+                case GL_COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT:
+                    formats.COMPRESSED_LUMINANCE_ALPHA_LATC2_EXT = true;
+                    break;
+                case GL_COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT:
+                    formats.COMPRESSED_SIGNED_LUMINANCE_ALPHA_LATC2_EXT = true;
+                    break;
 //		case GL_COMPRESSED_LUMINANCE_ALPHA_3DC_ATI:
 //			formatsData.COMPRESSED_LUMINANCE_ALPHA_3DC_ATI = true;
 //			break;
@@ -1499,10 +1499,10 @@ public class Caps {
 //			FormatsData.ETC1_RGB8_OES = true;
 //			break;
 
-		default:
-			// Unknown formats
-			break;
-		}
-	}
+                default:
+                    // Unknown formats
+                    break;
+            }
+        }
     }
 }

@@ -41,8 +41,7 @@ public class Gl_320_draw_image_space extends Test {
     private final String TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds";
 
     private int programName;
-    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), textureName = GLBuffers.newDirectIntBuffer(1),
-            bufferName = GLBuffers.newDirectIntBuffer(1);
+    private IntBuffer vertexArrayName = GLBuffers.newDirectIntBuffer(1), textureName = GLBuffers.newDirectIntBuffer(1);
 
     @Override
     protected boolean begin(GL gl) {
@@ -147,7 +146,6 @@ public class Gl_320_draw_image_space extends Test {
         gl3.glActiveTexture(GL_TEXTURE0);
         gl3.glBindTexture(GL_TEXTURE_2D, textureName.get(0));
         gl3.glBindVertexArray(vertexArrayName.get(0));
-        gl3.glBindBufferBase(GL_UNIFORM_BUFFER, Semantic.Uniform.TRANSFORM0, bufferName.get(0));
 
         gl3.glDrawArraysInstanced(GL_TRIANGLES, 0, 3, 1);
 
@@ -162,11 +160,9 @@ public class Gl_320_draw_image_space extends Test {
         gl3.glDeleteProgram(programName);
         gl3.glDeleteTextures(1, textureName);
         gl3.glDeleteVertexArrays(1, vertexArrayName);
-        gl3.glDeleteBuffers(1, bufferName);
 
         BufferUtils.destroyDirectBuffer(textureName);
         BufferUtils.destroyDirectBuffer(vertexArrayName);
-        BufferUtils.destroyDirectBuffer(bufferName);
 
         return true;
     }

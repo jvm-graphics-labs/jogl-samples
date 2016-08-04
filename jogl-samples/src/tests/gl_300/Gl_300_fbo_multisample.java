@@ -206,7 +206,8 @@ public class Gl_300_fbo_multisample extends Test {
 
         gl3.glGenFramebuffers(Framebuffer.MAX, framebufferName);
         gl3.glBindFramebuffer(GL_FRAMEBUFFER, framebufferName.get(Framebuffer.RENDER));
-        gl3.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, colorRenderbufferName.get(0));
+        gl3.glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, 
+                colorRenderbufferName.get(0));
         if (!isFramebufferComplete(gl3, framebufferName.get(Framebuffer.RENDER))) {
             return false;
         }
