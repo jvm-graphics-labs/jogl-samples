@@ -169,6 +169,7 @@ public class Gl_320_texture_buffer extends Test {
 
         IntBuffer maxTextureBufferSize = GLBuffers.newDirectIntBuffer(1);
         gl3.glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, maxTextureBufferSize);
+        System.out.println("GL_MAX_TEXTURE_BUFFER_SIZE: " + maxTextureBufferSize.get(0));
 
         gl3.glBindBuffer(GL_TEXTURE_BUFFER, bufferName.get(Buffer.DIFFUSE));
         gl3.glBufferData(GL_TEXTURE_BUFFER, Math.min(500_000, maxTextureBufferSize.get(0)), null, GL_STATIC_DRAW);
@@ -180,6 +181,7 @@ public class Gl_320_texture_buffer extends Test {
         BufferUtils.destroyDirectBuffer(positionDataBuffer);
         BufferUtils.destroyDirectBuffer(positionBuffer);
         BufferUtils.destroyDirectBuffer(diffuseBuffer);
+        BufferUtils.destroyDirectBuffer(maxTextureBufferSize);
 
         return checkError(gl3, "initBuffer");
     }
