@@ -19,6 +19,8 @@
 * `GL_TEXTURE_BUFFER`
 * `glTexBuffer`
 * `samplerBuffer`
+* [Uniform Buffers VS Texture Buffers](http://rastergrid.com/blog/2010/01/uniform-buffers-vs-texture-buffers/)
+* [Uniform buffers vs texture buffers: The 2015 edition](http://www.yosoygames.com.ar/wp/2015/01/uniform-buffers-vs-texture-buffers-the-2015-edition/)
 
 ### [gl-320-texture-compressed-ext](https://github.com/elect86/jogl-samples/blob/master/jogl-samples/src/tests/gl_320/texture/Gl_320_texture_compressed_ext.java) :
 
