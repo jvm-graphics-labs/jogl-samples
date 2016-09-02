@@ -151,7 +151,7 @@ public class Gl_320_texture_integer extends Test {
             for (int level = 0; level < texture.levels(); ++level) {
                 // TODO fix format
                 gl3.glTexImage2D(GL_TEXTURE_2D, level,
-                        GL_RGBA8UI,
+                        GL_RGBA8UI, // TODO -A?
                         texture.dimensions(level)[0], texture.dimensions(level)[1],
                         0,
                         GL_RGB_INTEGER, GL_UNSIGNED_BYTE,
