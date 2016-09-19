@@ -4,7 +4,7 @@ The Java OpenGL Samples Pack (called unsurprisingly jogl-samples  :scream: ) is 
 
 The project aims to promote the new OpenGL features making easier version transitions for OpenGL programmers with a complementary documentation for the OpenGL specification. Despite the fact that the OpenGL Samples Pack provides as simple (and dumb) as possible samples, it's not a tutorial for beginner but a project for programmers already familiar with OpenGL. The OpenGL Samples Pack is also a good OpenGL drivers feature test.
 
-These samples use [NEWT](http://jogamp.org/jogl/doc/NEWT-Overview.html) to create window and [jogl](http://jogamp.org/jogl/www/) of [Jogamp](http://jogamp.org/) as OpenGL wrapper, [jglm](https://github.com/elect86/Jglm) as math library and to replace OpenGL fixed pipeline functions and [jgli](https://github.com/elect86/jgli) to load images. 
+These samples use [NEWT](http://jogamp.org/jogl/doc/NEWT-Overview.html) to create window and [jogl](http://jogamp.org/jogl/www/) of [Jogamp](http://jogamp.org/) as OpenGL wrapper, [glm](https://github.com/elect86/Jglm) as math library and to replace OpenGL fixed pipeline functions and [gli](https://github.com/elect86/jgli) to load images. 
 
 The over 230 samples illustrate almost all OpenGL features ranging from ES 2.0 up to the last GL extenstions, same of them usually also called AZDO (Almost Zero Driver Overhead). They are divided per profiles and I also wrote a little wiki for each profile quoting the most relevant part of g-truc's reviews, really interesting (I have learnt a lot myself reading them):
 
