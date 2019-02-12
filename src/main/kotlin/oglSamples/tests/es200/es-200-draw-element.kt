@@ -1,25 +1,34 @@
 package oglSamples.tests.es200
 
 import glm_.BYTES
+import glm_.glm
+import glm_.mat4x4.Mat4
 import glm_.vec2.Vec2
+import glm_.vec4.Vec4
 import gln.cap.Caps
-import gln.objects.GlShader
-import gln.program.GlslProgram
-import kool.IntBuffer
+import gln.glViewport
+import gln.glf.glf
+import gln.objects.GlProgram
+import gln.uniform.glUniform
+import gln.vertexArray.glDisableVertexAttribArray
+import gln.vertexArray.glEnableVertexAttribArray
+import gln.vertexArray.glVertexAttribPointer
 import kool.shortBufferOf
+import oglSamples.*
 import oglSamples.framework.Framework
-import oglSamples.vec2BufferOf
+import oglSamples.framework.semantic
 import org.lwjgl.opengl.GL11C.*
+import org.lwjgl.opengl.GL41C.glClearDepthf
+import gln.buffer.Buffer as GlnBuffer
 
 
 fun main() {
-    es_200_draw_elements().setup()
+    es_200_draw_elements()()
 }
 
 class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 2, 0) {
 
-    val VERTEX_SHADER_SOURCE = "es-200/flat-color.vert"
-    val FRAGMENT_SHADER_SOURCE = "es-200/flat-color.frag"
+    val SHADER_SOURCE = "$dataDirectory/es-200/flat-color"
 
     val elementCount = 6
     val elementSize = elementCount * Short.BYTES
@@ -35,10 +44,9 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
             Vec2(+1f, +1f),
             Vec2(-1f, +1f))
 
-    enum class Buffer { VERTEX, ELEMENT }
+    enum class Buffer : GlBufferI { VERTEX, ELEMENT }
 
-    val bufferName = IntBuffer<Buffer>()
-    lateinit var programName: GlslProgram
+    var program = GlProgram.NULL
     var uniformMVP = 0
     var uniformDiffuse = 0
 
@@ -46,13 +54,13 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
 
         var validated = true
 
-        val vendor = glGetString (GL_VENDOR)
+        val vendor = glGetString(GL_VENDOR)
         println(vendor)
-        val renderer = glGetString (GL_RENDERER)
+        val renderer = glGetString(GL_RENDERER)
         println(renderer)
-        val version = glGetString (GL_VERSION)
+        val version = glGetString(GL_VERSION)
         println(version)
-        val extensions = glGetString (GL_EXTENSIONS)
+        val extensions = glGetString(GL_EXTENSIONS)
         println(extensions)
 
         if (validated)
@@ -63,105 +71,89 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
         return validated
     }
 
-    fun initProgram()    {
+    fun initProgram(): Boolean {
 
         var validated = true
 
         // Create program
-        if (validated) {
-            val vertShaderName = GlShader. create (GL_VERTEX_SHADER, getDataDirectory()+VERTEX_SHADER_SOURCE)
-            GLuint FragShaderName = Compiler . create (GL_FRAGMENT_SHADER, getDataDirectory()+FRAGMENT_SHADER_SOURCE)
-
-            ProgramName = glCreateProgram()
-            glAttachShader(ProgramName, VertShaderName)
-            glAttachShader(ProgramName, FragShaderName)
-
-            glBindAttribLocation(ProgramName, semantic::attr::POSITION, "Position")
-            glLinkProgram(ProgramName)
-
-            Validated = Validated && Compiler.check()
-            Validated = Validated && Compiler.check_program(ProgramName)
+        try {
+            program = GlProgram.initFromPath("$SHADER_SOURCE.vert", "$SHADER_SOURCE.frag") {
+                "Position".attrib = semantic.attr.POSITION
+            }
+        } catch (exc: Exception) {
+            validated = false
         }
 
         // Get variables locations
-        if (Validated) {
-            UniformMVP = glGetUniformLocation(ProgramName, "MVP")
-            UniformDiffuse = glGetUniformLocation(ProgramName, "Diffuse")
+        if (validated) {
+            uniformMVP = program.getUniformLocation("MVP")
+            uniformDiffuse = program.getUniformLocation("Diffuse")
         }
 
         // Set some variables
-        if (Validated) {
+        if (validated) {
             // Bind the program for use
-            glUseProgram(ProgramName)
-
-            // Set uniform value
-            glUniform4fv(UniformDiffuse, 1, & glm ::vec4(1.0f, 0.5f, 0.0f, 1.0f)[0])
-
-            // Unbind the program
-            glUseProgram(0)
+            program.use {
+                // Set uniform value
+                glUniform(uniformDiffuse, Vec4(1f, 0.5f, 0f, 1f))
+            }   // Unbind the program
         }
 
-        return Validated && this->checkError("initProgram")
+        return validated && checkError("initProgram")
     }
 
-    bool initBuffer()
-    {
-        glGenBuffers(static_cast<GLsizei>(BufferName.size()), & BufferName [0])
+    fun initBuffer(): Boolean {
 
-        glBindBuffer(GL_ARRAY_BUFFER, BufferName[buffer::VERTEX])
-        glBufferData(GL_ARRAY_BUFFER, PositionSize, PositionData, GL_STATIC_DRAW)
-        glBindBuffer(GL_ARRAY_BUFFER, 0)
+        glGenBuffers<Buffer>()
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferName[buffer::ELEMENT])
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, ElementSize, ElementData, GL_STATIC_DRAW)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
-
-        return this->checkError("initBuffer")
+        Buffer.VERTEX.bindArray {
+            data(positionData)
+        }
+        Buffer.ELEMENT.bindElement {
+            data(elementData)
+        }
+        return checkError("initBuffer")
     }
 
+    override fun end(): Boolean {
 
-
-    bool end()
-    {
-        glDeleteBuffers(static_cast<GLsizei>(BufferName.size()), & BufferName [0])
-        glDeleteProgram(ProgramName)
+        glDeleteBuffers()
+        program.delete()
 
         return true
     }
 
-    bool render()
-    {
+    override fun render(): Boolean {
+
         // Compute the MVP (Model View Projection matrix)
-        glm::mat4 Projection = glm ::perspective(glm::pi<float>() * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f)
-        glm::mat4 Model = glm ::mat4(1.0f)
-        glm::mat4 MVP = Projection * this->view() * Model
+        val projection = glm.perspective(glm.πf * 0.25f, window.aspect, 0.1f, 100f)
+        val model = Mat4(1f)
+        val mvp = projection * view * model
 
         // Set the display viewport
-        glm::uvec2 WindowSize = this->getWindowSize()
-        glViewport(0, 0, WindowSize.x, WindowSize.y)
+        glViewport(windowSize)
 
         // Clear color buffer with black
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
-        glClearDepthf(1.0f)
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+        glClearColor(0f, 0f, 0f, 1f)
+        glClearDepthf(1f)
+        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
 
         // Bind program
-        glUseProgram(ProgramName)
+        program.use {
 
-        // Set the value of MVP uniform.
-        glUniformMatrix4fv(UniformMVP, 1, GL_FALSE, & MVP [0][0])
+            // Set the value of MVP uniform.
+            glUniform(uniformMVP, mvp)
 
-        glBindBuffer(GL_ARRAY_BUFFER, BufferName[buffer::VERTEX])
-        glVertexAttribPointer(semantic::attr::POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0)
-        glBindBuffer(GL_ARRAY_BUFFER, 0)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferName[buffer::ELEMENT])
+            Buffer.VERTEX.bindArray {
+                glVertexAttribPointer(glf.pos2)
+            }
+            Buffer.ELEMENT.bindElement()
 
-        glEnableVertexAttribArray(semantic::attr::POSITION)
-        glDrawElements(GL_TRIANGLES, ElementCount, GL_UNSIGNED_SHORT, 0)
-        glDisableVertexAttribArray(semantic::attr::POSITION)
+            glEnableVertexAttribArray(glf.pos2)
+            glDrawElements(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0)
+            glDisableVertexAttribArray(glf.pos2)
 
-        // Unbind program
-        glUseProgram(0)
+        }   // Unbind program
 
         return true
     }

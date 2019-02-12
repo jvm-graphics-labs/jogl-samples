@@ -16,6 +16,7 @@ import oglSamples.glGetQueryObjectui
 import oglSamples.invoke
 import oglSamples.wo
 import org.lwjgl.glfw.GLFW.*
+import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.opengl.ARBDebugOutput.*
 import org.lwjgl.opengl.GL30C.GL_NUM_EXTENSIONS
 import org.lwjgl.opengl.GL30C.glGetStringi
@@ -64,6 +65,7 @@ abstract class Framework(
 
         glfw {
             init()
+            GLFWErrorCallback.createPrint().set();
             windowHint {
                 resizable = false
                 visible = true
@@ -419,4 +421,6 @@ abstract class Framework(
         println("OpenGL Version Needed $majorVersionRequire.$minorVersionRequire ( $majorVersionContext.$minorVersionContext Found )")
         return version(majorVersionContext, minorVersionContext) >= version(majorVersionRequire, minorVersionRequire)
     }
+
+    val dataDirectory = "data"
 }

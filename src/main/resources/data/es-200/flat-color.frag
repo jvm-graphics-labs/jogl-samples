@@ -1,6 +1,4 @@
-
-
-uniform vec4 Diffuse;
+uniform highp vec4 Diffuse;
 
 void main ()
 {

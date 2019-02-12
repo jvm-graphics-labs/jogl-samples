@@ -1,8 +1,6 @@
-
-
 uniform mat4 MVP;
 
-attribute vec4 Position;
+attribute highp vec4 Position;
 
 void main()
 {	
