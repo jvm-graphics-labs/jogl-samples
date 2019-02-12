@@ -1,36 +1,25 @@
 package oglSamples.tests.es200
 
-import com.jogamp.opengl.GL.*
-import com.jogamp.opengl.GL2ES2
-import com.jogamp.opengl.GLAutoDrawable
 import glm_.BYTES
-import glm.L
-import glm.f
-import glm.glm
-import glm.mat.Mat4
-import glm.vec._2.Vec2
-import glm.vec._4.Vec4
+import glm_.vec2.Vec2
+import gln.cap.Caps
+import gln.objects.GlShader
+import gln.program.GlslProgram
+import kool.IntBuffer
+import kool.shortBufferOf
 import oglSamples.framework.Framework
-import oglSamples.framework.semantic
-import uno.buffer.destroy
-import uno.buffer.floatBufferOf
-import uno.buffer.intBufferBig
-import uno.buffer.shortBufferOf
-import uno.caps.Caps.Profile
-import uno.gl.checkError
-import uno.glsl.programOf
+import oglSamples.vec2BufferOf
+import org.lwjgl.opengl.GL11C.*
 
-/**
- * Created by GBarbieri on 27.03.2017.
- */
 
 fun main() {
     es_200_draw_elements().setup()
 }
 
-class es_200_draw_elements : Framework("es-200-draw-elements", Profile.ES, 2, 0) {
+class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 2, 0) {
 
-    val SHADER = "es-200/flat-color"
+    val VERTEX_SHADER_SOURCE = "es-200/flat-color.vert"
+    val FRAGMENT_SHADER_SOURCE = "es-200/flat-color.frag"
 
     val elementCount = 6
     val elementSize = elementCount * Short.BYTES
@@ -39,117 +28,141 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Profile.ES, 2, 0)
             0, 2, 3)
 
     val vertexCount = 4
-    val positionSize = vertexCount * Vec2.SIZE
-    val positionData = floatBufferOf(
-            -1.0f, -1.0f,
-            +1.0f, -1.0f,
-            +1.0f, +1.0f,
-            -1.0f, +1.0f)
+    val positionSize = vertexCount * Vec2.size
+    val positionData = vec2BufferOf(
+            Vec2(-1f, -1f),
+            Vec2(+1f, -1f),
+            Vec2(+1f, +1f),
+            Vec2(-1f, +1f))
 
-    object Buffer {
-        val VERTEX = 0
-        val ELEMENT = 1
-        val MAX = 2
-    }
+    enum class Buffer { VERTEX, ELEMENT }
 
-    val bufferName = intBufferBig(Buffer.MAX)
-    var programName = 0
+    val bufferName = IntBuffer<Buffer>()
+    lateinit var programName: GlslProgram
     var uniformMVP = 0
     var uniformDiffuse = 0
 
-    val projection = Mat4()
+    override fun begin(): Boolean {
 
-    override fun begin(drawable: GLAutoDrawable) = with(drawable.gl.gL2ES2) {
+        var validated = true
 
-        println(caps.version.VENDOR)
-        println(caps.version.RENDERER)
-        println(caps.version.VERSION)
-        caps.extensions.list.forEach(::println)
+        val vendor = glGetString (GL_VENDOR)
+        println(vendor)
+        val renderer = glGetString (GL_RENDERER)
+        println(renderer)
+        val version = glGetString (GL_VERSION)
+        println(version)
+        val extensions = glGetString (GL_EXTENSIONS)
+        println(extensions)
 
-        initProgram(this)
+        if (validated)
+            validated = initProgram()
+        if (validated)
+            validated = initBuffer()
 
-        initBuffer(this)
+        return validated
     }
 
-    fun initProgram(gl: GL2ES2) = with(gl) {
+    fun initProgram()    {
+
+        var validated = true
 
         // Create program
-        val attributes = mapOf("Position" to semantic.attr.POSITION)
-        programName = programOf(gl, this::class.java, data, "$SHADER.vert", "$SHADER.frag", attributes)
+        if (validated) {
+            val vertShaderName = GlShader. create (GL_VERTEX_SHADER, getDataDirectory()+VERTEX_SHADER_SOURCE)
+            GLuint FragShaderName = Compiler . create (GL_FRAGMENT_SHADER, getDataDirectory()+FRAGMENT_SHADER_SOURCE)
+
+            ProgramName = glCreateProgram()
+            glAttachShader(ProgramName, VertShaderName)
+            glAttachShader(ProgramName, FragShaderName)
+
+            glBindAttribLocation(ProgramName, semantic::attr::POSITION, "Position")
+            glLinkProgram(ProgramName)
+
+            Validated = Validated && Compiler.check()
+            Validated = Validated && Compiler.check_program(ProgramName)
+        }
 
         // Get variables locations
-        uniformMVP = glGetUniformLocation(programName, "MVP")
-        uniformDiffuse = glGetUniformLocation(programName, "Diffuse")
+        if (Validated) {
+            UniformMVP = glGetUniformLocation(ProgramName, "MVP")
+            UniformDiffuse = glGetUniformLocation(ProgramName, "Diffuse")
+        }
 
         // Set some variables
-        // Bind the program for use
-        glUseProgram(programName)
+        if (Validated) {
+            // Bind the program for use
+            glUseProgram(ProgramName)
 
-        // Set uniform value
-        glUniform4fv(uniformDiffuse, 1, Vec4(1.0f, 0.5f, 0.0f, 1.0f) to matBuffer)
+            // Set uniform value
+            glUniform4fv(UniformDiffuse, 1, & glm ::vec4(1.0f, 0.5f, 0.0f, 1.0f)[0])
 
-        // Unbind the program
-        glUseProgram(0)
+            // Unbind the program
+            glUseProgram(0)
+        }
 
-        checkError(gl, "initProgram")
+        return Validated && this->checkError("initProgram")
     }
 
-    fun initBuffer(gl: GL2ES2) = with(gl) {
+    bool initBuffer()
+    {
+        glGenBuffers(static_cast<GLsizei>(BufferName.size()), & BufferName [0])
 
-        glGenBuffers(Buffer.MAX, bufferName)
-
-        glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX])
-        glBufferData(GL_ARRAY_BUFFER, positionSize.L, positionData, GL_STATIC_DRAW)
+        glBindBuffer(GL_ARRAY_BUFFER, BufferName[buffer::VERTEX])
+        glBufferData(GL_ARRAY_BUFFER, PositionSize, PositionData, GL_STATIC_DRAW)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
 
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT])
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, elementSize.L, elementData, GL_STATIC_DRAW)
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferName[buffer::ELEMENT])
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, ElementSize, ElementData, GL_STATIC_DRAW)
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0)
 
-        checkError(gl, "initBuffer")
+        return this->checkError("initBuffer")
     }
 
-    override fun display(drawable: GLAutoDrawable) = with(drawable.gl.gL2ES2) {
 
+
+    bool end()
+    {
+        glDeleteBuffers(static_cast<GLsizei>(BufferName.size()), & BufferName [0])
+        glDeleteProgram(ProgramName)
+
+        return true
+    }
+
+    bool render()
+    {
         // Compute the MVP (Model View Projection matrix)
-        val model = Mat4()
-        val mvp = projection * view() * model
+        glm::mat4 Projection = glm ::perspective(glm::pi<float>() * 0.25f, 4.0f / 3.0f, 0.1f, 100.0f)
+        glm::mat4 Model = glm ::mat4(1.0f)
+        glm::mat4 MVP = Projection * this->view() * Model
+
+        // Set the display viewport
+        glm::uvec2 WindowSize = this->getWindowSize()
+        glViewport(0, 0, WindowSize.x, WindowSize.y)
 
         // Clear color buffer with black
         glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
         glClearDepthf(1.0f)
-        glClear(GL_COLOR_BUFFER_BIT or GL_DEPTH_BUFFER_BIT)
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
         // Bind program
-        glUseProgram(programName)
+        glUseProgram(ProgramName)
 
         // Set the value of MVP uniform.
-        glUniformMatrix4fv(uniformMVP, 1, false, mvp to matBuffer)
+        glUniformMatrix4fv(UniformMVP, 1, GL_FALSE, & MVP [0][0])
 
-        glBindBuffer(GL_ARRAY_BUFFER, bufferName[Buffer.VERTEX])
-        glVertexAttribPointer(semantic.attr.POSITION, 2, GL_FLOAT, false, Vec2.SIZE, 0)
+        glBindBuffer(GL_ARRAY_BUFFER, BufferName[buffer::VERTEX])
+        glVertexAttribPointer(semantic::attr::POSITION, 2, GL_FLOAT, GL_FALSE, 0, 0)
         glBindBuffer(GL_ARRAY_BUFFER, 0)
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferName[Buffer.ELEMENT])
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferName[buffer::ELEMENT])
 
-        glEnableVertexAttribArray(semantic.attr.POSITION)
-        glDrawElements(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0)
-        glDisableVertexAttribArray(semantic.attr.POSITION)
+        glEnableVertexAttribArray(semantic::attr::POSITION)
+        glDrawElements(GL_TRIANGLES, ElementCount, GL_UNSIGNED_SHORT, 0)
+        glDisableVertexAttribArray(semantic::attr::POSITION)
 
         // Unbind program
         glUseProgram(0)
-    }
 
-    override fun reshape(drawable: GLAutoDrawable, x: Int, y: Int, width: Int, height: Int) = with(drawable.gl.gL2ES2) {
-
-        projection put glm.perspective(glm.PIf * 0.25f, width / height.f, 0.1f, 100.0f)
-
-        // Set the display viewport
-        glViewport(0, 0, windowSize.x, windowSize.y)
-    }
-
-    override fun end(drawable: GLAutoDrawable) = with(drawable.gl.gL2ES2) {
-        glDeleteBuffers(Buffer.MAX, bufferName)
-        glDeleteProgram(programName)
-        bufferName.destroy()
+        return true
     }
 }
