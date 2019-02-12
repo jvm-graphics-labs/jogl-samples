@@ -2,6 +2,7 @@ package oglSamples.framework
 
 
 var DEBUG = true
+var AUTOMATED_TESTS = false
 
 enum class Heuristic(val i: Int) {
     EQUAL_BIT(1 shl 0),
@@ -29,3 +30,5 @@ enum class ViewSetupFlag {
 }
 
 enum class Success { RUN_ONLY, GENERATE_ERROR, MATCH_TEMPLATE }
+
+enum class Exit { SUCCESS, FAILURE }
