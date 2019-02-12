@@ -1,0 +1,53 @@
+#version 410 core
+
+#define POSITION		0
+#define COLOR			3
+#define FRAG_COLOR		0
+
+precision highp float;
+precision highp int;
+layout(std140, column_major) uniform;
+layout(quads, equal_spacing, ccw) in;
+
+uniform mat4 MVP;
+
+struct vertex
+{
+	vec4 Color;
+};
+
+in gl_PerVertex
+{
+	vec4 gl_Position;
+	float gl_PointSize;
+	float gl_ClipDistance[];
+} gl_in[];
+
+layout(location = 0) in vertex In[];
+
+out gl_PerVertex
+{
+	vec4 gl_Position;
+	float gl_PointSize;
+	float gl_ClipDistance[];
+};
+
+layout(location = 0) out vertex Out;
+
+vec4 interpolate(in vec4 v0, in vec4 v1, in vec4 v2, in vec4 v3)
+{
+	vec4 a = mix(v0, v1, gl_TessCoord.x);
+	vec4 b = mix(v3, v2, gl_TessCoord.x);
+	return mix(a, b, gl_TessCoord.y);
+}
+
+void main()
+{
+	gl_Position = MVP * interpolate(
+		gl_in[0].gl_Position + vec4(-1.0f,-1.0f, 0.0f, 0.0f),
+		gl_in[0].gl_Position + vec4( 1.0f,-1.0f, 0.0f, 0.0f),
+		gl_in[0].gl_Position + vec4( 1.0f, 1.0f, 0.0f, 0.0f),
+		gl_in[0].gl_Position + vec4(-1.0f, 1.0f, 0.0f, 0.0f));
+	Out.Color = interpolate(In[0].Color, In[0].Color, In[0].Color, In[0].Color);
+}
+

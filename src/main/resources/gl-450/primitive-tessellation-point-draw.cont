@@ -1,0 +1,42 @@
+#version 450 core
+
+#define POSITION		0
+#define COLOR			3
+#define FRAG_COLOR		0
+
+precision highp float;
+precision highp int;
+layout(std140, column_major) uniform;
+layout(vertices = 1) out;
+
+struct vertex
+{
+	vec4 Color;
+};
+
+in gl_PerVertex
+{
+	vec4 gl_Position;
+} gl_in[];
+
+layout(location = 0) in vertex In[];
+
+out gl_PerVertex
+{
+	vec4 gl_Position;
+} gl_out[];
+
+layout(location = 0) out vertex Out[];
+
+void main()
+{	
+	gl_TessLevelInner[0] = 16.0;
+	gl_TessLevelInner[1] = 16.0;
+	gl_TessLevelOuter[0] = 8.0;
+	gl_TessLevelOuter[1] = 8.0;
+	gl_TessLevelOuter[2] = 8.0;
+	gl_TessLevelOuter[3] = 8.0;
+	gl_out[gl_InvocationID].gl_Position = gl_in[gl_InvocationID].gl_Position;
+	Out[gl_InvocationID].Color = In[gl_InvocationID].Color;
+}
+

@@ -91,13 +91,12 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
         }
 
         // Set some variables
-        if (validated) {
+        if (validated)
             // Bind the program for use
             program.use {
                 // Set uniform value
                 glUniform(uniformDiffuse, Vec4(1f, 0.5f, 0f, 1f))
             }   // Unbind the program
-        }
 
         return validated && checkError("initProgram")
     }
