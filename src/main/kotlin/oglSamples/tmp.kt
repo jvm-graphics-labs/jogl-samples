@@ -6,14 +6,10 @@ import gln.Usage
 import gln.buffer.Buffer
 import gln.buffer.BufferTarget
 import gln.buffer.bufferName
-import gln.buffer.glBindBuffer
-import gln.program.GlslProgram
 import kool.FloatBuffer
 import kool.IntBuffer
 import kool.free
-import org.lwjgl.opengl.GL15
 import org.lwjgl.opengl.GL15C
-import org.lwjgl.opengl.GL20
 import uno.glfw.glfw
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
@@ -28,6 +24,7 @@ fun glBeginQuery(target: Int, id: IntBuffer) = GL15C.glBeginQuery(target, id[0])
 
 fun glGetQueryObjectui(id: IntBuffer, name: Int) = GL15C.glGetQueryObjectui(id[0], name)
 
+
 inline class Vec2Buffer(val data: FloatBuffer)
 
 fun Vec2Buffer(size: Int) = Vec2Buffer(FloatBuffer(size * Vec2.length))
@@ -41,7 +38,36 @@ inline fun Vec2Buffer(size: Int, init: (Int) -> Vec2): Vec2Buffer {
 
 fun vec2BufferOf(vararg vecs: Vec2) = Vec2Buffer(vecs.size) { vecs[it] }
 
-fun GlslProgram.bindAttrLocation(index: Int, name: String) = GL20.glBindAttribLocation(this.name, index, name)
+
+class Vertex_v2v2(val a: Vec2, val b: Vec2) {
+
+    fun to(floats: FloatBuffer, index: Int) {
+        a.to(floats, index)
+        b.to(floats, index + Vec2.length)
+    }
+
+    companion object {
+        val size = Vec2.size * 2
+        val length = Vec2.length * 2
+    }
+}
+
+inline class Vertex_v2v2Buffer(val data: FloatBuffer) {
+
+
+}
+
+fun Vertex_v2v2_Buffer(size: Int) = Vertex_v2v2Buffer(FloatBuffer(size * Vertex_v2v2.length))
+
+inline fun Vertex_v2v2_Buffer(size: Int, init: (Int) -> Vertex_v2v2): Vertex_v2v2Buffer {
+    val buffer = Vertex_v2v2_Buffer(size)
+    for (i in 0 until size)
+        init(i).to(buffer.data, i * Vertex_v2v2.length)
+    return buffer
+}
+
+fun vertex_v2v2_BufferOf(vararg vertices: Vertex_v2v2) = Vertex_v2v2_Buffer(vertices.size) { vertices[it] }
+
 
 fun Buffer.data(data: Vec2Buffer, usage: Usage = GL_STATIC_DRAW) = GL15C.glBufferData(target.i, data.data, usage.i)
 

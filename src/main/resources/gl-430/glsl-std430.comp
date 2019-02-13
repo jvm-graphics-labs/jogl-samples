@@ -1,0 +1,144 @@
+#version 430 core
+
+precision highp float;
+precision highp int;
+layout(std140, column_major) uniform;
+layout(std430, column_major) buffer;
+layout (local_size_x = 1) in;
+
+#define BUFFER_INPUT	0
+#define BUFFER_OUTPUT	1
+
+layout(std430, binding = BUFFER_OUTPUT) writeonly buffer Ouput
+{
+	uint Data[];
+} Out;
+
+/*
+layout(binding = BUFFER_INPUT) readonly buffer Input
+{
+	uvec3 a;		// 0, 1, 2
+	uint b;			// 3
+
+	uint c;			// 4
+
+	uvec3 d;		// 8, 9, 10
+
+	uint e[2];		// 11, 12
+
+	uvec3 f;		// 15, 16, 17
+} In;
+
+void main()
+{
+	Out.Data[0] = In.a.x;
+	Out.Data[1] = In.a.y;
+	Out.Data[2] = In.a.z;
+	Out.Data[3] = In.b;
+
+	Out.Data[4] = In.c;
+
+	Out.Data[5] = In.d.x;
+	Out.Data[6] = In.d.y;
+	Out.Data[7] = In.d.z;
+
+	Out.Data[8] = In.e[0];
+	Out.Data[9] = In.e[1];
+
+	Out.Data[10] = In.f.x;
+	Out.Data[11] = In.f.y;
+	Out.Data[12] = In.f.z;
+}
+*/
+/*
+layout(binding = BUFFER_INPUT) readonly buffer Input
+{
+	uvec3 a;		// 0, 1, 2
+	uint b[2];			// 3
+} In;
+
+void main()
+{
+	Out.Data[0] = In.a.x;
+	Out.Data[1] = In.a.y;
+	Out.Data[2] = In.a.z;
+
+	Out.Data[3] = In.b[0];
+	Out.Data[4] = In.b[1];
+}
+*/
+/*
+layout(binding = BUFFER_INPUT) readonly buffer Input
+{
+	uvec3 a;		// 0, 1, 2
+	uvec2 b[2];		// 3
+} In;
+
+void main()
+{
+	Out.Data[0] = In.a.x;
+	Out.Data[1] = In.a.y;
+	Out.Data[2] = In.a.z;
+
+	Out.Data[3] = In.b[0].x;
+	Out.Data[4] = In.b[0].y;
+	Out.Data[5] = In.b[1].x;
+	Out.Data[6] = In.b[1].y;
+}
+*/
+
+/*
+struct s
+{
+	uvec2 a;
+	uvec3 b;
+	uint c[2];
+};
+
+layout(binding = BUFFER_INPUT) readonly buffer Input
+{
+	s S[2];
+} In;
+
+void main()
+{
+	Out.Data[0] = In.S[0].a.x;
+	Out.Data[1] = In.S[0].a.y;
+	Out.Data[2] = In.S[0].b.x;
+	Out.Data[3] = In.S[0].b.y;
+	Out.Data[4] = In.S[0].b.z;
+	Out.Data[5] = In.S[0].c[0];
+	Out.Data[6] = In.S[0].c[1];
+
+	Out.Data[7] = In.S[1].a.x;
+	Out.Data[8] = In.S[1].a.y;
+	Out.Data[9] = In.S[1].b.x;
+	Out.Data[10] = In.S[1].b.y;
+	Out.Data[11] = In.S[1].b.z;
+	Out.Data[12] = In.S[1].c[0];
+	Out.Data[13] = In.S[1].c[1];
+}
+*/
+
+struct s
+{
+	uvec2 a;
+	uint b;
+};
+
+layout(std430, binding = BUFFER_INPUT) readonly buffer Input
+{
+	uint I;
+	s S[2];
+} In;
+
+void main()
+{
+	Out.Data[0] = In.I;
+	Out.Data[1] = In.S[0].a.x;
+	Out.Data[2] = In.S[0].a.y;
+	Out.Data[3] = In.S[0].b;
+	Out.Data[4] = In.S[1].a.x;
+	Out.Data[5] = In.S[1].a.y;
+	Out.Data[6] = In.S[1].b;
+}

@@ -22,7 +22,7 @@ dependencies {
 
     testImplementation "io.kotlintest:kotlintest-runner-junit5:$kotlintest_version".toString()
 
-    ["", "-glfw", "-jemalloc", "-openal", "-opengl", "-stb"].each {
+    ["", "-glfw", "-jemalloc", "-openal", "-opengl", "-opengles", "-stb"].each {
         String base = "org.lwjgl:lwjgl$it:$lwjgl_version"
         implementation base
         runtime "$base:natives-$lwjgl_natives"

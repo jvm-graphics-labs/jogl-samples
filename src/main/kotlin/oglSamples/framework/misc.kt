@@ -32,3 +32,6 @@ enum class ViewSetupFlag {
 enum class Success { RUN_ONLY, GENERATE_ERROR, MATCH_TEMPLATE }
 
 enum class Exit { SUCCESS, FAILURE }
+
+typealias GLint = Int
+typealias GLuint = UInt
