@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/jogl-samples.iml" filepath="$PROJECT_DIR$/.idea/modules/jogl-samples.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ogl-samples.iml" filepath="$PROJECT_DIR$/.idea/modules/ogl-samples.iml" />
     </modules>
   </component>
 </project>

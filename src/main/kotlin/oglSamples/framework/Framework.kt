@@ -39,7 +39,7 @@ abstract class Framework(
         orientation: Vec2 = Vec2(),
         position: Vec2 = Vec2(0, 4),
         val frameCount: Int = 2,
-        val success: Success = Success.MATCH_TEMPLATE,
+        val success: Success = Success.RUN_ONLY, // TODO check
         val heuristic: Heuristic = Heuristic.ALL) {
 
     //    GLFWwindow* Window;
