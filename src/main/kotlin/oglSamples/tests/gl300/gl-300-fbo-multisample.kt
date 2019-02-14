@@ -25,10 +25,12 @@ import oglSamples.*
 import oglSamples.framework.Framework
 import oglSamples.framework.GLint
 import oglSamples.framework.semantic
+import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL11C
+import org.lwjgl.opengl.GL11C.*
 import org.lwjgl.opengl.GL13C
 import org.lwjgl.opengl.GL30C
-import org.lwjgl.opengl.GL30C.*
+import org.lwjgl.opengl.GL30C.glEnable
 
 fun main() {
     gl_300_fbo_multisample()()
@@ -43,7 +45,7 @@ class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.Profile.
     // With DDS textures, v texture coordinate are reversed, from top to bottom
     val vertexCount = 6
     val vertexSize = vertexCount * Vertex_v2v2.size
-    val vertexData = vertex_v2v2_BufferOf(
+    val vertexData = vertex_v2v2_buffer_of(
             Vertex_v2v2(Vec2(-2.0f, -1.5f), Vec2(0.0f, 0.0f)),
             Vertex_v2v2(Vec2(+2.0f, -1.5f), Vec2(1.0f, 0.0f)),
             Vertex_v2v2(Vec2(+2.0f, +1.5f), Vec2(1.0f, 1.0f)),
@@ -163,7 +165,7 @@ class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.Profile.
             image(GL11C.GL_RGBA8, FRAMEBUFFER_SIZE, GL11C.GL_RGBA, GL11C.GL_UNSIGNED_BYTE)
         }
         framebufferResolve.gen().bind {
-            texture(GL_COLOR_ATTACHMENT0, colorTexture)
+            texture(GL30C.GL_COLOR_ATTACHMENT0, colorTexture)
             if (!complete)
                 return false
         }
@@ -187,7 +189,7 @@ class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.Profile.
         // Render the scene in a multisampled framebuffer
         glEnable(GL13C.GL_MULTISAMPLE)
         renderFBO(framebufferRender)
-        glDisable(GL_MULTISAMPLE)
+        glDisable(GL13C.GL_MULTISAMPLE)
 
         // Resolved multisampling
         framebufferRender.bindRead()

@@ -1,8 +1,6 @@
 package oglSamples.framework
 
-import gli_.Format
-import gli_.Texture2d
-import gli_.has
+import gli_.*
 import glm_.bool
 import glm_.glm
 import glm_.mat4x4.Mat4
@@ -265,9 +263,9 @@ abstract class Framework(
             glfw.pollEvents()
             if (window.shouldClose || (automated && frameNum == 0)) {
                 if (success == Success.MATCH_TEMPLATE) {
-                    if (!checkTemplate(this->Window, this->Title.c_str()))
-                    result = EXIT_FAILURE
-                    this->checkError("checkTemplate")
+                    if (!checkTemplate())
+                        result = Exit.FAILURE
+                    checkError("checkTemplate")
                 }
                 break
             }
@@ -296,7 +294,7 @@ abstract class Framework(
         }
     }
 
-    fun checkTemplate() {
+    fun checkTemplate(): Boolean {
 
         val colorType: GLint
         val colorFormat: GLint
@@ -326,54 +324,54 @@ abstract class Framework(
                     textureRGB.store(texelCoord, 0, color)
                 }
 
-        bool Success = true
+        var success = true
 
-        if (Success) {
-            gli::texture Template (load_png((getDataDirectory() + "templates/" + Title + ".png").c_str()))
+        if (success) {
+            val template = Texture(gli.loadImage("templates/$title.png"))
 
-            if (Success)
-                Success = Success && !Template.empty()
+            if (success)
+                success = success && !template.empty()
 
-            bool SameSize = false
-            if (Success) {
-                SameSize = gli::texture2d(Template).extent() == textureRGB.extent()
-                Success = Success && SameSize
+            var sameSize = false
+            if (success) {
+                sameSize = Texture2d(template).extent() == textureRGB.extent()
+                success = success && sameSize
             }
 
-            if (Success) {
-                bool Pass = false
-                if (!Pass && this->Heuristic & HEURISTIC_EQUAL_BIT)
-                Pass = compare(Template, textureRGB, heuristic_equal())
-                if (!Pass && (this->Heuristic & HEURISTIC_ABSOLUTE_DIFFERENCE_MAX_ONE_BIT))
-                Pass = compare(Template, textureRGB, heuristic_absolute_difference_max_one())
-                if (!Pass && (this->Heuristic & HEURISTIC_ABSOLUTE_DIFFERENCE_MAX_ONE_KERNEL_BIT))
-                Pass = compare(Template, textureRGB, heuristic_absolute_difference_max_one_kernel())
-                if (!Pass && (this->Heuristic & HEURISTIC_ABSOLUTE_DIFFERENCE_MAX_ONE_LARGE_KERNEL_BIT))
-                Pass = compare(Template, textureRGB, heuristic_absolute_difference_max_one_large_kernel())
-                if (!Pass && (this->Heuristic & HEURISTIC_MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_ONE_BIT))
-                Pass = compare(Template, textureRGB, heuristic_mipmaps_absolute_difference_max_one())
-                if (!Pass && (this->Heuristic & HEURISTIC_MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_FOUR_BIT))
-                Pass = compare(Template, textureRGB, heuristic_mipmaps_absolute_difference_max_four())
-                if (!Pass && (this->Heuristic & HEURISTIC_MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_CHANNEL_BIT))
-                Pass = compare(Template, textureRGB, heuristic_mipmaps_absolute_difference_max_channel())
-                Success = Pass
+            if (success) {
+                var pass = false
+//                if (!pass && heuristic has Heuristic.EQUAL_BIT)
+//                    pass = compare(template, textureRGB, heuristic_equal())
+//                if (!pass && (this->Heuristic & HEURISTIC_ABSOLUTE_DIFFERENCE_MAX_ONE_BIT))
+//                pass = compare(template, textureRGB, heuristic_absolute_difference_max_one())
+//                if (!pass && (this->Heuristic & HEURISTIC_ABSOLUTE_DIFFERENCE_MAX_ONE_KERNEL_BIT))
+//                pass = compare(template, textureRGB, heuristic_absolute_difference_max_one_kernel())
+//                if (!pass && (this->Heuristic & HEURISTIC_ABSOLUTE_DIFFERENCE_MAX_ONE_LARGE_KERNEL_BIT))
+//                pass = compare(template, textureRGB, heuristic_absolute_difference_max_one_large_kernel())
+//                if (!pass && (this->Heuristic & HEURISTIC_MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_ONE_BIT))
+//                pass = compare(template, textureRGB, heuristic_mipmaps_absolute_difference_max_one())
+//                if (!pass && (this->Heuristic & HEURISTIC_MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_FOUR_BIT))
+//                pass = compare(template, textureRGB, heuristic_mipmaps_absolute_difference_max_four())
+//                if (!pass && (this->Heuristic & HEURISTIC_MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_CHANNEL_BIT))
+//                pass = compare(template, textureRGB, heuristic_mipmaps_absolute_difference_max_channel())
+//                success = pass
             }
 
             // Save abs diff
-            if (!Success) {
-                if (SameSize && !Template.empty()) {
-                    gli::texture Diff =::absolute_difference(Template, TextureRGB, 2)
-                    save_png(gli::texture2d(Diff), (getBinaryDirectory() + "/" + Title + "-diff.png").c_str())
-                }
-
-                if (!Template.empty())
-                    save_png(Template, (getBinaryDirectory() + "/" + Title + "-correct.png").c_str())
-
-                save_png(textureRGB, (getBinaryDirectory() + "/" + Title + ".png").c_str())
+            if (!success) {
+//                if (sameSize && !template.empty()) {
+//                    gli::texture Diff =::absolute_difference(Template, TextureRGB, 2)
+//                    save_png(gli::texture2d(Diff), (getBinaryDirectory() + "/" + Title + "-diff.png").c_str())
+//                }
+//
+//                if (!template.empty())
+//                    save_png(template, (getBinaryDirectory() + "/" + Title + "-correct.png").c_str())
+//
+//                save_png(textureRGB, (getBinaryDirectory() + "/" + Title + ".png").c_str())
             }
         }
 
-        return Success
+        return success
     }
 
     //    void log(csv & CSV, char const * String)
