@@ -1,5 +1,7 @@
 package oglSamples.framework
 
+import gli_.Format
+import gli_.Texture2d
 import gli_.has
 import glm_.bool
 import glm_.glm
@@ -9,7 +11,10 @@ import glm_.min
 import glm_.vec2.Vec2
 import glm_.vec2.Vec2i
 import glm_.vec3.Vec3
+import glm_.vec3.Vec3ub
+import glm_.vec4.Vec4ub
 import gln.cap.Caps.Profile
+import gln.framebuffer.glBindFramebuffer
 import kool.IntBuffer
 import oglSamples.glBeginQuery
 import oglSamples.glGetQueryObjectui
@@ -39,7 +44,7 @@ abstract class Framework(
         orientation: Vec2 = Vec2(),
         position: Vec2 = Vec2(0, 4),
         val frameCount: Int = 2,
-        val success: Success = Success.MATCH_TEMPLATE,
+        val success: Success = Success.MATCH_TEMPLATE, // TODO check
         val heuristic: Heuristic = Heuristic.ALL) {
 
     //    GLFWwindow* Window;
@@ -65,7 +70,7 @@ abstract class Framework(
 
         glfw {
             init()
-            GLFWErrorCallback.createPrint().set();
+            GLFWErrorCallback.createPrint().set()
             windowHint {
                 resizable = false
                 visible = true
@@ -260,10 +265,9 @@ abstract class Framework(
             glfw.pollEvents()
             if (window.shouldClose || (automated && frameNum == 0)) {
                 if (success == Success.MATCH_TEMPLATE) {
-                    TODO()
-//                    if(!checkTemplate(this->Window, this->Title.c_str()))
-//                    result = EXIT_FAILURE
-//                    this->checkError("checkTemplate")
+                    if (!checkTemplate(this->Window, this->Title.c_str()))
+                    result = EXIT_FAILURE
+                    this->checkError("checkTemplate")
                 }
                 break
             }
@@ -290,6 +294,86 @@ abstract class Framework(
                 else -> Exit.FAILURE
             }
         }
+    }
+
+    fun checkTemplate() {
+
+        val colorType: GLint
+        val colorFormat: GLint
+
+        if (profile == Profile.ES) {
+            colorType = glGetInteger(GL_IMPLEMENTATION_COLOR_READ_TYPE)
+            colorFormat = glGetInteger(GL_IMPLEMENTATION_COLOR_READ_FORMAT)
+        } else {
+            colorType = GL_UNSIGNED_BYTE
+            colorFormat = GL_RGBA
+        }
+
+        val windowSize = window.framebufferSize
+
+        val textureRead = Texture2d(if (colorFormat == GL_RGBA) Format.RGBA8_UNORM_PACK8 else Format.RGB8_UNORM_PACK8, windowSize, 1)
+        val textureRGB = Texture2d(Format.RGB8_UNORM_PACK8, windowSize, 1)
+
+        glBindFramebuffer()
+        glReadPixels(0, 0, windowSize.x, windowSize.y, colorFormat, colorType,
+                if (textureRead.format == Format.RGBA8_UNORM_PACK8) textureRead.data() else textureRGB.data())
+
+        if (textureRead.format == Format.RGBA8_UNORM_PACK8)
+            for (y in 0 until textureRGB.extent().y)
+                for (x in 0 until textureRGB.extent().x) {
+                    val texelCoord = Vec2i(x, y)
+                    val color = Vec3ub(textureRead.load<Vec4ub>(texelCoord, 0))
+                    textureRGB.store(texelCoord, 0, color)
+                }
+
+        bool Success = true
+
+        if (Success) {
+            gli::texture Template (load_png((getDataDirectory() + "templates/" + Title + ".png").c_str()))
+
+            if (Success)
+                Success = Success && !Template.empty()
+
+            bool SameSize = false
+            if (Success) {
+                SameSize = gli::texture2d(Template).extent() == textureRGB.extent()
+                Success = Success && SameSize
+            }
+
+            if (Success) {
+                bool Pass = false
+                if (!Pass && this->Heuristic & HEURISTIC_EQUAL_BIT)
+                Pass = compare(Template, textureRGB, heuristic_equal())
+                if (!Pass && (this->Heuristic & HEURISTIC_ABSOLUTE_DIFFERENCE_MAX_ONE_BIT))
+                Pass = compare(Template, textureRGB, heuristic_absolute_difference_max_one())
+                if (!Pass && (this->Heuristic & HEURISTIC_ABSOLUTE_DIFFERENCE_MAX_ONE_KERNEL_BIT))
+                Pass = compare(Template, textureRGB, heuristic_absolute_difference_max_one_kernel())
+                if (!Pass && (this->Heuristic & HEURISTIC_ABSOLUTE_DIFFERENCE_MAX_ONE_LARGE_KERNEL_BIT))
+                Pass = compare(Template, textureRGB, heuristic_absolute_difference_max_one_large_kernel())
+                if (!Pass && (this->Heuristic & HEURISTIC_MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_ONE_BIT))
+                Pass = compare(Template, textureRGB, heuristic_mipmaps_absolute_difference_max_one())
+                if (!Pass && (this->Heuristic & HEURISTIC_MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_FOUR_BIT))
+                Pass = compare(Template, textureRGB, heuristic_mipmaps_absolute_difference_max_four())
+                if (!Pass && (this->Heuristic & HEURISTIC_MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_CHANNEL_BIT))
+                Pass = compare(Template, textureRGB, heuristic_mipmaps_absolute_difference_max_channel())
+                Success = Pass
+            }
+
+            // Save abs diff
+            if (!Success) {
+                if (SameSize && !Template.empty()) {
+                    gli::texture Diff =::absolute_difference(Template, TextureRGB, 2)
+                    save_png(gli::texture2d(Diff), (getBinaryDirectory() + "/" + Title + "-diff.png").c_str())
+                }
+
+                if (!Template.empty())
+                    save_png(Template, (getBinaryDirectory() + "/" + Title + "-correct.png").c_str())
+
+                save_png(textureRGB, (getBinaryDirectory() + "/" + Title + ".png").c_str())
+            }
+        }
+
+        return Success
     }
 
     //    void log(csv & CSV, char const * String)
@@ -361,7 +445,7 @@ abstract class Framework(
 
         val result = glGetInteger(value)
         val message = "$string: $result"
-        if(Platform.get() != Platform.MACOSX && window.caps.caps.GL_ARB_debug_output)
+        if (Platform.get() != Platform.MACOSX && window.caps.caps.GL_ARB_debug_output)
             glDebugMessageInsertARB(GL_DEBUG_SOURCE_APPLICATION_ARB, GL_DEBUG_TYPE_OTHER_ARB, 1, GL_DEBUG_SEVERITY_LOW_ARB, message)
     }
 
@@ -406,8 +490,8 @@ abstract class Framework(
 
     fun checkExtension(extensionName: String): Boolean {
         val extensionCount = glGetInteger(GL_NUM_EXTENSIONS)
-        for(i in 0 until extensionCount)
-            if(glGetStringi(GL_EXTENSIONS, i) == extensionName)
+        for (i in 0 until extensionCount)
+            if (glGetStringi(GL_EXTENSIONS, i) == extensionName)
                 return true
         println("Failed to find Extension: \"$extensionName\"")
         return false
