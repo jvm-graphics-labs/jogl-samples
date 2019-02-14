@@ -87,9 +87,7 @@ class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.Profile.
         var validated = true
 
         try {
-
             program = GlProgram.initFromPath("$SHADER_SOURCE.vert", "$SHADER_SOURCE.frag") {
-
                 "Position".attrib = semantic.attr.POSITION
                 "Texcoord".attrib = semantic.attr.TEXCOORD
             }
@@ -114,20 +112,20 @@ class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.Profile.
 
     fun initTexture(): Boolean {
 
-        val texture = Texture2d(gli.loadDds(ClassLoader.getSystemResource(TEXTURE_DIFFUSE).toURI()))
+        val dds = Texture2d(gli.loadDds(ClassLoader.getSystemResource(TEXTURE_DIFFUSE).toURI()))
         gl.profile = gl.Profile.GL32
 
-        this.texture.gen().bind(0) {
-            levels(0, texture.levels() - 1)
+        texture.gen().bind(0) {
+            levels(0, dds.levels() - 1)
             filter(linear_mmLinear, linear)
 
-            val format = gl.translate(texture.format, texture.swizzles)
-            for (level in 0 until texture.levels())
+            val format = gl.translate(dds.format, dds.swizzles)
+            for (level in 0 until dds.levels())
                 image(level,
                         format.internal,
-                        texture[level].extent(),
+                        dds[level].extent(),
                         format.external, format.type,
-                        texture[level].data()!!)
+                        dds[level].data()!!)
         }
         return checkError("initTexture")
     }
