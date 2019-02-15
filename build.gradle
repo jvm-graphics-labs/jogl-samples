@@ -18,7 +18,7 @@ dependencies {
 
     implementation "$kotlin-stdlib"
 
-    implementation 'com.github.kotlin-graphics:uno-sdk:e17822c4b54a1da5ce662adde92cdc85c747716e'
+    implementation 'com.github.kotlin-graphics:uno-sdk:8364a630d5ad43aefa9b336aa110d938dd1e9106'
 
     testImplementation "io.kotlintest:kotlintest-runner-junit5:$kotlintest_version".toString()
 
@@ -28,6 +28,8 @@ dependencies {
         runtime "$base:natives-$lwjgl_natives"
     }
 }
+
+compileKotlin.kotlinOptions.jvmTarget = "1.8"
 
 repositories {
     mavenCentral()

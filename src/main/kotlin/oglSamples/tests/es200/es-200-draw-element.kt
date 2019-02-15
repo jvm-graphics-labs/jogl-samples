@@ -6,6 +6,7 @@ import glm_.mat4x4.Mat4
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
 import gln.cap.Caps
+import gln.draw.glDrawElements
 import gln.glViewport
 import gln.glf.glf
 import gln.objects.GlProgram
@@ -15,6 +16,7 @@ import gln.vertexArray.glEnableVertexAttribArray
 import gln.vertexArray.glVertexAttribPointer
 import kool.shortBufferOf
 import oglSamples.*
+import oglSamples.glGenBuffers
 import oglSamples.framework.Framework
 import oglSamples.framework.semantic
 import org.lwjgl.opengl.GL11C.*
@@ -44,7 +46,7 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
             Vec2(+1f, +1f),
             Vec2(-1f, +1f))
 
-    enum class Buffer : GlBufferI { VERTEX, ELEMENT }
+    enum class Buffer : GlBufferInterface0 { VERTEX, ELEMENT }
 
     var program = GlProgram.NULL
     var uniformMVP = 0
@@ -116,7 +118,7 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
 
     override fun end(): Boolean {
 
-        glDeleteBuffers()
+        glDeleteBuffers<Buffer>()
         program.delete()
 
         return true
@@ -149,7 +151,7 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
             Buffer.ELEMENT.bindElement()
 
             glEnableVertexAttribArray(glf.pos2)
-            glDrawElements(GL_TRIANGLES, elementCount, GL_UNSIGNED_SHORT, 0)
+            glDrawElements(elementCount, GL_UNSIGNED_SHORT)
             glDisableVertexAttribArray(glf.pos2)
 
         }   // Unbind program

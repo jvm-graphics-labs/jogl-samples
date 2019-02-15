@@ -1,15 +1,23 @@
 package oglSamples
 
+import glm_.L
+import glm_.vec3.Vec3
 import gln.GL_ARRAY_BUFFER
+import gln.GL_STATIC_DRAW
+import gln.Usage
+import gln.buffer.Buffer
+import gln.buffer.MappedBuffer
 import gln.framebuffer.Framebuffer
 import gln.objects.GlBuffer
+import gln.objects.GlProgram
 import gln.renderbuffer.RenderBuffer
 import gln.texture.Texture2d
 import kool.IntBuffer
-import org.lwjgl.opengl.GL11C
-import org.lwjgl.opengl.GL13C
-import org.lwjgl.opengl.GL15C
-import org.lwjgl.opengl.GL30C
+import kool.adr
+import kool.pos
+import kool.stak
+import org.lwjgl.opengl.*
+import java.nio.ByteBuffer
 import java.nio.IntBuffer
 
 inline class GlArrayBuffer(val name: IntBuffer) {
@@ -127,3 +135,18 @@ fun GlFramebuffer() = GlFramebuffer(IntBuffer(1))
 fun Framebuffer.renderbuffer(attachment: Int, renderbuffer: GlRenderBuffer) = GL30C.glFramebufferRenderbuffer(GL30C.GL_FRAMEBUFFER, attachment, GL30C.GL_RENDERBUFFER, renderbuffer.name[0])
 
 fun Framebuffer.texture(attachment: Int, texture: GlTexture2d, level: Int = 0) = GL30C.glFramebufferTexture2D(GL30C.GL_FRAMEBUFFER, attachment, GL11C.GL_TEXTURE_2D, texture.name[0], level)
+
+fun Buffer.data(data: Vec3, usage: Usage = GL_STATIC_DRAW) = stak { GL15C.glBufferData(Buffer.target.i, data.toBuffer(it), usage.i) }
+
+fun Buffer.mapBufferRange(size: Int, flags: Int) = mapBufferRange(0, size, flags)
+fun Buffer.mapBufferRange(offset: Int, size: Int, flags: Int) = GL30C.glMapBufferRange(target.i, offset.L, size.L, flags)
+
+inline fun Buffer.mapBufferRange(size: Int, flags: Int, block: MappedBuffer.(ByteBuffer?) -> Unit) = mapBufferRange(0, size, flags, block)
+inline fun Buffer.mapBufferRange(offset: Int, size: Int, flags: Int, block: MappedBuffer.(ByteBuffer?) -> Unit) {
+    MappedBuffer.block(GL30C.glMapBufferRange(target.i, offset.L, size.L, flags))
+    GL30C.glUnmapBuffer(target.i)
+}
+
+inline fun <reified E : Enum<E>> GlProgram.uniformBlockBinding(uniformBlockIndex: Int, uniformBlockBinding: E) = GL31C.glUniformBlockBinding(i, uniformBlockIndex, uniformBlockBinding.ordinal)
+
+fun glGenBuffers(size: Int) = IntBuffer(size)

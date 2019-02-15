@@ -18,6 +18,7 @@ import gln.framebuffer.glBindFramebuffer
 import gln.glf.glf
 import gln.objects.GlProgram
 import gln.renderbuffer.RenderBuffer
+import gln.texture.TexFilter
 import gln.uniform.glUniform
 import gln.vertexArray.glEnableVertexAttribArray
 import gln.vertexArray.glVertexAttribPointer
@@ -36,7 +37,7 @@ fun main() {
     gl_300_fbo_multisample()()
 }
 
-class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.Profile.COMPATIBILITY, 3, 0) {
+private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.Profile.COMPATIBILITY, 3, 0) {
 
     val SHADER_SOURCE = "gl-300/image-2d"
     val TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds"
@@ -98,8 +99,8 @@ class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.Profile.
         }
 
         if (validated) {
-            uniformMVP = program.getUniformLocation("MVP")
-            uniformDiffuse = program.getUniformLocation("Diffuse")
+            uniformMVP = program getUniformLocation "MVP"
+            uniformDiffuse = program getUniformLocation "Diffuse"
         }
 
         return validated && checkError("initProgram")
@@ -119,7 +120,7 @@ class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.Profile.
 
         texture.gen().bind(0) {
             levels(0, dds.levels() - 1)
-            filter(linear_mmLinear, linear)
+            filter(min = TexFilter.LINEAR_MIPMAP_LINEAR, mag = TexFilter.LINEAR)
 
             val format = gl.translate(dds.format, dds.swizzles)
             for (level in 0 until dds.levels())
@@ -161,7 +162,7 @@ class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.Profile.
         }
 
         colorTexture.gen().bind {
-            filter(nearest, nearest)
+            minMagFilter = TexFilter.LINEAR
             image(GL11C.GL_RGBA8, FRAMEBUFFER_SIZE, GL11C.GL_RGBA, GL11C.GL_UNSIGNED_BYTE)
         }
         framebufferResolve.gen().bind {

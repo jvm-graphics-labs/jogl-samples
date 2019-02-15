@@ -11,6 +11,7 @@ import glm_.vec2.Vec2i
 import glm_.vec3.Vec3
 import glm_.vec3.Vec3ub
 import glm_.vec4.Vec4ub
+import gln.cap.Caps
 import gln.cap.Caps.Profile
 import gln.framebuffer.glBindFramebuffer
 import kool.IntBuffer
@@ -21,15 +22,18 @@ import oglSamples.wo
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.opengl.ARBDebugOutput.*
+import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL30C.GL_NUM_EXTENSIONS
 import org.lwjgl.opengl.GL30C.glGetStringi
 import org.lwjgl.opengl.GL43C.*
 import org.lwjgl.opengl.GLDebugMessageCallback
 import org.lwjgl.opengl.GLDebugMessageCallbackI
+import org.lwjgl.system.Callback
 import org.lwjgl.system.MemoryUtil.NULL
 import org.lwjgl.system.Platform
 import uno.glfw.*
 import uno.glfw.windowHint.Api
+import java.nio.IntBuffer
 import uno.glfw.windowHint.Profile as GlfwProfile
 
 abstract class Framework(
@@ -63,12 +67,14 @@ abstract class Framework(
     var error = false
     var viewSetupFlags = ViewSetupFlag.TRANSLATE.i or ViewSetupFlag.ROTATE_X.i or ViewSetupFlag.ROTATE_Y.i
 
+    lateinit var glfwErrorCallback: GLFWErrorCallback
+
     init {
         assert(windowSize allGreaterThan 0)
 
         glfw {
             init()
-            GLFWErrorCallback.createPrint().set()
+            glfwErrorCallback = GLFWErrorCallback.createPrint().set()
             windowHint {
                 resizable = false
                 visible = true
@@ -198,13 +204,13 @@ abstract class Framework(
         window.keyCallback = keyCallback
         window.makeContextCurrent()
 
-        window.createCapabilities(profile)
+        window.createCapabilities(profile, profile == Profile.CORE)
 
         if (DEBUG && window.caps.caps.GL_KHR_debug)
             if (isExtensionSupported("GL_KHR_debug")) {
                 glEnable(GL_DEBUG_OUTPUT)
                 glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS)
-                glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, true)
+                glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, null as IntBuffer?, true)
                 glDebugMessageCallback(debugOutput, NULL)
             }
     }
@@ -236,6 +242,7 @@ abstract class Framework(
 
         window.destroy()
 
+        glfwErrorCallback.free()
         glfw.terminate()
     }
 
