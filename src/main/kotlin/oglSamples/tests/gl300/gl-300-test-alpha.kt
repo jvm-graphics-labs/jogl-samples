@@ -6,6 +6,7 @@ import gli_.gli
 import glm_.glm
 import glm_.mat4x4.Mat4
 import glm_.vec2.Vec2
+import glm_.vec2.Vec2i
 import gln.BufferTarget.Companion.ARRAY
 import gln.TextureTarget.Companion._2D
 import gln.cap.Caps
@@ -134,7 +135,7 @@ class gl_300_test_alpha : Framework("gl-300-test-alpha", Caps.Profile.COMPATIBIL
             for (level in 0 until dds.levels())
                 image(level,
                         format.internal,
-                        dds[level].extent(),
+                        Vec2i(dds[level].extent()),
                         format.external, format.type,
                         dds[level].data()!!)
         }

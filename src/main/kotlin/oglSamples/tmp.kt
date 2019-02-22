@@ -6,12 +6,16 @@ import glm_.vec4.Vec4
 import gln.BufferTarget
 import gln.buffer.GlBufferDSL
 import kool.FloatBuffer
+import oglSamples.tests.GlEnum
 import org.lwjgl.opengl.GL15C
+import org.lwjgl.opengl.GL45C
 import uno.glfw.glfw
 import uno.kotlin.getValue
 import uno.kotlin.setValue
+import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
+import java.nio.ShortBuffer
 import kotlin.reflect.KMutableProperty0
 
 operator fun glfw.invoke(block: glfw.() -> Unit) {
@@ -119,17 +123,6 @@ fun vertex_v3n3c4_buffer_of(vararg vecs: Any): Vertex_v3n3c4_Buffer {
 }
 
 
-interface GlEnum {
-    val names: KMutableProperty0<IntBuffer>
-        get() = ::bufferName0
-}
-
-interface GlBufferEnum0 : GlEnum {
-    override val names: KMutableProperty0<IntBuffer>
-        get() = ::bufferName0
-}
-
-lateinit var bufferName0: IntBuffer
 
 
 fun <E> Enum<E>.bindArray() where E : Enum<E>, E : GlEnum = bind(BufferTarget.ARRAY)
@@ -153,10 +146,25 @@ inline fun <E> Enum<E>.bound(target: BufferTarget, block: GlBufferDSL.() -> Unit
     GlBufferDSL.name = 0
 }
 
+inline fun <E> Enum<E>.storage(data: ByteBuffer, flags: Int = 0) where E : Enum<E>, E : GlEnum {
+    val names by (this as GlEnum).names
+    GL45C.glNamedBufferStorage(names[ordinal], data, flags)
+}
+inline fun <E> Enum<E>.storage(data: ShortBuffer, flags: Int = 0) where E : Enum<E>, E : GlEnum {
+    val names by (this as GlEnum).names
+    GL45C.glNamedBufferStorage(names[ordinal], data, flags)
+}
+
 inline fun <reified E> glGenBuffers() where E : Enum<E>, E : GlEnum {
     val values: Array<out Enum<*>> = Enum::class.java.enumConstants
     var names by (values[0] as GlEnum).names
     names = glGenBuffers(values.size)
+}
+
+inline fun <reified E> glCreateBuffers() where E : Enum<E>, E : GlEnum {
+    val values: Array<out Enum<*>> = Enum::class.java.enumConstants
+    var names by (values[0] as GlEnum).names
+    names = glCreateBuffers(values.size)
 }
 
 inline fun <reified E> glDeleteBuffers() where E : Enum<E>, E : GlEnum {

@@ -128,7 +128,7 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
             for (level in 0 until dds.levels())
                 image(level,
                         format.internal,
-                        dds[level].extent(),
+                        Vec2i(dds[level].extent()),
                         format.external, format.type,
                         dds[level].data()!!)
         }
