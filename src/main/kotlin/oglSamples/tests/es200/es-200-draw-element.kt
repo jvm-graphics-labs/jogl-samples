@@ -46,7 +46,7 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
             Vec2(+1f, +1f),
             Vec2(-1f, +1f))
 
-    enum class Buffer : GlBufferInterface0 { VERTEX, ELEMENT }
+    enum class Buffer : GlBufferEnum0 { VERTEX, ELEMENT }
 
     var program = GlProgram.NULL
     var uniformMVP = 0
@@ -151,7 +151,7 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
             Buffer.ELEMENT.bindElement()
 
             glEnableVertexAttribArray(glf.pos2)
-            glDrawElements(elementCount, GL_UNSIGNED_SHORT)
+            glDrawElements(elementCount, UNSIGNED_SHORT)
             glDisableVertexAttribArray(glf.pos2)
 
         }   // Unbind program

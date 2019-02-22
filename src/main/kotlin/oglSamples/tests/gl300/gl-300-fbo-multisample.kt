@@ -9,6 +9,7 @@ import glm_.vec2.Vec2
 import glm_.vec2.Vec2i
 import glm_.vec4.Vec4
 import gln.*
+import gln.buffer.BufferTarget
 import gln.glClearColor as b
 import gln.glEnable as a
 import gln.cap.Caps
@@ -56,7 +57,7 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
 
     var program = GlProgram.NULL
     val vertexArray = GlVertexArray()
-    val buffer = GlArrayBuffer()
+    var buffer = GlBuffer()
     val texture = GlTexture2d()
     val colorRenderbuffer = GlRenderBuffer()
     val colorTexture = GlTexture2d()
@@ -107,7 +108,7 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
     }
 
     fun initBuffer(): Boolean {
-        buffer.gen().bind {
+        buffer = GlBuffer.gen().bind(BufferTarget.Array) {
             data(vertexData.data)
         }
         return checkError("initBuffer")

@@ -6,9 +6,10 @@ import gln.GL_ARRAY_BUFFER
 import gln.GL_STATIC_DRAW
 import gln.Usage
 import gln.buffer.Buffer
+import gln.buffer.BufferTarget
 import gln.buffer.MappedBuffer
 import gln.framebuffer.Framebuffer
-import gln.objects.GlBuffer
+import gln.objects.GlBuffer as GlBufferDSL
 import gln.objects.GlProgram
 import gln.renderbuffer.RenderBuffer
 import gln.texture.Texture2d
@@ -20,25 +21,41 @@ import org.lwjgl.opengl.*
 import java.nio.ByteBuffer
 import java.nio.IntBuffer
 
-inline class GlArrayBuffer(val name: IntBuffer) {
+inline class GlArrayBuffer(val name: Int = 3) {
 
-    fun gen(): GlArrayBuffer {
-        GL15C.glGenBuffers(name)
-        return this
-    }
-
-    inline fun bind(block: GlBuffer.() -> Unit) {
-        GL15C.glBindBuffer(GL_ARRAY_BUFFER.i, name[0])
-        GlBuffer.i = name[0]
-        GlBuffer.target = GL_ARRAY_BUFFER
-        GlBuffer.block()
+    inline fun bind(block: GlBufferDSL.() -> Unit) {
+        GL15C.glBindBuffer(GL_ARRAY_BUFFER.i, name)
+        GlBufferDSL.i = name
+        GlBufferDSL.target = GL_ARRAY_BUFFER
+        GlBufferDSL.block()
         GL15C.glBindBuffer(GL_ARRAY_BUFFER.i, 0)
     }
 
     fun delete() = GL15C.glDeleteBuffers(name)
+
+    companion object {
+        fun gen(): GlArrayBuffer = GlArrayBuffer(GL15C.glGenBuffers())
+    }
 }
 
-fun GlArrayBuffer() = GlArrayBuffer(IntBuffer(1))
+
+inline class GlBuffer(val name: Int = -1) {
+
+    inline fun bind(target: BufferTarget, block: GlBufferDSL.() -> Unit): GlBuffer {
+        GL15C.glBindBuffer(GL_ARRAY_BUFFER.i, name)
+        GlBufferDSL.i = name
+        GlBufferDSL.target = GL_ARRAY_BUFFER
+        GlBufferDSL.block()
+        GL15C.glBindBuffer(GL_ARRAY_BUFFER.i, 0)
+        return this
+    }
+
+    fun delete() = GL15C.glDeleteBuffers(name)
+
+    companion object {
+        fun gen(): GlBuffer = GlBuffer(GL15C.glGenBuffers())
+    }
+}
 
 inline class GlTexture2d(val name: IntBuffer) {
 
@@ -131,6 +148,32 @@ inline class GlFramebuffer(val name: IntBuffer) {
 }
 
 fun GlFramebuffer() = GlFramebuffer(IntBuffer(1))
+
+
+inline class GlPipeline(val name: IntBuffer) {
+
+    fun gen(): GlPipeline {
+        GL41C.glGenProgramPipelines(name)
+        return this
+    }
+
+    fun bind() = GL30C.glBindFramebuffer(GL30C.GL_FRAMEBUFFER, name[0])
+
+    fun bindRead() = GL30C.glBindFramebuffer(GL30C.GL_READ_FRAMEBUFFER, name[0])
+    fun bindDraw() = GL30C.glBindFramebuffer(GL30C.GL_DRAW_FRAMEBUFFER, name[0])
+
+    inline fun bind(block: Framebuffer.() -> Unit) {
+        GL30C.glBindFramebuffer(GL30C.GL_FRAMEBUFFER, name[0])
+        Framebuffer.name = name[0]
+        Framebuffer.block()
+        GL30C.glBindFramebuffer(GL30C.GL_FRAMEBUFFER, 0)
+    }
+
+    fun delete() = GL30C.glDeleteFramebuffers(name)
+}
+
+fun GlPipeline() = GlPipeline(IntBuffer(1))
+
 
 fun Framebuffer.renderbuffer(attachment: Int, renderbuffer: GlRenderBuffer) = GL30C.glFramebufferRenderbuffer(GL30C.GL_FRAMEBUFFER, attachment, GL30C.GL_RENDERBUFFER, renderbuffer.name[0])
 
