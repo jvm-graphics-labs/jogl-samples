@@ -5,6 +5,7 @@ import glm_.glm
 import glm_.mat4x4.Mat4
 import glm_.vec2.Vec2
 import glm_.vec4.Vec4
+import gln.DataType.Companion.UNSIGNED_SHORT
 import gln.cap.Caps
 import gln.draw.glDrawElements
 import gln.glViewport
@@ -21,7 +22,6 @@ import oglSamples.framework.Framework
 import oglSamples.framework.semantic
 import org.lwjgl.opengl.GL11C.*
 import org.lwjgl.opengl.GL41C.glClearDepthf
-import gln.buffer.Buffer as GlnBuffer
 
 
 fun main() {
@@ -49,8 +49,8 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
     enum class Buffer : GlBufferEnum0 { VERTEX, ELEMENT }
 
     var program = GlProgram.NULL
-    var uniformMVP = 0
-    var uniformDiffuse = 0
+    var uniformMVP = -1
+    var uniformDiffuse = -1
 
     override fun begin(): Boolean {
 
@@ -108,7 +108,7 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
         glGenBuffers<Buffer>()
 
         Buffer.VERTEX.bindArray {
-            data(positionData)
+            data(positionData.data)
         }
         Buffer.ELEMENT.bindElement {
             data(elementData)

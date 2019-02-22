@@ -6,16 +6,18 @@ import gli_.gli
 import glm_.glm
 import glm_.mat4x4.Mat4
 import glm_.vec2.Vec2
+import gln.BufferTarget.Companion.ARRAY
+import gln.TextureTarget.Companion._2D
 import gln.cap.Caps
 import gln.draw.glDrawArrays
 import gln.glViewport
 import gln.glf.glf
 import gln.objects.GlProgram
+import gln.objects.GlTexture
 import gln.texture.TexFilter
 import gln.uniform.glUniform
 import gln.vertexArray.glEnableVertexAttribArray
 import gln.vertexArray.glVertexAttribPointer
-import kool.lib.indices
 import oglSamples.*
 import oglSamples.framework.Framework
 import oglSamples.framework.semantic
@@ -51,10 +53,10 @@ class gl_300_test_alpha : Framework("gl-300-test-alpha", Caps.Profile.COMPATIBIL
             Vertex_v2v2(Vec2(-1f, +1f), Vec2(0f, 0f)),
             Vertex_v2v2(Vec2(-1f, -1f), Vec2(0f, 1f)))
 
-    val vertexArray = GlVertexArray()
+    var vertexArray = GlVertexArray()
     var program = GlProgram.NULL
-    val buffer = GlArrayBuffer()
-    val texture2D = GlTexture2d()
+    var buffer = GlBuffer()
+    var texture2D = GlTexture()
     var uniformMVP = -1
     var uniformDiffuse = -1
 
@@ -113,7 +115,7 @@ class gl_300_test_alpha : Framework("gl-300-test-alpha", Caps.Profile.COMPATIBIL
 
     fun initBuffer(): Boolean {
 
-        buffer.gen().bind {
+        buffer = GlBuffer.gen().bound(ARRAY) {
             data(vertexData.data)
         }
 
@@ -122,7 +124,7 @@ class gl_300_test_alpha : Framework("gl-300-test-alpha", Caps.Profile.COMPATIBIL
 
     fun initTexture(): Boolean {
 
-        texture2D.gen().bind(0) {
+        texture2D = GlTexture.gen().bound(_2D,0) {
 
             minMagFilter = TexFilter.NEAREST
 
@@ -141,8 +143,8 @@ class gl_300_test_alpha : Framework("gl-300-test-alpha", Caps.Profile.COMPATIBIL
 
     fun initVertexArray(): Boolean {
 
-        vertexArray.gen().bind {
-            buffer.bind {
+        vertexArray = GlVertexArray.gen().bound {
+            buffer.bound(ARRAY) {
                 glVertexAttribPointer(glf.pos2_tc2)
             }
             glEnableVertexAttribArray(glf.pos2_tc2)
@@ -165,7 +167,7 @@ class gl_300_test_alpha : Framework("gl-300-test-alpha", Caps.Profile.COMPATIBIL
         glUniform(uniformDiffuse, 0)
         glUniform(uniformMVP, mvp)
 
-        texture2D.bind(0)
+        texture2D.bind(_2D,0)
 
         vertexArray.bind()
 

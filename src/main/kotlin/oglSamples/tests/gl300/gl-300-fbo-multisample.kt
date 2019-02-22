@@ -9,7 +9,8 @@ import glm_.vec2.Vec2
 import glm_.vec2.Vec2i
 import glm_.vec4.Vec4
 import gln.*
-import gln.buffer.BufferTarget
+import gln.BufferTarget.Companion.ARRAY
+import gln.TextureTarget.Companion._2D
 import gln.glClearColor as b
 import gln.glEnable as a
 import gln.cap.Caps
@@ -18,6 +19,7 @@ import gln.draw.glDrawArrays
 import gln.framebuffer.glBindFramebuffer
 import gln.glf.glf
 import gln.objects.GlProgram
+import gln.objects.GlTexture
 import gln.renderbuffer.RenderBuffer
 import gln.texture.TexFilter
 import gln.uniform.glUniform
@@ -27,7 +29,6 @@ import oglSamples.*
 import oglSamples.framework.Framework
 import oglSamples.framework.GLint
 import oglSamples.framework.semantic
-import org.lwjgl.glfw.GLFW
 import org.lwjgl.opengl.GL11C
 import org.lwjgl.opengl.GL11C.*
 import org.lwjgl.opengl.GL13C
@@ -56,13 +57,13 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
             Vertex_v2v2(Vec2(-2.0f, -1.5f), Vec2(0.0f, 0.0f)))
 
     var program = GlProgram.NULL
-    val vertexArray = GlVertexArray()
+    var vertexArray = GlVertexArray()
     var buffer = GlBuffer()
-    val texture = GlTexture2d()
-    val colorRenderbuffer = GlRenderBuffer()
-    val colorTexture = GlTexture2d()
-    val framebufferRender = GlFramebuffer()
-    val framebufferResolve = GlFramebuffer()
+    var texture = GlTexture()
+    var colorRenderbuffer = GlRenderBuffer()
+    var colorTexture = GlTexture()
+    var framebufferRender = GlFramebuffer()
+    var framebufferResolve = GlFramebuffer()
     var uniformMVP = -1
     var uniformDiffuse = -1
 
@@ -108,7 +109,7 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
     }
 
     fun initBuffer(): Boolean {
-        buffer = GlBuffer.gen().bind(BufferTarget.Array) {
+        buffer = GlBuffer.gen().bound(ARRAY) {
             data(vertexData.data)
         }
         return checkError("initBuffer")
@@ -119,7 +120,7 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
         val dds = Texture2d(gli.loadDds(ClassLoader.getSystemResource(TEXTURE_DIFFUSE).toURI()))
         gl.profile = gl.Profile.GL32
 
-        texture.gen().bind(0) {
+        texture = GlTexture.gen().bound(TextureTarget._2D, 0) {
             levels(0, dds.levels() - 1)
             filter(min = TexFilter.LINEAR_MIPMAP_LINEAR, mag = TexFilter.LINEAR)
 
@@ -136,8 +137,8 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
 
     fun initVertexArray(): Boolean {
 
-        vertexArray.gen().bind {
-            buffer.bind {
+        vertexArray = GlVertexArray.gen().bound {
+            buffer.bound(ARRAY) {
                 glVertexAttribPointer(glf.pos2_tc2)
             }
             glEnableVertexAttribArray(glf.pos2_tc2)
@@ -148,7 +149,7 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
 
     fun initFramebuffer(): Boolean {
 
-        colorRenderbuffer.gen().bind {
+        colorRenderbuffer = GlRenderBuffer.gen().bind {
             // The first parameter is the number of samples.
             storageMultisample(8, GL11C.GL_RGBA8, FRAMEBUFFER_SIZE)
 
@@ -156,17 +157,17 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
                 return false
         }
 
-        framebufferRender.gen().bind {
+        framebufferRender = GlFramebuffer.gen().bind {
             renderbuffer(GL30C.GL_COLOR_ATTACHMENT0, colorRenderbuffer)
             if (!complete)
                 return false
         }
 
-        colorTexture.gen().bind {
+        colorTexture = GlTexture.gen().bound(_2D) {
             minMagFilter = TexFilter.LINEAR
-            image(GL11C.GL_RGBA8, FRAMEBUFFER_SIZE, GL11C.GL_RGBA, GL11C.GL_UNSIGNED_BYTE)
+            image(gl.InternalFormat.RGBA8_UNORM, FRAMEBUFFER_SIZE, gl.ExternalFormat.RGBA, gl.TypeFormat.U8)
         }
-        framebufferResolve.gen().bind {
+        framebufferResolve = GlFramebuffer.gen().bind {
             texture(GL30C.GL_COLOR_ATTACHMENT0, colorTexture)
             if (!complete)
                 return false
@@ -220,7 +221,7 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
 
         glViewport(FRAMEBUFFER_SIZE)
 
-        texture.bind(0)
+        texture.bind(_2D, 0)
 
         vertexArray.bind()
         glDrawArrays(vertexCount)
@@ -228,14 +229,14 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
         checkError("renderFBO")
     }
 
-    fun renderFB(texture2D: GlTexture2d)    {
+    fun renderFB(texture2D: GlTexture)    {
 
         val perspective = glm.perspective(glm.πf * 0.25f, windowSize.aspect, 0.1f, 100f)
         val model = Mat4(1f)
         val mvp = perspective * view * model
         glUniform(uniformMVP, mvp)
 
-        texture2D.bind(0)
+        texture2D.bind(_2D, 0)
 
         vertexArray.bind()
         glDrawArrays(vertexCount)

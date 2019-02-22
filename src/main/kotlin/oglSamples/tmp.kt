@@ -3,10 +3,8 @@ package oglSamples
 import glm_.vec2.Vec2
 import glm_.vec3.Vec3
 import glm_.vec4.Vec4
-import gln.GL_STATIC_DRAW
-import gln.Usage
-import gln.buffer.Buffer
-import gln.buffer.BufferTarget
+import gln.BufferTarget
+import gln.buffer.GlBufferDSL
 import kool.FloatBuffer
 import org.lwjgl.opengl.GL15C
 import uno.glfw.glfw
@@ -121,9 +119,6 @@ fun vertex_v3n3c4_buffer_of(vararg vecs: Any): Vertex_v3n3c4_Buffer {
 }
 
 
-fun Buffer.data(data: Vec2Buffer, usage: Usage = GL_STATIC_DRAW) = GL15C.glBufferData(target.i, data.data, usage.i)
-
-
 interface GlEnum {
     val names: KMutableProperty0<IntBuffer>
         get() = ::bufferName0
@@ -137,9 +132,9 @@ interface GlBufferEnum0 : GlEnum {
 lateinit var bufferName0: IntBuffer
 
 
-fun <E> Enum<E>.bindArray() where E : Enum<E>, E : GlEnum = bind(BufferTarget.Array)
-fun <E> Enum<E>.bindElement() where E : Enum<E>, E : GlEnum = bind(BufferTarget.ElementArray)
-fun <E> Enum<E>.bindUniform() where E : Enum<E>, E : GlEnum = bind(BufferTarget.BufferTarget2.Uniform)
+fun <E> Enum<E>.bindArray() where E : Enum<E>, E : GlEnum = bind(BufferTarget.ARRAY)
+fun <E> Enum<E>.bindElement() where E : Enum<E>, E : GlEnum = bind(BufferTarget.ELEMENT_ARRAY)
+fun <E> Enum<E>.bindUniform() where E : Enum<E>, E : GlEnum = bind(BufferTarget.UNIFORM)
 fun <E> Enum<E>.bind(target: BufferTarget) where E : Enum<E>, E : GlEnum {
     val values: Array<out Enum<*>> = Enum::class.java.enumConstants
     val names by (values[0] as GlEnum).names
@@ -147,15 +142,15 @@ fun <E> Enum<E>.bind(target: BufferTarget) where E : Enum<E>, E : GlEnum {
 }
 
 
-inline fun <E> Enum<E>.bindArray(block: Buffer.() -> Unit) where E : Enum<E>, E : GlEnum = bind(BufferTarget.Array, block)
-inline fun <E> Enum<E>.bindElement(block: Buffer.() -> Unit) where E : Enum<E>, E : GlEnum = bind(BufferTarget.ElementArray, block)
-inline fun <E> Enum<E>.bindUniform(block: Buffer.() -> Unit) where E : Enum<E>, E : GlEnum = bind(BufferTarget.BufferTarget2.Uniform, block)
-inline fun <E> Enum<E>.bind(target: BufferTarget, block: Buffer.() -> Unit) where E : Enum<E>, E : GlEnum {
-    Buffer.target = target
+inline fun <E> Enum<E>.bindArray(block: GlBufferDSL.() -> Unit) where E : Enum<E>, E : GlEnum = bound(BufferTarget.ARRAY, block)
+inline fun <E> Enum<E>.bindElement(block: GlBufferDSL.() -> Unit) where E : Enum<E>, E : GlEnum = bound(BufferTarget.ELEMENT_ARRAY, block)
+inline fun <E> Enum<E>.bindUniform(block: GlBufferDSL.() -> Unit) where E : Enum<E>, E : GlEnum = bound(BufferTarget.UNIFORM, block)
+inline fun <E> Enum<E>.bound(target: BufferTarget, block: GlBufferDSL.() -> Unit) where E : Enum<E>, E : GlEnum {
+    GlBufferDSL.target = target
     val names by (this as GlEnum).names
-    Buffer.name = names[0]
-    Buffer.block()
-    Buffer.name = 0
+    GlBufferDSL.name = names[0]
+    GlBufferDSL.block()
+    GlBufferDSL.name = 0
 }
 
 inline fun <reified E> glGenBuffers() where E : Enum<E>, E : GlEnum {
