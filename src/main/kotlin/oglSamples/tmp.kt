@@ -3,20 +3,12 @@ package oglSamples
 import glm_.vec2.Vec2
 import glm_.vec3.Vec3
 import glm_.vec4.Vec4
-import gln.BufferTarget
-import gln.buffer.GlBufferDSL
 import kool.FloatBuffer
-import oglSamples.tests.GlEnum
+import oglSamples.tests.GlBufferEnum
 import org.lwjgl.opengl.GL15C
-import org.lwjgl.opengl.GL45C
 import uno.glfw.glfw
-import uno.kotlin.getValue
-import uno.kotlin.setValue
-import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
-import java.nio.ShortBuffer
-import kotlin.reflect.KMutableProperty0
 
 operator fun glfw.invoke(block: glfw.() -> Unit) {
     glfw.block()
@@ -125,50 +117,53 @@ fun vertex_v3n3c4_buffer_of(vararg vecs: Any): Vertex_v3n3c4_Buffer {
 
 
 
-fun <E> Enum<E>.bindArray() where E : Enum<E>, E : GlEnum = bind(BufferTarget.ARRAY)
-fun <E> Enum<E>.bindElement() where E : Enum<E>, E : GlEnum = bind(BufferTarget.ELEMENT_ARRAY)
-fun <E> Enum<E>.bindUniform() where E : Enum<E>, E : GlEnum = bind(BufferTarget.UNIFORM)
-fun <E> Enum<E>.bind(target: BufferTarget) where E : Enum<E>, E : GlEnum {
-    val values: Array<out Enum<*>> = Enum::class.java.enumConstants
-    val names by (values[0] as GlEnum).names
-    GL15C.glBindBuffer(target.i, names[ordinal])
-}
+//fun <E> Enum<E>.bindArray() where E : Enum<E>, E : GlBufferEnum = bind(BufferTarget.ARRAY)
+//fun <E> Enum<E>.bindElement() where E : Enum<E>, E : GlBufferEnum = bind(BufferTarget.ELEMENT_ARRAY)
+//fun <E> Enum<E>.bindUniform() where E : Enum<E>, E : GlBufferEnum = bind(BufferTarget.UNIFORM)
+//fun <E> Enum<E>.bind(target: BufferTarget) where E : Enum<E>, E : GlBufferEnum {
+//    val values: Array<out Enum<*>> = Enum::class.java.enumConstants
+//    val names by (values[0] as GlBufferEnum).names
+//    GL15C.glBindBuffer(target.i, names[ordinal])
+//}
+//
+//
+//inline fun <E> Enum<E>.bindArray(block: GlBufferDSL.() -> Unit) where E : Enum<E>, E : GlBufferEnum = bound(BufferTarget.ARRAY, block)
+//inline fun <E> Enum<E>.bindElement(block: GlBufferDSL.() -> Unit) where E : Enum<E>, E : GlBufferEnum = bound(BufferTarget.ELEMENT_ARRAY, block)
+//inline fun <E> Enum<E>.bindUniform(block: GlBufferDSL.() -> Unit) where E : Enum<E>, E : GlBufferEnum = bound(BufferTarget.UNIFORM, block)
+//inline fun <E> Enum<E>.bound(target: BufferTarget, block: GlBufferDSL.() -> Unit) where E : Enum<E>, E : GlBufferEnum {
+//    GlBufferDSL.target = target
+//    val names by (this as GlBufferEnum).names
+//    GlBufferDSL.name = names[0]
+//    GlBufferDSL.block()
+//    GlBufferDSL.name = 0
+//}
+//
+//inline fun <E> Enum<E>.storage(data: ByteBuffer, flags: Int = 0) where E : Enum<E>, E : GlBufferEnum {
+//    val names by (this as GlBufferEnum).names
+//    GL45C.glNamedBufferStorage(names[ordinal], data, flags)
+//}
+//inline fun <E> Enum<E>.storage(data: ShortBuffer, flags: Int = 0) where E : Enum<E>, E : GlBufferEnum {
+//    val names by (this as GlBufferEnum).names
+//    GL45C.glNamedBufferStorage(names[ordinal], data, flags)
+//}
+//
+//inline fun <reified E> glGenBuffers() where E : Enum<E>, E : GlBufferEnum {
+//    val values: Array<out Enum<*>> = E::class.java.enumConstants
+//    var names by (values[0] as GlBufferEnum).names
+//    names = glGenBuffers(values.size)
+//}
+//
+//inline fun <reified E> glCreateBuffers() where E : Enum<E>, E : GlBufferEnum {
+//    val values: Array<out Enum<*>> = E::class.java.enumConstants
+//    var names by (values[0] as GlBufferEnum).names
+//    names = glCreateBuffers(values.size)
+//}
+//
+//inline fun <reified E> glDeleteBuffers() where E : Enum<E>, E : GlBufferEnum {
+//    val values: Array<out Enum<*>> = E::class.java.enumConstants
+//    val names by (values[0] as GlBufferEnum).names
+//    GL15C.glDeleteBuffers(names)
+//}
 
-
-inline fun <E> Enum<E>.bindArray(block: GlBufferDSL.() -> Unit) where E : Enum<E>, E : GlEnum = bound(BufferTarget.ARRAY, block)
-inline fun <E> Enum<E>.bindElement(block: GlBufferDSL.() -> Unit) where E : Enum<E>, E : GlEnum = bound(BufferTarget.ELEMENT_ARRAY, block)
-inline fun <E> Enum<E>.bindUniform(block: GlBufferDSL.() -> Unit) where E : Enum<E>, E : GlEnum = bound(BufferTarget.UNIFORM, block)
-inline fun <E> Enum<E>.bound(target: BufferTarget, block: GlBufferDSL.() -> Unit) where E : Enum<E>, E : GlEnum {
-    GlBufferDSL.target = target
-    val names by (this as GlEnum).names
-    GlBufferDSL.name = names[0]
-    GlBufferDSL.block()
-    GlBufferDSL.name = 0
-}
-
-inline fun <E> Enum<E>.storage(data: ByteBuffer, flags: Int = 0) where E : Enum<E>, E : GlEnum {
-    val names by (this as GlEnum).names
-    GL45C.glNamedBufferStorage(names[ordinal], data, flags)
-}
-inline fun <E> Enum<E>.storage(data: ShortBuffer, flags: Int = 0) where E : Enum<E>, E : GlEnum {
-    val names by (this as GlEnum).names
-    GL45C.glNamedBufferStorage(names[ordinal], data, flags)
-}
-
-inline fun <reified E> glGenBuffers() where E : Enum<E>, E : GlEnum {
-    val values: Array<out Enum<*>> = Enum::class.java.enumConstants
-    var names by (values[0] as GlEnum).names
-    names = glGenBuffers(values.size)
-}
-
-inline fun <reified E> glCreateBuffers() where E : Enum<E>, E : GlEnum {
-    val values: Array<out Enum<*>> = Enum::class.java.enumConstants
-    var names by (values[0] as GlEnum).names
-    names = glCreateBuffers(values.size)
-}
-
-inline fun <reified E> glDeleteBuffers() where E : Enum<E>, E : GlEnum {
-    val values: Array<out Enum<*>> = Enum::class.java.enumConstants
-    val names by (values[0] as GlEnum).names
-    GL15C.glDeleteBuffers(names)
-}
+operator fun <E>IntBuffer.get(e: E): GlBuffer where E : Enum<E>, E : GlBufferEnum = GlBuffer(get(e.ordinal))
+fun <E>IntBuffer.gen(e: E) where E : Enum<E>, E : GlBufferEnum = put(e.ordinal, GL15C.glGenBuffers())

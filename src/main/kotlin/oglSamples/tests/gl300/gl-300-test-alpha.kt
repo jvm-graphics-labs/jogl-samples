@@ -13,10 +13,12 @@ import gln.cap.Caps
 import gln.draw.glDrawArrays
 import gln.glViewport
 import gln.glf.glf
+import gln.objects.GlBuffer
 import gln.objects.GlProgram
 import gln.objects.GlTexture
 import gln.texture.TexFilter
 import gln.uniform.glUniform
+import gln.vertexArray.GlVertexArray
 import gln.vertexArray.glEnableVertexAttribArray
 import gln.vertexArray.glVertexAttribPointer
 import oglSamples.*

@@ -16,10 +16,12 @@ object semantic {
         val TRANSFORM0 = 1
         val TRANSFORM1 = 2
         val INDIRECTION = 3
-        val CONSTANT = 0
-        val PER_FRAME = 1
-        val PER_PASS = 2
-        val LIGHT = 3
+        val CONSTANT = 4
+        val PER_SCENE = 5
+        val PER_PASS = 6
+        val PER_DRAW = 7
+        val PER_FRAME = 8
+        val LIGHT = 9
     }
 
     object sampler {

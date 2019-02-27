@@ -16,13 +16,17 @@ import gln.glEnable as a
 import gln.cap.Caps
 import gln.clear.glClearBuffer
 import gln.draw.glDrawArrays
+import gln.framebuffer.GlFramebuffer
 import gln.framebuffer.glBindFramebuffer
 import gln.glf.glf
+import gln.objects.GlBuffer
 import gln.objects.GlProgram
 import gln.objects.GlTexture
+import gln.renderbuffer.GlRenderbuffer
 import gln.renderbuffer.RenderBuffer
 import gln.texture.TexFilter
 import gln.uniform.glUniform
+import gln.vertexArray.GlVertexArray
 import gln.vertexArray.glEnableVertexAttribArray
 import gln.vertexArray.glVertexAttribPointer
 import oglSamples.*
@@ -60,7 +64,7 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
     var vertexArray = GlVertexArray()
     var buffer = GlBuffer()
     var texture = GlTexture()
-    var colorRenderbuffer = GlRenderBuffer()
+    var colorRenderbuffer = GlRenderbuffer()
     var colorTexture = GlTexture()
     var framebufferRender = GlFramebuffer()
     var framebufferResolve = GlFramebuffer()
@@ -149,7 +153,7 @@ private class gl_300_fbo_multisample : Framework("gl-300-fbo-multisample", Caps.
 
     fun initFramebuffer(): Boolean {
 
-        colorRenderbuffer = GlRenderBuffer.gen().bind {
+        colorRenderbuffer = GlRenderbuffer.gen().bind {
             // The first parameter is the number of samples.
             storageMultisample(8, GL11C.GL_RGBA8, FRAMEBUFFER_SIZE)
 

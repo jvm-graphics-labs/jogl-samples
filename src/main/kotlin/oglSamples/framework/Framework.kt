@@ -11,7 +11,6 @@ import glm_.vec2.Vec2i
 import glm_.vec3.Vec3
 import glm_.vec3.Vec3ub
 import glm_.vec4.Vec4ub
-import gln.cap.Caps
 import gln.cap.Caps.Profile
 import gln.framebuffer.glBindFramebuffer
 import kool.IntBuffer
@@ -22,13 +21,11 @@ import oglSamples.wo
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.opengl.ARBDebugOutput.*
-import org.lwjgl.opengl.GL
 import org.lwjgl.opengl.GL30C.GL_NUM_EXTENSIONS
 import org.lwjgl.opengl.GL30C.glGetStringi
 import org.lwjgl.opengl.GL43C.*
 import org.lwjgl.opengl.GLDebugMessageCallback
 import org.lwjgl.opengl.GLDebugMessageCallbackI
-import org.lwjgl.system.Callback
 import org.lwjgl.system.MemoryUtil.NULL
 import org.lwjgl.system.Platform
 import uno.glfw.*

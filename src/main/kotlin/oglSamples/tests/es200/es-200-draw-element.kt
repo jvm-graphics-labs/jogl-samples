@@ -46,7 +46,7 @@
 //            Vec2(+1f, +1f),
 //            Vec2(-1f, +1f))
 //
-//    enum class Buffer : GlBufferEnum0 { VERTEX, ELEMENT }
+//    enum class Buffer : GlBufferEnum { VERTEX, ELEMENT }
 //
 //    var program = GlProgram.NULL
 //    var uniformMVP = -1

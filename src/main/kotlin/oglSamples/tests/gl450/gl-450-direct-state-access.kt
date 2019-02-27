@@ -1,36 +1,49 @@
 package oglSamples.tests.gl450
 
+import gli_.Texture2d
+import gli_.gl
+import gli_.gli
 import glm_.BYTES
 import glm_.glm
 import glm_.mat4x4.Mat4
 import glm_.max
 import glm_.vec2.Vec2
 import glm_.vec2.Vec2i
+import glm_.vec4.Vec4
+import gln.CompareFunction.Companion.LEQUAL
+import gln.GlBufferEnum
+import gln.MagFilter.Companion.LINEAR
+import gln.MinFilter.Companion.LINEAR_MIPMAP_LINEAR
+import gln.TextureCompareMode.Companion.NONE
 import gln.cap.Caps
+import gln.objects.GlBuffers
 import gln.objects.GlProgram
-import kool.IntBuffer
-import kool.Ptr
+import gln.program.GlPipeline
+import gln.sampler.GlSampler
+import gln.texture.GlTextureDsl
+import gln.texture.TexWrap.Companion.CLAMP_TO_EDGE
+import gln.vertexArray.GlVertexArray
 import kool.shortBufferOf
 import oglSamples.*
 import oglSamples.framework.Framework
-import oglSamples.framework.semantic
-import oglSamples.tests.GlBufferEnum0
 import org.lwjgl.opengl.GL11C.glGetInteger
+import org.lwjgl.opengl.GL30C.GL_MAP_INVALIDATE_BUFFER_BIT
+import org.lwjgl.opengl.GL30C.GL_MAP_WRITE_BIT
 import org.lwjgl.opengl.GL31C.GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT
 import org.lwjgl.opengl.GL41C.GL_FRAGMENT_SHADER_BIT
 import org.lwjgl.opengl.GL41C.GL_VERTEX_SHADER_BIT
-import org.lwjgl.opengl.GL45C
-import org.lwjgl.system.MemoryUtil.NULL
-import kotlin.system.measureNanoTime
+import org.lwjgl.opengl.GL44C.GL_MAP_COHERENT_BIT
+import org.lwjgl.opengl.GL44C.GL_MAP_PERSISTENT_BIT
+import java.nio.ByteBuffer
 
 fun main() {
-
+    gl_450_directStateAccess()()
 }
 
 private class gl_450_directStateAccess : Framework("gl-450-direct-state-access", Caps.Profile.CORE, 4, 5, Vec2i(640, 480), Vec2(glm.πf * 0.2f)) {
     override fun end(): Boolean = true
 
-    override fun render(): Boolean =true
+    override fun render(): Boolean = true
 
     val SHADER_SOURCE = "gl-450/direct-state-access"
     val TEXTURE_DIFFUSE = "kueken7_rgba8_srgb.dds"
@@ -54,19 +67,22 @@ private class gl_450_directStateAccess : Framework("gl-450-direct-state-access",
 
     enum class Framebuffer { RENDER, RESOLVE }
 
-    enum class Buffer : GlBufferEnum0 { VERTEX, ELEMENT, TRANSFORM }
+    enum class Buffer : GlBufferEnum { VERTEX, ELEMENT, TRANSFORM }
 
     enum class Texture { TEXTURE, MULTISAMPLE, COLORBUFFER }
 
     var vertexArray = GlVertexArray()
+    val bufferName = GlBuffers<Buffer>()
+    val textureName = GlTextures<Texture>()
     var pipeline = GlPipeline()
     var program = GlProgram.NULL
     var sampler = GlSampler()
     var uniformBlockSize = 0
-    var uniformPointer: Ptr = NULL
-    val test = IntBuffer(3)
+    var uniformPointer: ByteBuffer? = null
 
     override fun begin(): Boolean {
+
+        DSA = true
 
         var validated = true
 
@@ -110,89 +126,110 @@ private class gl_450_directStateAccess : Framework("gl-450-direct-state-access",
         val uniformBufferOffset = glGetInteger(GL_UNIFORM_BUFFER_OFFSET_ALIGNMENT)
         uniformBlockSize = Mat4.size max uniformBufferOffset
 
-        glCreateBuffers<Buffer>()
-        val a = measureNanoTime {
-            for (i in 0..999)
-            Buffer.ELEMENT.storage(elementData)
-        }
-        val b = measureNanoTime {
-            for (i in 0..999)
-            GL45C.glNamedBufferStorage(test[0], elementData, 0)
-        }
-        println("$a, $b")
-//        glNamedBufferStorage(BufferName[buffer::ELEMENT], elementSize, ElementData, 0)
-//        glNamedBufferStorage(BufferName[buffer::VERTEX], vertexSize, VertexData, 0)
-//        glNamedBufferStorage(BufferName[buffer::TRANSFORM], this->UniformBlockSize * 2, nullptr, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT)
+//        for (i in 0..9999) {
+//            GL45C.glNamedBufferStorage(test[1], elementData, 0)
+//            GL15C.glDeleteBuffers(test[1])
+//            GL15C.nglGenBuffers(1, test.adr + Int.BYTES)
+//        }
 //
-//        this->UniformPointer = static_cast<glm::uint8*>(glMapNamedBufferRange(
-//        BufferName[buffer::TRANSFORM], 0, this->UniformBlockSize * 2, GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT | GL_MAP_INVALIDATE_BUFFER_BIT))
+//        GL45C.glCreateBuffers(bufferName)
+//        val a = measureNanoTime {
+//            for (i in 0..999) {
+//                bufferName[Buffer.ELEMENT].storage(elementData)
+//                bufferName[Buffer.ELEMENT].delete()
+//                bufferName.gen(Buffer.ELEMENT)
+//            }
+//        }
+//        val b = measureNanoTime {
+//            for (i in 0..999) {
+//                GL45C.glNamedBufferStorage(test[1], elementData, 0)
+//                GL15C.glDeleteBuffers(test[1])
+//                GL15C.nglGenBuffers(1, test.adr + Int.BYTES)
+//            }
+//        }
+//        val c = measureNanoTime {
+//            for (i in 0..999) {
+//                What.Eh.gen()
+//                What.Eh.storage(elementData, 0)
+//                What.Eh.delete()
+//            }
+//        }
+//        println("$a, $b, $c")
+
+        bufferName.create {
+
+            Buffer.ELEMENT.storage(elementData)
+            Buffer.VERTEX.storage(vertexData.data)
+            Buffer.TRANSFORM.storage(uniformBlockSize * 2, GL_MAP_WRITE_BIT or GL_MAP_PERSISTENT_BIT or GL_MAP_COHERENT_BIT)
+
+            uniformPointer = Buffer.TRANSFORM.mapRange(uniformBlockSize * 2, GL_MAP_WRITE_BIT or GL_MAP_PERSISTENT_BIT or GL_MAP_COHERENT_BIT or GL_MAP_INVALIDATE_BUFFER_BIT)
+        }
 
         return true
     }
 
-//    bool initSampler ()
-//    {
-//        glCreateSamplers(1, & SamplerName)
-//        glSamplerParameteri(SamplerName, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR)
-//        glSamplerParameteri(SamplerName, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-//        glSamplerParameteri(SamplerName, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE)
-//        glSamplerParameteri(SamplerName, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE)
-//        glSamplerParameteri(SamplerName, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE)
-//        glSamplerParameterfv(SamplerName, GL_TEXTURE_BORDER_COLOR, & glm ::vec4(0.0f)[0])
-//        glSamplerParameterf(SamplerName, GL_TEXTURE_MIN_LOD, -1000.f)
-//        glSamplerParameterf(SamplerName, GL_TEXTURE_MAX_LOD, 1000.f)
-//        glSamplerParameterf(SamplerName, GL_TEXTURE_LOD_BIAS, 0.0f)
-//        glSamplerParameteri(SamplerName, GL_TEXTURE_COMPARE_MODE, GL_NONE)
-//        glSamplerParameteri(SamplerName, GL_TEXTURE_COMPARE_FUNC, GL_LEQUAL)
-//
-//        return true
-//    }
-//
-//    bool initTexture ()
-//    {
-//        gli::texture2d Texture (gli::load(getDataDirectory() + TEXTURE_DIFFUSE))
-//        if (Texture.empty())
-//            return 0
-//
-//        gli::gl GL (gli::gl::PROFILE_GL33)
-//        gli::gl::format const Format = GL.translate(Texture.format(), Texture.swizzles())
-//        GLenum const Target = GL.translate(Texture.target())
-//        glm::tvec2<GLsizei> const Dimensions(Texture.extent())
-//
-//        glCreateTextures(GL_TEXTURE_2D, 1, & TextureName [texture::TEXTURE])
-//        glTextureParameteri(TextureName[texture::TEXTURE], GL_TEXTURE_BASE_LEVEL, 0)
-//        glTextureParameteri(TextureName[texture::TEXTURE], GL_TEXTURE_MAX_LEVEL, static_cast<GLint>(Texture.levels() - 1))
-//        glTextureParameteri(TextureName[texture::TEXTURE], GL_TEXTURE_SWIZZLE_R, Format.Swizzles[0])
-//        glTextureParameteri(TextureName[texture::TEXTURE], GL_TEXTURE_SWIZZLE_G, Format.Swizzles[1])
-//        glTextureParameteri(TextureName[texture::TEXTURE], GL_TEXTURE_SWIZZLE_B, Format.Swizzles[2])
-//        glTextureParameteri(TextureName[texture::TEXTURE], GL_TEXTURE_SWIZZLE_A, Format.Swizzles[3])
-//        glTextureStorage2D(TextureName[texture::TEXTURE],
-//                static_cast<GLint>(Texture.levels()), Format.Internal,
-//                Dimensions.x, Texture.target() == gli::TARGET_2D ? Dimensions . y : static_cast < GLsizei >(Texture.layers() * Texture.faces()))
-//
-//        for (gli:: texture2d::size_type Level = 0; Level < Texture.levels(); ++Level)
-//        {
-//            glTextureSubImage2D(TextureName[texture::TEXTURE], static_cast<GLint>(Level),
-//                    0, 0,
-//                    static_cast<GLsizei>(Texture[Level].extent().x), static_cast<GLsizei>(Texture[Level].extent().y),
-//                    Format.External, Format.Type,
-//                    Texture[Level].data())
-//        }
-//
-//
-//        glCreateTextures(GL_TEXTURE_2D_MULTISAMPLE, 1, & TextureName [texture::MULTISAMPLE])
-//        glTextureParameteri(TextureName[texture::MULTISAMPLE], GL_TEXTURE_BASE_LEVEL, 0)
-//        glTextureParameteri(TextureName[texture::MULTISAMPLE], GL_TEXTURE_MAX_LEVEL, 0)
-//        glTextureStorage2DMultisample(TextureName[texture::MULTISAMPLE], 4, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, GL_FALSE)
-//
-//        glCreateTextures(GL_TEXTURE_2D, 1, & TextureName [texture::COLORBUFFER])
-//        glTextureParameteri(TextureName[texture::COLORBUFFER], GL_TEXTURE_BASE_LEVEL, 0)
-//        glTextureParameteri(TextureName[texture::COLORBUFFER], GL_TEXTURE_MAX_LEVEL, 0)
-//        glTextureStorage2D(TextureName[texture::COLORBUFFER], 1, GL_RGBA8, GLsizei(FRAMEBUFFER_SIZE.x), GLsizei(FRAMEBUFFER_SIZE.y))
-//
-//        return true
-//    }
-//
+    fun initSampler(): Boolean {
+
+        sampler = GlSampler.create {
+            minFiler = LINEAR_MIPMAP_LINEAR
+            magFiler = LINEAR
+            setWrapSTR(CLAMP_TO_EDGE)
+            borderColor = Vec4(0f)
+            minLod = -1000f
+            maxLod = 1000f
+            lodBias = 0f
+            compareMode = NONE
+            compareFunc = LEQUAL
+        }
+
+
+        return true
+    }
+
+    fun initTexture(): Boolean {
+
+        val texture = Texture2d(gli.load(TEXTURE_DIFFUSE))
+        if (texture.empty())
+            return false
+
+        gl.profile = gl.Profile.GL33
+        val (target, format) = gl.translate(texture)
+        val dimensions = Vec2i(texture.extent())
+
+        textureName.create {
+
+            Texture.TEXTURE {
+
+                levels = 0 until texture.levels()
+                swizzles = format.swizzles
+                GlTextureDsl.storage()
+                glTextureStorage2D(TextureName[texture::TEXTURE],
+                        static_cast<GLint>(texture.levels()), Format.Internal,
+                        Dimensions.x, texture.target() == gli::TARGET_2D ? Dimensions . y : static_cast < GLsizei >(texture.layers() * texture.faces()))
+
+                for (gli:: texture2d::size_type Level = 0; Level < texture.levels(); ++Level)
+                {
+                    glTextureSubImage2D(TextureName[texture::TEXTURE], static_cast<GLint>(Level),
+                            0, 0,
+                            static_cast<GLsizei>(texture[Level].extent().x), static_cast<GLsizei>(texture[Level].extent().y),
+                            Format.External, Format.Type,
+                            texture[Level].data())
+                }
+            }
+
+            glCreateTextures(GL_TEXTURE_2D_MULTISAMPLE, 1, & TextureName [texture::MULTISAMPLE])
+            glTextureParameteri(TextureName[texture::MULTISAMPLE], GL_TEXTURE_BASE_LEVEL, 0)
+            glTextureParameteri(TextureName[texture::MULTISAMPLE], GL_TEXTURE_MAX_LEVEL, 0)
+            glTextureStorage2DMultisample(TextureName[texture::MULTISAMPLE], 4, GL_RGBA8, FRAMEBUFFER_SIZE.x, FRAMEBUFFER_SIZE.y, GL_FALSE)
+
+            glCreateTextures(GL_TEXTURE_2D, 1, & TextureName [texture::COLORBUFFER])
+            glTextureParameteri(TextureName[texture::COLORBUFFER], GL_TEXTURE_BASE_LEVEL, 0)
+            glTextureParameteri(TextureName[texture::COLORBUFFER], GL_TEXTURE_MAX_LEVEL, 0)
+            glTextureStorage2D(TextureName[texture::COLORBUFFER], 1, GL_RGBA8, GLsizei(FRAMEBUFFER_SIZE.x), GLsizei(FRAMEBUFFER_SIZE.y))
+        }
+        return true
+    }
+
 //    bool initFramebuffer ()
 //    {
 //        glCreateFramebuffers(framebuffer::MAX, & FramebufferName [0])
