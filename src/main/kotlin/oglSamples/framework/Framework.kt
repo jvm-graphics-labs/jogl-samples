@@ -14,10 +14,7 @@ import glm_.vec4.Vec4ub
 import gln.cap.Caps.Profile
 import gln.framebuffer.glBindFramebuffer
 import kool.IntBuffer
-import oglSamples.glBeginQuery
-import oglSamples.glGetQueryObjectui
-import oglSamples.invoke
-import oglSamples.wo
+import oglSamples.*
 import org.lwjgl.glfw.GLFW.*
 import org.lwjgl.glfw.GLFWErrorCallback
 import org.lwjgl.opengl.ARBDebugOutput.*
@@ -328,7 +325,7 @@ abstract class Framework(
         var success = true
 
         if (success) {
-            val template = Texture(gli.load("templates/$title.png"))
+            val template = Texture(gli.load(ClassLoader.getSystemResource("templates/$title.png").toURI()))
 
             if (success)
                 success = success && !template.empty()

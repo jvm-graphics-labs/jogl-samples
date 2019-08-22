@@ -23,7 +23,8 @@ import oglSamples.framework.Framework
 import oglSamples.framework.semantic
 import oglSamples.vec2BufferOf
 import org.lwjgl.opengl.GL11C.*
-import org.lwjgl.opengl.GL41C.glClearDepthf
+import org.lwjgl.opengl.GL15C
+import org.lwjgl.opengl.GL41C.*
 
 
 fun main() {
@@ -100,7 +101,7 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
         // Set some variables
         if (validated)
         // Bind the program for use
-            program.use {
+            program.used {
                 // Set uniform value
                 glUniform(uniformDiffuse, Vec4(1f, 0.5f, 0f, 1f))
             }   // Unbind the program
@@ -111,13 +112,10 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
     fun initBuffer(): Boolean {
 
         buffers.gen {
-            VERTEX.bind(ARRAY) {
-                data(positionData.data)
-            }
-            ELEMENT.bind(ELEMENT_ARRAY) {
-                data(elementData)
-            }
+            VERTEX.bind(ARRAY) { data(positionData.data) }
+            ELEMENT.bind(ELEMENT_ARRAY) { data(elementData) }
         }
+
         return checkError("initBuffer")
     }
 
