@@ -43,7 +43,7 @@ abstract class Framework(
         orientation: Vec2 = Vec2(),
         position: Vec2 = Vec2(0, 4),
         val frameCount: Int = 2,
-        val success: Success = Success.MATCH_TEMPLATE, // TODO check
+        val success: Success = Success.MATCH_TEMPLATE,
         val heuristic: Heuristic = Heuristic.ALL) {
 
     //    GLFWwindow* Window;
@@ -80,7 +80,6 @@ abstract class Framework(
                 api = if (this@Framework.profile == Profile.ES) Api.glEs else Api.gl
 
                 if (version(major, minor) >= version(3, 2) || this@Framework.profile == Profile.ES) {
-
                     context.major = major
                     context.minor = minor
                     if (Platform.get() == Platform.MACOSX) {
@@ -88,7 +87,7 @@ abstract class Framework(
                         forwardComp = true
                     } else {
                         if (this@Framework.profile != Profile.ES) {
-                            profile = if (this@Framework == Profile.CORE) GlfwProfile.core else GlfwProfile.compat
+                            profile = if (this@Framework.profile == Profile.CORE) GlfwProfile.core else GlfwProfile.compat
                             forwardComp = this@Framework.profile == Profile.CORE
                         }
                         debug = DEBUG
@@ -259,10 +258,8 @@ abstract class Framework(
 
         while (result == Exit.SUCCESS && !error) {
             result = if (render()) Exit.SUCCESS else Exit.FAILURE
-            result = when {
-                result == Exit.FAILURE && checkError("render") -> Exit.FAILURE
-                else -> Exit.SUCCESS
-            }
+            if (result == Exit.SUCCESS)
+                result = if (checkError("render")) Exit.SUCCESS else Exit.FAILURE
 
             glfw.pollEvents()
             if (window.shouldClose || (automated && frameNum == 0)) {
@@ -331,7 +328,7 @@ abstract class Framework(
         var success = true
 
         if (success) {
-            val template = Texture(gli.loadImage("templates/$title.png"))
+            val template = Texture(gli.load("templates/$title.png"))
 
             if (success)
                 success = success && !template.empty()
@@ -342,27 +339,12 @@ abstract class Framework(
                 success = success && sameSize
             }
 
-            if (success) {
-                var pass = false
-//                if (!pass && heuristic has Heuristic.EQUAL_BIT)
-//                    pass = compare(template, textureRGB, heuristic_equal())
-//                if (!pass && (this->Heuristic & HEURISTIC_ABSOLUTE_DIFFERENCE_MAX_ONE_BIT))
-//                pass = compare(template, textureRGB, heuristic_absolute_difference_max_one())
-//                if (!pass && (this->Heuristic & HEURISTIC_ABSOLUTE_DIFFERENCE_MAX_ONE_KERNEL_BIT))
-//                pass = compare(template, textureRGB, heuristic_absolute_difference_max_one_kernel())
-//                if (!pass && (this->Heuristic & HEURISTIC_ABSOLUTE_DIFFERENCE_MAX_ONE_LARGE_KERNEL_BIT))
-//                pass = compare(template, textureRGB, heuristic_absolute_difference_max_one_large_kernel())
-//                if (!pass && (this->Heuristic & HEURISTIC_MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_ONE_BIT))
-//                pass = compare(template, textureRGB, heuristic_mipmaps_absolute_difference_max_one())
-//                if (!pass && (this->Heuristic & HEURISTIC_MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_FOUR_BIT))
-//                pass = compare(template, textureRGB, heuristic_mipmaps_absolute_difference_max_four())
-//                if (!pass && (this->Heuristic & HEURISTIC_MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_CHANNEL_BIT))
-//                pass = compare(template, textureRGB, heuristic_mipmaps_absolute_difference_max_channel())
-//                success = pass
-            }
+            if (success)
+                success = heuristic.test(template, textureRGB)
 
             // Save abs diff
             if (!success) {
+                TODO()
 //                if (sameSize && !template.empty()) {
 //                    gli::texture Diff =::absolute_difference(Template, TextureRGB, 2)
 //                    save_png(gli::texture2d(Diff), (getBinaryDirectory() + "/" + Title + "-diff.png").c_str())
@@ -380,10 +362,9 @@ abstract class Framework(
 
     //    void log(csv & CSV, char const * String)
     fun setupView(translate: Boolean, rotateX: Boolean, rotateY: Boolean) {
-        viewSetupFlags =
-                (if (translate) ViewSetupFlag.TRANSLATE.i else 0) or
-                        (if (rotateX) ViewSetupFlag.ROTATE_X.i else 0) or
-                        (if (rotateY) ViewSetupFlag.ROTATE_Y.i else 0)
+        viewSetupFlags = (if (translate) ViewSetupFlag.TRANSLATE.i else 0) or
+                (if (rotateX) ViewSetupFlag.ROTATE_X.i else 0) or
+                if (rotateY) ViewSetupFlag.ROTATE_Y.i else 0
     }
 
     abstract fun begin(): Boolean
@@ -507,6 +488,4 @@ abstract class Framework(
         println("OpenGL Version Needed $majorVersionRequire.$minorVersionRequire ( $majorVersionContext.$minorVersionContext Found )")
         return version(majorVersionContext, minorVersionContext) >= version(majorVersionRequire, minorVersionRequire)
     }
-
-    val dataDirectory = "data"
 }

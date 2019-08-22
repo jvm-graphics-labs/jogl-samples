@@ -1,6 +1,7 @@
 package oglSamples
 
 import gln.*
+import gln.identifiers.GlTextures
 import gln.program.ProgramBase
 import kool.IntBuffer
 import org.lwjgl.opengl.*
@@ -14,7 +15,7 @@ fun glCreateBuffers(size: Int) = IntBuffer(size).also(GL45C::glCreateBuffers)
 
 var ProgramBase.separable: Boolean
     get() = throw Exception("Invalid")
-    set(value) = GL41C.glProgramParameteri(program.i, GL41C.GL_PROGRAM_SEPARABLE, if(value) GL11C.GL_TRUE else GL11C.GL_FALSE)
+    set(value) = GL41C.glProgramParameteri(program.name, GL41C.GL_PROGRAM_SEPARABLE, if(value) GL11C.GL_TRUE else GL11C.GL_FALSE)
 
 
 

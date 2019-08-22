@@ -27,25 +27,26 @@ enum class Heuristic(val i: Int) {
             ABSOLUTE_DIFFERENCE_MAX_ONE_LARGE_KERNEL_BIT.i or MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_ONE_BIT.i or
             MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_FOUR_BIT.i);
 
-    fun absoluteDifference(a: Texture, b: Texture, scale: Int): Texture {
-
-        assert(a.format == Format.RGB8_UNORM_PACK8 && b.format == Format.RGB8_UNORM_PACK8)
-
-        val result = Texture(a.target, a.format, a.extent(), a.layers(), a.faces(), a.levels())
-        val texelCount = a.size<Vec3ub>()
-        for (texelIndex in 0 until texelCount) {
-            val texelA = a.data<Vec3ub>()[texelIndex]
-            val texelB = b.data<Vec3ub>()[texelIndex]
-            val texelResult = glm.mix(texelA - texelB, texelB - texelA, texelB greaterThan texelA) * scale
-            result.data<Vec3ub>()[texelIndex] = texelResult
-        }
-        return result
-    }
+//    fun absoluteDifference(a: Texture, b: Texture, scale: Int): Texture {
+//
+//        assert(a.format == Format.RGB8_UNORM_PACK8 && b.format == Format.RGB8_UNORM_PACK8)
+//
+//        val result = Texture(a.target, a.format, a.extent(), a.layers(), a.faces(), a.levels())
+//        val texelCount = a.size<Vec3ub>()
+//        for (texelIndex in 0 until texelCount) {
+//            val texelA = a.data<Vec3ub>()[texelIndex]
+//            val texelB = b.data<Vec3ub>()[texelIndex]
+//            val texelResult = glm.mix(texelA - texelB, texelB - texelA, texelB greaterThan texelA) * scale
+//            result.data<Vec3ub>()[texelIndex] = texelResult
+//        }
+//        return result
+//    }
 
     fun test(a: Texture, b: Texture): Boolean {
 
         return when (this) {
             EQUAL_BIT -> a == b
+            ABSOLUTE_DIFFERENCE_MAX_ONE_BIT -> TODO()
             ABSOLUTE_DIFFERENCE_MAX_ONE_LARGE_KERNEL_BIT -> {
 
                 fun kernel(texelCoordA: Vec2i, texelA: Vec3ub, textureB: Texture2d): Boolean {
@@ -97,42 +98,51 @@ enum class Heuristic(val i: Int) {
             }
             ABSOLUTE_DIFFERENCE_MAX_ONE_KERNEL_BIT -> {
 
-                val texture = Texture2d(absoluteDifference(a, b, 1))
-                val absDiffMax = Vec3ub(0)
-                val texelCount = texture.extent()
-                for (texelIndexY in 0 until texelCount.y)
-                    for (texelIndexX in 0 until texelCount.x) {
-
-                        val texelCoord = Vec2i(texelIndexX, texelIndexY)
-                        var texelDiff = texture.load<Vec3ub>(texelCoord, 0)
-
-                        if (texelDiff allLessThanEqual 1)
-                            continue
-
-                        val textureA = Texture2d(a)
-                        val textureB = Texture2d(b)
-                        val texelA = textureA.load<Vec3ub>(texelCoord, 0)
-
-                        var kernelAbsDiffMax = false
-                        for (kernelIndexY in -1..1)
-                            for (kernelIndexX in -1..1) {
-                                val kernelCoord = Vec2i(kernelIndexX, kernelIndexY)
-                                val clampedTexelCoord = glm.clamp(texelCoord + kernelCoord, Vec2i(0), Vec2i(texture.extent()) - 1)
-                                val texelB = textureB.load<Vec3ub>(clampedTexelCoord, 0)
-
-                                val diff = glm.abs(Vec3(texelB) - Vec3(texelA))
-                                if (diff allLessThanEqual 1f)
-                                    kernelAbsDiffMax = true
-                            }
-
-//                        if (kernelAbsDiffMax)
-//                            texelDiff = glm.min(texelDiff, 1)
-//                        absDiffMax = glm::max(TexelDiff, AbsDiffMax)
-                    }
+//                val texture = Texture2d(absoluteDifference(a, b, 1))
+//                val absDiffMax = Vec3ub(0)
+//                val texelCount = texture.extent()
+//                for (texelIndexY in 0 until texelCount.y)
+//                    for (texelIndexX in 0 until texelCount.x) {
+//
+//                        val texelCoord = Vec2i(texelIndexX, texelIndexY)
+//                        val texelDiff = texture.load<Vec3ub>(texelCoord, 0)
+//
+//                        if (texelDiff allLessThanEqual 1)
+//                            continue
+//
+//                        val textureA = Texture2d(a)
+//                        val textureB = Texture2d(b)
+//                        val texelA = textureA.load<Vec3ub>(texelCoord, 0)
+//
+//                        var kernelAbsDiffMax = false
+//                        for (kernelIndexY in -1..1)
+//                            for (kernelIndexX in -1..1) {
+//                                val kernelCoord = Vec2i(kernelIndexX, kernelIndexY)
+//                                val clampedTexelCoord = glm.clamp(texelCoord + kernelCoord, Vec2i(0), Vec2i(texture.extent()) - 1)
+//                                val texelB = textureB.load<Vec3ub>(clampedTexelCoord, 0)
+//
+//                                val diff = glm.abs(Vec3(texelB) - Vec3(texelA))
+//                                if (diff allLessThanEqual 1f)
+//                                    kernelAbsDiffMax = true
+//                            }
+//
+////                        if (kernelAbsDiffMax)
+////                            texelDiff = glm.min(texelDiff, 1)
+////                        absDiffMax = glm::max(TexelDiff, AbsDiffMax)
+//                    }
 
                 return true //glm::all(glm::lessThanEqual(AbsDiffMax, glm::u8vec3(1)))
             }
-            else -> false
+            MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_ONE_BIT -> TODO()
+            MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_FOUR_BIT -> TODO()
+            MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_CHANNEL_BIT -> TODO()
+            ALL -> EQUAL_BIT.test(a, b) ||
+                    ABSOLUTE_DIFFERENCE_MAX_ONE_BIT.test(a, b) ||
+                    ABSOLUTE_DIFFERENCE_MAX_ONE_KERNEL_BIT.test(a, b) ||
+                    ABSOLUTE_DIFFERENCE_MAX_ONE_LARGE_KERNEL_BIT.test(a, b) ||
+                    MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_ONE_BIT.test(a, b) ||
+                    MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_FOUR_BIT.test(a, b) ||
+                    MIPMAPS_ABSOLUTE_DIFFERENCE_MAX_CHANNEL_BIT.test(a, b)
         }
     }
 

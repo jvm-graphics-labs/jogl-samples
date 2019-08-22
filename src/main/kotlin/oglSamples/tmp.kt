@@ -4,7 +4,6 @@ import glm_.vec2.Vec2
 import glm_.vec3.Vec3
 import glm_.vec4.Vec4
 import kool.FloatBuffer
-import oglSamples.tests.GlBufferEnum
 import org.lwjgl.opengl.GL15C
 import uno.glfw.glfw
 import java.nio.FloatBuffer
@@ -165,5 +164,5 @@ fun vertex_v3n3c4_buffer_of(vararg vecs: Any): Vertex_v3n3c4_Buffer {
 //    GL15C.glDeleteBuffers(names)
 //}
 
-operator fun <E>IntBuffer.get(e: E): GlBuffer where E : Enum<E>, E : GlBufferEnum = GlBuffer(get(e.ordinal))
-fun <E>IntBuffer.gen(e: E) where E : Enum<E>, E : GlBufferEnum = put(e.ordinal, GL15C.glGenBuffers())
+//operator fun <E: Enum<E>>IntBuffer.get(e: E): GlBuffer where E : Enum<E>, E : GlBufferEnum = GlBuffer(get(e.ordinal))
+//fun <E: Enum<E>>IntBuffer.gen(e: E) where E : Enum<E>, E : GlBufferEnum = put(e.ordinal, GL15C.glGenBuffers())
