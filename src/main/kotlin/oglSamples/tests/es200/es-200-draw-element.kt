@@ -51,8 +51,8 @@ private class es_200_draw_elements : Framework("es-200-draw-elements", ES, 2, 0)
     val buffers = GlBuffers<Buffer>()
 
     var program = GlProgram.NULL
-    var uniformMVP = -1
-    var uniformDiffuse = -1
+    var uniformMVP = 0
+    var uniformDiffuse = 0
 
     override fun begin(): Boolean {
 

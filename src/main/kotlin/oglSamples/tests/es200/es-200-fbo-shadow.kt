@@ -71,17 +71,6 @@ private class es_200_fbo_shadow : Framework("es-200-fbo-shadow", ES, 2, 0, Vec2(
 
     enum class Framebuffer { RENDER, DEPTH }
 
-//    namespace shader
-//    {
-//        enum type
-//                { VERT_RENDER,
-//                  FRAG_RENDER,
-//                  VERT_DEPTH,
-//                  FRAG_DEPTH,
-//                  MAX
-//                };
-//    }//namespace shader
-
     val shadowSize = Vec2i(64)
 
     val framebuffers = GlFramebuffers<Framebuffer>()
@@ -89,19 +78,19 @@ private class es_200_fbo_shadow : Framework("es-200-fbo-shadow", ES, 2, 0, Vec2(
     val buffers = GlBuffers<Buffer>()
     val textures = GlTextures<Attachment>()
     val renderbuffers = GlRenderbuffers<Attachment>()
-    var uniformLightProj: UniformLocation = -1
-    var uniformLightView: UniformLocation = -1
-    var uniformLightWorld: UniformLocation = -1
-    var uniformLightPointLightPosition: UniformLocation = -1
-    var uniformLightClipNearFar: UniformLocation = -1
+    var uniformLightProj: UniformLocation = 0
+    var uniformLightView: UniformLocation = 0
+    var uniformLightWorld: UniformLocation = 0
+    var uniformLightPointLightPosition: UniformLocation = 0
+    var uniformLightClipNearFar: UniformLocation = 0
 
-    var uniformRenderP: UniformLocation = -1
-    var uniformRenderV: UniformLocation = -1
-    var uniformRenderW: UniformLocation = -1
-    var uniformRenderShadow: UniformLocation = -1
-    var uniformRenderPointLightPosition: UniformLocation = -1
-    var uniformRenderClipNearFar: UniformLocation = -1
-    var uniformRenderBias: UniformLocation = -1
+    var uniformRenderP: UniformLocation = 0
+    var uniformRenderV: UniformLocation = 0
+    var uniformRenderW: UniformLocation = 0
+    var uniformRenderShadow: UniformLocation = 0
+    var uniformRenderPointLightPosition: UniformLocation = 0
+    var uniformRenderClipNearFar: UniformLocation = 0
+    var uniformRenderBias: UniformLocation = 0
 
     override fun begin(): Boolean {
 

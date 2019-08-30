@@ -7,6 +7,8 @@ import glm_.vec4.Vec4ub
 import gln.identifiers.GlFramebuffer
 import gln.identifiers.GlFramebuffers
 import gln.renderbuffer.GlRenderbuffers
+import gln.vertexArray.GlVertexArray
+import gln.vertexArray.GlVertexArrays
 import kool.FloatBuffer
 import kool.IntBuffer
 import org.lwjgl.opengl.GL15C
@@ -180,6 +182,7 @@ operator fun ByteBuffer.plusAssign(v: Vec4ub) {
     put(v.x.v).put(v.y.v).put(v.z.v).put(v.w.v)
 }
 
+inline fun <reified E : Enum<E>> GlVertexArrays(): GlVertexArrays = GlVertexArrays(IntBuffer<E>())
 inline fun <reified E : Enum<E>> GlFramebuffers(): GlFramebuffers = GlFramebuffers(IntBuffer<E>())
 inline fun <reified E : Enum<E>> GlRenderbuffers(): GlRenderbuffers = GlRenderbuffers(IntBuffer<E>())
 
