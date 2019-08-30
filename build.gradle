@@ -19,8 +19,12 @@ dependencies {
 
     implementation "$kotlin-stdlib"
 
-    implementation "$kx:uno-sdk:3f32007ffe"
-    implementation "$kx:gln:e6fd699b6723c770a4dd891119e33e6dca74961a"
+//    implementation "$kx:uno-sdk:72fb1bd171eba9074579739dfd8aefddfefd854a"
+    ["core", "gl"].each {
+        implementation "${kx}.uno-sdk:uno-$it:ef111a5337152010db964342e015b61a2f8111fd"
+    }
+
+    implementation "$kx:gln:13c65e0fe64043f2d9c7adacb51c6f622440d524"
     implementation "$kx:gli:c8cb88947b77232beed84599fb7a01b5ce158f25"
     implementation "${kx}.glm:glm:6048c31425ae6110258e4b42165f1e636f8b5603"
     implementation "$kx:kool:d052c5e18a06642fcdf9f5942198ee9c4cee1a3f"
@@ -28,7 +32,7 @@ dependencies {
 
     testImplementation "io.kotlintest:kotlintest-runner-junit5:$kotlintest_version".toString()
 
-    ["", "-glfw", "-jemalloc", "-openal", "-opengl", "-opengles", "-stb"].each {
+    ["", "-glfw", "-jemalloc", "-openal", "-opengl", "-stb"].each {
         String base = "org.lwjgl:lwjgl$it:$lwjgl_version"
         implementation base
         runtime "$base:natives-$lwjgl_natives"

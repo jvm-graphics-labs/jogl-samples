@@ -199,7 +199,7 @@ abstract class Framework(
 
         window.createCapabilities(profile, profile == Profile.CORE)
 
-        if (DEBUG && window.caps.caps.GL_KHR_debug)
+        if (DEBUG && window.caps.gl.GL_KHR_debug)
             if (isExtensionSupported("GL_KHR_debug")) {
                 glEnable(GL_DEBUG_OUTPUT)
                 glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS)
@@ -215,13 +215,13 @@ abstract class Framework(
 
     constructor(title: String, profile: Profile,
                 major: Int, minor: Int,
-                orientation: Vec2, success: Success) :
+                orientation: Vec2, success: Success = Success.MATCH_TEMPLATE) :
             this(title, profile, major, minor, Vec2i(640, 480), orientation, Vec2(0, 4), 2, success)
 
     constructor(title: String, profile: Profile,
                 major: Int, minor: Int,
-                frameCount: Int, windowSize: Vec2i,
-                orientation: Vec2, position: Vec2) :
+                frameCount: Int, windowSize: Vec2i = Vec2i(640, 480),
+                orientation: Vec2 = Vec2(), position: Vec2 = Vec2(0f, 4f)) :
             this(title, profile, major, minor, windowSize, orientation, position, frameCount, Success.RUN_ONLY)
 
     constructor(title: String, profile: Profile,
@@ -283,11 +283,11 @@ abstract class Framework(
         return when (success) {
             Success.GENERATE_ERROR -> when {
                 result != Exit.SUCCESS || error -> Exit.SUCCESS
-                else -> Exit.FAILURE
+                else -> error("failed")
             }
             else -> when {
                 result == Exit.SUCCESS && !error -> Exit.SUCCESS
-                else -> Exit.FAILURE
+                else -> error("failed")
             }
         }
     }
@@ -330,7 +330,7 @@ abstract class Framework(
             if (success)
                 success = success && !template.empty()
 
-            var sameSize = false
+            val sameSize: Boolean
             if (success) {
                 sameSize = Texture2d(template).extent() == textureRGB.extent()
                 success = success && sameSize
@@ -425,7 +425,7 @@ abstract class Framework(
 
         val result = glGetInteger(value)
         val message = "$string: $result"
-        if (Platform.get() != Platform.MACOSX && window.caps.caps.GL_ARB_debug_output)
+        if (Platform.get() != Platform.MACOSX && window.caps.gl.GL_ARB_debug_output)
             glDebugMessageInsertARB(GL_DEBUG_SOURCE_APPLICATION_ARB, GL_DEBUG_TYPE_OTHER_ARB, 1, GL_DEBUG_SEVERITY_LOW_ARB, message)
     }
 

@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/jogl-samples.iml" filepath="$PROJECT_DIR$/.idea/modules/jogl-samples.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/jogl-samples.main.iml" filepath="$PROJECT_DIR$/.idea/modules/jogl-samples.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/jogl-samples.test.iml" filepath="$PROJECT_DIR$/.idea/modules/jogl-samples.test.iml" />
     </modules>
   </component>
 </project>

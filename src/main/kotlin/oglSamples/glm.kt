@@ -4,7 +4,6 @@ import glm_.glm
 import glm_.vec2.Vec2i
 import glm_.vec3.Vec3bool
 import glm_.vec3.Vec3ub
-import unsigned.Ubyte
 
 fun glm.clamp(a: Vec2i, min: Vec2i, max: Vec2i) = clamp(a, min, max, Vec2i())
 fun glm.clamp(a: Vec2i, min: Vec2i, max: Vec2i, res: Vec2i): Vec2i {

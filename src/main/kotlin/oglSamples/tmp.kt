@@ -3,9 +3,15 @@ package oglSamples
 import glm_.vec2.Vec2
 import glm_.vec3.Vec3
 import glm_.vec4.Vec4
+import glm_.vec4.Vec4ub
+import gln.identifiers.GlFramebuffer
+import gln.identifiers.GlFramebuffers
+import gln.renderbuffer.GlRenderbuffers
 import kool.FloatBuffer
+import kool.IntBuffer
 import org.lwjgl.opengl.GL15C
 import uno.glfw.glfw
+import java.nio.ByteBuffer
 import java.nio.FloatBuffer
 import java.nio.IntBuffer
 
@@ -166,3 +172,18 @@ fun vertex_v3n3c4_buffer_of(vararg vecs: Any): Vertex_v3n3c4_Buffer {
 
 //operator fun <E: Enum<E>>IntBuffer.get(e: E): GlBuffer where E : Enum<E>, E : GlBufferEnum = GlBuffer(get(e.ordinal))
 //fun <E: Enum<E>>IntBuffer.gen(e: E) where E : Enum<E>, E : GlBufferEnum = put(e.ordinal, GL15C.glGenBuffers())
+
+operator fun ByteBuffer.plusAssign(v: Vec3) {
+    putFloat(v.x).putFloat(v.y).putFloat(v.z)
+}
+operator fun ByteBuffer.plusAssign(v: Vec4ub) {
+    put(v.x.v).put(v.y.v).put(v.z.v).put(v.w.v)
+}
+
+inline fun <reified E : Enum<E>> GlFramebuffers(): GlFramebuffers = GlFramebuffers(IntBuffer<E>())
+inline fun <reified E : Enum<E>> GlRenderbuffers(): GlRenderbuffers = GlRenderbuffers(IntBuffer<E>())
+
+operator fun <E : Enum<E>, T> Array<T>.get(index: E): T = get(index.ordinal)
+operator fun <E : Enum<E>, T> Array<T>.set(index: E, value: T) = set(index.ordinal, value)
+
+val defaultFbo = GlFramebuffer(0)

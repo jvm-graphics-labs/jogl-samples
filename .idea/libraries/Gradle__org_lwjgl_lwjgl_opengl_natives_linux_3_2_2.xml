@@ -1,5 +1,5 @@
 <component name="libraryTable">
-  <library name="Gradle: org.lwjgl:lwjgl-opengl:3.2.2:natives-linux">
+  <library name="Gradle: org.lwjgl:lwjgl-opengl:natives-linux:3.2.2">
     <CLASSES>
       <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.2.2/338d33387919cb3f4cdba143c2b738a71ccfda60/lwjgl-opengl-3.2.2-natives-linux.jar!/" />
     </CLASSES>

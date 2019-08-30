@@ -1,6 +1,5 @@
 package oglSamples.tests.es200
 
-import glm_.BYTES
 import glm_.glm
 import glm_.mat4x4.Mat4
 import glm_.vec2.Vec2
@@ -8,8 +7,9 @@ import glm_.vec4.Vec4
 import gln.BufferTarget.Companion.ARRAY
 import gln.BufferTarget.Companion.ELEMENT_ARRAY
 import gln.DataType.Companion.UNSIGNED_SHORT
-import gln.cap.Caps
+import gln.cap.Caps.Profile.ES
 import gln.draw.glDrawElements
+import gln.gl
 import gln.glViewport
 import gln.glf.glf
 import gln.identifiers.GlBuffers
@@ -18,12 +18,13 @@ import gln.uniform.glUniform
 import gln.vertexArray.glDisableVertexAttribArray
 import gln.vertexArray.glEnableVertexAttribArray
 import gln.vertexArray.glVertexAttribPointer
+import kool.rem
 import kool.shortBufferOf
 import oglSamples.framework.Framework
 import oglSamples.framework.semantic
+import oglSamples.tests.es200.es_200_draw_elements.Buffer.ELEMENT
+import oglSamples.tests.es200.es_200_draw_elements.Buffer.VERTEX
 import oglSamples.vec2BufferOf
-import org.lwjgl.opengl.GL11C.*
-import org.lwjgl.opengl.GL15C
 import org.lwjgl.opengl.GL41C.*
 
 
@@ -31,28 +32,23 @@ fun main() {
     es_200_draw_elements()()
 }
 
-class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 2, 0) {
+private class es_200_draw_elements : Framework("es-200-draw-elements", ES, 2, 0) {
 
     val SHADER_SOURCE = "es-200/flat-color"
 
-    val elementCount = 6
-    val elementSize = elementCount * Short.BYTES
-    val elementData = shortBufferOf(
+    val elements = shortBufferOf(
             0, 1, 2,
             0, 2, 3)
 
-    val vertexCount = 4
-    val positionSize = vertexCount * Vec2.size
-    val positionData = vec2BufferOf(
+    val positions = vec2BufferOf(
             Vec2(-1f, -1f),
             Vec2(+1f, -1f),
             Vec2(+1f, +1f),
             Vec2(-1f, +1f))
 
-    val VERTEX = 0
-    val ELEMENT = 1
+    enum class Buffer { VERTEX, ELEMENT }
 
-    val buffers = GlBuffers(2)
+    val buffers = GlBuffers<Buffer>()
 
     var program = GlProgram.NULL
     var uniformMVP = -1
@@ -60,19 +56,13 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
 
     override fun begin(): Boolean {
 
-        var validated = true
-
-        val vendor = glGetString(GL_VENDOR)
-        println(vendor)
-        val renderer = glGetString(GL_RENDERER)
-        println(renderer)
-        val version = glGetString(GL_VERSION)
-        println(version)
-        val extensions = glGetString(GL_EXTENSIONS)
-        println(extensions)
-
-        if (validated)
-            validated = initProgram()
+        window.caps.apply {
+            println(version.VENDOR)
+            println(version.RENDERER)
+            println(version.VERSION)
+            println(extensions.list)
+        }
+        var validated = initProgram()
         if (validated)
             validated = initBuffer()
 
@@ -81,22 +71,22 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
 
     fun initProgram(): Boolean {
 
-        var validated = true
-
         // Create program
-        try {
-            program = GlProgram.initFromPath("$SHADER_SOURCE.vert", "$SHADER_SOURCE.frag") {
+        val validated = try {
+            program = GlProgram.initFromPath(SHADER_SOURCE) {
                 "Position".attrib = semantic.attr.POSITION
             }
-        } catch (exc: Exception) {
-            validated = false
+            true
+        } catch (_: Exception) {
+            false
         }
 
         // Get variables locations
-        if (validated) {
-            uniformMVP = program getUniformLocation "MVP"
-            uniformDiffuse = program getUniformLocation "Diffuse"
-        }
+        if (validated)
+            program {
+                uniformMVP = "MVP".uniform
+                uniformDiffuse = "Diffuse".uniform
+            }
 
         // Set some variables
         if (validated)
@@ -112,8 +102,8 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
     fun initBuffer(): Boolean {
 
         buffers.gen {
-            VERTEX.bind(ARRAY) { data(positionData.data) }
-            ELEMENT.bind(ELEMENT_ARRAY) { data(elementData) }
+            VERTEX.bind(ARRAY) { data(positions.data) }
+            ELEMENT.bind(ELEMENT_ARRAY) { data(elements) }
         }
 
         return checkError("initBuffer")
@@ -132,7 +122,7 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
         // Compute the MVP (Model View Projection matrix)
         val projection = glm.perspective(glm.πf * 0.25f, window.aspect, 0.1f, 100f)
         val model = Mat4(1f)
-        val mvp = projection * view * model
+        val mvp = projection * this.view * model
 
         // Set the display viewport
         glViewport(windowSize)
@@ -150,15 +140,14 @@ class es_200_draw_elements : Framework("es-200-draw-elements", Caps.Profile.ES, 
 
             buffers {
                 VERTEX.bind(ARRAY) {
-                    glVertexAttribPointer(glf.pos2)
+                    glf.pos2.set()
                 }
                 ELEMENT bind ELEMENT_ARRAY
             }
 
-            glEnableVertexAttribArray(glf.pos2)
-            glDrawElements(elementCount, UNSIGNED_SHORT)
-            glDisableVertexAttribArray(glf.pos2)
-
+            glf.pos2.enabled {
+                glDrawElements(elements)
+            }
         }   // Unbind program
 
         return true
