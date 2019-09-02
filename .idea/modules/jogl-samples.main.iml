@@ -8,7 +8,6 @@
         </compilerSettings>
         <compilerArguments>
           <option name="destination" value="$MODULE_DIR$/../../build/classes/kotlin/main" />
-          <option name="classpath" value="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.3.41/e24bd38de28a326cce8b1f0d61e809e9a92dad6a/kotlin-stdlib-1.3.41.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/com.github.kotlin-graphics.uno-sdk/uno-core/ef111a5337152010db964342e015b61a2f8111fd/36850150b17d3909f4410655a5e0b874f6111de4/uno-core-ef111a5337152010db964342e015b61a2f8111fd.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/com.github.kotlin-graphics.uno-sdk/uno-gl/ef111a5337152010db964342e015b61a2f8111fd/5bedc4d32e2d8c83752dba72f89fbbaab945ac9d/uno-gl-ef111a5337152010db964342e015b61a2f8111fd.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/com.github.kotlin-graphics/gln/13c65e0fe64043f2d9c7adacb51c6f622440d524/2e6ff8f12a654e8140263c2bef6c203c90643f3c/gln-13c65e0fe64043f2d9c7adacb51c6f622440d524.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/com.github.kotlin-graphics/gli/c8cb88947b77232beed84599fb7a01b5ce158f25/2637767bb813f2dedf9bcbc4f775567f00cb1805/gli-c8cb88947b77232beed84599fb7a01b5ce158f25.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/com.github.kotlin-graphics.glm/glm/6048c31425ae6110258e4b42165f1e636f8b5603/be825795adf887a045ee19eb08db0eeff47b02fb/glm-6048c31425ae6110258e4b42165f1e636f8b5603.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/com.github.kotlin-graphics/kool/d052c5e18a06642fcdf9f5942198ee9c4cee1a3f/afb422553612b7ded2bac953a2cd9e0ab4bb22b7/kool-d052c5e18a06642fcdf9f5942198ee9c4cee1a3f.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/com.github.kotlin-graphics/kotlin-unsigned/ba1b5c2ab0231aabbef753df5fa0d0de98142360/927e62bc9074531f025cdd07e664084cefd11f8/kotlin-unsigned-ba1b5c2ab0231aabbef753df5fa0d0de98142360.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-glfw/3.2.2/d3ad4df38e400b8afba1de63f84338809399df5b/lwjgl-glfw-3.2.2.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-jemalloc/3.2.2/ee8e57a79300f78294576d87c4a587f8c99402e2/lwjgl-jemalloc-3.2.2.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-openal/3.2.2/2b772a102b0a11ee5f2109a5b136f4dc7c630827/lwjgl-openal-3.2.2.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-opengl/3.2.2/6ac5bb88b44c43ea195a570aab059f63da004cd8/lwjgl-opengl-3.2.2.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl-stb/3.2.2/3b8e6ebc5851dd3d17e37e5cadce2eff2a429f0f/lwjgl-stb-3.2.2.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/org.lwjgl/lwjgl/3.2.2/8ad6294407e15780b43e84929c40e4c5e997972e/lwjgl-3.2.2.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-common/1.3.41/2ecf4aa059427d7186312fd1736afedf7972e7f7/kotlin-stdlib-common-1.3.41.jar;C:/Users/gbarbieri/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar" />
           <option name="noStdlib" value="true" />
           <option name="noReflect" value="true" />
           <option name="moduleName" value="jogl-samples" />
@@ -47,28 +46,22 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib:1.3.41" level="project" />
-    <orderEntry type="library" name="Gradle: com.github.kotlin-graphics.uno-sdk:uno-core:ef111a5337152010db964342e015b61a2f8111fd" level="project" />
-    <orderEntry type="library" name="Gradle: com.github.kotlin-graphics.uno-sdk:uno-gl:ef111a5337152010db964342e015b61a2f8111fd" level="project" />
-    <orderEntry type="library" name="Gradle: com.github.kotlin-graphics:gln:13c65e0fe64043f2d9c7adacb51c6f622440d524" level="project" />
-    <orderEntry type="library" name="Gradle: com.github.kotlin-graphics:gli:c8cb88947b77232beed84599fb7a01b5ce158f25" level="project" />
+    <orderEntry type="library" name="Gradle: com.github.kotlin-graphics.uno-sdk:uno-gl:131e1b0116101477352fbc015f3a30526a23af20" level="project" />
+    <orderEntry type="library" name="Gradle: com.github.kotlin-graphics.uno-sdk:uno-core:131e1b0116101477352fbc015f3a30526a23af20" level="project" />
     <orderEntry type="library" name="Gradle: com.github.kotlin-graphics.glm:glm:6048c31425ae6110258e4b42165f1e636f8b5603" level="project" />
-    <orderEntry type="library" name="Gradle: com.github.kotlin-graphics:kool:d052c5e18a06642fcdf9f5942198ee9c4cee1a3f" level="project" />
     <orderEntry type="library" name="Gradle: com.github.kotlin-graphics:kotlin-unsigned:ba1b5c2ab0231aabbef753df5fa0d0de98142360" level="project" />
     <orderEntry type="library" name="Gradle: org.lwjgl:lwjgl-glfw:3.2.2" level="project" />
     <orderEntry type="library" name="Gradle: org.lwjgl:lwjgl-jemalloc:3.2.2" level="project" />
-    <orderEntry type="library" name="Gradle: org.lwjgl:lwjgl-openal:3.2.2" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.3.41" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains.kotlin:kotlin-reflect:1.3.41" level="project" />
     <orderEntry type="library" name="Gradle: org.lwjgl:lwjgl-opengl:3.2.2" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.lwjgl:lwjgl-jemalloc:natives-windows:3.2.2" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains.kotlin:kotlin-reflect:1.3.41" level="project" />
     <orderEntry type="library" name="Gradle: org.lwjgl:lwjgl-stb:3.2.2" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.3.41" level="project" />
     <orderEntry type="library" name="Gradle: org.lwjgl:lwjgl:3.2.2" level="project" />
     <orderEntry type="library" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib-common:1.3.41" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.lwjgl:lwjgl-glfw:natives-windows:3.2.2" level="project" />
     <orderEntry type="library" name="Gradle: org.jetbrains:annotations:13.0" level="project" />
+    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.lwjgl:lwjgl-glfw:natives-windows:3.2.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.lwjgl:lwjgl-glfw:natives-linux:3.2.2" level="project" />
-    <orderEntry type="library" scope="RUNTIME" name="Gradle: org.lwjgl:lwjgl-jemalloc:natives-windows:3.2.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.lwjgl:lwjgl-openal:3.2.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.lwjgl:lwjgl-jemalloc:natives-linux:3.2.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.lwjgl:lwjgl-openal:natives-windows:3.2.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.lwjgl:lwjgl-openal:natives-linux:3.2.2" level="project" />
@@ -78,5 +71,9 @@
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.lwjgl:lwjgl-stb:natives-linux:3.2.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.lwjgl:lwjgl:natives-windows:3.2.2" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: org.lwjgl:lwjgl:natives-linux:3.2.2" level="project" />
+    <orderEntry type="library" name="Gradle: com.github.kotlin-graphics:kool:d052c5e18a06642fcdf9f5942198ee9c4cee1a3f" level="project" />
+    <orderEntry type="library" name="Gradle: org.jetbrains.kotlin:kotlin-stdlib:1.3.41" level="project" />
+    <orderEntry type="library" name="Gradle: com.github.kotlin-graphics:gln:f91c2ae90ac1547285c6fb757bcf25b3f82ba277" level="project" />
+    <orderEntry type="library" name="Gradle: com.github.kotlin-graphics:gli:c8cb88947b77232beed84599fb7a01b5ce158f25" level="project" />
   </component>
 </module>

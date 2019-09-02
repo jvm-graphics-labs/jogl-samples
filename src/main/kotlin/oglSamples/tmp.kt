@@ -6,9 +6,8 @@ import glm_.vec4.Vec4
 import glm_.vec4.Vec4ub
 import gln.identifiers.GlFramebuffer
 import gln.identifiers.GlFramebuffers
+import gln.identifiers.GlVertexArrays
 import gln.renderbuffer.GlRenderbuffers
-import gln.vertexArray.GlVertexArray
-import gln.vertexArray.GlVertexArrays
 import kool.FloatBuffer
 import kool.IntBuffer
 import org.lwjgl.opengl.GL15C

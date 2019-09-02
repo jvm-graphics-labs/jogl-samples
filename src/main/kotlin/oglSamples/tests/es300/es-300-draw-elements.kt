@@ -15,8 +15,8 @@ import gln.glf.glf
 import gln.glf.semantic
 import gln.identifiers.GlBuffer
 import gln.identifiers.GlProgram
+import gln.identifiers.GlVertexArray
 import gln.uniform.glUniform
-import gln.vertexArray.GlVertexArray
 import kool.intBufferOf
 import oglSamples.framework.Framework
 import oglSamples.vec2BufferOf

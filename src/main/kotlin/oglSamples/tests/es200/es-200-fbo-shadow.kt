@@ -280,8 +280,7 @@ private class es_200_fbo_shadow : Framework("es-200-fbo-shadow", ES, 2, 0, Vec2(
 
         programs.forEach { it.delete() }
 
-//        framebuffers.de TODO
-//        glDeleteFramebuffers(framebuffer::MAX, & FramebufferName [0])
+        framebuffers.delete()
         buffers.delete()
         textures.delete()
 

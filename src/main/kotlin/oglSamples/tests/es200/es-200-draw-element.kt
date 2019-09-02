@@ -109,14 +109,6 @@ private class es_200_draw_elements : Framework("es-200-draw-elements", ES, 2, 0)
         return checkError("initBuffer")
     }
 
-    override fun end(): Boolean {
-
-        buffers.delete()
-        program.delete()
-
-        return true
-    }
-
     override fun render(): Boolean {
 
         // Compute the MVP (Model View Projection matrix)
@@ -149,6 +141,14 @@ private class es_200_draw_elements : Framework("es-200-draw-elements", ES, 2, 0)
                 glDrawElements(elements)
             }
         }   // Unbind program
+
+        return true
+    }
+
+    override fun end(): Boolean {
+
+        buffers.delete()
+        program.delete()
 
         return true
     }
